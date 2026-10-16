@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.navigation
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
     data object Dashboard : Screen("dashboard")
     data object AddItem : Screen("add_item")
     data object ItemDetail : Screen("item_detail/{itemId}") {

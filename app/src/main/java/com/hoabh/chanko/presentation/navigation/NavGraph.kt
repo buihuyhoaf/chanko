@@ -11,6 +11,7 @@ import com.hoabh.chanko.presentation.screens.additem.AddItemScreen
 import com.hoabh.chanko.presentation.screens.dashboard.DashboardScreen
 import com.hoabh.chanko.presentation.screens.decision.DecisionScreen
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailScreen
+import com.hoabh.chanko.presentation.screens.splash.SplashScreen
 import com.hoabh.chanko.presentation.screens.vault.VaultScreen
 
 @Composable
@@ -20,9 +21,19 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Dashboard.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
+        composable(route = Screen.Splash.route) {
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(
                 onNavigateToAddItem = {
