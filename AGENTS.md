@@ -1,0 +1,9 @@
+# Chanko Project Guidelines
+
+## Git & Branching Strategy
+- **Base / Development Branch**: `dev-chanko-1x`
+- **Release / Stable Branch**: `main`
+- **Feature Branch Workflow**:
+  - Always branch off from `dev-chanko-1x` (e.g., `feature/<feature-name>`, `fix/<bug-name>`).
+  - Create a Pull Request / Merge Request (PR/MR) targeting `dev-chanko-1x`.
+  - Do not commit directly to `dev-chanko-1x` or `main` for new features.
