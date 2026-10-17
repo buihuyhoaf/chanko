@@ -1,13 +1,6 @@
 package com.hoabh.chanko.presentation.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabh.chanko.presentation.ItemsState
-import com.hoabh.chanko.presentation.OverviewViewModel
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,19 +17,15 @@ import com.hoabh.chanko.presentation.screens.vault.VaultRoute
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier,
-    overviewViewModel: OverviewViewModel = hiltViewModel()
+    modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
-        composable(route = Screen.Splash.route,
-            enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None }) {
-            val state by overviewViewModel.items.collectAsStateWithLifecycle()
+        composable(route = Screen.Splash.route) {
             SplashScreen(
-                isReady = state !is ItemsState.Loading,
                 onSplashFinished = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
@@ -45,11 +34,8 @@ fun NavGraph(
             )
         }
 
-        composable(route = Screen.Dashboard.route, enterTransition = {
-            if (initialState.destination.route == Screen.Splash.route) EnterTransition.None else null
-        }) {
+        composable(route = Screen.Dashboard.route) {
             DashboardRoute(
-                viewModel = overviewViewModel,
                 onNavigateToAddItem = {
                     navController.navigate(Screen.AddItem.route)
                 },
