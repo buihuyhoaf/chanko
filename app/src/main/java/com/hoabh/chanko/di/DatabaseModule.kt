@@ -2,6 +2,7 @@ package com.hoabh.chanko.di
 
 import android.content.Context
 import androidx.room.Room
+import com.hoabh.chanko.data.local.MIGRATION_1_2
 import com.hoabh.chanko.data.local.AppDatabase
 import com.hoabh.chanko.data.local.dao.ItemDao
 import dagger.Module
@@ -22,7 +23,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "chanko_database"
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides

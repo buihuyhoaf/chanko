@@ -20,5 +20,5 @@ interface ItemRepository {
 
     suspend fun deleteItem(item: CooldownItem)
 
-    fun getTotalSavedAmount(): Flow<Double?>
+    fun getTotalSavedAmount(): Flow<Long>
 }

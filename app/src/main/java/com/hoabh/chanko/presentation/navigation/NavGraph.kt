@@ -7,12 +7,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hoabh.chanko.presentation.screens.additem.AddItemScreen
-import com.hoabh.chanko.presentation.screens.dashboard.DashboardScreen
-import com.hoabh.chanko.presentation.screens.decision.DecisionScreen
-import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailScreen
+import com.hoabh.chanko.presentation.screens.additem.AddItemRoute
+import com.hoabh.chanko.presentation.screens.dashboard.DashboardRoute
+import com.hoabh.chanko.presentation.screens.decision.DecisionRoute
+import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.splash.SplashScreen
-import com.hoabh.chanko.presentation.screens.vault.VaultScreen
+import com.hoabh.chanko.presentation.screens.vault.VaultRoute
 
 @Composable
 fun NavGraph(
@@ -35,7 +35,7 @@ fun NavGraph(
         }
 
         composable(route = Screen.Dashboard.route) {
-            DashboardScreen(
+            DashboardRoute(
                 onNavigateToAddItem = {
                     navController.navigate(Screen.AddItem.route)
                 },
@@ -49,7 +49,7 @@ fun NavGraph(
         }
 
         composable(route = Screen.AddItem.route) {
-            AddItemScreen(
+            AddItemRoute(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
@@ -63,8 +63,7 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getInt("itemId") ?: return@composable
-            ItemDetailScreen(
-                itemId = itemId,
+            ItemDetailRoute(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -79,18 +78,19 @@ fun NavGraph(
             arguments = listOf(
                 navArgument("itemId") { type = NavType.IntType }
             )
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getInt("itemId") ?: return@composable
-            DecisionScreen(
-                itemId = itemId,
+        ) {
+            DecisionRoute(
                 onDecisionMade = {
                     navController.popBackStack(Screen.Dashboard.route, inclusive = false)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
 
         composable(route = Screen.Vault.route) {
-            VaultScreen(
+            VaultRoute(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
