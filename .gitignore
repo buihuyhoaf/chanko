@@ -9,3 +9,5 @@
 .cxx
 .kotlin
 *.code-workspace
+.agent/
+.agents/
