@@ -12,6 +12,7 @@ import com.hoabh.chanko.presentation.screens.dashboard.DashboardRoute
 import com.hoabh.chanko.presentation.screens.decision.DecisionRoute
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.splash.SplashScreen
+import com.hoabh.chanko.presentation.screens.login.LoginRoute
 import com.hoabh.chanko.presentation.screens.vault.VaultRoute
 
 @Composable
@@ -27,8 +28,18 @@ fun NavGraph(
         composable(route = Screen.Splash.route) {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate(Screen.Dashboard.route) {
+                    navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Login.route) {
+            LoginRoute(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )

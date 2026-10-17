@@ -33,4 +33,16 @@
     <string name="cooling">Đang hạ nhiệt</string>
     <string name="empty_items">Chưa có món nào đang hạ nhiệt!</string>
     <string name="empty_description">Đưa món đồ muốn mua vào danh sách để có thời gian suy nghĩ kỹ hơn.</string>
+    <string name="login_title">Chào mừng trở lại!</string>
+    <string name="login_subtitle">Đăng nhập để quản lý chi tiêu và hạ nhiệt mua sắm</string>
+    <string name="login_account_label">Tài khoản / Email</string>
+    <string name="login_account_placeholder">Nhập tài khoản hoặc email</string>
+    <string name="login_password_label">Mật khẩu</string>
+    <string name="login_password_placeholder">Nhập mật khẩu</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_with_google">Đăng nhập bằng Google</string>
+    <string name="login_or_divider">HOẶC</string>
+    <string name="login_empty_error">Vui lòng nhập tài khoản và mật khẩu</string>
+    <string name="login_account_empty_error">Tài khoản không được để trống</string>
+    <string name="login_password_empty_error">Mật khẩu không được để trống</string>
 </resources>
