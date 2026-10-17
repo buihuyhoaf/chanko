@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -40,7 +42,7 @@ fun SplashScreen(
     onSplashFinished: () -> Unit
 ) {
     val scale = remember { Animatable(0.6f) }
-    val alpha = remember { Animatable(0f) }
+    val entranceAlpha = remember { Animatable(0f) }
     val floatOffset = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
@@ -55,7 +57,7 @@ fun SplashScreen(
             )
         }
         launch {
-            alpha.animateTo(
+            entranceAlpha.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(durationMillis = 600)
             )
@@ -94,6 +96,7 @@ fun SplashScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .scale(scale.value)
+                .graphicsLayer { alpha = entranceAlpha.value; translationY = floatOffset.value.dp.toPx() }
                 .padding(24.dp)
         ) {
             Image(
@@ -113,7 +116,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Chanko",
+                text = stringResource(R.string.splash_title),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
@@ -123,7 +126,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Hạ nhiệt mua sắm • Tiết kiệm thông minh",
+                text = stringResource(R.string.splash_tagline),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White.copy(alpha = 0.88f),
@@ -138,7 +141,7 @@ fun SplashScreen(
                 .padding(bottom = 36.dp)
         ) {
             Text(
-                text = "Bình tĩnh trước mỗi quyết định chi tiêu",
+                text = stringResource(R.string.splash_subtitle),
                 fontSize = 12.sp,
                 color = Color.White.copy(alpha = 0.65f),
                 fontWeight = FontWeight.Normal

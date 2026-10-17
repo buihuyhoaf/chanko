@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.hoabh.chanko.domain.model.CooldownItem
+import com.hoabh.chanko.data.local.entity.CooldownItemEntity
 import com.hoabh.chanko.domain.model.ItemStatus
 import kotlinx.coroutines.flow.Flow
 
@@ -14,26 +14,26 @@ import kotlinx.coroutines.flow.Flow
 interface ItemDao {
 
     @Query("SELECT * FROM cooldown_items WHERE status = 'COOLING_DOWN' ORDER BY addedTimestamp DESC")
-    fun getActiveItems(): Flow<List<CooldownItem>>
+    fun getActiveItems(): Flow<List<CooldownItemEntity>>
 
     @Query("SELECT * FROM cooldown_items WHERE status = :status ORDER BY addedTimestamp DESC")
-    fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItem>>
+    fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItemEntity>>
 
     @Query("SELECT * FROM cooldown_items WHERE id = :id")
-    fun getItemById(id: Int): Flow<CooldownItem?>
+    fun getItemById(id: Int): Flow<CooldownItemEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItem(item: CooldownItem)
+    suspend fun insertItem(item: CooldownItemEntity)
 
     @Update
-    suspend fun updateItem(item: CooldownItem)
+    suspend fun updateItem(item: CooldownItemEntity)
 
-    @Query("UPDATE cooldown_items SET status = :status WHERE id = :id")
-    suspend fun updateItemStatus(id: Int, status: ItemStatus)
+    @Query("UPDATE cooldown_items SET status = :status WHERE id = :id AND status = 'COOLING_DOWN' AND addedTimestamp + cooldownDurationMillis <= :now")
+    suspend fun updateItemStatus(id: Int, status: ItemStatus, now: Long): Int
 
     @Delete
-    suspend fun deleteItem(item: CooldownItem)
+    suspend fun deleteItem(item: CooldownItemEntity)
 
-    @Query("SELECT SUM(price) FROM cooldown_items WHERE status = 'PASSED'")
-    fun getTotalSavedAmount(): Flow<Double?>
+    @Query("SELECT COALESCE(SUM(price), 0) FROM cooldown_items WHERE status = 'PASSED'")
+    fun getTotalSavedAmount(): Flow<Long>
 }

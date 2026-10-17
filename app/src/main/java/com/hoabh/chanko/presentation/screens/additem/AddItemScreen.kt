@@ -1,60 +1,67 @@
 package com.hoabh.chanko.presentation.screens.additem
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.ActionState
+import com.hoabh.chanko.presentation.components.ItemPage
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddItemRoute(onNavigateBack: () -> Unit, viewModel: AddItemViewModel = hiltViewModel()) {
+    val name by viewModel.field("name").collectAsStateWithLifecycle()
+    val price by viewModel.field("price").collectAsStateWithLifecycle()
+    val hours by viewModel.field("hours").collectAsStateWithLifecycle()
+    val reason by viewModel.field("reason").collectAsStateWithLifecycle()
+    val action by viewModel.action.collectAsStateWithLifecycle()
+    LaunchedEffect(action) { if (action == ActionState.DONE) onNavigateBack() }
+    AddItemScreen(name, price, hours, reason, action, viewModel::setField,
+        onSave = {
+            val p = price.trim().toLongOrNull()
+            val h = hours.trim().toLongOrNull()
+            if (p != null && h != null) {
+                viewModel.add(name, p, h, reason)
+            }
+        },
+        onNavigateBack = onNavigateBack)
+}
+
 @Composable
 fun AddItemScreen(
+    name: String,
+    price: String,
+    hours: String,
+    reason: String,
+    action: ActionState,
+    onFieldChange: (String, String) -> Unit,
+    onSave: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Add New Item") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Add Item Form",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "Name, price, image, cooldown duration",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+    val isInputValid = name.isNotBlank() &&
+        (price.trim().toLongOrNull() ?: 0L) > 0L &&
+        (hours.trim().toLongOrNull() ?: 0L) in 1..8760
+    ItemPage(stringResource(R.string.add_item), onNavigateBack) {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(name, { onFieldChange("name", it) }, label = { Text(stringResource(R.string.item_name)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(price, { onFieldChange("price", it) }, label = { Text(stringResource(R.string.item_price)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(hours, { onFieldChange("hours", it) }, label = { Text(stringResource(R.string.cooldown_hours)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(reason, { onFieldChange("reason", it) }, label = { Text(stringResource(R.string.item_reason)) }, modifier = Modifier.fillMaxWidth())
+            if (action == ActionState.ERROR) Text(stringResource(R.string.action_error), color = MaterialTheme.colorScheme.error)
+            Button(
+                onClick = onSave,
+                enabled = isInputValid && action != ActionState.RUNNING && action != ActionState.DONE
+            ) {
+                Text(stringResource(R.string.save_item))
+            }
         }
     }
 }
