@@ -26,3 +26,5 @@ rootProject.name = "Chanko"
 include(":app")
 
 include(":core:domain")
+
+include(":core:database")
