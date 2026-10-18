@@ -1,0 +1,5 @@
+com.hoabh.chanko.InitialSetupScreenTest:...
+
+Time: 9.579
+
+OK (3 tests)

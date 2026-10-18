@@ -60,11 +60,12 @@ class SplashNavigationTest {
         compose.onNodeWithText("Xác thực từ server").performClick()
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Dashboard.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
-        compose.onNodeWithText("Home — Chưa triển khai").assertIsDisplayed()
-        compose.onNodeWithText("Budget").performClick()
-        compose.onNodeWithText("Budget — Chưa triển khai").assertIsDisplayed()
+        // Authentication alone cannot grant Home while setup status is unverified.
+        compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
+        compose.onNodeWithText("Thử lại").performClick()
+        compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
         compose.runOnIdle { auth.accept("other-account") }
-        compose.onNodeWithText("Home — Chưa triển khai").assertIsDisplayed()
+        compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
         compose.runOnIdle { auth.session.value = com.hoabh.chanko.domain.auth.SessionState.SignedOut }
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }

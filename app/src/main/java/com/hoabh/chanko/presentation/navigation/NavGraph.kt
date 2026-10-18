@@ -71,7 +71,12 @@ fun NavGraph(
         composable(route = Screen.Dashboard.route) {
             if (!restored || !authenticated) return@composable
             // Account changes discard all remembered/saved tab stacks from the prior account.
-            androidx.compose.runtime.key(identity) { MainNavigation() }
+            androidx.compose.runtime.key(identity) {
+                com.hoabh.chanko.presentation.screens.setup.SetupGate(
+                    accountKey = (identity as com.hoabh.chanko.domain.auth.SessionState.Available).account.value,
+                    onConfirmedComplete = { MainNavigation() },
+                )
+            }
         }
     }
 }
