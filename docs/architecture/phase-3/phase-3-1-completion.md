@@ -71,3 +71,17 @@ and review evidence are available. Base tree has no `.github` workflow. No specu
 TECH-04 CI pipeline is introduced. Check remote PR checks/reviews after creation.
 Do not merge unless all automated/CI/review/acceptance gates are evidenced PASS.
 No merge to `main`, and stop at Phase 3.1.
+
+## Publication status
+
+Implementation commit: `687e892`. Local gates passed as recorded above.
+Push was rejected by automatic approval review. Read-only GitHub connector verification
+confirmed the connected account owns `buihuyhoaf/chanko`, the origin matches, the repository
+is public, and the account has push/admin permissions. A retry with that evidence was
+also rejected: the reviewer requires explicit user approval of the exact public destination
+and source-code payload. No alternate publication path was used.
+
+Pending user approval to publish this Phase 3.1 implementation (and this completion report)
+to `https://github.com/buihuyhoaf/chanko` on `feature/phase-3-1-network-foundation`, then
+create a PR targeting `dev-chanko-1x`. No PR exists yet; no CI or PR review PASS is claimed,
+no auto-merge was enabled, and neither development nor main was merged.
