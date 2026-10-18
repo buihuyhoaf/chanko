@@ -54,7 +54,6 @@ private val LoginPlum = Color(0xFF4D2939)
 fun LoginRoute(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val provider = remember(context) { AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
     var legalUnavailable by rememberSaveable { mutableStateOf(false) }
     DisposableEffect(viewModel) { onDispose { viewModel.cancelLogin() } }
     LaunchedEffect(state.isLoginSuccess) { if (state.isLoginSuccess) onLoginSuccess() }
@@ -67,7 +66,11 @@ fun LoginRoute(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewM
         try { context.startActivity(Intent(Intent.ACTION_VIEW, uri))
         } catch (_: ActivityNotFoundException) { legalUnavailable = true }
     }
-    LoginScreen(state, { viewModel.loginWithGoogle(provider) },
+    LoginScreen(state, {
+        // TODO(auth): Remove this temporary bypass when API/OAuth is configured and restore:
+        // viewModel.loginWithGoogle(AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID))
+        onLoginSuccess()
+    },
         { openLegal(BuildConfig.TERMS_URL) }, { openLegal(BuildConfig.PRIVACY_URL) })
     if (legalUnavailable) AlertDialog(
         onDismissRequest = { legalUnavailable = false },

@@ -1,5 +1,16 @@
 # Login — The Little Door
 
+## Temporary login bypass — 18/10/2026
+
+At the user’s explicit request, tapping the Google button now opens Dashboard
+directly while API/OAuth configuration is unavailable. A `TODO(auth)` beside the
+button callback records the original authentication call to restore. This bypass
+creates no Google credential or stored token. The real authentication implementation
+remains in place, but is not called by this temporary button behavior.
+The server-verification requirements and previous acceptance results below describe
+the original authentication flow, not this temporary navigation override.
+
+
 Branch: `feature/login-screen`. Base: `origin/dev-chanko-1x` at `ad69984`.
 The existing three feature commits were rebased onto the latest fetched development
 branch. The implementation preserves the development Splash timing, shared overview
