@@ -55,9 +55,15 @@ class SplashNavigationTest {
         compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
+        // Callback only triggers dummy navigation to SetupGate
         compose.onNodeWithText("Callback only").performClick()
-        compose.runOnIdle { assertEquals(Screen.Login.route, navigation.currentDestination?.route) }
-        compose.onNodeWithText("Xác thực từ server").performClick()
+        compose.runOnIdle { assertEquals(Screen.Setup.route, navigation.currentDestination?.route) }
+        // SetupGate is displayed with status error
+        compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
+        compose.onNodeWithText("Thử lại").performClick()
+        compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
+        compose.runOnIdle { auth.accept("other-account") }
+        compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Dashboard.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
         // Authentication alone cannot grant Home while setup status is unverified.

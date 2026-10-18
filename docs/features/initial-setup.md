@@ -24,7 +24,7 @@ Authentication/OAuth hiện hữu không được thay đổi trong nhánh này.
 
 ## Xem giao diện trực tiếp
 
-Bản debug có launcher riêng **Xem thử thiết lập** (`SetupReviewActivity`). Nó chỉ hiển thị form và báo dịch vụ chưa sẵn sàng khi nhấn lưu. Dòng “Bản xem thử giao diện · chưa kết nối máy chủ” luôn có mặt. Không thể chuyển Home. Activity/launcher này chỉ có trong `src/debug`, không nằm trong release. Các `@Preview` hỗ trợ 393×852 và 320×568 fontScale 2.
+Đã gỡ `SetupReviewActivity` và launcher “Xem thử thiết lập” theo yêu cầu user. Bản debug và release chỉ dùng launcher Chanko. Các `@Preview` còn trong source để xem thiết kế; không tạo icon hay app phụ. Kiểm tra runtime chỉ thực hiện trên thiết bị thật; cấm cài hoặc sử dụng máy ảo/emulator/AVD. Adapter setup chưa cấu hình nên luồng production hiện báo chưa xác nhận thay vì giả lập thành công.
 
 Visual foreground dùng các màu đề xuất trong mockup đã review, gồm text #30233E, secondary #62596D, onPrimary #15131D trên brand #8965F6. DS PV-01 vẫn mở, không gắn nhãn toàn bộ palette đã approved. Scene là PNG opaque tĩnh, chưa có layer alpha/3D rig riêng.
 

@@ -1,6 +1,0 @@
-com.hoabh.chanko.InitialSetupScreenTest:...
-com.hoabh.chanko.SplashNavigationTest:..
-
-Time: 20.007
-
-OK (5 tests)

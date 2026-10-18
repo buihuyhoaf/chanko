@@ -12,7 +12,7 @@ Một module `app`, Kotlin, Compose Material 3, Navigation Compose, Hilt và Roo
 - `data`: entity Room, mapping, DAO và repository implementation.
 - `di`: cấu hình Hilt. `ui/theme`: màu sắc và typography.
 
-Luồng xác thực: Splash → Google Sign-In → xác nhận Initial Setup từ server → hai bước thiết lập hoặc Home. Adapter setup hiện chưa cấu hình nên cổng server hiển thị lỗi có Thử lại; không suy đoán hoàn tất từ cache. Xem [Initial Setup tiếng Việt](docs/features/initial-setup.md). Bản debug có launcher riêng **Xem thử thiết lập** để review hai màn mà không kết nối server.
+Luồng xác thực: Splash → Google Sign-In → xác nhận Initial Setup từ server → hai bước thiết lập hoặc Home. Adapter setup hiện chưa cấu hình nên cổng server hiển thị lỗi có Thử lại; không suy đoán hoàn tất từ cache. Xem [Initial Setup tiếng Việt](docs/features/initial-setup.md). APK chỉ có biểu tượng Chanko, không có launcher xem thử riêng.
 
 Các màn nghiệp vụ Dashboard/Thêm món/Chi tiết/Quyết định/Vault có source kế thừa; bốn tab hiện là foundation placeholders, chưa được nối trọn luồng production.
 
