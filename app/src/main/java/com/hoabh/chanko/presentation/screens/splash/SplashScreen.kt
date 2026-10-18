@@ -6,14 +6,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,8 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
-import com.hoabh.chanko.ui.theme.CandyElevation
-import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
 
@@ -44,87 +49,95 @@ fun SplashScreen(isReady: Boolean, onSplashFinished: () -> Unit) {
     SplashContent(isLoading = !isReady)
 }
 
-// Reference artwork colors local to this screen; not new approved design-system tokens.
+// Local colors and logo sizing reproduce the user's artwork, not new global theme tokens.
 private val LogoBrown = Color(0xFF60362F)
-private val LogoCoral = Color(0xFFB32945)
+private val LogoCoral = Color(0xFFD63F55)
 
-/** All layers are static, including loading text: identical with reduced motion enabled. */
+/** Static layers also provide the reduced-motion presentation. No simulated progress. */
 @Composable
 internal fun SplashContent(modifier: Modifier = Modifier, isLoading: Boolean = true) {
     val cream = MaterialTheme.colorScheme.background
-    Box(modifier.fillMaxSize().background(cream)) {
+    BoxWithConstraints(modifier.fillMaxSize().background(cream)) {
         Image(
             painterResource(R.drawable.chanko_splash_room), contentDescription = null,
-            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(),
+            contentScale = if (maxWidth > maxHeight) ContentScale.Crop else ContentScale.FillBounds
         )
-        // Keep native copy readable across background crops and window sizes.
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
-            listOf(cream.copy(alpha = .12f), Color.Transparent, cream.copy(alpha = .8f))
-        )))
+        // Suppress decoration when large text or landscape needs the space for native copy.
+        if (LocalDensity.current.fontScale <= 1.3f && maxHeight > maxWidth) {
+            Image(
+                painterResource(R.drawable.chanko_splash_decorations), contentDescription = null,
+                modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit
+            )
+        }
         BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
-            val mascotHeight = (maxHeight * .46f).coerceIn(120.dp, 360.dp)
+            val compact = maxHeight < 700.dp
+            val logoSize = if (compact) 48.sp else 60.sp
+            val mascotHeight = (maxHeight * .46f).coerceIn(120.dp, 400.dp)
             Column(
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                    .padding(horizontal = CandySpace.screen, vertical = CandySpace.section),
+                    .padding(horizontal = CandySpace.screen, vertical = CandySpace.lg),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(CandySpace.lg, Alignment.CenterVertically)
+                verticalArrangement = Arrangement.spacedBy(CandySpace.sm, Alignment.CenterVertically)
             ) {
-                Surface(
-                    shape = CandyShape.hero, color = cream,
-                    shadowElevation = CandyElevation.medium,
-                    modifier = Modifier.widthIn(max = 360.dp)
+                Spacer(Modifier.height(if (compact) 0.dp else CandySpace.section))
+                Column(
+                    Modifier.padding(8.dp).semantics(mergeDescendants = true) { heading() },
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        Modifier.padding(horizontal = CandySpace.section, vertical = CandySpace.md)
-                            .semantics(mergeDescendants = true) { heading() },
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(stringResource(R.string.splash_title_first),
-                            style = MaterialTheme.typography.displayLarge, color = LogoBrown,
-                            textAlign = TextAlign.Center)
-                        Text(stringResource(R.string.splash_title_second),
-                            style = MaterialTheme.typography.displayLarge, color = LogoCoral,
-                            textAlign = TextAlign.Center)
-                    }
+                    OutlinedLogoWord(stringResource(R.string.splash_title_first), LogoBrown, logoSize)
+                    OutlinedLogoWord(stringResource(R.string.splash_title_second), LogoCoral, logoSize)
                 }
-                Surface(shape = CandyShape.chip, color = cream.copy(alpha = .96f)) {
-                    Text(stringResource(R.string.splash_tagline),
-                        style = MaterialTheme.typography.bodyLarge, color = LogoBrown,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = CandySpace.lg, vertical = CandySpace.xs))
-                }
+                Text(stringResource(R.string.splash_tagline),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(cream, Offset.Zero, 8f)),
+                    color = LogoBrown, textAlign = TextAlign.Center)
                 Image(
                     painterResource(R.drawable.chanko_splash_cat_bag), contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().height(mascotHeight).widthIn(max = 360.dp),
+                    modifier = Modifier.fillMaxWidth().height(mascotHeight),
                     contentScale = ContentScale.Fit
                 )
-                Surface(shape = CandyShape.card, color = cream.copy(alpha = .96f)) {
-                    Column(
-                        Modifier.padding(CandySpace.lg).widthIn(max = 360.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
-                    ) {
-                        if (isLoading) {
-                            Text(stringResource(R.string.splash_loading),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-                        }
-                        Text(stringResource(R.string.splash_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center)
+                Column(
+                    Modifier.widthIn(max = 360.dp).padding(top = CandySpace.lg),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+                ) {
+                    if (isLoading) {
+                        Text(stringResource(R.string.splash_loading),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                shadow = Shadow(cream, Offset.Zero, 8f)),
+                            color = LogoBrown, textAlign = TextAlign.Center,
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                     }
+                    Text(stringResource(R.string.splash_subtitle),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            shadow = Shadow(cream, Offset.Zero, 8f)),
+                        color = LogoBrown, textAlign = TextAlign.Center)
                 }
             }
         }
     }
 }
 
-@Preview(name = "Splash compact", widthDp = 360, heightDp = 640)
-@Preview(name = "Splash 150%", widthDp = 360, heightDp = 640, fontScale = 1.5f)
-@Preview(name = "Splash 200%", widthDp = 320, heightDp = 568, fontScale = 2f)
-@Preview(name = "Splash landscape", widthDp = 640, heightDp = 360, fontScale = 2f)
+/** Two native text passes create the cream sticker edge without rasterizing the lettering. */
 @Composable
-private fun SplashPreview() { ChankoTheme { SplashContent() } }
+private fun OutlinedLogoWord(text: String, color: Color, size: TextUnit) {
+    val stroke = with(LocalDensity.current) { 7.dp.toPx() }
+    val style = MaterialTheme.typography.displayLarge.copy(
+        fontSize = size, lineHeight = size * 1.08f, fontWeight = FontWeight.ExtraBold,
+        shadow = Shadow(Color(0x5560362F), Offset(0f, 4f), 4f))
+    Box(contentAlignment = Alignment.Center) {
+        Text(text, style = style.copy(drawStyle = Stroke(width = stroke, join = StrokeJoin.Round)),
+            color = MaterialTheme.colorScheme.background, textAlign = TextAlign.Center,
+            modifier = Modifier.clearAndSetSemantics { })
+        Text(text, style = style, color = color, textAlign = TextAlign.Center)
+    }
+}
+
+@Preview(name = "Splash room portrait", widthDp = 393, heightDp = 852)
+@Preview(name = "Splash room compact", widthDp = 360, heightDp = 640)
+@Preview(name = "Splash room 200%", widthDp = 320, heightDp = 568, fontScale = 2f)
+@Preview(name = "Splash room landscape", widthDp = 640, heightDp = 360, fontScale = 2f)
+@Composable
+fun SplashRoomPreview() { ChankoTheme { SplashContent() } }
