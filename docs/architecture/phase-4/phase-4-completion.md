@@ -106,3 +106,14 @@ logout semantics; this self-review is not independent approval. `git diff --chec
 Target only `dev-chanko-1x`; never main. CI, independent review and acceptance must
 be evidenced for the published head before merge. Missing evidence means leave PR
 pending. Stop after this foundation; no Phase 5 or full auth UI/backend work.
+
+### Published evidence
+
+Implementation commit: `5ca72e76b7636b615ef4b7dc96c0980d3992466e`, pushed to
+`origin/feature/phase-4-auth-foundation`.
+PR: https://github.com/buihuyhoaf/chanko/pull/18, draft, base `dev-chanko-1x`.
+For implementation head `5ca72e7`, remote checks/statuses/annotations, PR-triggered
+workflow runs and submitted reviews are all empty. CI and independent review are
+NOT evidenced PASS; backend/device/contract acceptance remains pending above.
+PR retained as draft; no merge or auto-merge performed. This publication note is
+a documentation-only follow-up; tested implementation remains unchanged.
