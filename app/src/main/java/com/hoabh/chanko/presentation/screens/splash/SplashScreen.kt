@@ -1,151 +1,98 @@
 package com.hoabh.chanko.presentation.screens.splash
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.ui.res.stringResource
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandyElevation
+import com.hoabh.chanko.ui.theme.CandyShape
+import com.hoabh.chanko.ui.theme.CandySpace
+import com.hoabh.chanko.ui.theme.ChankoTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
-fun SplashScreen(
-    onSplashFinished: () -> Unit
-) {
-    val scale = remember { Animatable(0.6f) }
-    val entranceAlpha = remember { Animatable(0f) }
-    val floatOffset = remember { Animatable(0f) }
-
+fun SplashScreen(onSplashFinished: () -> Unit) {
+    val finish by rememberUpdatedState(onSplashFinished)
+    // Existing 1800ms launch delay, independent of art, font scale and motion settings.
     LaunchedEffect(Unit) {
-        // Entrance scale and fade-in
-        launch {
-            scale.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = 800,
-                    easing = FastOutSlowInEasing
-                )
-            )
-        }
-        launch {
-            entranceAlpha.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = 600)
-            )
-        }
-        // Subtle floating / breathing animation
-        launch {
-            delay(400)
-            floatOffset.animateTo(
-                targetValue = -8f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                )
-            )
-        }
-        // Transition to Dashboard after splash delay
         delay(1800)
-        onSplashFinished()
+        finish()
     }
+    SplashContent()
+}
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF8C70E7),
-                        Color(0xFF6C4ACD)
-                    )
-                )
-            ),
-        contentAlignment = Alignment.Center
+/** Static art is also the reduced-motion presentation; no decorative loop or fake progress. */
+@Composable
+internal fun SplashContent(modifier: Modifier = Modifier) {
+    BoxWithConstraints(
+        modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()
     ) {
+        // Reference placement: shrink decoration in short windows, retaining readable text.
+        val mascotSize = if (maxHeight < 480.dp) 120.dp else 220.dp
         Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(horizontal = CandySpace.screen, vertical = CandySpace.section),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .scale(scale.value)
-                .graphicsLayer { alpha = entranceAlpha.value; translationY = floatOffset.value.dp.toPx() }
-                .padding(24.dp)
+            verticalArrangement = Arrangement.spacedBy(CandySpace.section, Alignment.CenterVertically)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_logo),
-                contentDescription = "Chanko Logo",
-                modifier = Modifier
-                    .size(140.dp)
-                    .shadow(
-                        elevation = 16.dp,
-                        shape = RoundedCornerShape(32.dp),
-                        ambientColor = Color.Black.copy(alpha = 0.25f),
-                        spotColor = Color.Black.copy(alpha = 0.35f)
-                    )
-                    .clip(RoundedCornerShape(32.dp))
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            Box(
+                Modifier.size(mascotSize)
+                    .shadow(CandyElevation.medium, CandyShape.hero)
+                    .background(MaterialTheme.colorScheme.primary, CandyShape.hero)
+                    .padding(CandySpace.lg),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painterResource(R.drawable.chanko_splash_mascot),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
             Text(
-                text = stringResource(R.string.splash_title),
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                letterSpacing = 1.sp
+                stringResource(R.string.splash_title),
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().semantics { heading() }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
-                text = stringResource(R.string.splash_tagline),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.88f),
-                letterSpacing = 0.2.sp
+                stringResource(R.string.splash_tagline),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
-        }
-
-        // Bottom tagline / footer
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 36.dp)
-        ) {
             Text(
-                text = stringResource(R.string.splash_subtitle),
-                fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.65f),
-                fontWeight = FontWeight.Normal
+                stringResource(R.string.splash_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
 }
+
+@Preview(name = "Splash compact", widthDp = 360, heightDp = 640)
+@Preview(name = "Splash 150%", widthDp = 360, heightDp = 640, fontScale = 1.5f)
+@Preview(name = "Splash 200%", widthDp = 320, heightDp = 568, fontScale = 2f)
+@Preview(name = "Splash landscape", widthDp = 640, heightDp = 360, fontScale = 2f)
+@Composable
+private fun SplashPreview() { ChankoTheme { SplashContent() } }
