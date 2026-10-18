@@ -22,9 +22,12 @@
     <string name="bought_items">Đã mua</string>
     <string name="no_history">Chưa có món đồ nào được bỏ qua.</string>
     <string name="active_count">%1$d món</string>
-    <string name="splash_title">Chanko</string>
-    <string name="splash_tagline">Hạ nhiệt mua sắm • Tiết kiệm thông minh</string>
-    <string name="splash_subtitle">Bình tĩnh trước mỗi quyết định chi tiêu</string>
+    <string name="splash_title">Should I Buy It?</string>
+    <string name="splash_title_first">Should I</string>
+    <string name="splash_title_second">Buy It?</string>
+    <string name="splash_loading">Đang mở dữ liệu của bạn…</string>
+    <string name="splash_tagline">Pause. Think. Decide.</string>
+    <string name="splash_subtitle">Kiểm soát chi tiêu bắt đầu từ một quyết định tốt hơn</string>
     <string name="cooling_items">Món đồ đang hạ nhiệt</string>
     <string name="history">Lịch sử</string>
     <string name="banner_title">Bình tĩnh trước khi chốt đơn!</string>
