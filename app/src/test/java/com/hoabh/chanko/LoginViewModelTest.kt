@@ -34,11 +34,11 @@ class LoginViewModelTest {
         vm.cancelLogin(); runCurrent()
         assertFalse(vm.uiState.value.isLoading)
     }
-    @Test fun cancelledPickerDoesNotExchangeOrShowError() = runTest(dispatcher) {
+    @Test fun cancelledPickerDoesNotExchangeAndUsesFoundationFailure() = runTest(dispatcher) {
         val repo = FakeAuth(); val vm = LoginViewModel(repo)
         vm.loginWithGoogle { null }; runCurrent()
         assertEquals(listOf("challenge"), repo.calls)
-        assertFalse(vm.uiState.value.isLoginSuccess); assertNull(vm.uiState.value.error)
+        assertFalse(vm.uiState.value.isLoginSuccess); assertEquals(AuthFailure.GOOGLE, vm.uiState.value.error)
     }
     @Test fun unavailableConfigurationNeverLaunchesGoogle() = runTest(dispatcher) {
         val repo = FakeAuth(); repo.challengeFailure = AuthFailure.NOT_CONFIGURED
@@ -71,18 +71,29 @@ class LoginViewModelTest {
         assertNull(vm.uiState.value.error)
     }
 }
-private class FakeAuth : GoogleAuthRepository {
+private class FakeAuth : AuthenticationRepository {
     val calls = mutableListOf<String>()
     var challengeFailure: AuthFailure? = null
     var exchangeFailure: AuthFailure? = null
     var beforeSignIn: suspend () -> Unit = {}
     var sequence = 0
-    override suspend fun createChallenge(): AuthResult<GoogleAuthChallenge> {
+    override val session = kotlinx.coroutines.flow.MutableStateFlow<SessionState>(SessionState.SignedOut)
+    override suspend fun restore() = AuthResult.Success(Unit)
+    override suspend fun refresh() = AuthResult.Success(Unit)
+    override suspend fun logout() = AuthResult.Success(Revocation.CONFIRMED)
+    override suspend fun signIn(provider: GoogleTokenProvider): AuthResult<Unit> {
+        val challenge = createChallenge()
+        if (challenge is AuthResult.Failure) return challenge
+        val token = provider.getIdToken((challenge as AuthResult.Success).value.nonce)
+            ?: return AuthResult.Failure(AuthFailure.GOOGLE)
+        return signIn(challenge.value, token)
+    }
+    suspend fun createChallenge(): AuthResult<GoogleAuthChallenge> {
         calls += "challenge"; sequence++
         return challengeFailure?.let { AuthResult.Failure(it) }
             ?: AuthResult.Success(GoogleAuthChallenge("id-$sequence", "nonce-$sequence", "future"))
     }
-    override suspend fun signIn(challenge: GoogleAuthChallenge, idToken: String): AuthResult<Unit> {
+    suspend fun signIn(challenge: GoogleAuthChallenge, idToken: String): AuthResult<Unit> {
         calls += "exchange:${challenge.id}:$idToken"; beforeSignIn()
         return exchangeFailure?.let { AuthResult.Failure(it) } ?: AuthResult.Success(Unit)
     }

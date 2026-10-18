@@ -31,14 +31,19 @@ class SplashNavigationTest {
 
     private fun verifyStartup(fail: Boolean) {
         val repository = StartupRepository()
+        val auth = NavigationAuth()
+        val session = com.hoabh.chanko.presentation.navigation.LoginSessionViewModel(auth)
         lateinit var navigation: NavHostController
         lateinit var model: OverviewViewModel
         compose.runOnUiThread { model = OverviewViewModel(repository) }
         compose.setContent {
             val controller = rememberNavController()
             SideEffect { navigation = controller }
-            ChankoTheme { NavGraph(controller, overviewViewModel = model, loginContent = { onSuccess ->
-                androidx.compose.material3.Button(onClick = onSuccess) { androidx.compose.material3.Text("Xác thực từ server") }
+            ChankoTheme { NavGraph(controller, overviewViewModel = model, session = session, loginContent = { onSuccess ->
+                androidx.compose.foundation.layout.Column {
+                androidx.compose.material3.Button(onClick = onSuccess) { androidx.compose.material3.Text("Callback only") }
+                androidx.compose.material3.Button(onClick = { auth.accept() }) { androidx.compose.material3.Text("Xác thực từ server") }
+                }
             }) }
         }
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").assertIsDisplayed()
@@ -50,11 +55,19 @@ class SplashNavigationTest {
         compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
+        compose.onNodeWithText("Callback only").performClick()
+        compose.runOnIdle { assertEquals(Screen.Login.route, navigation.currentDestination?.route) }
         compose.onNodeWithText("Xác thực từ server").performClick()
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Dashboard.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
-        if (fail) compose.onNodeWithText("Không thể tải dữ liệu. Hãy mở lại màn hình để thử lại.")
-            .assertIsDisplayed()
+        compose.onNodeWithText("Home — Chưa triển khai").assertIsDisplayed()
+        compose.onNodeWithText("Budget").performClick()
+        compose.onNodeWithText("Budget — Chưa triển khai").assertIsDisplayed()
+        compose.runOnIdle { auth.accept("other-account") }
+        compose.onNodeWithText("Home — Chưa triển khai").assertIsDisplayed()
+        compose.runOnIdle { auth.session.value = com.hoabh.chanko.domain.auth.SessionState.SignedOut }
+        compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
+        compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
     }
 }
 
@@ -72,4 +85,13 @@ private class StartupRepository : ItemRepository {
     override suspend fun updateItem(item: CooldownItem) = error("Not used")
     override suspend fun deleteItem(item: CooldownItem) = error("Not used")
     override suspend fun updateItemStatus(id: Int, status: ItemStatus) = error("Not used")
+}
+
+private class NavigationAuth : com.hoabh.chanko.domain.auth.AuthenticationRepository {
+    override val session = MutableStateFlow<com.hoabh.chanko.domain.auth.SessionState>(com.hoabh.chanko.domain.auth.SessionState.SignedOut)
+    fun accept(account: String = "test") { session.value = com.hoabh.chanko.domain.auth.SessionState.Available(com.hoabh.chanko.domain.repository.foundation.AccountScope(account)) }
+    override suspend fun restore() = com.hoabh.chanko.domain.auth.AuthResult.Success(Unit)
+    override suspend fun signIn(provider: com.hoabh.chanko.domain.auth.GoogleTokenProvider) = com.hoabh.chanko.domain.auth.AuthResult.Success(Unit)
+    override suspend fun refresh() = com.hoabh.chanko.domain.auth.AuthResult.Success(Unit)
+    override suspend fun logout() = com.hoabh.chanko.domain.auth.AuthResult.Success(com.hoabh.chanko.domain.auth.Revocation.CONFIRMED)
 }
