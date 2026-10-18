@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Chanko" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/splash_background</item>
-        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:windowBackground">@color/splash_cream</item>
+        <item name="android:statusBarColor">@color/splash_cream</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <style name="Theme.Chanko.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/chanko_system_splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.Chanko</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
