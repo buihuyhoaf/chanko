@@ -75,13 +75,11 @@ No merge to `main`, and stop at Phase 3.1.
 ## Publication status
 
 Implementation commit: `687e892`. Local gates passed as recorded above.
-Push was rejected by automatic approval review. Read-only GitHub connector verification
-confirmed the connected account owns `buihuyhoaf/chanko`, the origin matches, the repository
-is public, and the account has push/admin permissions. A retry with that evidence was
-also rejected: the reviewer requires explicit user approval of the exact public destination
-and source-code payload. No alternate publication path was used.
+The user explicitly approved public publication of the Phase 3.1 code and report to
+`https://github.com/buihuyhoaf/chanko`, branch
+`feature/phase-3-1-network-foundation`, and a PR targeting `dev-chanko-1x`.
+The previous automatic publication-approval blocker is resolved by that authorization.
 
-Pending user approval to publish this Phase 3.1 implementation (and this completion report)
-to `https://github.com/buihuyhoaf/chanko` on `feature/phase-3-1-network-foundation`, then
-create a PR targeting `dev-chanko-1x`. No PR exists yet; no CI or PR review PASS is claimed,
-no auto-merge was enabled, and neither development nor main was merged.
+Publication proceeds under the original conditional merge rule: no CI or PR review
+PASS is claimed until verified remotely. No auto-merge is enabled without all required
+acceptance evidence. Neither development nor main has been merged by this task.
