@@ -2,22 +2,27 @@ package com.hoabh.chanko.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val ChankoPurple = Color(0xFF7B5BE6)
-val ChankoPurpleLight = Color(0xFF9D85EB)
-val ChankoPurpleContainer = Color(0xFFEDE7FF)
-val ChankoPurpleDark = Color(0xFF5A3DB8)
-
-val ChankoGold = Color(0xFFFFB800)
-val ChankoGoldLight = Color(0xFFFFE599)
-val ChankoGoldContainer = Color(0xFFFFF6D8)
-
-val BackgroundLight = Color(0xFFF9F8FD)
-val SurfaceLight = Color(0xFFFFFFFF)
-val TextPrimary = Color(0xFF1E1A2E)
-val TextSecondary = Color(0xFF6B6580)
-
-// Dark theme colors
-val ChankoPurple80 = Color(0xFFC7B8FF)
-val ChankoGold80 = Color(0xFFFFD566)
-val BackgroundDark = Color(0xFF14121C)
-val SurfaceDark = Color(0xFF1F1B2A)
+// UI-02 approved signal colors. Do not use as small text on white.
+object CandyColors {
+    val primary = Color(0xFF8965F6)
+    val secondary = Color(0xFFFF85B3)
+    val background = Color(0xFFFAF8F5)
+    val yellow = Color(0xFFFFD75E)
+    val mint = Color(0xFF78DCC3)
+    val blue = Color(0xFF8DCDF8)
+    val orange = Color(0xFFFFAA61)
+    val coolingOff = blue
+    val readyForReview = yellow
+    val purchased = Color(0xFF6888C9)
+    val skipped = mint
+    val postponed = orange
+    val budgetWarning = Color(0xFFE9A23B)
+    val overBudget = Color(0xFFE56B73)
+    val error = Color(0xFFD94B57)
+    val success = Color(0xFF269C78)
+    // Reference foregrounds, verified in phase-2-1-completion.md; PV-01 remains open.
+    val ink = Color.Black
+    val mutedInk = Color(0xFF595959)
+    val outline = Color(0xFF767676)
+    val errorText = Color(0xFFAA2635)
+}

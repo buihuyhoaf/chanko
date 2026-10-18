@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.*
+import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,7 +77,7 @@ fun DashboardScreen(
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.cooling_items), style = MaterialTheme.typography.titleMedium)
-                            TextButton(onClick = onNavigateToVault) { Text(stringResource(R.string.history)) }
+                            TextButton(onClick = onNavigateToVault, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) { Text(stringResource(R.string.history)) }
                         }
                     }
                     if (state.active.isEmpty()) item { EmptyItems(onNavigateToAddItem) }
