@@ -19,12 +19,12 @@ android {
 dependencies {
     api(project(":core:domain"))
     api(project(":core:database"))
-    implementation(project(":core:network"))
     implementation(libs.retrofit)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.coroutines.core)
+    implementation(project(":core:network"))
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 }
