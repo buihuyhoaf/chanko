@@ -1,60 +1,41 @@
 package com.hoabh.chanko.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = ChankoPurple80,
-    onPrimary = BackgroundDark,
-    primaryContainer = ChankoPurpleDark,
-    onPrimaryContainer = ChankoPurpleContainer,
-    secondary = ChankoGold80,
-    background = BackgroundDark,
-    surface = SurfaceDark,
-    onBackground = Color.White,
-    onSurface = Color.White
-)
-
+// Approved brand colors; neutral containers/on-colors are Reference, not approved PV-01 tokens.
 private val LightColorScheme = lightColorScheme(
-    primary = ChankoPurple,
-    onPrimary = Color.White,
-    primaryContainer = ChankoPurpleContainer,
-    onPrimaryContainer = ChankoPurpleDark,
-    secondary = ChankoGold,
-    onSecondary = Color.White,
-    secondaryContainer = ChankoGoldContainer,
-    background = BackgroundLight,
-    surface = SurfaceLight,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary
+    primary = CandyColors.primary, onPrimary = CandyColors.ink,
+    primaryContainer = CandyColors.primary, onPrimaryContainer = CandyColors.ink,
+    inversePrimary = CandyColors.primary,
+    secondary = CandyColors.secondary, onSecondary = CandyColors.ink,
+    secondaryContainer = CandyColors.secondary, onSecondaryContainer = CandyColors.ink,
+    tertiary = CandyColors.mint, onTertiary = CandyColors.ink,
+    tertiaryContainer = CandyColors.mint, onTertiaryContainer = CandyColors.ink,
+    background = CandyColors.background, onBackground = CandyColors.ink,
+    surface = Color.White, onSurface = CandyColors.ink,
+    surfaceVariant = CandyColors.background, onSurfaceVariant = CandyColors.mutedInk,
+    surfaceTint = Color.Transparent,
+    surfaceDim = CandyColors.background, surfaceBright = Color.White,
+    surfaceContainerLowest = Color.White, surfaceContainerLow = CandyColors.background,
+    surfaceContainer = CandyColors.background, surfaceContainerHigh = CandyColors.background,
+    surfaceContainerHighest = CandyColors.background,
+    outline = CandyColors.outline, outlineVariant = CandyColors.outline,
+    error = CandyColors.errorText, onError = Color.White,
+    errorContainer = CandyColors.error, onErrorContainer = CandyColors.ink,
+    inverseSurface = CandyColors.ink, inverseOnSurface = Color.White
 )
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun ChankoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Compatibility parameters: MVP always renders the approved Light scheme.
+    darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = ChankoTypography,
-        content = content
-    )
+    MaterialTheme(colorScheme = LightColorScheme, typography = ChankoTypography,
+        shapes = ChankoShapes, content = content)
 }

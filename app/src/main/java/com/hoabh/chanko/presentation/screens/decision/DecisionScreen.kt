@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.decision
 
 import androidx.compose.material3.*
+import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,7 +54,7 @@ fun DecisionScreen(
                     Text(formatMoney(item.price))
                     val enabled = item.canDecide(now) && action != ActionState.RUNNING && action != ActionState.DONE
                     Button(onClick = { onDecide(ItemStatus.BOUGHT) }, enabled = enabled) { Text(stringResource(R.string.buy_item)) }
-                    OutlinedButton(onClick = { onDecide(ItemStatus.PASSED) }, enabled = enabled) { Text(stringResource(R.string.pass_item)) }
+                    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onDecide(ItemStatus.PASSED) }, enabled = enabled) { Text(stringResource(R.string.pass_item)) }
                     if (action == ActionState.ERROR) Text(stringResource(R.string.action_error), color = MaterialTheme.colorScheme.error)
                 }
             }
