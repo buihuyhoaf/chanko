@@ -44,7 +44,7 @@ class SplashScreenTest {
         compose.runOnIdle { assertEquals(1, latest) }
     }
 
-    @Test fun fastDataStillShowsRoomForOneSecondWithoutLoadingCopy() {
+    @Test fun fastDataStillShowsRoomForTwoSecondsWithoutLoadingCopy() {
         compose.mainClock.autoAdvance = false
         var calls = 0
         compose.setContent { ChankoTheme { SplashScreen(true) { calls++ } } }
@@ -54,7 +54,7 @@ class SplashScreenTest {
         compose.runOnIdle { assertEquals(0, calls) }
         compose.onNodeWithText("Pause. Think. Decide.").assertIsDisplayed()
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").assertDoesNotExist()
-        compose.mainClock.advanceTimeBy(800)
+        compose.mainClock.advanceTimeBy(1800)
         compose.runOnIdle { assertEquals(0, calls) }
         compose.mainClock.advanceTimeBy(400)
         compose.runOnIdle { assertEquals(1, calls) }

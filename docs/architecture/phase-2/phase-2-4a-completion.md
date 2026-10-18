@@ -6,10 +6,10 @@
 
 This revision supersedes the earlier fixed-delay splash described in commit 8c7bf05. The user explicitly requested the attached pastel-room design on this branch after the earlier revert.
 
-- AndroidX SplashScreen installed before super.onCreate, dedicated launcher theme, brand Purple #8965F6 and padded static cat icon. The platform releases it normally on the first frame; no keep-on-screen timer.
+- AndroidX SplashScreen installed before super.onCreate, dedicated launcher theme with cream #FAF8F5 and an explicit transparent vector icon. The purple/cat launch interstitial is removed; the platform overlay is removed immediately before the room introduction. No keep-on-screen timer.
 - Compose renders a full-bleed pre-rendered room, a separate transparent cat holding the coral bag, and native Nunito title/tagline/footer. Title is “Should I Buy It?”; launcher app label remains Chanko. “Pause. Think. Decide.” retains the mindful-shopping message agreed in the conversation.
 - Uses the existing theme, spacing and shapes. Local brown/coral logo colors reproduce the supplied visual reference; they are Reference artwork colors, not new Approved design-system tokens.
-- User-approved one-second brand introduction, measured after the scene first draws. Native loading text appears only while OverviewViewModel is Loading. After the introduction, Content and Error both navigate to the existing Dashboard; slow data continues to wait for a real result. No fake percentage or partial progress bar.
+- User-approved two-second brand introduction, measured after the scene first draws. Native loading text appears only while OverviewViewModel is Loading. After the introduction, Content and Error both navigate to the existing Dashboard; slow data continues to wait for a real result. No fake percentage or partial progress bar.
 - NavGraph and Dashboard share the same OverviewViewModel instance from the existing Activity owner, so the first query result is retained across the handoff. No startup module, repository, database change or new architecture.
 - Existing Splash route is removed from the back stack. Splash entrance and the transition to Dashboard use no transition animation. The platform exit callback removes its overlay immediately. Navigation restoration retains the user's actual destination.
 - Art and loading text remain static in all motion settings. No decorative loop, bobbing, flashing, countdown, simulated progress or animation-dependent navigation.
@@ -97,3 +97,14 @@ The user explicitly approved: always display the room for about one second, with
 No device installation or execution was performed. The installed APK is not automatically updated by Git commits; the newly built app-debug.apk must be explicitly run/installed by the user if they choose to update their device.
 
 One-second introduction verification: assembleDebug, 11/11 unit tests, lintDebug (0 errors, 34 warnings), and assembleDebugAndroidTest PASS. Additional host render of SplashScreen(isReady=true) PASS, saved as qa/splash/fast-data-introduction.png; the room is present and loading copy absent. The timer assertions are compiled instrumentation coverage, not an executed device result.
+
+## Latest user revision — remove purple/cat launch interstitial, show room for two seconds
+
+The user explicitly requested removal of the cat on purple and an approximately two-second room splash. This supersedes the previous one-second presentation and purple platform-launch styling.
+
+- Starting theme now uses warm cream #FAF8F5, an explicit transparent vector in windowSplashScreenAnimatedIcon, a transparent icon background and dark status icons. An explicit drawable prevents fallback to the launcher cat; the launcher icon itself is unchanged.
+- Compose introduction now lasts 2,000 ms after its first draw/frame. Exit still requires actual Content or Error, so slow initialization can last longer. Loading text still reflects real pending data only.
+- Existing fast-data instrumentation test now checks no exit through approximately 1.8 seconds, completion after two seconds, no fake loading copy and single completion. It is compiled locally, not run on a device.
+- No device installation or execution is authorized or performed. The new APK must be explicitly installed/run by the user if desired.
+
+Two-second revision verification: assembleDebug, testDebugUnitTest (11/11), lintDebug (0 errors, 34 warnings), assembleDebugAndroidTest and diff --check PASS. Compiled APK inspected with aapt2: splash_background is #FAF8F5, Starting theme references the explicit transparent vector icon and transparent icon background. No phone operations performed.

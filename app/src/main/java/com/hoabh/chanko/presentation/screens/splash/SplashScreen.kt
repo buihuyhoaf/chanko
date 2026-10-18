@@ -37,7 +37,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
 
-/** Show the user-approved one-second brand introduction after the scene's first draw.
+/** Show the user-approved two-second brand introduction after the scene's first draw.
  * Loading copy remains tied only to real data work; readiness changes do not restart branding.
  */
 @Composable
@@ -51,7 +51,7 @@ fun SplashScreen(isReady: Boolean, onSplashFinished: () -> Unit) {
         if (sceneDrawn && !presentationComplete) {
             // Start after a rendered scene, not while decoding assets or under the platform icon.
             withFrameNanos { }
-            delay(1_000)
+            delay(2_000)
             presentationComplete = true
         }
     }
