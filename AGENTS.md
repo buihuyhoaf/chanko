@@ -11,3 +11,7 @@
 ## Architecture Baseline
 - Read `docs/architecture/phase-0/README.md` and its source inventory before architecture work. Keep Approved, Proposed, Pending and Superseded decisions distinct; do not treat unread sources as verified.
 - Phase 0 is documentation only. Phase 1 requires a separate instruction; preserve existing code, Gradle, database migrations and UI until then.
+
+## Agent Skills
+- Do not modify, edit, or delete agent skills (under `.agent/skills/` or `~/.gemini/config/skills/`).
+- Agent skills are strictly protected and must remain untouched.
