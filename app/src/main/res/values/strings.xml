@@ -33,4 +33,5 @@
     <string name="cooling">Đang hạ nhiệt</string>
     <string name="empty_items">Chưa có món nào đang hạ nhiệt!</string>
     <string name="empty_description">Đưa món đồ muốn mua vào danh sách để có thời gian suy nghĩ kỹ hơn.</string>
+    <string name="component_loading">Đang xử lý</string>
 </resources>
