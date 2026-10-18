@@ -1,132 +1,89 @@
 package com.hoabh.chanko
 
+import com.hoabh.chanko.domain.auth.*
 import com.hoabh.chanko.presentation.screens.login.LoginViewModel
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.*
+import org.junit.*
+import org.junit.Assert.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
+    private val dispatcher = StandardTestDispatcher()
+    @Before fun setup() { Dispatchers.setMain(dispatcher) }
+    @After fun tearDown() { Dispatchers.resetMain() }
 
-    private lateinit var viewModel: LoginViewModel
-
-    @Before
-    fun setUp() {
-        viewModel = LoginViewModel()
+    @Test fun onlyBackendAcceptanceCanNavigate() = runTest(dispatcher) {
+        val repo = FakeAuth(); val vm = LoginViewModel(repo)
+        val gate = CompletableDeferred<Unit>()
+        repo.beforeSignIn = { gate.await() }
+        vm.loginWithGoogle { nonce -> assertEquals("nonce-1", nonce); "google-proof" }
+        runCurrent()
+        assertTrue(vm.uiState.value.isLoading)
+        assertFalse(vm.uiState.value.isLoginSuccess)
+        assertEquals(listOf("challenge", "exchange:id-1:google-proof"), repo.calls)
+        gate.complete(Unit); runCurrent()
+        assertTrue(vm.uiState.value.isLoginSuccess)
+        assertFalse(vm.uiState.value.isLoading)
     }
-
-    @Test
-    fun initialState_isEmpty() {
-        val state = viewModel.uiState.value
-        assertEquals("", state.account)
-        assertEquals("", state.password)
-        assertFalse(state.isPasswordVisible)
-        assertFalse(state.isLoginSuccess)
-        assertNull(state.accountError)
-        assertNull(state.passwordError)
-        assertNull(state.generalError)
+    @Test fun doubleTapStartsOnlyOneChallenge() = runTest(dispatcher) {
+        val repo = FakeAuth(); val vm = LoginViewModel(repo)
+        val gate = CompletableDeferred<String?>()
+        vm.loginWithGoogle { gate.await() }; vm.loginWithGoogle { error("Duplicate") }; runCurrent()
+        assertEquals(listOf("challenge"), repo.calls)
+        vm.cancelLogin(); runCurrent()
+        assertFalse(vm.uiState.value.isLoading)
     }
-
-    @Test
-    fun onAccountChange_updatesStateAndClearsErrors() {
-        viewModel.loginWithCredentials() // Triggers error
-        assertNotNull(viewModel.uiState.value.generalError)
-
-        viewModel.onAccountChange("testuser@example.com")
-        val state = viewModel.uiState.value
-        assertEquals("testuser@example.com", state.account)
-        assertNull(state.accountError)
-        assertNull(state.generalError)
+    @Test fun cancelledPickerDoesNotExchangeOrShowError() = runTest(dispatcher) {
+        val repo = FakeAuth(); val vm = LoginViewModel(repo)
+        vm.loginWithGoogle { null }; runCurrent()
+        assertEquals(listOf("challenge"), repo.calls)
+        assertFalse(vm.uiState.value.isLoginSuccess); assertNull(vm.uiState.value.error)
     }
-
-    @Test
-    fun onPasswordChange_updatesStateAndClearsErrors() {
-        viewModel.loginWithCredentials() // Triggers error
-        assertNotNull(viewModel.uiState.value.generalError)
-
-        viewModel.onPasswordChange("secret123")
-        val state = viewModel.uiState.value
-        assertEquals("secret123", state.password)
-        assertNull(state.passwordError)
-        assertNull(state.generalError)
+    @Test fun unavailableConfigurationNeverLaunchesGoogle() = runTest(dispatcher) {
+        val repo = FakeAuth(); repo.challengeFailure = AuthFailure.NOT_CONFIGURED
+        val vm = LoginViewModel(repo)
+        vm.loginWithGoogle { error("Should not launch") }; runCurrent()
+        assertEquals(AuthFailure.NOT_CONFIGURED, vm.uiState.value.error)
+        assertFalse(vm.uiState.value.isLoginSuccess)
     }
-
-    @Test
-    fun togglePasswordVisibility_switchesBoolean() {
-        assertFalse(viewModel.uiState.value.isPasswordVisible)
-        viewModel.togglePasswordVisibility()
-        assertTrue(viewModel.uiState.value.isPasswordVisible)
-        viewModel.togglePasswordVisibility()
-        assertFalse(viewModel.uiState.value.isPasswordVisible)
+    @Test fun rejectionAndRetryGetNewChallengeAndNonce() = runTest(dispatcher) {
+        val repo = FakeAuth(); repo.exchangeFailure = AuthFailure.REJECTED
+        val vm = LoginViewModel(repo)
+        vm.loginWithGoogle { "bad" }; runCurrent()
+        assertEquals(AuthFailure.REJECTED, vm.uiState.value.error)
+        repo.exchangeFailure = null
+        vm.loginWithGoogle { nonce -> assertEquals("nonce-2", nonce); "good" }; runCurrent()
+        assertTrue(vm.uiState.value.isLoginSuccess); assertNull(vm.uiState.value.error)
     }
-
-    @Test
-    fun loginWithCredentials_emptyAccount_fails() {
-        viewModel.onPasswordChange("password123")
-        viewModel.loginWithCredentials()
-
-        val state = viewModel.uiState.value
-        assertFalse(state.isLoginSuccess)
-        assertNotNull(state.accountError)
-        assertNull(state.passwordError)
-        assertNotNull(state.generalError)
+    @Test fun providerFailureCanRetryWithoutLeakingExceptionText() = runTest(dispatcher) {
+        val vm = LoginViewModel(FakeAuth())
+        vm.loginWithGoogle { throw IllegalStateException("sensitive-token") }; runCurrent()
+        assertEquals(AuthFailure.GOOGLE, vm.uiState.value.error)
+        assertFalse(vm.uiState.value.isLoading); assertFalse(vm.uiState.value.isLoginSuccess)
     }
-
-    @Test
-    fun loginWithCredentials_emptyPassword_fails() {
-        viewModel.onAccountChange("user@example.com")
-        viewModel.loginWithCredentials()
-
-        val state = viewModel.uiState.value
-        assertFalse(state.isLoginSuccess)
-        assertNull(state.accountError)
-        assertNotNull(state.passwordError)
-        assertNotNull(state.generalError)
+    @Test fun routeCancellationPreventsLateSuccess() = runTest(dispatcher) {
+        val repo = FakeAuth(); val gate = CompletableDeferred<Unit>(); repo.beforeSignIn = { gate.await() }
+        val vm = LoginViewModel(repo)
+        vm.loginWithGoogle { "token" }; runCurrent(); vm.cancelLogin(); runCurrent()
+        gate.complete(Unit); runCurrent()
+        assertFalse(vm.uiState.value.isLoginSuccess); assertFalse(vm.uiState.value.isLoading)
+        assertNull(vm.uiState.value.error)
     }
-
-    @Test
-    fun loginWithCredentials_blankSpaces_fails() {
-        viewModel.onAccountChange("   ")
-        viewModel.onPasswordChange("   ")
-        viewModel.loginWithCredentials()
-
-        val state = viewModel.uiState.value
-        assertFalse(state.isLoginSuccess)
-        assertNotNull(state.accountError)
-        assertNotNull(state.passwordError)
+}
+private class FakeAuth : GoogleAuthRepository {
+    val calls = mutableListOf<String>()
+    var challengeFailure: AuthFailure? = null
+    var exchangeFailure: AuthFailure? = null
+    var beforeSignIn: suspend () -> Unit = {}
+    var sequence = 0
+    override suspend fun createChallenge(): AuthResult<GoogleAuthChallenge> {
+        calls += "challenge"; sequence++
+        return challengeFailure?.let { AuthResult.Failure(it) }
+            ?: AuthResult.Success(GoogleAuthChallenge("id-$sequence", "nonce-$sequence", "future"))
     }
-
-    @Test
-    fun loginWithCredentials_validInput_succeeds() {
-        viewModel.onAccountChange("user@example.com")
-        viewModel.onPasswordChange("password123")
-        viewModel.loginWithCredentials()
-
-        val state = viewModel.uiState.value
-        assertTrue(state.isLoginSuccess)
-        assertNull(state.accountError)
-        assertNull(state.passwordError)
-        assertNull(state.generalError)
-    }
-
-    @Test
-    fun loginWithGoogle_succeeds() {
-        viewModel.loginWithGoogle()
-
-        val state = viewModel.uiState.value
-        assertTrue(state.isLoginSuccess)
-        assertNull(state.generalError)
-    }
-
-    @Test
-    fun consumeLoginSuccess_resetsFlag() {
-        viewModel.loginWithGoogle()
-        assertTrue(viewModel.uiState.value.isLoginSuccess)
-
-        viewModel.consumeLoginSuccess()
-        assertFalse(viewModel.uiState.value.isLoginSuccess)
+    override suspend fun signIn(challenge: GoogleAuthChallenge, idToken: String): AuthResult<Unit> {
+        calls += "exchange:${challenge.id}:$idToken"; beforeSignIn()
+        return exchangeFailure?.let { AuthResult.Failure(it) } ?: AuthResult.Success(Unit)
     }
 }

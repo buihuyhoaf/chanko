@@ -1,435 +1,193 @@
 package com.hoabh.chanko.presentation.screens.login
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.core.net.toUri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hoabh.chanko.BuildConfig
 import com.hoabh.chanko.R
-import com.hoabh.chanko.ui.theme.ChankoPurple
-import com.hoabh.chanko.ui.theme.ChankoPurpleDark
+import com.hoabh.chanko.domain.auth.AuthFailure
 import com.hoabh.chanko.ui.theme.ChankoTheme
-import com.hoabh.chanko.ui.theme.TextPrimary
-import com.hoabh.chanko.ui.theme.TextSecondary
+import com.hoabh.chanko.ui.theme.Nunito
+
+private val LoginCream = Color(0xFFFAF8F5)
+private val LoginPlum = Color(0xFF4D2939)
 
 @Composable
-fun LoginRoute(
-    onLoginSuccess: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uiState.isLoginSuccess) {
-        if (uiState.isLoginSuccess) {
-            onLoginSuccess()
-            viewModel.consumeLoginSuccess()
+fun LoginRoute(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val provider = remember(context) { AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
+    var legalUnavailable by rememberSaveable { mutableStateOf(false) }
+    DisposableEffect(viewModel) { onDispose { viewModel.cancelLogin() } }
+    LaunchedEffect(state.isLoginSuccess) { if (state.isLoginSuccess) onLoginSuccess() }
+    fun openLegal(url: String) {
+        val uri = url.toUri()
+        if (uri.scheme != "https" || uri.host.isNullOrBlank() || !uri.userInfo.isNullOrEmpty()) {
+            legalUnavailable = true
+            return
         }
+        try { context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (_: ActivityNotFoundException) { legalUnavailable = true }
     }
-
-    LoginScreen(
-        uiState = uiState,
-        onAccountChange = viewModel::onAccountChange,
-        onPasswordChange = viewModel::onPasswordChange,
-        onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
-        onLoginClick = viewModel::loginWithCredentials,
-        onGoogleLoginClick = viewModel::loginWithGoogle
+    LoginScreen(state, { viewModel.loginWithGoogle(provider) },
+        { openLegal(BuildConfig.TERMS_URL) }, { openLegal(BuildConfig.PRIVACY_URL) })
+    if (legalUnavailable) AlertDialog(
+        onDismissRequest = { legalUnavailable = false },
+        text = { Text(stringResource(R.string.login_legal_unavailable)) },
+        confirmButton = { TextButton(onClick = { legalUnavailable = false }) { Text(stringResource(R.string.login_close)) } },
     )
 }
 
 @Composable
 fun LoginScreen(
-    uiState: LoginUiState,
-    onAccountChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onTogglePasswordVisibility: () -> Unit,
-    onLoginClick: () -> Unit,
-    onGoogleLoginClick: () -> Unit
+    uiState: LoginUiState = LoginUiState(),
+    onGoogleLoginClick: () -> Unit,
+    onTermsClick: () -> Unit,
+    onPrivacyClick: () -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF8C70E7),
-                        Color(0xFF6C4ACD),
-                        Color(0xFFF9F8FD)
-                    ),
-                    startY = 0f,
-                    endY = 700f
-                )
-            ),
-        color = Color.Transparent
-    ) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(LoginCream)) {
+        val heroHeight = (maxHeight * 0.55f).coerceIn(300.dp, 600.dp)
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .imePadding()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // App Brand Header
-            Image(
-                painter = painterResource(id = R.drawable.ic_logo),
-                contentDescription = stringResource(R.string.app_name),
-                modifier = Modifier
-                    .size(88.dp)
-                    .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(22.dp),
-                        ambientColor = Color.Black.copy(alpha = 0.2f),
-                        spotColor = Color.Black.copy(alpha = 0.3f)
-                    )
-                    .clip(RoundedCornerShape(22.dp))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = stringResource(R.string.login_title),
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stringResource(R.string.login_subtitle),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // Card Container
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // General error banner if present
-                    AnimatedVisibility(
-                        visible = uiState.generalError != null,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.ErrorOutline,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = uiState.generalError.orEmpty(),
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-
-                    // Account field
-                    OutlinedTextField(
-                        value = uiState.account,
-                        onValueChange = onAccountChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.login_account_label)) },
-                        placeholder = { Text(stringResource(R.string.login_account_placeholder)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Person,
-                                contentDescription = null,
-                                tint = ChankoPurple
-                            )
-                        },
-                        isError = uiState.accountError != null,
-                        supportingText = {
-                            if (uiState.accountError != null) {
-                                Text(
-                                    text = uiState.accountError,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ChankoPurple,
-                            focusedLabelColor = ChankoPurple,
-                            cursorColor = ChankoPurple
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Password field
-                    OutlinedTextField(
-                        value = uiState.password,
-                        onValueChange = onPasswordChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.login_password_label)) },
-                        placeholder = { Text(stringResource(R.string.login_password_placeholder)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Lock,
-                                contentDescription = null,
-                                tint = ChankoPurple
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = onTogglePasswordVisibility) {
-                                Icon(
-                                    imageVector = if (uiState.isPasswordVisible) {
-                                        Icons.Filled.VisibilityOff
-                                    } else {
-                                        Icons.Filled.Visibility
-                                    },
-                                    contentDescription = null,
-                                    tint = TextSecondary
-                                )
-                            }
-                        },
-                        visualTransformation = if (uiState.isPasswordVisible) {
-                            VisualTransformation.None
-                        } else {
-                            PasswordVisualTransformation()
-                        },
-                        isError = uiState.passwordError != null,
-                        supportingText = {
-                            if (uiState.passwordError != null) {
-                                Text(
-                                    text = uiState.passwordError,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                focusManager.clearFocus()
-                                onLoginClick()
-                            }
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ChankoPurple,
-                            focusedLabelColor = ChankoPurple,
-                            cursorColor = ChankoPurple
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Login Button
-                    Button(
-                        onClick = {
-                            focusManager.clearFocus()
-                            onLoginClick()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ChankoPurple
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.login_button),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Or Divider
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = stringResource(R.string.login_or_divider),
-                            modifier = Modifier.padding(horizontal = 12.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Google Login Button
-                    OutlinedButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            onGoogleLoginClick()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                            brush = Brush.horizontalGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.outlineVariant,
-                                    MaterialTheme.colorScheme.outlineVariant
-                                )
-                            )
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_google),
-                                contentDescription = null,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = stringResource(R.string.login_with_google),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = TextPrimary
-                            )
-                        }
-                    }
-                }
+            Box(Modifier.fillMaxWidth().height(heroHeight)) {
+                Image(painterResource(R.drawable.chanko_login_door), contentDescription = null,
+                    contentScale = ContentScale.Crop, alignment = Alignment.BottomCenter,
+                    modifier = Modifier.fillMaxSize())
+                Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(48.dp)
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, LoginCream))))
+                LoginWordmark(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 18.dp))
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.login_headline),
+                    style = TextStyle(fontFamily = Nunito, fontSize = 28.sp, lineHeight = 34.sp,
+                        fontWeight = FontWeight.ExtraBold, color = LoginPlum, textAlign = TextAlign.Center),
+                    modifier = Modifier.semantics { heading() })
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.login_subtitle), color = LoginPlum,
+                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 22.sp), textAlign = TextAlign.Center)
+                Spacer(Modifier.height(22.dp))
+                OutlinedButton(
+                    onClick = onGoogleLoginClick,
+                    enabled = !uiState.isLoading && !uiState.isLoginSuccess,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+                    shape = RoundedCornerShape(50), border = BorderStroke(1.dp, Color(0xFF747775)),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF1F1F1F)),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    Image(painterResource(R.drawable.ic_google), null, Modifier.size(22.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text(stringResource(R.string.login_with_google), fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f, fill = false))
+                }
+                if (uiState.isLoading) Row(
+                    Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Text(stringResource(R.string.login_loading), style = MaterialTheme.typography.bodyMedium, color = LoginPlum)
+                }
+                uiState.error?.let { error ->
+                    Text(stringResource(error.messageId()), color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite })
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(stringResource(R.string.login_legal_intro), color = Color(0xFF6B6570),
+                    style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                LegalLinks(onTermsClick, onPrivacyClick)
+                Spacer(Modifier.height(12.dp))
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun LoginScreenPreview() {
-    ChankoTheme {
-        LoginScreen(
-            uiState = LoginUiState(),
-            onAccountChange = {},
-            onPasswordChange = {},
-            onTogglePasswordVisibility = {},
-            onLoginClick = {},
-            onGoogleLoginClick = {}
-        )
+private fun LoginWordmark(modifier: Modifier = Modifier) {
+    val text = buildAnnotatedString {
+        withStyle(SpanStyle(color = LoginPlum)) { append(stringResource(R.string.login_brand).substringBefore('\n')) }
+        append('\n')
+        withStyle(SpanStyle(color = Color(0xFFD72C61))) { append(stringResource(R.string.login_brand).substringAfter('\n')) }
+    }
+    val style = TextStyle(fontFamily = Nunito, fontSize = 36.sp, lineHeight = 38.sp,
+        fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+    Box(modifier.rotate(-5f), contentAlignment = Alignment.Center) {
+        Text(text.text, style = style.copy(color = Color.White, drawStyle = Stroke(width = 15f)),
+            modifier = Modifier.clearAndSetSemantics { })
+        Text(text, style = style)
     }
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LegalLinks(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
+    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        TextButton(onClick = onTermsClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.login_terms), color = Color(0xFF6B6570), fontSize = 12.sp,
+                textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
+        }
+        TextButton(onClick = onPrivacyClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.login_privacy), color = Color(0xFF6B6570), fontSize = 12.sp,
+                textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+private fun AuthFailure.messageId(): Int = when (this) {
+    AuthFailure.NOT_CONFIGURED -> R.string.login_not_configured
+    AuthFailure.NETWORK -> R.string.login_network_error
+    AuthFailure.TIMEOUT -> R.string.login_timeout_error
+    AuthFailure.REJECTED -> R.string.login_rejected_error
+    AuthFailure.RATE_LIMITED -> R.string.login_rate_limit_error
+    AuthFailure.SERVER -> R.string.login_server_error
+    AuthFailure.INVALID_RESPONSE -> R.string.login_invalid_error
+    AuthFailure.STORAGE -> R.string.login_storage_error
+    AuthFailure.GOOGLE -> R.string.login_google_error
+}
+
+@Preview(showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun LoginPreview() { ChankoTheme { LoginScreen(onGoogleLoginClick = {}, onTermsClick = {}, onPrivacyClick = {}) } }
+@Preview(showBackground = true, widthDp = 320, heightDp = 568, fontScale = 2f)
+@Composable
+private fun LoginLargeTextPreview() { LoginPreview() }

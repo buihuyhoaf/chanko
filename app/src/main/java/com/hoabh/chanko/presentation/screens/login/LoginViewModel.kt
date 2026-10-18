@@ -1,97 +1,52 @@
 package com.hoabh.chanko.presentation.screens.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.domain.auth.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
+import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 data class LoginUiState(
-    val account: String = "",
-    val password: String = "",
-    val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
-    val accountError: String? = null,
-    val passwordError: String? = null,
-    val generalError: String? = null,
-    val isLoginSuccess: Boolean = false
+    val error: AuthFailure? = null,
+    val isLoginSuccess: Boolean = false,
 )
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(private val repository: GoogleAuthRepository) : ViewModel() {
+    private val state = MutableStateFlow(LoginUiState())
+    val uiState = state.asStateFlow()
+    private var attempt: Job? = null
 
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
-
-    fun onAccountChange(account: String) {
-        _uiState.update {
-            it.copy(
-                account = account,
-                accountError = null,
-                generalError = null
-            )
+    fun loginWithGoogle(provider: GoogleTokenProvider) {
+        if (state.value.isLoading || state.value.isLoginSuccess) return
+        state.value = LoginUiState(isLoading = true)
+        attempt = viewModelScope.launch {
+            try {
+                when (val challenge = repository.createChallenge()) {
+                    is AuthResult.Failure -> state.update { it.copy(error = challenge.reason) }
+                    is AuthResult.Success -> {
+                        val token = provider.getIdToken(challenge.value.nonce)
+                        if (token != null) {
+                            when (val result = repository.signIn(challenge.value, token)) {
+                                is AuthResult.Success -> state.update { it.copy(isLoginSuccess = true) }
+                                is AuthResult.Failure -> state.update { it.copy(error = result.reason) }
+                            }
+                        }
+                    }
+                }
+            } catch (e: CancellationException) { throw e
+            } catch (_: Exception) { state.update { it.copy(error = AuthFailure.GOOGLE) }
+            } finally { state.update { it.copy(isLoading = false) } }
         }
     }
 
-    fun onPasswordChange(password: String) {
-        _uiState.update {
-            it.copy(
-                password = password,
-                passwordError = null,
-                generalError = null
-            )
-        }
-    }
-
-    fun togglePasswordVisibility() {
-        _uiState.update {
-            it.copy(isPasswordVisible = !it.isPasswordVisible)
-        }
-    }
-
-    fun loginWithCredentials() {
-        val current = _uiState.value
-        val isAccountEmpty = current.account.isBlank()
-        val isPasswordEmpty = current.password.isBlank()
-
-        if (isAccountEmpty || isPasswordEmpty) {
-            _uiState.update {
-                it.copy(
-                    accountError = if (isAccountEmpty) "Tài khoản không được để trống" else null,
-                    passwordError = if (isPasswordEmpty) "Mật khẩu không được để trống" else null,
-                    generalError = "Vui lòng nhập tài khoản và mật khẩu",
-                    isLoginSuccess = false
-                )
-            }
-            return
-        }
-
-        _uiState.update {
-            it.copy(
-                accountError = null,
-                passwordError = null,
-                generalError = null,
-                isLoginSuccess = true
-            )
-        }
-    }
-
-    fun loginWithGoogle() {
-        _uiState.update {
-            it.copy(
-                accountError = null,
-                passwordError = null,
-                generalError = null,
-                isLoginSuccess = true
-            )
-        }
-    }
-
-    fun consumeLoginSuccess() {
-        _uiState.update {
-            it.copy(isLoginSuccess = false)
-        }
-    }
+    // Leaving the route (including Activity recreation) cancels its credential UI safely.
+    fun cancelLogin() { attempt?.cancel() }
 }

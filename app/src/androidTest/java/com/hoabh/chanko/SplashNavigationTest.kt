@@ -1,6 +1,7 @@
 package com.hoabh.chanko
 
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -25,8 +26,8 @@ import org.junit.Test
 class SplashNavigationTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun databaseReadyOpensDashboardAndBackCannotReopenSplash() = verifyStartup(fail = false)
-    @Test fun databaseFailureLeavesSplashAndShowsExistingError() = verifyStartup(fail = true)
+    @Test fun databaseReadyOpensLoginAndRequiresAuthentication() = verifyStartup(fail = false)
+    @Test fun databaseFailureStillRequiresAuthentication() = verifyStartup(fail = true)
 
     private fun verifyStartup(fail: Boolean) {
         val repository = StartupRepository()
@@ -36,11 +37,20 @@ class SplashNavigationTest {
         compose.setContent {
             val controller = rememberNavController()
             SideEffect { navigation = controller }
-            ChankoTheme { NavGraph(controller, overviewViewModel = model) }
+            ChankoTheme { NavGraph(controller, overviewViewModel = model, loginContent = { onSuccess ->
+                androidx.compose.material3.Button(onClick = onSuccess) { androidx.compose.material3.Text("Xác thực từ server") }
+            }) }
         }
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").assertIsDisplayed()
         compose.runOnIdle { assertEquals(Screen.Splash.route, navigation.currentDestination?.route) }
         compose.runOnIdle { repository.ready.value = !fail }
+        compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
+        compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
+        // A restored or programmatically requested protected route cannot bypass Google.
+        compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
+        compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
+        compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
+        compose.onNodeWithText("Xác thực từ server").performClick()
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Dashboard.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
         if (fail) compose.onNodeWithText("Không thể tải dữ liệu. Hãy mở lại màn hình để thử lại.")
