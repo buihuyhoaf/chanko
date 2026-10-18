@@ -1,0 +1,50 @@
+{
+  "AppDatabase.kt": true,
+  "dao/ItemDao.kt": true,
+  "converter/Converters.kt": true,
+  "AppDatabase_Impl.kt": true,
+  "ItemDao_Impl.kt": true,
+  "entity_class_unchanged": true,
+  "mapper_bodies_unchanged": true,
+  "lint_baseline": {
+    "AndroidGradlePluginVersion:Warning": 1,
+    "GradleDependency:Warning": 13,
+    "NewerVersionAvailable:Warning": 5,
+    "PluralsCandidate:Warning": 1,
+    "UnusedResources:Warning": 9,
+    "MonochromeLauncherIcon:Warning": 2
+  },
+  "lint_after_app": {
+    "AndroidGradlePluginVersion:Warning": 1,
+    "GradleDependency:Warning": 13,
+    "NewerVersionAvailable:Warning": 5,
+    "PluralsCandidate:Warning": 1,
+    "UnusedResources:Warning": 9,
+    "MonochromeLauncherIcon:Warning": 2
+  },
+  "lint_after_database": {},
+  "unit_tests": [
+    {
+      "name": "com.hoabh.chanko.CooldownItemTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-18T04:32:19.169Z",
+      "hostname": "Mini-cua-Bui",
+      "time": "0.003"
+    },
+    {
+      "name": "com.hoabh.chanko.ViewModelTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-18T04:32:19.175Z",
+      "hostname": "Mini-cua-Bui",
+      "time": "0.11"
+    }
+  ],
+  "phase11_domain_model/CooldownItem.kt": true,
+  "phase11_domain_repository/ItemRepository.kt": true
+}

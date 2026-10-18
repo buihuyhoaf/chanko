@@ -43,6 +43,7 @@ android {
 
 dependencies {
     implementation(project(":core:domain"))
+    implementation(project(":core:database"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -65,7 +66,6 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
 
     // Hilt
     implementation(libs.hilt.android)
