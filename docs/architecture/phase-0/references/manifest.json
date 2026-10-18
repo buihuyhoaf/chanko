@@ -1,0 +1,57 @@
+[
+  {
+    "source_id": "S3",
+    "title": "04. API & Backend Architecture (TECH-03)",
+    "url": "https://docs.google.com/document/d/1BA6OjK-vDcXEVz0Ejcao7Krg4D9i6qqc5XNMMkSTkDI/edit?usp=drivesdk",
+    "drive_id": "1BA6OjK-vDcXEVz0Ejcao7Krg4D9i6qqc5XNMMkSTkDI",
+    "mime_type": "application/vnd.google-apps.document",
+    "provider_modified_at": "2026-10-17T10:11:03.420Z",
+    "accessed_on": "2026-10-18 Asia/Ho_Chi_Minh",
+    "snapshot": "TECH-03-v1.1.extracted.txt",
+    "capture": "Drive search best_effort_fetch readable extraction; CRLF normalized to LF; not original binary/export; formatting/tables may be flattened; canonical source retained via URL"
+  },
+  {
+    "source_id": "S2",
+    "title": "03. Data Architecture (TECH-02)",
+    "url": "https://docs.google.com/document/d/1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ/edit?usp=drivesdk",
+    "drive_id": "1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ",
+    "mime_type": "application/vnd.google-apps.document",
+    "provider_modified_at": "2026-10-17T10:11:01.531Z",
+    "accessed_on": "2026-10-18 Asia/Ho_Chi_Minh",
+    "snapshot": "TECH-02-v1.1.extracted.txt",
+    "capture": "Drive search best_effort_fetch readable extraction; CRLF normalized to LF; not original binary/export; formatting/tables may be flattened; canonical source retained via URL"
+  },
+  {
+    "source_id": "S1",
+    "title": "02. System Architecture (TECH-01)",
+    "url": "https://docs.google.com/document/d/1iedDkUbbOWThMm_vDs5RRQ-BKJ6NMDLTkb4YhcTapEI/edit?usp=drivesdk",
+    "drive_id": "1iedDkUbbOWThMm_vDs5RRQ-BKJ6NMDLTkb4YhcTapEI",
+    "mime_type": "application/vnd.google-apps.document",
+    "provider_modified_at": "2026-10-17T09:40:08.183Z",
+    "accessed_on": "2026-10-18 Asia/Ho_Chi_Minh",
+    "snapshot": "TECH-01-v1.1.extracted.txt",
+    "capture": "Drive search best_effort_fetch readable extraction; CRLF normalized to LF; not original binary/export; formatting/tables may be flattened; canonical source retained via URL"
+  },
+  {
+    "source_id": "S4",
+    "title": "1. Functional Specification — v1.1",
+    "url": "https://docs.google.com/document/d/1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go/edit?usp=drivesdk",
+    "drive_id": "1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go",
+    "mime_type": "application/vnd.google-apps.document",
+    "provider_modified_at": "2026-10-17T10:10:59.447Z",
+    "accessed_on": "2026-10-18 Asia/Ho_Chi_Minh",
+    "snapshot": "functional-specification-v1.1.extracted.txt",
+    "capture": "Drive search best_effort_fetch readable extraction; CRLF normalized to LF; not original binary/export; formatting/tables may be flattened; canonical source retained via URL"
+  },
+  {
+    "source_id": "S5",
+    "title": "UI UX Design System & Visual Guidelines — v1.0.docx",
+    "url": "https://docs.google.com/document/d/1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg/edit?usp=drivesdk&ouid=101159830481101825148&rtpof=true&sd=true",
+    "drive_id": "1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg",
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "provider_modified_at": "2026-10-18T03:50:21.858Z",
+    "accessed_on": "2026-10-18 Asia/Ho_Chi_Minh",
+    "snapshot": "uiux-v1.0.extracted.txt",
+    "capture": "Drive search best_effort_fetch readable extraction; CRLF normalized to LF; not original binary/export; formatting/tables may be flattened; canonical source retained via URL"
+  }
+]
