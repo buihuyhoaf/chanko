@@ -30,3 +30,5 @@ include(":core:domain")
 include(":core:database")
 
 include(":core:data")
+
+include(":core:network")
