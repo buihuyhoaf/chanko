@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Chanko"
 include(":app")
+
+include(":core:domain")
