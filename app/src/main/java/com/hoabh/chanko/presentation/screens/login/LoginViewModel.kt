@@ -19,7 +19,7 @@ data class LoginUiState(
 )
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val repository: GoogleAuthRepository) : ViewModel() {
+class LoginViewModel @Inject constructor(private val repository: AuthenticationRepository) : ViewModel() {
     private val state = MutableStateFlow(LoginUiState())
     val uiState = state.asStateFlow()
     private var attempt: Job? = null
@@ -29,17 +29,9 @@ class LoginViewModel @Inject constructor(private val repository: GoogleAuthRepos
         state.value = LoginUiState(isLoading = true)
         attempt = viewModelScope.launch {
             try {
-                when (val challenge = repository.createChallenge()) {
-                    is AuthResult.Failure -> state.update { it.copy(error = challenge.reason) }
-                    is AuthResult.Success -> {
-                        val token = provider.getIdToken(challenge.value.nonce)
-                        if (token != null) {
-                            when (val result = repository.signIn(challenge.value, token)) {
-                                is AuthResult.Success -> state.update { it.copy(isLoginSuccess = true) }
-                                is AuthResult.Failure -> state.update { it.copy(error = result.reason) }
-                            }
-                        }
-                    }
+                when (val result = repository.signIn(provider)) {
+                    is AuthResult.Success -> state.update { it.copy(isLoginSuccess = true) }
+                    is AuthResult.Failure -> state.update { it.copy(error = result.reason) }
                 }
             } catch (e: CancellationException) { throw e
             } catch (_: Exception) { state.update { it.copy(error = AuthFailure.GOOGLE) }
