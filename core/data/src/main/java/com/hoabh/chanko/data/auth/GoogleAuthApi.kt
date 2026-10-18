@@ -3,14 +3,11 @@ package com.hoabh.chanko.data.auth
 import com.hoabh.chanko.core.network.ApiResponse
 import kotlinx.serialization.Serializable
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.POST
 
+/** Legacy test seam only; no production transport binding until contract approval. */
 interface GoogleAuthApi {
-    @POST("auth/google/challenge")
     suspend fun challenge(): Response<ApiResponse<GoogleChallengeDto>>
-    @POST("auth/google")
-    suspend fun signIn(@Body request: GoogleSignInRequest): Response<ApiResponse<AuthTokensDto>>
+    suspend fun signIn(request: GoogleSignInRequest): Response<ApiResponse<AuthTokensDto>>
 }
 
 @Serializable
