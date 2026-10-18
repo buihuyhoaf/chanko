@@ -43,3 +43,7 @@ User to verify and confirm:
 5. Run CandyListDialogSheetTest and existing CandyComponentsTest on an allowed test device. Both compilation and runtime results must be distinguished.
 
 PV-01 and manual accessibility still affect acceptance under UI-09/B10. Therefore create PR and stop merge pending user confirmation, even though local automated gates passed. Do not enable auto-merge while this hold remains. Remote review/CI must also satisfy the user's conditions before any later merge.
+
+## PR status
+
+Created [PR #12](https://github.com/buihuyhoaf/chanko/pull/12), open, targeting dev-chanko-1x. Implementation commit `00fa631d59ef962b53c166d3c4a570cb2b3a5cf8`: GitHub checks/statuses and PR-triggered workflow runs are empty at inspection; CI is unverified, not PASS. No independent review approval obtained. No merge or auto-merge enabled. Merge remains held for the acceptance items above and review/CI requirements.
