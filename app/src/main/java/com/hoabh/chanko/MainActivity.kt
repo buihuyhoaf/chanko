@@ -18,7 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // Release the platform icon immediately so it cannot cover the branded scene.
+        installSplashScreen().setOnExitAnimationListener { splash -> splash.remove() }
         super.onCreate(savedInstanceState)
         // MVP uses a light theme even when the device uses dark mode.
         enableEdgeToEdge(

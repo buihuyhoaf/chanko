@@ -9,9 +9,9 @@ This revision supersedes the earlier fixed-delay splash described in commit 8c7b
 - AndroidX SplashScreen installed before super.onCreate, dedicated launcher theme, brand Purple #8965F6 and padded static cat icon. The platform releases it normally on the first frame; no keep-on-screen timer.
 - Compose renders a full-bleed pre-rendered room, a separate transparent cat holding the coral bag, and native Nunito title/tagline/footer. Title is “Should I Buy It?”; launcher app label remains Chanko. “Pause. Think. Decide.” retains the mindful-shopping message agreed in the conversation.
 - Uses the existing theme, spacing and shapes. Local brown/coral logo colors reproduce the supplied visual reference; they are Reference artwork colors, not new Approved design-system tokens.
-- No fake percentage, partial progress bar or minimum display time. Native loading text appears only while the existing OverviewViewModel stream is Loading. Content and Error both navigate immediately to the existing Dashboard, where the existing error UI is available.
+- User-approved one-second brand introduction, measured after the scene first draws. Native loading text appears only while OverviewViewModel is Loading. After the introduction, Content and Error both navigate to the existing Dashboard; slow data continues to wait for a real result. No fake percentage or partial progress bar.
 - NavGraph and Dashboard share the same OverviewViewModel instance from the existing Activity owner, so the first query result is retained across the handoff. No startup module, repository, database change or new architecture.
-- Existing Splash route is removed from the back stack. Splash-to-Dashboard uses no transition animation. Navigation restoration retains the user's actual destination.
+- Existing Splash route is removed from the back stack. Splash entrance and the transition to Dashboard use no transition animation. The platform exit callback removes its overlay immediately. Navigation restoration retains the user's actual destination.
 - Art and loading text remain static in all motion settings. No decorative loop, bobbing, flashing, countdown, simulated progress or animation-dependent navigation.
 - Background extends behind system bars; actual content uses safeDrawingPadding. Text wraps and the entire composition scrolls; the art shrinks with available height. Dark system-bar icons match the app's existing Light-only theme even in device dark mode.
 
@@ -47,7 +47,7 @@ No merge or auto-merge. No Phase 2.4b work.
 
 ## Manual acceptance
 
-Inspect the Compose previews and derivative mascot for visual fidelity. No completed device screenshot is claimed. Test cold/warm launch on Android 11 and 12+; on a fast local database, the branded frame may be brief or skipped, intentionally. Check landscape, split screen, cutouts, font scaling, TalkBack, system animation scale zero and recreation. No artificial delay should be added for visual review; SplashContent previews and the focused screenshot test provide stable review surfaces.
+Inspect the Compose previews and derivative mascot for visual fidelity. No completed device screenshot is claimed. Test cold/warm launch on Android 11 and 12+; on a fast local database, the brand introduction still remains visible for approximately one second with no loading text. Check landscape, split screen, cutouts, font scaling, TalkBack, system animation scale zero and recreation. The one-second introduction is explicitly approved branding, not simulated loading. SplashContent previews and the focused screenshot test also provide stable review surfaces.
 
 ## Runtime asset checks
 
@@ -80,3 +80,20 @@ Use case: background-extraction / precise-object-edit. Input is the supplied ori
 SHA-256: d1f31e95f457adba3343912b067653282cce47f6813d91ff2b6db4dd311f0706
 
 Visual-correction verification: final assembleDebug, testDebugUnitTest (11/11), lintDebug (0 errors, 34 warnings), assembleDebugAndroidTest and diff --check PASS. Four actual host renders (portrait, compact, 200% font, landscape 200%) completed successfully. No device operation was performed in this correction.
+
+## Startup visibility fix — one-second brand introduction
+
+After another report of only seeing the cat on purple, source inspection confirmed the missing runtime guarantee: the first data result could navigate away while the platform splash still covered the window or while NavHost's default entrance fade had not exposed the room. Earlier room renders verified art/layout only; they did not prove that real startup kept the room visible.
+
+The user explicitly approved: always display the room for about one second, with loading copy only while actual data work remains. This supersedes the previous immediate-exit policy, without simulating loading.
+
+- MainActivity removes the system splash overlay immediately in setOnExitAnimationListener; no extra platform fade covers the room.
+- The Splash route has no entrance fade. The scene's first draw starts a frame-synchronized one-second presentation interval. Asset decode/composition time is not counted as visible presentation time.
+- A separate readiness effect exits only after BOTH the interval and the actual data result. Readiness changes never restart the interval. The latest completion callback is used, once only.
+- Loading copy disappears immediately when data is ready, including throughout a fast-start brand introduction. If data takes longer than one second, the real loading state remains until Content or Error.
+- The presentation remains static under reduced motion. The completed presentation flag is saveable across configuration recreation.
+- Instrumentation coverage is updated for fast ready-at-entry (scene present, no loading, no completion before one second), slow data beyond the presentation, latest callback and single completion. Instrumentation is compiled only, not executed on a phone.
+
+No device installation or execution was performed. The installed APK is not automatically updated by Git commits; the newly built app-debug.apk must be explicitly run/installed by the user if they choose to update their device.
+
+One-second introduction verification: assembleDebug, 11/11 unit tests, lintDebug (0 errors, 34 warnings), and assembleDebugAndroidTest PASS. Additional host render of SplashScreen(isReady=true) PASS, saved as qa/splash/fast-data-introduction.png; the room is present and loading copy absent. The timer assertions are compiled instrumentation coverage, not an executed device result.

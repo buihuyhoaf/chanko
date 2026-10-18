@@ -22,7 +22,7 @@ import org.junit.Test
 class SplashScreenTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun waitsForReadinessWithoutTimerAndUsesLatestCallbackOnlyOnce() {
+    @Test fun slowDataWaitsBeyondBrandingAndUsesLatestCallbackOnlyOnce() {
         compose.mainClock.autoAdvance = false
         var first = 0
         var latest = 0
@@ -31,6 +31,8 @@ class SplashScreenTest {
         compose.setContent {
             ChankoTheme { SplashScreen(ready.value, if (useLatest.value) ({ latest++ }) else ({ first++ })) }
         }
+        compose.runOnIdle { }
+        repeat(4) { compose.mainClock.advanceTimeByFrame() }
         compose.mainClock.advanceTimeBy(10000)
         compose.runOnIdle { assertEquals(0, first + latest); useLatest.value = true }
         compose.mainClock.advanceTimeByFrame()
@@ -42,11 +44,22 @@ class SplashScreenTest {
         compose.runOnIdle { assertEquals(1, latest) }
     }
 
-    @Test fun alreadyReadyDoesNotWaitForBranding() {
+    @Test fun fastDataStillShowsRoomForOneSecondWithoutLoadingCopy() {
+        compose.mainClock.autoAdvance = false
         var calls = 0
         compose.setContent { ChankoTheme { SplashScreen(true) { calls++ } } }
-        compose.runOnIdle { assertEquals(1, calls) }
+        compose.runOnIdle { }
+        // Commit the first draw and let its effect start the presentation interval.
+        repeat(4) { compose.mainClock.advanceTimeByFrame() }
+        compose.runOnIdle { assertEquals(0, calls) }
+        compose.onNodeWithText("Pause. Think. Decide.").assertIsDisplayed()
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").assertDoesNotExist()
+        compose.mainClock.advanceTimeBy(800)
+        compose.runOnIdle { assertEquals(0, calls) }
+        compose.mainClock.advanceTimeBy(400)
+        compose.runOnIdle { assertEquals(1, calls) }
+        compose.mainClock.advanceTimeBy(2000)
+        compose.runOnIdle { assertEquals(1, calls) }
     }
 
     @Test fun largeTextRemainsAccessibleWithoutDecorativeImageAnnouncement() {

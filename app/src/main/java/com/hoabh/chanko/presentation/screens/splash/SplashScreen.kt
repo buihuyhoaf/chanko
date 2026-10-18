@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.drawWithContent
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,18 +37,37 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
 
-/** Readiness comes from the existing Overview data stream, never an animation or a timer. */
+/** Show the user-approved one-second brand introduction after the scene's first draw.
+ * Loading copy remains tied only to real data work; readiness changes do not restart branding.
+ */
 @Composable
 fun SplashScreen(isReady: Boolean, onSplashFinished: () -> Unit) {
     val finish by rememberUpdatedState(onSplashFinished)
     var finished by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(isReady) {
-        if (isReady && !finished) {
+    var presentationComplete by rememberSaveable { mutableStateOf(false) }
+    var sceneDrawn by remember { mutableStateOf(false) }
+
+    LaunchedEffect(sceneDrawn) {
+        if (sceneDrawn && !presentationComplete) {
+            // Start after a rendered scene, not while decoding assets or under the platform icon.
+            withFrameNanos { }
+            delay(1_000)
+            presentationComplete = true
+        }
+    }
+    LaunchedEffect(isReady, presentationComplete) {
+        if (isReady && presentationComplete && !finished) {
             finished = true
             finish()
         }
     }
-    SplashContent(isLoading = !isReady)
+    SplashContent(
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            if (!sceneDrawn) sceneDrawn = true
+        },
+        isLoading = !isReady
+    )
 }
 
 // Local colors and logo sizing reproduce the user's artwork, not new global theme tokens.

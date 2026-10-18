@@ -32,7 +32,8 @@ fun NavGraph(
         startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
-        composable(route = Screen.Splash.route, exitTransition = { ExitTransition.None }) {
+        composable(route = Screen.Splash.route,
+            enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None }) {
             val state by overviewViewModel.items.collectAsStateWithLifecycle()
             SplashScreen(
                 isReady = state !is ItemsState.Loading,
