@@ -83,3 +83,17 @@ The previous automatic publication-approval blocker is resolved by that authoriz
 Publication proceeds under the original conditional merge rule: no CI or PR review
 PASS is claimed until verified remotely. No auto-merge is enabled without all required
 acceptance evidence. Neither development nor main has been merged by this task.
+
+### Remote verification after publication
+
+PR: https://github.com/buihuyhoaf/chanko/pull/16 (draft), targeting `dev-chanko-1x`.
+GitHub checks/statuses, pull-request workflow runs and submitted reviews were all empty
+for implementation/report head `fb9fefd631a7a5cb14435d79096b10a16f9c8ffa`.
+Therefore CI, independent review and final acceptance are NOT evidenced PASS; do not merge.
+
+The target advanced to `e413c84` through PR #14 (Splash) during this task.
+`git merge-tree --write-tree HEAD origin/dev-chanko-1x` completed without conflicts.
+This is a conflict check, not a build/test of the combined tree; local gate results
+above belong to this feature branch based on `b378a52`. No Splash changes were authored
+or merged by this Phase 3.1 task. The final documentation-only update records these
+remote findings; no additional implementation changes were made.
