@@ -1,5 +1,7 @@
 package com.hoabh.chanko.di
 
+import com.hoabh.chanko.BuildConfig
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import com.hoabh.chanko.core.network.NetworkClient
 import com.hoabh.chanko.core.network.NetworkConfig
 import dagger.Module
@@ -15,7 +17,9 @@ import retrofit2.Retrofit
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     @Provides @Singleton
-    fun config(): NetworkConfig = NetworkConfig()
+    fun config(): NetworkConfig = runCatching {
+        NetworkConfig(BuildConfig.API_BASE_URL.takeIf { it.isNotBlank() }?.toHttpUrlOrNull())
+    }.getOrElse { NetworkConfig() }
 
     @Provides @Singleton
     fun json(): Json = NetworkClient.json()

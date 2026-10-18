@@ -1,0 +1,196 @@
+package com.hoabh.chanko.presentation.screens.login
+
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.core.net.toUri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hoabh.chanko.BuildConfig
+import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.auth.AuthFailure
+import com.hoabh.chanko.ui.theme.ChankoTheme
+import com.hoabh.chanko.ui.theme.Nunito
+
+private val LoginCream = Color(0xFFFAF8F5)
+private val LoginPlum = Color(0xFF4D2939)
+
+@Composable
+fun LoginRoute(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var legalUnavailable by rememberSaveable { mutableStateOf(false) }
+    DisposableEffect(viewModel) { onDispose { viewModel.cancelLogin() } }
+    LaunchedEffect(state.isLoginSuccess) { if (state.isLoginSuccess) onLoginSuccess() }
+    fun openLegal(url: String) {
+        val uri = url.toUri()
+        if (uri.scheme != "https" || uri.host.isNullOrBlank() || !uri.userInfo.isNullOrEmpty()) {
+            legalUnavailable = true
+            return
+        }
+        try { context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (_: ActivityNotFoundException) { legalUnavailable = true }
+    }
+    LoginScreen(state, {
+        // TODO(auth): Remove this temporary bypass when API/OAuth is configured and restore:
+        // viewModel.loginWithGoogle(AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID))
+        onLoginSuccess()
+    },
+        { openLegal(BuildConfig.TERMS_URL) }, { openLegal(BuildConfig.PRIVACY_URL) })
+    if (legalUnavailable) AlertDialog(
+        onDismissRequest = { legalUnavailable = false },
+        text = { Text(stringResource(R.string.login_legal_unavailable)) },
+        confirmButton = { TextButton(onClick = { legalUnavailable = false }) { Text(stringResource(R.string.login_close)) } },
+    )
+}
+
+@Composable
+fun LoginScreen(
+    uiState: LoginUiState = LoginUiState(),
+    onGoogleLoginClick: () -> Unit,
+    onTermsClick: () -> Unit,
+    onPrivacyClick: () -> Unit,
+) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(LoginCream)) {
+        val heroHeight = (maxHeight * 0.55f).coerceIn(300.dp, 600.dp)
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(Modifier.fillMaxWidth().height(heroHeight)) {
+                Image(painterResource(R.drawable.chanko_login_door), contentDescription = null,
+                    contentScale = ContentScale.Crop, alignment = Alignment.BottomCenter,
+                    modifier = Modifier.fillMaxSize())
+                Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(48.dp)
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, LoginCream))))
+                LoginWordmark(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 18.dp))
+            }
+            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.login_headline),
+                    style = TextStyle(fontFamily = Nunito, fontSize = 28.sp, lineHeight = 34.sp,
+                        fontWeight = FontWeight.ExtraBold, color = LoginPlum, textAlign = TextAlign.Center),
+                    modifier = Modifier.semantics { heading() })
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.login_subtitle), color = LoginPlum,
+                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 22.sp), textAlign = TextAlign.Center)
+                Spacer(Modifier.height(22.dp))
+                OutlinedButton(
+                    onClick = onGoogleLoginClick,
+                    enabled = !uiState.isLoading && !uiState.isLoginSuccess,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+                    shape = RoundedCornerShape(50), border = BorderStroke(1.dp, Color(0xFF747775)),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF1F1F1F)),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    Image(painterResource(R.drawable.ic_google), null, Modifier.size(22.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text(stringResource(R.string.login_with_google), fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f, fill = false))
+                }
+                if (uiState.isLoading) Row(
+                    Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Text(stringResource(R.string.login_loading), style = MaterialTheme.typography.bodyMedium, color = LoginPlum)
+                }
+                uiState.error?.let { error ->
+                    Text(stringResource(error.messageId()), color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite })
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(stringResource(R.string.login_legal_intro), color = Color(0xFF6B6570),
+                    style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                LegalLinks(onTermsClick, onPrivacyClick)
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoginWordmark(modifier: Modifier = Modifier) {
+    val text = buildAnnotatedString {
+        withStyle(SpanStyle(color = LoginPlum)) { append(stringResource(R.string.login_brand).substringBefore('\n')) }
+        append('\n')
+        withStyle(SpanStyle(color = Color(0xFFD72C61))) { append(stringResource(R.string.login_brand).substringAfter('\n')) }
+    }
+    val style = TextStyle(fontFamily = Nunito, fontSize = 36.sp, lineHeight = 38.sp,
+        fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+    Box(modifier.rotate(-5f), contentAlignment = Alignment.Center) {
+        Text(text.text, style = style.copy(color = Color.White, drawStyle = Stroke(width = 15f)),
+            modifier = Modifier.clearAndSetSemantics { })
+        Text(text, style = style)
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LegalLinks(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
+    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        TextButton(onClick = onTermsClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.login_terms), color = Color(0xFF6B6570), fontSize = 12.sp,
+                textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
+        }
+        TextButton(onClick = onPrivacyClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.login_privacy), color = Color(0xFF6B6570), fontSize = 12.sp,
+                textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+private fun AuthFailure.messageId(): Int = when (this) {
+    AuthFailure.NOT_CONFIGURED -> R.string.login_not_configured
+    AuthFailure.NETWORK -> R.string.login_network_error
+    AuthFailure.TIMEOUT -> R.string.login_timeout_error
+    AuthFailure.REJECTED -> R.string.login_rejected_error
+    AuthFailure.RATE_LIMITED -> R.string.login_rate_limit_error
+    AuthFailure.SERVER -> R.string.login_server_error
+    AuthFailure.INVALID_RESPONSE -> R.string.login_invalid_error
+    AuthFailure.STORAGE -> R.string.login_storage_error
+    AuthFailure.GOOGLE -> R.string.login_google_error
+}
+
+@Preview(showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun LoginPreview() { ChankoTheme { LoginScreen(onGoogleLoginClick = {}, onTermsClick = {}, onPrivacyClick = {}) } }
+@Preview(showBackground = true, widthDp = 320, heightDp = 568, fontScale = 2f)
+@Composable
+private fun LoginLargeTextPreview() { LoginPreview() }

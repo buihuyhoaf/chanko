@@ -18,6 +18,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        fun configuredString(name: String): String {
+            val value = providers.gradleProperty(name).orElse("").get()
+            return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") + "\""
+        }
+        buildConfigField("String", "API_BASE_URL", configuredString("CHANKO_API_BASE_URL"))
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", configuredString("CHANKO_GOOGLE_WEB_CLIENT_ID"))
+        buildConfigField("String", "TERMS_URL", configuredString("CHANKO_TERMS_URL"))
+        buildConfigField("String", "PRIVACY_URL", configuredString("CHANKO_PRIVACY_URL"))
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +45,7 @@ android {
         jvmToolchain(17)
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -46,6 +55,10 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
     implementation(project(":core:database"))
+
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
