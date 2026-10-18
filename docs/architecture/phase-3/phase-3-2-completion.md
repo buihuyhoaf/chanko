@@ -84,3 +84,14 @@ blocked above. Remote CI/review and final acceptance must be verified after PR c
 No all-gates-PASS or durable-cache feature completion is claimed. Leave PR pending if
 CI/review/acceptance evidence is absent. Merge target may only be `dev-chanko-1x`,
 never `main`. Stop after Phase 3.2; Phase 4 has not started.
+
+### Publication and remote evidence
+
+Implementation commit: `6ec3acf92e43a8f60eae3cd61e2938a0e2995b0b`.
+Pushed to `origin/feature/phase-3-2-data-foundation`.
+PR: https://github.com/buihuyhoaf/chanko/pull/17 (draft), base `dev-chanko-1x`.
+Remote checks/statuses/annotations and PR-triggered workflow runs were empty;
+submitted reviews were empty for implementation head `6ec3acf`.
+CI, independent review and final acceptance are therefore NOT evidenced PASS.
+PR is left pending; no merge or auto-merge is performed. This documentation-only
+follow-up records remote evidence without changing tested implementation.
