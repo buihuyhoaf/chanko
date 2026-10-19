@@ -8,7 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
+import com.hoabh.chanko.ui.theme.CandyPrimaryButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,7 +61,7 @@ fun AddItemScreen(
             OutlinedTextField(colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = MaterialTheme.colorScheme.onSurface, cursorColor = MaterialTheme.colorScheme.onSurface), shape = com.hoabh.chanko.ui.theme.CandyShape.input, value = hours, onValueChange = { onFieldChange("hours", it) }, label = { Text(stringResource(R.string.cooldown_hours)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = MaterialTheme.colorScheme.onSurface, cursorColor = MaterialTheme.colorScheme.onSurface), shape = com.hoabh.chanko.ui.theme.CandyShape.input, value = reason, onValueChange = { onFieldChange("reason", it) }, label = { Text(stringResource(R.string.item_reason)) }, modifier = Modifier.fillMaxWidth())
             if (action == ActionState.ERROR) Text(stringResource(R.string.action_error), color = MaterialTheme.colorScheme.error)
-            Button(
+            CandyPrimaryButton(
                 onClick = onSave,
                 enabled = isInputValid && action != ActionState.RUNNING && action != ActionState.DONE
             ) {

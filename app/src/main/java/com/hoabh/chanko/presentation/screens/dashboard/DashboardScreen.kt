@@ -8,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.*
-import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
+import com.hoabh.chanko.ui.theme.CandyPrimaryButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,7 +128,7 @@ private fun EmptyItems(onAdd: () -> Unit) {
         Column(Modifier.fillMaxWidth().padding(CandySpace.section), verticalArrangement = Arrangement.spacedBy(CandySpace.md)) {
             Text(stringResource(R.string.empty_items), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.empty_description))
-            Button(onClick = onAdd) { Text(stringResource(R.string.add_item)) }
+            CandyPrimaryButton(onClick = onAdd) { Text(stringResource(R.string.add_item)) }
         }
     }
 }
