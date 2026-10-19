@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
+import com.hoabh.chanko.ui.theme.CandyPrimaryButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +48,7 @@ fun ItemDetailScreen(
                     Text(item.reason)
                     val seconds = (item.remainingMillis(now) + 999) / 1000
                     Text(stringResource(R.string.remaining_time, seconds / 3600, (seconds % 3600) / 60, seconds % 60))
-                    Button(onClick = onNavigateToDecision, enabled = item.canDecide(now)) { Text(stringResource(R.string.make_decision)) }
+                    CandyPrimaryButton(onClick = onNavigateToDecision, enabled = item.canDecide(now)) { Text(stringResource(R.string.make_decision)) }
                 }
             }
         }

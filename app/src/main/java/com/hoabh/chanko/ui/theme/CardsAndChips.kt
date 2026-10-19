@@ -17,7 +17,7 @@ fun CandyCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = CandyElevation.low)) {
-        Column(Modifier.padding(CandySpace.lg), verticalArrangement = Arrangement.spacedBy(CandySpace.sm), content = content)
+        CandyCardContent(content)
     }
 }
 
@@ -34,8 +34,15 @@ fun CandyActionCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = CandyElevation.low)) {
-        Column(Modifier.padding(CandySpace.lg), verticalArrangement = Arrangement.spacedBy(CandySpace.sm), content = content)
+        CandyCardContent(content)
     }
+}
+
+/** Identical inset and spacing contract for passive and actionable cards. */
+@Composable
+private fun CandyCardContent(content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.padding(CandySpace.lg),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.sm), content = content)
 }
 
 enum class CandyStatus { CoolingOff, ReadyForReview, Purchased, Skipped, Postponed }
