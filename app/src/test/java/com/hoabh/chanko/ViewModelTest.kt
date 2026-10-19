@@ -47,6 +47,30 @@ class ViewModelTest {
         assertEquals(1, repository.insertCount)
     }
 
+    @Test fun addItemRestoresExistingKeysAndKeepsActionTransient() = runTest(dispatcher) {
+        val restored = mapOf("name" to " Tai nghe ", "price" to "0500000",
+            "hours" to "24", "reason" to " Làm việc ")
+        val handle = SavedStateHandle(restored)
+        val repository = FakeRepository()
+        val model = AddItemViewModel(repository, handle)
+        restored.forEach { (key, value) -> assertEquals(value, model.field(key).value) }
+        val name = model.field("name")
+        model.setField("name", "Tên mới")
+        assertEquals("Tên mới", name.value)
+        assertEquals("Tên mới", handle.get<String>("name"))
+        model.add("Tên mới", 500_000, 24, " Làm việc ")
+        runCurrent()
+        assertEquals(ActionState.DONE, model.action.value)
+        // Simulate framework-restored values; this is not an Android Bundle round-trip test.
+        val recreated = AddItemViewModel(repository, SavedStateHandle(
+            restored.keys.associateWith { handle.get<String>(it) }))
+        assertEquals("Tên mới", recreated.field("name").value)
+        for (key in listOf("price", "hours", "reason")) {
+            assertEquals(restored[key], recreated.field(key).value)
+        }
+        assertEquals(ActionState.IDLE, recreated.action.value)
+    }
+
     @Test fun overviewCollectsDataAndExposesReadFailure() = runTest(dispatcher) {
         val repository = FakeRepository()
         val model = OverviewViewModel(repository)

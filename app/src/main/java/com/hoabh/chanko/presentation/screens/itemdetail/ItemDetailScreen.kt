@@ -23,14 +23,24 @@ import com.hoabh.chanko.presentation.components.*
 @Composable
 fun ItemDetailRoute(onNavigateBack: () -> Unit, onNavigateToDecision: () -> Unit, viewModel: ItemViewModel = hiltViewModel()) {
     val state by viewModel.item.collectAsStateWithLifecycle()
-    val now by viewModel.now.collectAsStateWithLifecycle()
-    ItemDetailScreen(state, now, onNavigateBack, onNavigateToDecision)
+    val now = viewModel.now.collectAsStateWithLifecycle()
+    ItemDetailContent(state, { now.value }, onNavigateBack, onNavigateToDecision)
 }
 
 @Composable
 fun ItemDetailScreen(
     state: ItemUiState,
     now: Long,
+    onNavigateBack: () -> Unit,
+    onNavigateToDecision: () -> Unit
+) {
+    ItemDetailContent(state, { now }, onNavigateBack, onNavigateToDecision)
+}
+
+@Composable
+private fun ItemDetailContent(
+    state: ItemUiState,
+    now: () -> Long,
     onNavigateBack: () -> Unit,
     onNavigateToDecision: () -> Unit
 ) {
@@ -46,12 +56,21 @@ fun ItemDetailScreen(
                     Text(item.name, style = MaterialTheme.typography.headlineMedium)
                     Text(formatMoney(item.price))
                     Text(item.reason)
-                    val seconds = (item.remainingMillis(now) + 999) / 1000
-                    Text(stringResource(R.string.remaining_time, seconds / 3600, (seconds % 3600) / 60, seconds % 60))
-                    CandyPrimaryButton(onClick = onNavigateToDecision, enabled = item.canDecide(now)) { Text(stringResource(R.string.make_decision)) }
+                    ItemDetailTimer(item, now, onNavigateToDecision)
                 }
             }
         }
+    }
+}
+
+// Read the ticking state only in this restart scope, once for both countdown and action.
+@Composable
+private fun ItemDetailTimer(item: CooldownItem, now: () -> Long, onNavigateToDecision: () -> Unit) {
+    val currentTime = now()
+    val seconds = (item.remainingMillis(currentTime) + 999) / 1000
+    Text(stringResource(R.string.remaining_time, seconds / 3600, (seconds % 3600) / 60, seconds % 60))
+    CandyPrimaryButton(onClick = onNavigateToDecision, enabled = item.canDecide(currentTime)) {
+        Text(stringResource(R.string.make_decision))
     }
 }
 
