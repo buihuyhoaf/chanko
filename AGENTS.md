@@ -15,3 +15,13 @@
 ## Agent Skills
 - Do not modify, edit, or delete agent skills (under `.agent/skills/` or `~/.gemini/config/skills/`).
 - Agent skills are strictly protected and must remain untouched.
+
+## Build & Testing Execution
+- **No Device / Emulator Installation**: Do not install or run the app on physical devices or emulators/virtual machines (e.g., no `adb install`, `./gradlew installDebug`, or device launches). Cấm cài đặt trên máy thật hoặc máy ảo.
+- **Build & Verification Only**: Only perform build checks, unit tests, and verify build/runtime compilation results via terminal output/logs (e.g., `./gradlew assembleDebug`, `./gradlew test`). Chỉ build và verify kết quả build runtime.
+
+## User verification and UI preferences (2026-10-18)
+- Never install, create, configure, start, or use virtual machines, Android emulators, or AVDs.
+- Only build and verify runtime on a real physical device. When unavailable or installation is rejected, report runtime unverified; never substitute an emulator or retry a refused installation.
+- Do not add a separate debug/review launcher or app icon. Installed APKs must expose only the Chanko launcher.
+- All Initial Setup UI text must be Vietnamese.

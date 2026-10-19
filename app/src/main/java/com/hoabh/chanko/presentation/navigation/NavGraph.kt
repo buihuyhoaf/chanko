@@ -10,12 +10,15 @@ import com.hoabh.chanko.presentation.ItemsState
 import com.hoabh.chanko.presentation.OverviewViewModel
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.splash.SplashScreen
 import com.hoabh.chanko.presentation.screens.login.LoginRoute
+import com.hoabh.chanko.presentation.screens.setup.SetupGate
 
 @Composable
 fun NavGraph(
@@ -39,7 +42,8 @@ fun NavGraph(
             return@LaunchedEffect
         }
         val route = entry?.destination?.route
-        if (!authenticated && route != null && route != Screen.Splash.route && route != Screen.Login.route) {
+        // TODO(dummy): Cho phép truy cập Screen.Setup khi chưa có session authenticated chính thức
+        if (!authenticated && route != null && route != Screen.Splash.route && route != Screen.Login.route && route != Screen.Setup.route) {
             navController.navigate(Screen.Login.route) {
                 popUpTo(navController.graph.id) { inclusive = false }
                 launchSingleTop = true
@@ -65,13 +69,38 @@ fun NavGraph(
         }
 
         composable(route = Screen.Login.route) {
-            loginContent { /* Repository session observation performs navigation. */ }
+            loginContent {
+                // TODO(dummy): Navigate tới màn SetupGate khi logic onLoginSuccess pass (tạm thời cho đến khi kết nối backend/OAuth)
+                navController.navigate(Screen.Setup.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+
+        composable(route = Screen.Setup.route) {
+            // TODO(dummy): Hiển thị màn SetupGate độc lập với accountKey giả lập trước khi có session thật từ server
+            val accountKey = (identity as? SessionState.Available)?.account?.value ?: "dummy_account"
+            SetupGate(
+                accountKey = accountKey,
+                onConfirmedComplete = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Setup.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
 
         composable(route = Screen.Dashboard.route) {
             if (!restored || !authenticated) return@composable
             // Account changes discard all remembered/saved tab stacks from the prior account.
-            androidx.compose.runtime.key(identity) { MainNavigation() }
+            key(identity) {
+                SetupGate(
+                    accountKey = (identity as SessionState.Available).account.value,
+                    onConfirmedComplete = { MainNavigation() },
+                )
+            }
         }
     }
 }

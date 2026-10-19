@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_step">Bước %1$d / 2</string>
+    <string name="setup_budget_title">Cùng đặt ngân sách\nmua sắm nhé!</string>
+    <string name="setup_budget_subtitle">Một kế hoạch nhỏ để mua sắm sáng suốt hơn.</string>
+    <string name="setup_budget_label">Ngân sách mua sắm mỗi tháng</string>
+    <string name="setup_budget_placeholder">Nhập số tiền</string>
+    <string name="setup_currency">₫</string>
+    <string name="setup_budget_hint">Đơn vị VND. Bạn có thể đổi ngân sách sau.</string>
+    <string name="setup_budget_error">Nhập ngân sách lớn hơn 0 ₫ bằng chữ số nhé.</string>
+    <string name="setup_continue">Tiếp tục</string>
+    <string name="setup_budget_footer">Chủ động chi tiêu, theo cách của bạn.</string>
+    <string name="setup_day_title">Khởi đầu mới,\nmỗi tháng.</string>
+    <string name="setup_day_subtitle">Chọn ngày bắt đầu chu kỳ ngân sách.</string>
+    <string name="setup_day_label">Ngày bắt đầu chu kỳ</string>
+    <string name="setup_day_placeholder">Chọn ngày từ 1 đến 31</string>
+    <string name="setup_day_value">Ngày %1$d</string>
+    <string name="setup_day_fixed">Ngày này sẽ được giữ cố định.</string>
+    <string name="setup_day_notice">Bạn chưa thể đổi ngày này trong phiên bản hiện tại. Với tháng thiếu ngày đã chọn, chu kỳ dùng ngày cuối tháng rồi trở lại ngày đã chọn ở tháng tiếp theo.</string>
+    <string name="setup_day_error">Chọn một ngày từ 1 đến 31 nhé.</string>
+    <string name="setup_budget_summary">Ngân sách mỗi tháng: %1$s ₫</string>
+    <string name="setup_save">Lưu và bắt đầu</string>
+    <string name="setup_retry">Thử lại</string>
+    <string name="setup_saving">Đang lưu thiết lập…</string>
+    <string name="setup_checking">Đang kiểm tra thiết lập…</string>
+    <string name="setup_status_title">Chưa thể xác nhận thiết lập</string>
+    <string name="setup_unknown">Chưa thể xác nhận trạng thái trên máy chủ. Hãy thử lại nhé.</string>
+    <string name="setup_offline">Bạn đang ngoại tuyến. Kết nối mạng rồi thử lại nhé.</string>
+    <string name="setup_save_error">Chưa thể lưu thiết lập. Nội dung bạn nhập vẫn được giữ lại.</string>
+    <string name="setup_unavailable">Dịch vụ thiết lập chưa sẵn sàng. Vui lòng thử lại sau.</string>
+    <string name="setup_timezone_error">Chưa xác định được múi giờ của thiết bị. Kiểm tra cài đặt múi giờ rồi thử lại nhé.</string>
+    <string name="setup_online_hint">Cần kết nối mạng để lưu thiết lập.</string>
+</resources>
