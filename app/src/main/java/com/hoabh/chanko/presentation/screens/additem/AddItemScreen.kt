@@ -1,5 +1,8 @@
 package com.hoabh.chanko.presentation.screens.additem
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.hoabh.chanko.ui.theme.ChankoTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -66,3 +69,38 @@ fun AddItemScreen(
         }
     }
 }
+
+@Preview(name = "Light Mode", showBackground = true)
+@Composable
+private fun AddItemScreenPreview() {
+    ChankoTheme {
+        AddItemScreen(
+            name = "Tai nghe Sony",
+            price = "1500000",
+            hours = "48",
+            reason = "Cần nghe nhạc tập trung hơn",
+            action = ActionState.IDLE,
+            onFieldChange = { _, _ -> },
+            onSave = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun AddItemScreenDarkPreview() {
+    ChankoTheme(darkTheme = true) {
+        AddItemScreen(
+            name = "Tai nghe Sony",
+            price = "1500000",
+            hours = "48",
+            reason = "Cần nghe nhạc tập trung hơn",
+            action = ActionState.IDLE,
+            onFieldChange = { _, _ -> },
+            onSave = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
