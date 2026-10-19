@@ -12,5 +12,4 @@ sealed class Screen(val route: String) {
     data object Decision : Screen("decision/{itemId}") {
         fun createRoute(itemId: Int) = "decision/$itemId"
     }
-    data object Vault : Screen("vault")
 }
