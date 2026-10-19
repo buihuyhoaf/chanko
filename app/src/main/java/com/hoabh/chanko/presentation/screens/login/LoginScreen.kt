@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.login
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.compose.foundation.Image
@@ -52,32 +53,72 @@ import com.hoabh.chanko.ui.theme.Nunito
 private val LoginPlum = Color(0xFF4D2939)
 
 @Composable
-fun LoginRoute(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
+fun LoginRoute(
+    onLoginSuccess: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var legalUnavailable by rememberSaveable { mutableStateOf(false) }
-    DisposableEffect(viewModel) { onDispose { viewModel.cancelLogin() } }
-    LaunchedEffect(state.isLoginSuccess) { if (state.isLoginSuccess) onLoginSuccess() }
-    fun openLegal(url: String) {
-        val uri = url.toUri()
-        if (uri.scheme != "https" || uri.host.isNullOrBlank() || !uri.userInfo.isNullOrEmpty()) {
-            legalUnavailable = true
-            return
-        }
-        try { context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-        } catch (_: ActivityNotFoundException) { legalUnavailable = true }
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.cancelLogin() }
     }
-    LoginScreen(state, {
-        // TODO(auth): Remove this temporary bypass when API/OAuth is configured and restore:
-        // viewModel.loginWithGoogle(AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID))
-        onLoginSuccess()
-    },
-        { openLegal(BuildConfig.TERMS_URL) }, { openLegal(BuildConfig.PRIVACY_URL) })
-    if (legalUnavailable) AlertDialog(
-        onDismissRequest = { legalUnavailable = false },
-        text = { Text(stringResource(R.string.login_legal_unavailable)) },
-        confirmButton = { TextButton(onClick = { legalUnavailable = false }) { Text(stringResource(R.string.login_close)) } },
+
+    LaunchedEffect(state.isLoginSuccess) {
+        if (state.isLoginSuccess) {
+            onLoginSuccess()
+        }
+    }
+
+    LoginScreen(
+        uiState = state,
+        onGoogleLoginClick = {
+            // TODO(auth): Remove this temporary bypass when API/OAuth is configured and restore:
+            // viewModel.loginWithGoogle(AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID))
+            onLoginSuccess()
+        },
+        onTermsClick = {
+            context.launchSafeWebUrl(BuildConfig.TERMS_URL) { legalUnavailable = true }
+        },
+        onPrivacyClick = {
+            context.launchSafeWebUrl(BuildConfig.PRIVACY_URL) { legalUnavailable = true }
+        },
+        modifier = modifier,
     )
+
+    if (legalUnavailable) {
+        LegalUnavailableDialog(onDismiss = { legalUnavailable = false })
+    }
+}
+
+@Composable
+private fun LegalUnavailableDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = { Text(stringResource(R.string.login_legal_unavailable)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.login_close))
+            }
+        },
+    )
+}
+
+private fun Context.launchSafeWebUrl(url: String, onUnavailable: () -> Unit) {
+    val uri = url.toUri()
+    val isSafeHttps = uri.scheme == "https" && !uri.host.isNullOrBlank() && uri.userInfo.isNullOrEmpty()
+    if (!isSafeHttps) {
+        onUnavailable()
+        return
+    }
+
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, uri))
+    } catch (_: ActivityNotFoundException) {
+        onUnavailable()
+    }
 }
 
 @Composable
@@ -86,8 +127,9 @@ fun LoginScreen(
     onGoogleLoginClick: () -> Unit,
     onTermsClick: () -> Unit,
     onPrivacyClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize().background(CandyColors.background)) {
+    BoxWithConstraints(modifier.fillMaxSize().background(CandyColors.background)) {
         val heroHeight = (maxHeight * 0.55f).coerceIn(300.dp, 600.dp)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding(),
