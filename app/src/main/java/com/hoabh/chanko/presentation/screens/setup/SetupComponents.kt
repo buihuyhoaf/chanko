@@ -39,7 +39,7 @@ internal fun SetupButton(
             containerColor = CandyColors.primary,
             contentColor = OnPurple,
         ),
-        shape = RoundedCornerShape(18.dp),
+        shape = SetupButtonShape,
         contentPadding = PaddingValues(CandySpace.lg),
         modifier = modifier
             .fillMaxWidth()

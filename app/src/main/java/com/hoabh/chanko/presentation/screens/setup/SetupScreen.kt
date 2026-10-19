@@ -50,10 +50,10 @@ fun SetupGate(
     modifier: Modifier = Modifier,
 ) {
     val model: SetupViewModel = viewModel(key = "setup:$accountKey")
-    val state by model.state.collectAsStateWithLifecycle()
+    val state by model.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(model) {
-        if (model.state.value.page == SetupPage.CHECKING && !model.state.value.busy) {
+        if (model.uiState.value.page == SetupPage.CHECKING && !model.uiState.value.busy) {
             model.checkStatus()
         }
     }
