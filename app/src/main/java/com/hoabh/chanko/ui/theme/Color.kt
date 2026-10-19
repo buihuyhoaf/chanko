@@ -25,4 +25,7 @@ object CandyColors {
     val mutedInk = Color(0xFF595959)
     val outline = Color(0xFF767676)
     val errorText = Color(0xFFAA2635)
+    // Splash brand typography colors
+    val logoBrown = Color(0xFF60362F)
+    val logoCoral = Color(0xFFD63F55)
 }
