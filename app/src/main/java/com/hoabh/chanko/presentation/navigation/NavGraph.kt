@@ -6,7 +6,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabh.chanko.presentation.ItemsState
+import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -59,7 +59,7 @@ fun NavGraph(
             enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None }) {
             val state by overviewViewModel.items.collectAsStateWithLifecycle()
             SplashScreen(
-                isReady = restored && state !is ItemsState.Loading,
+                isReady = restored && state !is OverviewUiState.Loading,
                 onSplashFinished = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }

@@ -25,3 +25,7 @@
 - Only build and verify runtime on a real physical device. When unavailable or installation is rejected, report runtime unverified; never substitute an emulator or retry a refused installation.
 - Do not add a separate debug/review launcher or app icon. Installed APKs must expose only the Chanko launcher.
 - All Initial Setup UI text must be Vietnamese.
+
+## Coding Standards & Conventions
+- Tuân thủ nghiêm ngặt các quy tắc kiến trúc, quy chuẩn Compose, đặt tên và xử lý tài nguyên được mô tả trong [CODING_STANDARDS.md](file:///Users/buihoa/Ho%CC%A3c%20ta%CC%A3%CC%82p/Android/chanko/CODING_STANDARDS.md).
+

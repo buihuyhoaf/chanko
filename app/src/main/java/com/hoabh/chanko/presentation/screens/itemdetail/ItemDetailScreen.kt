@@ -1,5 +1,9 @@
 package com.hoabh.chanko.presentation.screens.itemdetail
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.hoabh.chanko.ui.theme.ChankoTheme
+import com.hoabh.chanko.domain.model.CooldownItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,18 +29,18 @@ fun ItemDetailRoute(onNavigateBack: () -> Unit, onNavigateToDecision: () -> Unit
 
 @Composable
 fun ItemDetailScreen(
-    state: ItemState,
+    state: ItemUiState,
     now: Long,
     onNavigateBack: () -> Unit,
     onNavigateToDecision: () -> Unit
 ) {
     ItemPage(stringResource(R.string.item_detail), onNavigateBack) {
         when(val data = state) {
-            ItemState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            ItemState.Error -> Text(stringResource(R.string.load_error))
-            is ItemState.Content -> {
+            ItemUiState.Error -> Text(stringResource(R.string.load_error))
+            is ItemUiState.Content -> {
                 val item = data.item
                 if (item == null) Text(stringResource(R.string.item_missing)) else {
                     Text(item.name, style = MaterialTheme.typography.headlineMedium)
@@ -50,3 +54,46 @@ fun ItemDetailScreen(
         }
     }
 }
+
+@Preview(name = "Light Mode", showBackground = true)
+@Composable
+private fun ItemDetailScreenPreview() {
+    val sampleItem = CooldownItem(
+        id = 1,
+        name = "Đồng hồ thông minh",
+        price = 4_500_000L,
+        addedTimestamp = 1_000_000L,
+        cooldownDurationMillis = 86_400_000L,
+        reason = "Theo dõi sức khỏe và chạy bộ"
+    )
+    ChankoTheme {
+        ItemDetailScreen(
+            state = ItemUiState.Content(sampleItem),
+            now = 1_000_000L + 36_000_000L,
+            onNavigateBack = {},
+            onNavigateToDecision = {}
+        )
+    }
+}
+
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun ItemDetailScreenDarkPreview() {
+    val sampleItem = CooldownItem(
+        id = 1,
+        name = "Đồng hồ thông minh",
+        price = 4_500_000L,
+        addedTimestamp = 1_000_000L,
+        cooldownDurationMillis = 86_400_000L,
+        reason = "Theo dõi sức khỏe và chạy bộ"
+    )
+    ChankoTheme(darkTheme = true) {
+        ItemDetailScreen(
+            state = ItemUiState.Content(sampleItem),
+            now = 1_000_000L + 36_000_000L,
+            onNavigateBack = {},
+            onNavigateToDecision = {}
+        )
+    }
+}
+

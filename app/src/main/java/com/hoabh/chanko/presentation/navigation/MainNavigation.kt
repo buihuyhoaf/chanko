@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.hoabh.chanko.R
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -41,7 +43,7 @@ fun MainNavigation(controller: NavHostController = rememberNavController()) {
                         TopLevelDestination.Budget -> Icons.Rounded.AccountBalanceWallet
                         TopLevelDestination.Insights -> Icons.Rounded.Insights
                     }, contentDescription = null) },
-                    label = { Text(tab.label) },
+                    label = { Text(stringResource(tab.labelRes)) },
                 )
             }
         }
@@ -51,7 +53,7 @@ fun MainNavigation(controller: NavHostController = rememberNavController()) {
             TopLevelDestination.entries.forEach { tab ->
                 composable(tab.route) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("${tab.label} — Chưa triển khai", style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.tab_not_implemented, stringResource(tab.labelRes)), style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }

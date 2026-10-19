@@ -159,7 +159,7 @@ class AuthenticationFoundationTest {
         assertEquals(SessionState.SignedOut, repository.session.value)
     }
     @Test fun useCaseEmitsExplicitLoadingThenSuccessOrFailure() = runTest {
-        val useCase = SignInWithGoogle(repository)
+        val useCase = SignInWithGoogleUseCase(repository)
         assertEquals(listOf(AuthOperation.Loading, AuthOperation.Success(Unit)), useCase.execute(provider).toList())
         repository.logout()
         backend.exchange = AuthResult.Failure(AuthFailure.REJECTED)

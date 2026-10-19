@@ -5,7 +5,7 @@ import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.presentation.ActionState
-import com.hoabh.chanko.presentation.ItemsState
+import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.presentation.screens.additem.AddItemViewModel
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemViewModel
@@ -52,14 +52,14 @@ class ViewModelTest {
         val model = OverviewViewModel(repository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.items.collect() }
         runCurrent()
-        assertTrue(model.items.value is ItemsState.Content)
+        assertTrue(model.items.value is OverviewUiState.Content)
         repository.rows.value = listOf(repository.example)
         runCurrent()
-        assertEquals(1, (model.items.value as ItemsState.Content).active.size)
+        assertEquals(1, (model.items.value as OverviewUiState.Content).active.size)
         val failed = OverviewViewModel(FakeRepository().apply { failRead = true })
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { failed.items.collect() }
         runCurrent()
-        assertEquals(ItemsState.Error, failed.items.value)
+        assertEquals(OverviewUiState.Error, failed.items.value)
     }
 
     @Test fun decisionUsesNavigationIdAndReportsWriteFailure() = runTest(dispatcher) {

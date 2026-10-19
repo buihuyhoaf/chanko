@@ -9,14 +9,18 @@ import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /** AES/GCM key lives in Android Keystore; ciphertext is excluded from backup and device transfer. */
-class KeystoreAuthSessionStore(context: Context) : AuthSessionStore {
+class KeystoreAuthSessionStore(
+    context: Context,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : AuthSessionStore {
     private val directory = context.noBackupFilesDir
-    override suspend fun save(accessToken: String, refreshToken: String) = withContext(Dispatchers.IO) {
+    override suspend fun save(accessToken: String, refreshToken: String) = withContext(ioDispatcher) {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key())
         val plain = JSONObject().put("access_token", accessToken).put("refresh_token", refreshToken)

@@ -1,5 +1,10 @@
 package com.hoabh.chanko.presentation.screens.vault
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.hoabh.chanko.ui.theme.ChankoTheme
+import com.hoabh.chanko.domain.model.CooldownItem
+import com.hoabh.chanko.domain.model.ItemStatus
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,14 +30,14 @@ fun VaultRoute(onNavigateBack: () -> Unit, viewModel: OverviewViewModel = hiltVi
 }
 
 @Composable
-fun VaultScreen(state: ItemsState, onNavigateBack: () -> Unit) {
+fun VaultScreen(state: OverviewUiState, onNavigateBack: () -> Unit) {
     ItemPage(stringResource(R.string.vault), onNavigateBack) {
         when(val data = state) {
-            ItemsState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            OverviewUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            ItemsState.Error -> Text(stringResource(R.string.load_error))
-            is ItemsState.Content -> {
+            OverviewUiState.Error -> Text(stringResource(R.string.load_error))
+            is OverviewUiState.Content -> {
                 Text(stringResource(R.string.total_saved, formatMoney(data.saved)), style = MaterialTheme.typography.headlineSmall)
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
@@ -48,3 +53,80 @@ fun VaultScreen(state: ItemsState, onNavigateBack: () -> Unit) {
         }
     }
 }
+
+@Preview(name = "Light Mode", showBackground = true)
+@Composable
+private fun VaultScreenPreview() {
+    val samplePassed = listOf(
+        CooldownItem(
+            id = 1,
+            name = "Giày thể thao",
+            price = 1_800_000L,
+            addedTimestamp = 1_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Thấy đẹp nhưng chưa cần",
+            status = ItemStatus.PASSED
+        )
+    )
+    val sampleBought = listOf(
+        CooldownItem(
+            id = 2,
+            name = "Sách học lập trình",
+            price = 250_000L,
+            addedTimestamp = 1_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Cần cho công việc",
+            status = ItemStatus.BOUGHT
+        )
+    )
+    ChankoTheme {
+        VaultScreen(
+            state = OverviewUiState.Content(
+                active = emptyList(),
+                passed = samplePassed,
+                bought = sampleBought,
+                saved = 1_800_000L
+            ),
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun VaultScreenDarkPreview() {
+    val samplePassed = listOf(
+        CooldownItem(
+            id = 1,
+            name = "Giày thể thao",
+            price = 1_800_000L,
+            addedTimestamp = 1_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Thấy đẹp nhưng chưa cần",
+            status = ItemStatus.PASSED
+        )
+    )
+    val sampleBought = listOf(
+        CooldownItem(
+            id = 2,
+            name = "Sách học lập trình",
+            price = 250_000L,
+            addedTimestamp = 1_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Cần cho công việc",
+            status = ItemStatus.BOUGHT
+        )
+    )
+    ChankoTheme(darkTheme = true) {
+        VaultScreen(
+            state = OverviewUiState.Content(
+                active = emptyList(),
+                passed = samplePassed,
+                bought = sampleBought,
+                saved = 1_800_000L
+            ),
+            onNavigateBack = {}
+        )
+    }
+}
+

@@ -12,15 +12,19 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /** One encrypted active session; business cache/drafts remain in their own account partitions. */
-class KeystoreSessionStore(context: Context) : SecureSessionStore {
+class KeystoreSessionStore(
+    context: Context,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : SecureSessionStore {
     private val legacy = AtomicFile(File(context.noBackupFilesDir, "auth-session.enc"))
     private val file = AtomicFile(File(context.noBackupFilesDir, "auth-foundation-session-v1.enc"))
-    override suspend fun read(): SessionCredentials? = withContext(Dispatchers.IO) {
+    override suspend fun read(): SessionCredentials? = withContext(ioDispatcher) {
         if (!exists()) return@withContext null
         val bytes = file.readFully()
         if (bytes.size < 30 || bytes.size > 65536 || bytes[0].toInt() != 1)
@@ -38,7 +42,7 @@ class KeystoreSessionStore(context: Context) : SecureSessionStore {
         } catch (_: IllegalArgumentException) { throw IOException("Invalid session account")
         } finally { plain.fill(0) }
     }
-    override suspend fun replace(credentials: SessionCredentials) = withContext(Dispatchers.IO) {
+    override suspend fun replace(credentials: SessionCredentials) = withContext(ioDispatcher) {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, existingKey() ?: createKey())
         val plain = JSONObject().put("account", credentials.account.value).put("access", credentials.access)
@@ -53,7 +57,7 @@ class KeystoreSessionStore(context: Context) : SecureSessionStore {
             file.finishWrite(output)
         } catch (e: Exception) { file.failWrite(output); throw e }
     }
-    override suspend fun clear() = withContext(Dispatchers.IO) {
+    override suspend fun clear() = withContext(ioDispatcher) {
         file.delete()
         legacy.delete() // Retire the unscoped legacy credentials; never infer their account.
         if (exists() || legacy.baseFile.exists() || File(legacy.baseFile.path + ".bak").exists()) throw IOException("Session removal failed")

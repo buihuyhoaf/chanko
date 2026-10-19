@@ -26,8 +26,8 @@ object AuthModule {
     @Provides @Singleton
     fun repository(backend: AuthBackend, store: SecureSessionStore, clock: AuthClock): AuthenticationRepository =
         AuthenticationRepositoryImpl(backend, store, clock)
-    @Provides fun signIn(repository: AuthenticationRepository) = SignInWithGoogle(repository)
-    @Provides fun restore(repository: AuthenticationRepository) = RestoreAuthSession(repository)
-    @Provides fun refresh(repository: AuthenticationRepository) = RefreshAuthSession(repository)
-    @Provides fun logout(repository: AuthenticationRepository) = Logout(repository)
+    @Provides fun signIn(repository: AuthenticationRepository) = SignInWithGoogleUseCase(repository)
+    @Provides fun restore(repository: AuthenticationRepository) = RestoreAuthSessionUseCase(repository)
+    @Provides fun refresh(repository: AuthenticationRepository) = RefreshAuthSessionUseCase(repository)
+    @Provides fun logout(repository: AuthenticationRepository) = LogoutUseCase(repository)
 }

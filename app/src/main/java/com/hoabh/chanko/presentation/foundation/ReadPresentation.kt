@@ -86,15 +86,17 @@ fun <T> ReadRepository<T>.presentationStates(
                         currentCoroutineContext().ensureActive()
                         when (result) {
                             is ReadState.Cached -> {
-                                content = ReadUiState.Content(result.value, ReadSource.CACHE,
+                                val newContent = ReadUiState.Content(result.value, ReadSource.CACHE,
                                     result.cachedAtEpochMillis, isRefreshing = true)
-                                emit(content!!)
+                                content = newContent
+                                emit(newContent)
                             }
                             is ReadState.Fresh -> {
                                 terminal = true
-                                content = ReadUiState.Content(result.value, ReadSource.SERVER,
+                                val newContent = ReadUiState.Content(result.value, ReadSource.SERVER,
                                     error = result.cacheFailure?.toReadError())
-                                emit(content!!)
+                                content = newContent
+                                emit(newContent)
                             }
                             is ReadState.Failed -> { terminal = true; fail(result.failure.toReadError()) }
                         }
