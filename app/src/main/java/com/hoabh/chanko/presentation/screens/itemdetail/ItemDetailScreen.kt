@@ -25,18 +25,18 @@ fun ItemDetailRoute(onNavigateBack: () -> Unit, onNavigateToDecision: () -> Unit
 
 @Composable
 fun ItemDetailScreen(
-    state: ItemState,
+    state: ItemUiState,
     now: Long,
     onNavigateBack: () -> Unit,
     onNavigateToDecision: () -> Unit
 ) {
     ItemPage(stringResource(R.string.item_detail), onNavigateBack) {
         when(val data = state) {
-            ItemState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            ItemState.Error -> Text(stringResource(R.string.load_error))
-            is ItemState.Content -> {
+            ItemUiState.Error -> Text(stringResource(R.string.load_error))
+            is ItemUiState.Content -> {
                 val item = data.item
                 if (item == null) Text(stringResource(R.string.item_missing)) else {
                     Text(item.name, style = MaterialTheme.typography.headlineMedium)

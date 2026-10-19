@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
-import com.hoabh.chanko.presentation.ItemsState
+import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.presentation.components.ItemRow
 import com.hoabh.chanko.presentation.components.formatMoney
@@ -39,7 +39,7 @@ fun DashboardRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    state: ItemsState,
+    state: OverviewUiState,
     onNavigateToAddItem: () -> Unit,
     onNavigateToItemDetail: (Int) -> Unit,
     onNavigateToVault: () -> Unit
@@ -65,13 +65,13 @@ fun DashboardScreen(
         ) {
             item { MascotBanner() }
             when (state) {
-                ItemsState.Loading -> item {
+                OverviewUiState.Loading -> item {
                     Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
-                ItemsState.Error -> item { Text(stringResource(R.string.load_error)) }
-                is ItemsState.Content -> {
+                OverviewUiState.Error -> item { Text(stringResource(R.string.load_error)) }
+                is OverviewUiState.Content -> {
                     item { SavingsStats(state.saved, state.active.size) }
                     item {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
@@ -135,11 +135,11 @@ private fun EmptyItems(onAdd: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun EmptyDashboardPreview() {
-    ChankoTheme { DashboardScreen(ItemsState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
+    ChankoTheme { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DarkDashboardPreview() {
-    ChankoTheme(darkTheme = true) { DashboardScreen(ItemsState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
+    ChankoTheme(darkTheme = true) { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
 }

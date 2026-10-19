@@ -10,7 +10,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.presentation.*
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemViewModel
-import com.hoabh.chanko.presentation.screens.itemdetail.ItemState
+import com.hoabh.chanko.presentation.screens.itemdetail.ItemUiState
 import com.hoabh.chanko.presentation.components.*
 
 import androidx.compose.foundation.layout.Box
@@ -35,7 +35,7 @@ fun DecisionRoute(
 
 @Composable
 fun DecisionScreen(
-    state: ItemState,
+    state: ItemUiState,
     action: ActionState,
     now: Long,
     onDecide: (ItemStatus) -> Unit,
@@ -43,11 +43,11 @@ fun DecisionScreen(
 ) {
     ItemPage(stringResource(R.string.make_decision), onNavigateBack) {
         when(val data = state) {
-            ItemState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            ItemState.Error -> Text(stringResource(R.string.load_error))
-            is ItemState.Content -> {
+            ItemUiState.Error -> Text(stringResource(R.string.load_error))
+            is ItemUiState.Content -> {
                 val item = data.item
                 if (item == null) Text(stringResource(R.string.item_missing)) else {
                     Text(item.name, style = MaterialTheme.typography.headlineMedium)

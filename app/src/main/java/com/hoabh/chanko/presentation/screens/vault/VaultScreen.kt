@@ -25,14 +25,14 @@ fun VaultRoute(onNavigateBack: () -> Unit, viewModel: OverviewViewModel = hiltVi
 }
 
 @Composable
-fun VaultScreen(state: ItemsState, onNavigateBack: () -> Unit) {
+fun VaultScreen(state: OverviewUiState, onNavigateBack: () -> Unit) {
     ItemPage(stringResource(R.string.vault), onNavigateBack) {
         when(val data = state) {
-            ItemsState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            OverviewUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            ItemsState.Error -> Text(stringResource(R.string.load_error))
-            is ItemsState.Content -> {
+            OverviewUiState.Error -> Text(stringResource(R.string.load_error))
+            is OverviewUiState.Content -> {
                 Text(stringResource(R.string.total_saved, formatMoney(data.saved)), style = MaterialTheme.typography.headlineSmall)
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),

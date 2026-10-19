@@ -21,10 +21,10 @@ import kotlinx.coroutines.launch
 
 import com.hoabh.chanko.presentation.ActionState
 
-sealed interface ItemState {
-    data object Loading : ItemState
-    data object Error : ItemState
-    data class Content(val item: CooldownItem?) : ItemState
+sealed interface ItemUiState {
+    data object Loading : ItemUiState
+    data object Error : ItemUiState
+    data class Content(val item: CooldownItem?) : ItemUiState
 }
 
 @HiltViewModel
@@ -33,9 +33,9 @@ class ItemViewModel @Inject constructor(
     savedState: SavedStateHandle
 ) : ViewModel() {
     private val itemId: Int = checkNotNull(savedState["itemId"])
-    val item = repository.getItemById(itemId).map<CooldownItem?, ItemState> { ItemState.Content(it) }
-        .catch { emit(ItemState.Error) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemState.Loading)
+    val item = repository.getItemById(itemId).map<CooldownItem?, ItemUiState> { ItemUiState.Content(it) }
+        .catch { emit(ItemUiState.Error) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemUiState.Loading)
     val now = flow { while (true) { emit(System.currentTimeMillis()); delay(1_000) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), System.currentTimeMillis())
     private val _action = MutableStateFlow(ActionState.IDLE)

@@ -12,18 +12,18 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-sealed interface ItemsState {
-    data object Loading : ItemsState
-    data object Error : ItemsState
-    data class Content(val active: List<CooldownItem>, val passed: List<CooldownItem>, val bought: List<CooldownItem>, val saved: Long) : ItemsState
+sealed interface OverviewUiState {
+    data object Loading : OverviewUiState
+    data object Error : OverviewUiState
+    data class Content(val active: List<CooldownItem>, val passed: List<CooldownItem>, val bought: List<CooldownItem>, val saved: Long) : OverviewUiState
 }
 
 @HiltViewModel
 class OverviewViewModel @Inject constructor(repository: ItemRepository) : ViewModel() {
     val items = combine(repository.getActiveItems(), repository.getItemsByStatus(ItemStatus.PASSED),
         repository.getItemsByStatus(ItemStatus.BOUGHT), repository.getTotalSavedAmount()) { active, passed, bought, saved ->
-        ItemsState.Content(active, passed, bought, saved) as ItemsState
-    }.catch { emit(ItemsState.Error) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsState.Loading)
+        OverviewUiState.Content(active, passed, bought, saved) as OverviewUiState
+    }.catch { emit(OverviewUiState.Error) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OverviewUiState.Loading)
 
 }
