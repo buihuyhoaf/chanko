@@ -13,8 +13,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
-import com.hoabh.chanko.presentation.components.ItemRow
-import com.hoabh.chanko.presentation.components.formatMoney
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.navigation.MainNavigation
 import com.hoabh.chanko.presentation.navigation.Screen
@@ -42,9 +40,7 @@ fun NavGraphBuilder.dashboardDestination(
 @Composable
 fun DashboardRoute(
     modifier: Modifier = Modifier,
-    viewModel: OverviewViewModel = hiltViewModel(),
-    onNavigateToAddItem: () -> Unit = {},
-    onNavigateToItemDetail: (Int) -> Unit = {}
+    viewModel: OverviewViewModel = hiltViewModel()
 ) {
     val state by viewModel.items.collectAsStateWithLifecycle()
     DashboardScreen(

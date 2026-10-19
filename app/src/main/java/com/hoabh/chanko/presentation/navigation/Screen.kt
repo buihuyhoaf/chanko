@@ -5,11 +5,4 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Setup : Screen("setup")
     data object Dashboard : Screen("dashboard")
-    data object AddItem : Screen("add_item")
-    data object ItemDetail : Screen("item_detail/{itemId}") {
-        fun createRoute(itemId: Int) = "item_detail/$itemId"
-    }
-    data object Decision : Screen("decision/{itemId}") {
-        fun createRoute(itemId: Int) = "decision/$itemId"
-    }
 }
