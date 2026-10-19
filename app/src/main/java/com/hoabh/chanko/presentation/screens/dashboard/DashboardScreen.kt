@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.*
 import com.hoabh.chanko.ui.theme.CandyPrimaryButton
 import androidx.compose.runtime.*
@@ -30,11 +29,10 @@ import com.hoabh.chanko.ui.theme.ChankoTheme
 fun DashboardRoute(
     onNavigateToAddItem: () -> Unit,
     onNavigateToItemDetail: (Int) -> Unit,
-    onNavigateToVault: () -> Unit,
     viewModel: OverviewViewModel = hiltViewModel()
 ) {
     val state by viewModel.items.collectAsStateWithLifecycle()
-    DashboardScreen(state, onNavigateToAddItem, onNavigateToItemDetail, onNavigateToVault)
+    DashboardScreen(state, onNavigateToAddItem, onNavigateToItemDetail)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,16 +40,11 @@ fun DashboardRoute(
 fun DashboardScreen(
     state: OverviewUiState,
     onNavigateToAddItem: () -> Unit,
-    onNavigateToItemDetail: (Int) -> Unit,
-    onNavigateToVault: () -> Unit
+    onNavigateToItemDetail: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.app_name)) }, actions = {
-                IconButton(onClick = onNavigateToVault) {
-                    Icon(Icons.Default.Savings, contentDescription = stringResource(R.string.vault))
-                }
-            })
+            TopAppBar(title = { Text(stringResource(R.string.app_name)) })
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onNavigateToAddItem,
@@ -75,11 +68,7 @@ fun DashboardScreen(
                 is OverviewUiState.Content -> {
                     item { SavingsStats(state.saved, state.active.size) }
                     item {
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(R.string.cooling_items), style = MaterialTheme.typography.titleMedium)
-                            TextButton(onClick = onNavigateToVault, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) { Text(stringResource(R.string.history)) }
-                        }
+                        Text(stringResource(R.string.cooling_items), style = MaterialTheme.typography.titleMedium)
                     }
                     if (state.active.isEmpty()) item { EmptyItems(onNavigateToAddItem) }
                     items(state.active, key = { it.id }) { item ->
@@ -136,11 +125,11 @@ private fun EmptyItems(onAdd: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun EmptyDashboardPreview() {
-    ChankoTheme { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
+    ChankoTheme { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DarkDashboardPreview() {
-    ChankoTheme(darkTheme = true) { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}, {}) }
+    ChankoTheme(darkTheme = true) { DashboardScreen(OverviewUiState.Content(emptyList(), emptyList(), emptyList(), 0), {}, {}) }
 }

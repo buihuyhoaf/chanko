@@ -16,11 +16,6 @@
     <string name="make_decision">Đưa ra quyết định</string>
     <string name="buy_item">Mua món này</string>
     <string name="pass_item">Bỏ qua và tiết kiệm</string>
-    <string name="vault">Két tiết kiệm</string>
-    <string name="total_saved">Đã tiết kiệm: %1$s</string>
-    <string name="passed_items">Đã bỏ qua</string>
-    <string name="bought_items">Đã mua</string>
-    <string name="no_history">Chưa có món đồ nào được bỏ qua.</string>
     <string name="active_count">%1$d món</string>
     <string name="splash_title">Should I Buy It?</string>
     <string name="splash_title_first">Should I</string>
