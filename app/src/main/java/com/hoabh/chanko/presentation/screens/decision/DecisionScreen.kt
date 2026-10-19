@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.presentation.*
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemViewModel
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun DecisionRoute(
@@ -47,7 +47,7 @@ fun DecisionScreen(
 ) {
     ItemPage(stringResource(R.string.make_decision), onNavigateBack) {
         when(val data = state) {
-            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(CandySpace.xl), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             ItemUiState.Error -> Text(stringResource(R.string.load_error))

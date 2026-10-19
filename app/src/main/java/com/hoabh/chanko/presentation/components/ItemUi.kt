@@ -8,8 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.model.CooldownItem
 import java.text.NumberFormat
 import java.util.Locale
@@ -29,14 +29,14 @@ fun ItemPage(title: String, onBack: () -> Unit, content: @Composable ColumnScope
             )
         }
     }) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+        Column(Modifier.fillMaxSize().padding(padding).padding(CandySpace.lg), verticalArrangement = Arrangement.spacedBy(CandySpace.md), content = content)
     }
 }
 
 @Composable
 fun ItemRow(item: CooldownItem, onClick: (() -> Unit)? = null) {
     Card(modifier = Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(CandySpace.lg)) {
             Text(item.name, style = MaterialTheme.typography.titleMedium)
             Text(formatMoney(item.price))
         }

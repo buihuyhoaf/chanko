@@ -13,10 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.presentation.*
 import com.hoabh.chanko.presentation.components.*
 
@@ -36,7 +36,7 @@ fun ItemDetailScreen(
 ) {
     ItemPage(stringResource(R.string.item_detail), onNavigateBack) {
         when(val data = state) {
-            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            ItemUiState.Loading -> Box(Modifier.fillMaxWidth().padding(CandySpace.xl), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             ItemUiState.Error -> Text(stringResource(R.string.load_error))

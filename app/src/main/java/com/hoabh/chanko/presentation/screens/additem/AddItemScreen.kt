@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import com.hoabh.chanko.ui.theme.CandyPrimaryButton as Button
 import androidx.compose.runtime.*
@@ -17,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandyShape
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.presentation.ActionState
 import com.hoabh.chanko.presentation.components.ItemPage
 
@@ -54,7 +55,7 @@ fun AddItemScreen(
         (price.trim().toLongOrNull() ?: 0L) > 0L &&
         (hours.trim().toLongOrNull() ?: 0L) in 1..8760
     ItemPage(stringResource(R.string.add_item), onNavigateBack) {
-        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(CandySpace.md)) {
             OutlinedTextField(colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = MaterialTheme.colorScheme.onSurface, cursorColor = MaterialTheme.colorScheme.onSurface), shape = com.hoabh.chanko.ui.theme.CandyShape.input, value = name, onValueChange = { onFieldChange("name", it) }, label = { Text(stringResource(R.string.item_name)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = MaterialTheme.colorScheme.onSurface, cursorColor = MaterialTheme.colorScheme.onSurface), shape = com.hoabh.chanko.ui.theme.CandyShape.input, value = price, onValueChange = { onFieldChange("price", it) }, label = { Text(stringResource(R.string.item_price)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = MaterialTheme.colorScheme.onSurface, cursorColor = MaterialTheme.colorScheme.onSurface), shape = com.hoabh.chanko.ui.theme.CandyShape.input, value = hours, onValueChange = { onFieldChange("hours", it) }, label = { Text(stringResource(R.string.cooldown_hours)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
