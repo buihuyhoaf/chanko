@@ -19,9 +19,15 @@ fun formatMoney(value: Long): String = NumberFormat.getCurrencyInstance(Locale.f
 }.format(value)
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** Caller owns navigation; modifier applies to the page scaffold, outside content insets. */
 @Composable
-fun ItemPage(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    Scaffold(topBar = { TopAppBar(title = { Text(title) }, navigationIcon = {
+fun ItemPage(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Scaffold(modifier = modifier, topBar = { TopAppBar(title = { Text(title) }, navigationIcon = {
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,

@@ -57,7 +57,7 @@ fun CandyButton(
     }
 }
 
-/** Compatibility entry point used by existing screens. Height can grow with text. */
+/** Primary variant convenience API; delegates all layout, loading and activation to CandyButton. */
 @Composable
 fun CandyPrimaryButton(
     onClick: () -> Unit,
