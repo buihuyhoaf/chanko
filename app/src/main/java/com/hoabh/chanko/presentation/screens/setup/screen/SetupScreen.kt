@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup
+package com.hoabh.chanko.presentation.screens.setup.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -39,6 +39,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.setup.Secondary
+import com.hoabh.chanko.presentation.screens.setup.SetupAnchorDayStep
+import com.hoabh.chanko.presentation.screens.setup.SetupBudgetStep
+import com.hoabh.chanko.presentation.screens.setup.SetupButton
+import com.hoabh.chanko.presentation.screens.setup.SetupDayPickerBottomSheet
+import com.hoabh.chanko.presentation.screens.setup.SetupHeroBanner
+import com.hoabh.chanko.presentation.screens.setup.SetupPage
+import com.hoabh.chanko.presentation.screens.setup.SetupProblemText
+import com.hoabh.chanko.presentation.screens.setup.SetupStatusScreen
+import com.hoabh.chanko.presentation.screens.setup.SetupTopBar
+import com.hoabh.chanko.presentation.screens.setup.SetupUiState
+import com.hoabh.chanko.presentation.screens.setup.SetupViewModel
+import com.hoabh.chanko.presentation.screens.setup.findActivity
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme

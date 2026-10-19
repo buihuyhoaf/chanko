@@ -8,6 +8,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
 import com.hoabh.chanko.presentation.screens.setup.*
+import com.hoabh.chanko.presentation.screens.setup.screen.InitialSetupScreen
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import org.junit.Assert.*
 import org.junit.Rule
@@ -19,8 +20,13 @@ class InitialSetupScreenTest {
     @Test fun vietnameseFormHasNoDefaultDayAndBackPreservesBudget() {
         var state by mutableStateOf(SetupUiState(page = SetupPage.FORM))
         compose.setContent { ChankoTheme {
-            InitialSetupScreen(state, { state=state.copy(amount=it) }, { state=state.copy(day=it) },
-                { state=state.copy(step=2) }, { state=state.copy(step=1) }, {})
+            InitialSetupScreen(
+                state,
+                { state = state.copy(amount = it) },
+                { state = state.copy(day = it) },
+                { state = state.copy(step = 2) },
+                { state = state.copy(step = 1) },
+                {})
         } }
         screenshot("budget-vi.png")
         compose.onNodeWithContentDescription("Ngân sách mua sắm mỗi tháng").performTextInput("3000000")
@@ -39,7 +45,12 @@ class InitialSetupScreenTest {
         compose.setContent { ChankoTheme {
             val density = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
-                InitialSetupScreen(SetupUiState(page=SetupPage.FORM, step=2,amount="3000000"), {}, {}, {}, {}, { pressed=true })
+                InitialSetupScreen(
+                    SetupUiState(
+                        page = SetupPage.FORM,
+                        step = 2,
+                        amount = "3000000"
+                    ), {}, {}, {}, {}, { pressed = true })
             }
         } }
         compose.onNodeWithText("Ngày này sẽ được giữ cố định.").performScrollTo().assertIsDisplayed()

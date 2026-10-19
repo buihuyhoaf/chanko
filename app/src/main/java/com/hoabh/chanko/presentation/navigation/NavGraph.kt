@@ -18,7 +18,7 @@ import androidx.navigation.compose.composable
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.splash.SplashScreen
 import com.hoabh.chanko.presentation.screens.login.LoginRoute
-import com.hoabh.chanko.presentation.screens.setup.SetupGate
+import com.hoabh.chanko.presentation.screens.setup.screen.SetupGate
 
 @Composable
 fun NavGraph(
