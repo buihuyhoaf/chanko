@@ -3,17 +3,20 @@ package com.hoabh.chanko.presentation.screens.setup
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 
-// Screen-scoped visual reference colors from the reviewed mockup; DS PV-01 stays open.
+// Screen-scoped visual reference colors and shapes from the reviewed mockup; DS PV-01 stays open.
 internal val Ink = Color(0xFF30233E)
 internal val Secondary = Color(0xFF62596D)
 internal val OnPurple = Color(0xFF15131D)
 internal val StepDotInactive = Color(0xFFD9D1E4)
+internal val SetupButtonShape = RoundedCornerShape(18.dp)
 
 /**
  * Traverses the Context wrapper hierarchy to find the enclosing Activity.
