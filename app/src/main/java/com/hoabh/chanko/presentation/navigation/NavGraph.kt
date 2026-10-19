@@ -2,23 +2,27 @@ package com.hoabh.chanko.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabh.chanko.presentation.OverviewUiState
-import com.hoabh.chanko.presentation.OverviewViewModel
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.runtime.key
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
-import com.hoabh.chanko.presentation.screens.splash.SplashScreen
+import com.hoabh.chanko.presentation.OverviewViewModel
+import com.hoabh.chanko.presentation.screens.dashboard.dashboardDestination
 import com.hoabh.chanko.presentation.screens.login.LoginRoute
-import com.hoabh.chanko.presentation.screens.setup.screen.SetupGate
+import com.hoabh.chanko.presentation.screens.login.loginDestination
+import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
+import com.hoabh.chanko.presentation.screens.splash.splashDestination
+
+/** Các route công khai không yêu cầu phiên đăng nhập */
+private val UnauthenticatedRoutes = setOf(
+    Screen.Splash.route,
+    Screen.Login.route,
+    Screen.Setup.route
+)
 
 @Composable
 fun NavGraph(
@@ -30,77 +34,72 @@ fun NavGraph(
 ) {
     val identity by session.session.collectAsStateWithLifecycle()
     val restored by session.restorationComplete.collectAsStateWithLifecycle()
-    val authenticated = identity is com.hoabh.chanko.domain.auth.SessionState.Available
+    val authenticated = identity is SessionState.Available
     val entry by navController.currentBackStackEntryAsState()
+
     LaunchedEffect(entry, authenticated, restored) {
         if (!restored) return@LaunchedEffect
-        if (authenticated && entry?.destination?.route == Screen.Login.route) {
+
+        val currentRoute = entry?.destination?.route
+        if (authenticated && currentRoute == Screen.Login.route) {
             navController.navigate(Screen.Dashboard.route) {
                 popUpTo(navController.graph.id)
                 launchSingleTop = true
             }
             return@LaunchedEffect
         }
-        val route = entry?.destination?.route
+
         // TODO(dummy): Cho phép truy cập Screen.Setup khi chưa có session authenticated chính thức
-        if (!authenticated && route != null && route != Screen.Splash.route && route != Screen.Login.route && route != Screen.Setup.route) {
+        if (!authenticated && currentRoute != null && currentRoute !in UnauthenticatedRoutes) {
             navController.navigate(Screen.Login.route) {
                 popUpTo(navController.graph.id) { inclusive = false }
                 launchSingleTop = true
             }
         }
     }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
-        composable(route = Screen.Splash.route,
-            enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None }) {
-            val state by overviewViewModel.items.collectAsStateWithLifecycle()
-            SplashScreen(
-                isReady = restored && state !is OverviewUiState.Loading,
-                onSplashFinished = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
+        splashDestination(
+            overviewViewModel = overviewViewModel,
+            isRestored = { restored },
+            onSplashFinished = {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
                 }
-            )
-        }
+            }
+        )
 
-        composable(route = Screen.Login.route) {
-            loginContent {
+        loginDestination(
+            loginContent = loginContent,
+            onLoginSuccess = {
                 // TODO(dummy): Navigate tới màn SetupGate khi logic onLoginSuccess pass (tạm thời cho đến khi kết nối backend/OAuth)
                 navController.navigate(Screen.Setup.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                     launchSingleTop = true
                 }
             }
-        }
+        )
 
-        composable(route = Screen.Setup.route) {
-            // TODO(dummy): Hiển thị màn SetupGate độc lập với accountKey giả lập trước khi có session thật từ server
-            val accountKey = (identity as? SessionState.Available)?.account?.value ?: "dummy_account"
-            SetupGate(
-                accountKey = accountKey,
-                onConfirmedComplete = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.Setup.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
+        setupDestination(
+            accountKeyProvider = {
+                // TODO(dummy): Hiển thị màn SetupGate độc lập với accountKey giả lập trước khi có session thật từ server
+                (identity as? SessionState.Available)?.account?.value ?: "dummy_account"
+            },
+            onConfirmedComplete = {
+                navController.navigate(Screen.Dashboard.route) {
+                    popUpTo(Screen.Setup.route) { inclusive = true }
+                    launchSingleTop = true
                 }
-            )
-        }
-
-        composable(route = Screen.Dashboard.route) {
-            if (!restored || !authenticated) return@composable
-            // Account changes discard all remembered/saved tab stacks from the prior account.
-            key(identity) {
-                SetupGate(
-                    accountKey = (identity as SessionState.Available).account.value,
-                    onConfirmedComplete = { MainNavigation() },
-                )
             }
-        }
+        )
+
+        dashboardDestination(
+            sessionProvider = { identity as? SessionState.Available },
+            isRestored = { restored }
+        )
     }
 }

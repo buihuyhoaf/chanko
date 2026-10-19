@@ -12,7 +12,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
+import com.hoabh.chanko.presentation.components.ItemRow
+import com.hoabh.chanko.presentation.components.formatMoney
+import com.hoabh.chanko.domain.auth.SessionState
+import com.hoabh.chanko.presentation.navigation.MainNavigation
+import com.hoabh.chanko.presentation.navigation.Screen
+import com.hoabh.chanko.presentation.screens.setup.screen.SetupGate
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.hoabh.chanko.ui.theme.ChankoTheme
+
+fun NavGraphBuilder.dashboardDestination(
+    sessionProvider: () -> SessionState.Available?,
+    isRestored: () -> Boolean
+) {
+    composable(route = Screen.Dashboard.route) {
+        if (!isRestored()) return@composable
+        val session = sessionProvider() ?: return@composable
+        key(session) {
+            SetupGate(
+                accountKey = session.account.value,
+                onConfirmedComplete = { MainNavigation() }
+            )
+        }
+    }
+}
 
 @Composable
 fun DashboardRoute(

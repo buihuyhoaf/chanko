@@ -47,10 +47,22 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.auth.AuthFailure
+import com.hoabh.chanko.presentation.navigation.Screen
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import com.hoabh.chanko.ui.theme.Nunito
 
 private val LoginPlum = Color(0xFF4D2939)
+
+fun NavGraphBuilder.loginDestination(
+    loginContent: @Composable (() -> Unit) -> Unit = { LoginRoute(it) },
+    onLoginSuccess: () -> Unit
+) {
+    composable(route = Screen.Login.route) {
+        loginContent(onLoginSuccess)
+    }
+}
 
 @Composable
 fun LoginRoute(

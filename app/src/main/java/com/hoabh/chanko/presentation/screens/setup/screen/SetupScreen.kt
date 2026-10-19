@@ -52,9 +52,24 @@ import com.hoabh.chanko.presentation.screens.setup.SetupTopBar
 import com.hoabh.chanko.presentation.screens.setup.SetupUiState
 import com.hoabh.chanko.presentation.screens.setup.SetupViewModel
 import com.hoabh.chanko.presentation.screens.setup.findActivity
+import com.hoabh.chanko.presentation.navigation.Screen
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
+
+fun NavGraphBuilder.setupDestination(
+    accountKeyProvider: () -> String,
+    onConfirmedComplete: () -> Unit
+) {
+    composable(route = Screen.Setup.route) {
+        SetupGate(
+            accountKey = accountKeyProvider(),
+            onConfirmedComplete = { onConfirmedComplete() }
+        )
+    }
+}
 
 @Composable
 fun SetupGate(

@@ -17,9 +17,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import com.hoabh.chanko.presentation.OverviewUiState
+import com.hoabh.chanko.presentation.OverviewViewModel
+import com.hoabh.chanko.presentation.navigation.Screen
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,6 +79,24 @@ private val LogoStrokeWidth = 7.dp
 
 private val LogoSizeCompact = 48.sp
 private val LogoSizeRegular = 60.sp
+
+fun NavGraphBuilder.splashDestination(
+    overviewViewModel: OverviewViewModel,
+    isRestored: () -> Boolean,
+    onSplashFinished: () -> Unit
+) {
+    composable(
+        route = Screen.Splash.route,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
+    ) {
+        val state by overviewViewModel.items.collectAsStateWithLifecycle()
+        SplashScreen(
+            isReady = isRestored() && state !is OverviewUiState.Loading,
+            onSplashFinished = onSplashFinished
+        )
+    }
+}
 
 /** Show the user-approved two-second brand introduction after the scene's first draw.
  * Loading copy remains tied only to real data work; readiness changes do not restart branding.
