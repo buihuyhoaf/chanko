@@ -22,6 +22,16 @@ class CooldownItemTest {
         assertFalse(item.copy(status = ItemStatus.PASSED).canDecide(9_000_000))
         assertFalse(item.copy(status = ItemStatus.BOUGHT).canDecide(9_000_000))
     }
+    @Test fun countdownRoundsUpAndDecisionUsesTheSameDeadline() {
+        val deadline = item.addedTimestamp + item.cooldownDurationMillis
+        for ((offset, seconds) in listOf(-1001L to 2L, -1000L to 1L,
+            -999L to 1L, -1L to 1L, 0L to 0L, 1000L to 0L)) {
+            val now = deadline + offset
+            assertEquals(seconds, (item.remainingMillis(now) + 999) / 1000)
+            assertEquals(offset >= 0, item.canDecide(now))
+        }
+    }
+
     @Test fun clockMovingBackDoesNotExceedOriginalDuration() {
         assertEquals(3_600_000L, item.remainingMillis(0))
     }
