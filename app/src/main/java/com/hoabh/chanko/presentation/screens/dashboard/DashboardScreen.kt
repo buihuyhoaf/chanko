@@ -30,7 +30,7 @@ fun NavGraphBuilder.dashboardDestination(
     composable(route = Screen.Dashboard.route) {
         if (!isRestored()) return@composable
         val session = sessionProvider() ?: return@composable
-        navGraphkey(session) {
+        key(session) {
             SetupGate(
                 accountKey = session.account.value,
                 onConfirmedComplete = { MainNavigation() }
