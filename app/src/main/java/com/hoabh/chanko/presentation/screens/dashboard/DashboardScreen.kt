@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.presentation.OverviewUiState
 import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.presentation.components.ItemRow
@@ -60,13 +61,13 @@ fun DashboardScreen(
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = CandySpace.screen, end = CandySpace.screen, top = CandySpace.md, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
         ) {
             item { MascotBanner() }
             when (state) {
                 OverviewUiState.Loading -> item {
-                    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.fillMaxWidth().padding(CandySpace.xl), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
@@ -105,15 +106,15 @@ private fun MascotBanner() {
 
 @Composable
 private fun SavingsStats(saved: Long, count: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(CandySpace.md)) {
         Card(Modifier.weight(1f)) {
-            Column(Modifier.padding(16.dp)) {
+            Column(Modifier.padding(CandySpace.lg)) {
                 Text(stringResource(R.string.savings))
                 Text(formatMoney(saved), style = MaterialTheme.typography.titleLarge)
             }
         }
         Card(Modifier.weight(1f)) {
-            Column(Modifier.padding(16.dp)) {
+            Column(Modifier.padding(CandySpace.lg)) {
                 Text(stringResource(R.string.cooling))
                 Text(stringResource(R.string.active_count, count), style = MaterialTheme.typography.titleLarge)
             }
@@ -124,7 +125,7 @@ private fun SavingsStats(saved: Long, count: Int) {
 @Composable
 private fun EmptyItems(onAdd: () -> Unit) {
     Card {
-        Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(CandySpace.section), verticalArrangement = Arrangement.spacedBy(CandySpace.md)) {
             Text(stringResource(R.string.empty_items), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.empty_description))
             Button(onClick = onAdd) { Text(stringResource(R.string.add_item)) }

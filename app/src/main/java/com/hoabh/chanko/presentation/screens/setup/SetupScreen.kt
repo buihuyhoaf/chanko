@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandyShape
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import kotlinx.coroutines.launch
@@ -75,19 +77,19 @@ fun SetupGate(accountKey: String, onConfirmedComplete: @Composable () -> Unit) {
 @Composable
 fun SetupStatusScreen(state: SetupUiState, onRetry: () -> Unit) {
     Column(Modifier.fillMaxSize().background(CandyColors.background).safeDrawingPadding()
-        .verticalScroll(rememberScrollState()).padding(24.dp),
+        .verticalScroll(rememberScrollState()).padding(CandySpace.section),
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         if (state.page == SetupPage.CHECKING) {
             CircularProgressIndicator(color = CandyColors.primary)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(CandySpace.lg))
             Text(stringResource(R.string.setup_checking), color = Ink,
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         } else {
             Text(stringResource(R.string.setup_status_title), style = MaterialTheme.typography.headlineMedium,
                 color = Ink, modifier = Modifier.semantics { heading() })
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(CandySpace.md))
             ProblemText(state.problem ?: SetupProblem.UNKNOWN)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(CandySpace.lg))
             SetupButton(stringResource(R.string.setup_retry), onRetry)
         }
     }
@@ -125,14 +127,14 @@ fun InitialSetupScreen(
             else -> (maxHeight * .30f).coerceIn(180.dp, 260.dp)
         }
         Column(Modifier.fillMaxSize().verticalScroll(scroll), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = 24.dp)
+            Row(Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(horizontal = CandySpace.section)
                 .heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (state.step == 2) IconButton(onClick = onBack, enabled = !state.busy, modifier = Modifier.size(48.dp)) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), tint = Ink)
                 }
                 Text(stringResource(R.string.setup_step, state.step), style = MaterialTheme.typography.labelMedium,
                     color = Ink, modifier = Modifier.weight(1f))
-                Row(Modifier.clearAndSetSemantics { }, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.clearAndSetSemantics { }, horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)) {
                     (1..2).forEach { step -> Box(Modifier.size(24.dp, 4.dp).background(
                         if (step <= state.step) CandyColors.primary else Color(0xFFD9D1E4), RoundedCornerShape(4.dp))) }
                 }
@@ -143,17 +145,17 @@ fun InitialSetupScreen(
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(24.dp)
                     .background(Brush.verticalGradient(listOf(Color.Transparent, CandyColors.background))))
             }
-            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(24.dp)) {
+            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(CandySpace.section)) {
                 Text(stringResource(if (state.step == 1) R.string.setup_budget_title else R.string.setup_day_title),
                     style = MaterialTheme.typography.headlineLarge, color = Ink, modifier = Modifier.semantics { heading() })
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(CandySpace.sm))
                 Text(stringResource(if (state.step == 1) R.string.setup_budget_subtitle else R.string.setup_day_subtitle),
                     style = MaterialTheme.typography.bodyLarge, color = Secondary)
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(CandySpace.section))
                 if (state.step == 1) {
                     val budgetLabel = stringResource(R.string.setup_budget_label)
                     Text(budgetLabel, style = MaterialTheme.typography.titleSmall, color = Ink)
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(CandySpace.sm))
                     OutlinedTextField(value = state.amount, onValueChange = onAmountChanged,
                         enabled = !state.busy, singleLine = true,
                         placeholder = { Text(stringResource(R.string.setup_budget_placeholder)) },
@@ -163,17 +165,17 @@ fun InitialSetupScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { keyboard?.hide(); onContinue() }),
                         isError = state.amountError,
-                        shape = RoundedCornerShape(16.dp),
+                        shape = CandyShape.input,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).semantics { contentDescription = budgetLabel }.focusRequester(focus)
                             .bringIntoViewRequester(bring).onFocusChanged { if (it.isFocused) scope.launch { bring.bringIntoView() } })
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(CandySpace.sm))
                     Text(stringResource(R.string.setup_budget_hint), style = MaterialTheme.typography.bodyMedium, color = Secondary)
                     if (state.amountError) ErrorText(stringResource(R.string.setup_budget_error))
                 } else {
                     Text(stringResource(R.string.setup_day_label), style = MaterialTheme.typography.titleSmall, color = Ink)
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(CandySpace.sm))
                     OutlinedButton(onClick = { keyboard?.hide(); showDays = true }, enabled = !state.busy,
-                        shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(16.dp),
+                        shape = CandyShape.input, contentPadding = PaddingValues(CandySpace.lg),
                         modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).focusRequester(focus).bringIntoViewRequester(bring)
                             .semantics { if (state.dayError) error(dayErrorText) }) {
                         Text(if (state.day == null) stringResource(R.string.setup_day_placeholder)
@@ -182,22 +184,22 @@ fun InitialSetupScreen(
                         Icon(Icons.Rounded.ExpandMore, contentDescription = null, tint = Ink)
                     }
                     if (state.dayError) ErrorText(stringResource(R.string.setup_day_error))
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(CandySpace.lg))
                     Row {
                         Box(Modifier.width(3.dp).height(32.dp).background(CandyColors.primary))
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(CandySpace.md))
                         Column {
                             Text(stringResource(R.string.setup_day_fixed), fontWeight = FontWeight.Bold, color = Ink,
                                 style = MaterialTheme.typography.bodyMedium)
                             Text(stringResource(R.string.setup_day_notice), style = MaterialTheme.typography.bodyMedium, color = Ink)
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(CandySpace.lg))
                     Text(stringResource(R.string.setup_budget_summary, groupedVnd(state.amount)),
                         style = MaterialTheme.typography.bodyMedium, color = Secondary)
                 }
-                state.problem?.let { Spacer(Modifier.height(12.dp)); ProblemText(it) }
-                Spacer(Modifier.height(24.dp))
+                state.problem?.let { Spacer(Modifier.height(CandySpace.md)); ProblemText(it) }
+                Spacer(Modifier.height(CandySpace.section))
                 val label = when {
                     state.busy -> R.string.setup_saving
                     state.step == 1 -> R.string.setup_continue
@@ -208,7 +210,7 @@ fun InitialSetupScreen(
                     keyboard?.hide()
                     if (state.step == 1) onContinue() else onSave()
                 }, !state.busy, state.busy)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(CandySpace.md))
                 Text(stringResource(if (state.step == 1) R.string.setup_budget_footer else R.string.setup_online_hint),
                     style = MaterialTheme.typography.bodySmall, color = Secondary)
             }
@@ -216,16 +218,16 @@ fun InitialSetupScreen(
     }
     if (showDays && !state.busy) ModalBottomSheet(onDismissRequest = { showDays = false }, containerColor = CandyColors.background) {
         Text(stringResource(R.string.setup_day_label), style = MaterialTheme.typography.titleLarge,
-            color = Ink, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp).semantics { heading() })
+            color = Ink, modifier = Modifier.padding(horizontal = CandySpace.section, vertical = CandySpace.md).semantics { heading() })
         LazyColumn(Modifier.testTag("setup_days").fillMaxWidth().weight(1f, fill = false).navigationBarsPadding(),
-            contentPadding = PaddingValues(bottom = 24.dp)) {
+            contentPadding = PaddingValues(bottom = CandySpace.section)) {
             items((1..31).toList(), key = { it }) { day ->
                 Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
                     .clickable(role = Role.RadioButton) { onDayChanged(day); showDays = false }
                     .semantics(mergeDescendants = true) { selected = state.day == day }
-                    .padding(horizontal = 24.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    .padding(horizontal = CandySpace.section, vertical = CandySpace.sm), verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = state.day == day, onClick = null)
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.width(CandySpace.lg))
                     Text(stringResource(R.string.setup_day_value, day), color = Ink)
                 }
             }
@@ -237,16 +239,16 @@ fun InitialSetupScreen(
 private fun SetupButton(text: String, onClick: () -> Unit, enabled: Boolean = true, busy: Boolean = false) {
     Button(onClick = onClick, enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = CandyColors.primary, contentColor = OnPurple),
-        shape = RoundedCornerShape(18.dp), contentPadding = PaddingValues(16.dp),
+        shape = RoundedCornerShape(18.dp), contentPadding = PaddingValues(CandySpace.lg),
         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-        if (busy) { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = OnPurple); Spacer(Modifier.width(8.dp)) }
+        if (busy) { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = OnPurple); Spacer(Modifier.width(CandySpace.sm)) }
         Text(text, modifier = Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelLarge)
     }
 }
 @Composable
 private fun ErrorText(text: String) {
     Text(text, color = CandyColors.errorText, style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
+        modifier = Modifier.padding(top = CandySpace.sm).semantics { liveRegion = LiveRegionMode.Polite })
 }
 @Composable
 private fun ProblemText(problem: SetupProblem) = ErrorText(stringResource(when (problem) {

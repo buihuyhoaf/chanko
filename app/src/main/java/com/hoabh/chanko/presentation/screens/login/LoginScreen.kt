@@ -43,11 +43,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.BuildConfig
 import com.hoabh.chanko.R
+import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.auth.AuthFailure
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import com.hoabh.chanko.ui.theme.Nunito
 
-private val LoginCream = Color(0xFFFAF8F5)
 private val LoginPlum = Color(0xFF4D2939)
 
 @Composable
@@ -86,7 +87,7 @@ fun LoginScreen(
     onTermsClick: () -> Unit,
     onPrivacyClick: () -> Unit,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize().background(LoginCream)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(CandyColors.background)) {
         val heroHeight = (maxHeight * 0.55f).coerceIn(300.dp, 600.dp)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding(),
@@ -97,10 +98,10 @@ fun LoginScreen(
                     contentScale = ContentScale.Crop, alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize())
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(48.dp)
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, LoginCream))))
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, CandyColors.background))))
                 LoginWordmark(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 18.dp))
             }
-            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = 24.dp),
+            Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = CandySpace.section),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.login_headline),
                     style = TextStyle(fontFamily = Nunito, fontSize = 28.sp, lineHeight = 34.sp,
@@ -116,30 +117,30 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
                     shape = RoundedCornerShape(50), border = BorderStroke(1.dp, Color(0xFF747775)),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF1F1F1F)),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    contentPadding = PaddingValues(horizontal = CandySpace.lg, vertical = CandySpace.md),
                 ) {
                     Image(painterResource(R.drawable.ic_google), null, Modifier.size(22.dp))
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(CandySpace.md))
                     Text(stringResource(R.string.login_with_google), fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f, fill = false))
                 }
                 if (uiState.isLoading) Row(
-                    Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite },
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Modifier.padding(top = CandySpace.md).semantics { liveRegion = LiveRegionMode.Polite },
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)) {
                     CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                     Text(stringResource(R.string.login_loading), style = MaterialTheme.typography.bodyMedium, color = LoginPlum)
                 }
                 uiState.error?.let { error ->
                     Text(stringResource(error.messageId()), color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite })
+                        modifier = Modifier.padding(top = CandySpace.md).semantics { liveRegion = LiveRegionMode.Polite })
                 }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(CandySpace.lg))
                 Text(stringResource(R.string.login_legal_intro), color = Color(0xFF6B6570),
                     style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                 LegalLinks(onTermsClick, onPrivacyClick)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(CandySpace.md))
             }
         }
     }
@@ -165,11 +166,11 @@ private fun LoginWordmark(modifier: Modifier = Modifier) {
 @Composable
 private fun LegalLinks(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        TextButton(onClick = onTermsClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+        TextButton(onClick = onTermsClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = CandySpace.sm)) {
             Text(stringResource(R.string.login_terms), color = Color(0xFF6B6570), fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
         }
-        TextButton(onClick = onPrivacyClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)) {
+        TextButton(onClick = onPrivacyClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = CandySpace.sm)) {
             Text(stringResource(R.string.login_privacy), color = Color(0xFF6B6570), fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
         }
