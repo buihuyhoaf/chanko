@@ -24,7 +24,7 @@ interface AuthenticationRepository {
     suspend fun logout(): AuthResult<Revocation>
 }
 
-class SignInWithGoogle(private val repository: AuthenticationRepository) {
+class SignInWithGoogleUseCase(private val repository: AuthenticationRepository) {
     fun execute(provider: GoogleTokenProvider) = kotlinx.coroutines.flow.flow {
         emit(AuthOperation.Loading)
         emit(when (val result = repository.signIn(provider)) {
@@ -33,12 +33,12 @@ class SignInWithGoogle(private val repository: AuthenticationRepository) {
         })
     }
 }
-class RestoreAuthSession(private val repository: AuthenticationRepository) {
+class RestoreAuthSessionUseCase(private val repository: AuthenticationRepository) {
     suspend operator fun invoke() = repository.restore()
 }
-class RefreshAuthSession(private val repository: AuthenticationRepository) {
+class RefreshAuthSessionUseCase(private val repository: AuthenticationRepository) {
     suspend operator fun invoke() = repository.refresh()
 }
-class Logout(private val repository: AuthenticationRepository) {
+class LogoutUseCase(private val repository: AuthenticationRepository) {
     suspend operator fun invoke() = repository.logout()
 }
