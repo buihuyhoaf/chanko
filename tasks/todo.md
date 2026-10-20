@@ -54,25 +54,10 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 6: Screen Assembly (`HomeScreen`), Stateful Route & Previews
-
-**Description:** Lắp ghép toàn bộ các component vào `HomeScreen` (Stateless) sử dụng `LazyColumn`, nền cream `#FAF8F5` với gradient nhẹ, hỗ trợ responsive $320\text{dp} - 393\text{dp}$ và xây dựng `HomeRoute` (Stateful).
-
-**Acceptance criteria:**
-- [ ] `HomeScreen.kt`: Chứa Stateless `HomeScreen` nhận `HomeUiState` và emit các callback. Sử dụng `LazyColumn`, xử lý khoảng cách padding chuẩn 16dp.
-- [ ] Xử lý các trạng thái: `Loading` (hiển thị skeleton/loading indicator), `Error` (thông báo lỗi và nút thử lại), `Success` (nội dung đầy đủ).
-- [ ] `HomeRoute`: Kết nối với `HomeViewModel` qua `collectAsStateWithLifecycle()`, truyền callback xuống `HomeScreen`.
-- [ ] Cung cấp `@Preview` cho Light scheme với sample mock data.
-
-**Verification:**
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-- [ ] Manual check: Previews hiển thị trọn vẹn màn hình Home v5.
-
-**Dependencies:** Task 3, Task 4, Task 5
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeScreen.kt`
-
-**Estimated scope:** S (1 file)
+- [x] Task 6: Screen Assembly (`HomeScreen`), Stateful Route & Previews
+  - Acceptance: `HomeScreen.kt` (Stateless & Stateful `HomeRoute`), responsive $320\text{dp} - 393\text{dp}$, `@Preview` đầy đủ.
+  - Verify: Build assembleDebug succeeds.
+  - Files: `HomeScreen.kt`
 
 ---
 
