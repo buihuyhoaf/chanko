@@ -47,6 +47,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.auth.AuthFailure
+import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.navigation.Screen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -78,9 +79,9 @@ fun LoginRoute(
         onDispose { viewModel.cancelLogin() }
     }
 
-    LaunchedEffect(state.isLoginSuccess) {
-        if (state.isLoginSuccess) {
-            onLoginSuccess()
+    CollectEffect(viewModel.effect) { effect ->
+        when (effect) {
+            is LoginUiEffect.NavigateToHome -> onLoginSuccess()
         }
     }
 

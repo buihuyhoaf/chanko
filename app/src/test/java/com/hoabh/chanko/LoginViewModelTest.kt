@@ -1,8 +1,10 @@
 package com.hoabh.chanko
 
 import com.hoabh.chanko.domain.auth.*
+import com.hoabh.chanko.presentation.screens.login.LoginUiEffect
 import com.hoabh.chanko.presentation.screens.login.LoginViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.Assert.*
@@ -69,6 +71,17 @@ class LoginViewModelTest {
         gate.complete(Unit); runCurrent()
         assertFalse(vm.uiState.value.isLoginSuccess); assertFalse(vm.uiState.value.isLoading)
         assertNull(vm.uiState.value.error)
+    }
+
+    @Test fun loginSuccessEmitsNavigateToHomeEffect() = runTest(dispatcher) {
+        val repo = FakeAuth()
+        val vm = LoginViewModel(repo)
+
+        val effectDeferred = async { vm.effect.first() }
+        vm.loginWithGoogle { "valid-token" }
+        runCurrent()
+
+        assertEquals(LoginUiEffect.NavigateToHome, effectDeferred.await())
     }
 }
 private class FakeAuth : AuthenticationRepository {
