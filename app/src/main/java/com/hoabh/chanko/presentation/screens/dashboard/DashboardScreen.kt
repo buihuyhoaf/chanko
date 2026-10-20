@@ -4,15 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabh.chanko.presentation.OverviewUiState
-import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.navigation.MainNavigation
 import com.hoabh.chanko.presentation.navigation.Screen
@@ -39,19 +34,15 @@ fun NavGraphBuilder.dashboardDestination(
 
 @Composable
 fun DashboardRoute(
-    modifier: Modifier = Modifier,
-    viewModel: OverviewViewModel = hiltViewModel()
+    modifier: Modifier = Modifier
 ) {
-    val state by viewModel.items.collectAsStateWithLifecycle()
     DashboardScreen(
-        state = state,
         modifier = modifier
     )
 }
 
 @Composable
 fun DashboardScreen(
-    state: OverviewUiState,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -66,7 +57,7 @@ fun DashboardScreen(
 @Composable
 private fun DashboardScreenPreview() {
     ChankoTheme {
-        DashboardScreen(state = OverviewUiState.Loading)
+        DashboardScreen()
     }
 }
 
@@ -74,6 +65,6 @@ private fun DashboardScreenPreview() {
 @Composable
 private fun DarkDashboardScreenPreview() {
     ChankoTheme(darkTheme = true) {
-        DashboardScreen(state = OverviewUiState.Loading)
+        DashboardScreen()
     }
 }

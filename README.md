@@ -7,7 +7,7 @@
 Một module `app`, Kotlin, Compose Material 3, Navigation Compose, Hilt và Room.
 
 - `presentation/screens`: Route thu thập state bằng `collectAsStateWithLifecycle`; Screen nhận state và callback để hiển thị UI.
-- `OverviewViewModel`: dữ liệu Dashboard/Vault. `AddItemViewModel`: form và thao tác thêm. `ItemViewModel`: một món đồ, đồng hồ và quyết định.
+- `presentation`: ViewModel quản lý state cho màn hình và luồng nghiệp vụ.
 - `domain`: model thuần Kotlin và hợp đồng repository.
 - `data`: entity Room, mapping, DAO và repository implementation.
 - `di`: cấu hình Hilt. `ui/theme`: màu sắc và typography.

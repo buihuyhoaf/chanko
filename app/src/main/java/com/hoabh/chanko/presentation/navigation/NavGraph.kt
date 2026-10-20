@@ -10,7 +10,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
-import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.presentation.screens.dashboard.dashboardDestination
 import com.hoabh.chanko.presentation.screens.login.LoginRoute
 import com.hoabh.chanko.presentation.screens.login.loginDestination
@@ -28,7 +27,6 @@ private val UnauthenticatedRoutes = setOf(
 fun NavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    overviewViewModel: OverviewViewModel = hiltViewModel(),
     loginContent: @Composable (() -> Unit) -> Unit = { LoginRoute(it) },
     session: LoginSessionViewModel = hiltViewModel()
 ) {
@@ -64,7 +62,6 @@ fun NavGraph(
         modifier = modifier
     ) {
         splashDestination(
-            overviewViewModel = overviewViewModel,
             isRestored = { restored },
             onSplashFinished = {
                 navController.navigate(Screen.Login.route) {
