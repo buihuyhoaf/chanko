@@ -36,7 +36,7 @@ enum class SetupPage { CHECKING, STATUS_ERROR, FORM, COMPLETE }
 enum class SetupProblem { UNKNOWN, OFFLINE, SAVE_ERROR, UNAVAILABLE, TIME_ZONE }
 
 data class SetupUiState(
-    val page: SetupPage = SetupPage.CHECKING,
+    val page: SetupPage = SetupPage.FORM,
     val step: Int = 1,
     val amount: String = "",
     val day: Int? = null,
@@ -44,6 +44,7 @@ data class SetupUiState(
     val dayError: Boolean = false,
     val busy: Boolean = false,
     val problem: SetupProblem? = null,
+    val showErrorDialog: Boolean = false,
     // A possibly committed submission must be reconciled before any new submission.
     val needsReconciliation: Boolean = false,
 )
@@ -61,8 +62,8 @@ class SetupViewModel(
 
     private var operation: Job? = null
 
-    init {
-        checkStatus()
+    fun dismissErrorDialog() {
+        _uiState.update { it.copy(showErrorDialog = false) }
     }
 
     fun amountChanged(value: String) {
@@ -156,7 +157,7 @@ class SetupViewModel(
         val zone = deviceTimeZone()
         // Offset aliases must not silently stand in for an IANA device region.
         if (zone !in TimeZone.getAvailableIDs() || (!zone.contains('/') && zone !in setOf("UTC", "GMT"))) {
-            _uiState.update { it.copy(problem = SetupProblem.TIME_ZONE) }
+            _uiState.update { it.copy(problem = SetupProblem.TIME_ZONE, showErrorDialog = true) }
             return
         }
 
@@ -177,13 +178,13 @@ class SetupViewModel(
                     applyStatus(safeStatus())
                 }
                 SetupSubmission.OFFLINE -> {
-                    _uiState.update { it.copy(busy = false, problem = SetupProblem.OFFLINE) }
+                    _uiState.update { it.copy(busy = false, problem = SetupProblem.OFFLINE, showErrorDialog = true) }
                 }
                 SetupSubmission.ERROR -> {
-                    _uiState.update { it.copy(busy = false, problem = SetupProblem.SAVE_ERROR) }
+                    _uiState.update { it.copy(busy = false, problem = SetupProblem.SAVE_ERROR, showErrorDialog = true) }
                 }
                 SetupSubmission.UNAVAILABLE -> {
-                    _uiState.update { it.copy(busy = false, problem = SetupProblem.UNAVAILABLE) }
+                    _uiState.update { it.copy(busy = false, problem = SetupProblem.UNAVAILABLE, showErrorDialog = true) }
                 }
             }
         }
@@ -221,6 +222,7 @@ class SetupViewModel(
                         SetupStatus.UNAVAILABLE -> SetupProblem.UNAVAILABLE
                         else -> SetupProblem.UNKNOWN
                     },
+                    showErrorDialog = old.page == SetupPage.FORM,
                 )
             }
         }
