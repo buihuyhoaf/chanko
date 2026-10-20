@@ -34,30 +34,10 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 4: Calendar & Budget UI Components
-
-**Description:** Xây dựng cụm thành phần UI thẻ lịch chi tiêu: Header lời chào, Lưới lịch chu kỳ 7 cột, Linh vật Mèo 3D kèm bong bóng thoại, Thống kê ngân sách 3 cột và Thẻ container `SpendingCalendarCard`.
-
-**Acceptance criteria:**
-- [ ] `HomeHeader.kt`: Câu chào thời gian + nút Cài đặt và Avatar (touch target $\ge 48\text{dp}$).
-- [ ] `CycleCalendarGrid.kt`: Hàng thứ theo chu kỳ, lưới các ô ngày có outline tím (Start), tím đặc (Today), viền hồng (Selected), chấm hồng (Purchase).
-- [ ] `MascotSpeechBanner.kt`: Ảnh mèo `mascot_crossed_arms.png` + bong bóng thoại nền `#FFECE5` vẽ bằng Compose UI với text thật.
-- [ ] `BudgetSummarySection.kt`: 3 cột thông số (Ngân sách, Đã tiêu, Còn lại) + progress bar bo góc full + ngày bắt đầu kỳ mới.
-- [ ] `SpendingCalendarCard.kt`: Kết hợp tiêu đề, nút "Hôm nay", lưới lịch, chi tiết ngày chọn, mascot và thống kê ngân sách trong card container radius 24dp `#F4EEFF`.
-
-**Verification:**
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-- [ ] Manual check: Khối lịch hiển thị đúng tỷ lệ và các trạng thái ngày theo mockup v5.
-
-**Dependencies:** Task 1, Task 2
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/HomeHeader.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/CycleCalendarGrid.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/MascotSpeechBanner.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/BudgetSummarySection.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/SpendingCalendarCard.kt`
-
-**Estimated scope:** M (5 files)
+- [x] Task 4: Calendar & Budget UI Components
+  - Acceptance: `HomeHeader`, `CycleCalendarGrid`, `MascotSpeechBanner`, `BudgetSummarySection`, `SpendingCalendarCard`.
+  - Verify: Build assembleDebug succeeds, touch target $\ge 48\text{dp}$.
+  - Files: `HomeHeader.kt`, `CycleCalendarGrid.kt`, `MascotSpeechBanner.kt`, `BudgetSummarySection.kt`, `SpendingCalendarCard.kt`, `CurrencyUtils.kt`
 
 ---
 
