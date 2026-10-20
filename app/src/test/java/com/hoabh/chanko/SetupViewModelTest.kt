@@ -59,14 +59,19 @@ class SetupViewModelTest {
         vm.save(); runCurrent(); assertEquals(2,gw.submitted.size)
     }
     @Test fun unconfiguredOfflineAndExceptionsNeverCompleteOrEraseDraft() = runTest(dispatcher) {
-        val closed = SetupViewModel(); runCurrent(); assertEquals(SetupPage.STATUS_ERROR,closed.state.value.page)
+        val closed = SetupViewModel()
+        assertEquals(SetupPage.FORM, closed.state.value.page)
         closed.checkStatus(); runCurrent(); assertEquals(SetupProblem.UNAVAILABLE,closed.state.value.problem)
         val gw = Gateway(); val vm = SetupViewModel(gw) { "Asia/Ho_Chi_Minh" }; runCurrent()
         vm.amountChanged("42"); vm.dayChanged(30); gw.response = SetupSubmission.OFFLINE
         vm.save(); runCurrent(); assertEquals(SetupProblem.OFFLINE,vm.state.value.problem)
+        assertTrue(vm.state.value.showErrorDialog)
+        vm.dismissErrorDialog()
+        assertFalse(vm.state.value.showErrorDialog)
         assertEquals("42",vm.state.value.amount); assertEquals(30,vm.state.value.day)
         gw.beforeSave = { throw IllegalStateException("private diagnostic") }; gw.status=SetupStatus.UNKNOWN
         vm.save(); runCurrent(); assertEquals(SetupProblem.UNKNOWN,vm.state.value.problem)
+        assertTrue(vm.state.value.showErrorDialog)
         assertTrue(vm.state.value.needsReconciliation)
         vm.discard(); assertEquals("",vm.state.value.amount); assertNull(vm.state.value.day)
     }
@@ -76,9 +81,9 @@ class SetupViewModelTest {
             override suspend fun checkStatus() = withContext(NonCancellable) { result.await() }
             override suspend fun submit(draft: SetupDraft) = SetupSubmission.UNKNOWN
         }
-        val vm = SetupViewModel(gw); runCurrent(); vm.discard()
+        val vm = SetupViewModel(gw); runCurrent(); vm.checkStatus(); vm.discard()
         result.complete(SetupStatus.COMPLETE); runCurrent()
-        assertEquals(SetupPage.CHECKING, vm.state.value.page)
+        assertEquals(SetupPage.FORM, vm.state.value.page)
         assertEquals("", vm.state.value.amount)
     }
 

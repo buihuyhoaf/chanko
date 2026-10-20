@@ -44,7 +44,9 @@ import com.hoabh.chanko.presentation.screens.setup.SetupAnchorDayStep
 import com.hoabh.chanko.presentation.screens.setup.SetupBudgetStep
 import com.hoabh.chanko.presentation.screens.setup.SetupButton
 import com.hoabh.chanko.presentation.screens.setup.SetupDayPickerBottomSheet
+import com.hoabh.chanko.presentation.screens.setup.SetupErrorDialog
 import com.hoabh.chanko.presentation.screens.setup.SetupHeroBanner
+import com.hoabh.chanko.presentation.screens.setup.SetupProblem
 import com.hoabh.chanko.presentation.screens.setup.SetupPage
 import com.hoabh.chanko.presentation.screens.setup.SetupProblemText
 import com.hoabh.chanko.presentation.screens.setup.SetupStatusScreen
@@ -98,15 +100,24 @@ fun SetupGate(
 
     when (state.page) {
         SetupPage.COMPLETE -> onConfirmedComplete()
-        SetupPage.FORM -> InitialSetupScreen(
-            state = state,
-            onAmountChanged = model::amountChanged,
-            onDayChanged = model::dayChanged,
-            onContinue = model::continueToDay,
-            onBack = model::back,
-            onSave = model::save,
-            modifier = modifier,
-        )
+        SetupPage.FORM -> {
+            InitialSetupScreen(
+                state = state,
+                onAmountChanged = model::amountChanged,
+                onDayChanged = model::dayChanged,
+                onContinue = model::continueToDay,
+                onBack = model::back,
+                onSave = model::save,
+                modifier = modifier,
+            )
+            if (state.showErrorDialog && state.problem != null) {
+                SetupErrorDialog(
+                    problem = state.problem ?: SetupProblem.UNKNOWN,
+                    onDismiss = model::dismissErrorDialog,
+                    onRetry = model::save,
+                )
+            }
+        }
         else -> SetupStatusScreen(
             state = state,
             onRetry = model::checkStatus,
