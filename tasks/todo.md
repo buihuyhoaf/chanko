@@ -41,31 +41,16 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 5: Review & Cooling Item UI Components
-
-**Description:** Xây dựng 2 section danh sách món đồ: "Sẵn sàng xem lại" (mint card + nút Xem lại $\ge 48\text{dp}$) và "Đang cân nhắc" (card xanh nhạt + timer chip).
-
-**Acceptance criteria:**
-- [ ] `ReadyReviewSection.kt`: Header icon cửa mở 3D `ready_open_door.png` + số lượng món. Card mint gradient (`#D9FAE6` $\rightarrow$ `#CFF6DF`), thumbnail 64dp, chip "Đã hết thời gian chờ", nút Xem lại $\ge 48\text{dp}$ (`#00634F`).
-- [ ] `CoolingOffSection.kt`: Header icon bông tuyết 3D `cooling_snowflake.png` + số lượng món. Danh sách card nền xanh nhạt (`#E0EBFF`), thumbnail 64dp, chip đếm ngược thời gian ("Còn X ngày Y giờ").
-- [ ] Hỗ trợ trạng thái Empty State nhẹ nhàng khi không có món đồ nào ở từng section.
-
-**Verification:**
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-- [ ] Manual check: Card hiển thị đúng font Nunito, không ellipsis giá tiền.
-
-**Dependencies:** Task 1, Task 2
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/ReadyReviewSection.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/CoolingOffSection.kt`
-
-**Estimated scope:** S (2 files)
+- [x] Task 5: Review & Cooling Item UI Components
+  - Acceptance: `ReadyReviewSection` (cửa mint 3D, card mint, nút Xem lại $\ge 48\text{dp}$) và `CoolingOffSection` (bông tuyết 3D, card xanh nhạt, timer đếm ngược).
+  - Verify: Build assembleDebug succeeds, touch target $\ge 48\text{dp}$.
+  - Files: `ReadyReviewSection.kt`, `CoolingOffSection.kt`
 
 ---
 
 ## Checkpoint 3: UI Slices Complete
-- [ ] Toàn bộ các component UI con đã sẵn sàng và biên dịch sạch.
-- [ ] Mọi nút bấm và tương tác đều đạt kích thước chuẩn $\ge 48\text{dp}$.
+- [x] Toàn bộ các component UI con đã sẵn sàng và biên dịch sạch.
+- [x] Mọi nút bấm và tương tác đều đạt kích thước chuẩn $\ge 48\text{dp}$.
 
 ---
 
