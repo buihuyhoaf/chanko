@@ -23,34 +23,14 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 3: HomeUiState, HomeUiEvent, HomeViewModel & Unit Tests
-
-**Description:** Xây dựng tầng Presentation State Engine: `HomeUiState`, `HomeUiEvent`, và `HomeViewModel` (kết nối `ItemRepository` + `HomeSpendingRepository`), xử lý chọn ngày, nhảy về hôm nay, phân loại ready/cooling items, cùng bộ test `HomeViewModelTest`.
-
-**Acceptance criteria:**
-- [ ] `HomeUiState.kt`: Quản lý trạng thái màn hình (`Loading`, `Success`, `Error`), bao gồm chu kỳ, ngày đang chọn, danh sách ready items (`canDecide == true`), danh sách cooling items (`remainingMillis > 0`), thông điệp mèo.
-- [ ] `HomeUiEvent.kt`: Định nghĩa các sự kiện người dùng (`SelectDate`, `JumpToToday`, `OpenItem`, `ReviewItem`, `AddItem`, `SettingsClick`, `ProfileClick`).
-- [ ] `HomeViewModel.kt`: Tích hợp Hilt, expose `StateFlow<HomeUiState>`, xử lý logic chuyển ngày chọn và cập nhật chi tiết giao dịch.
-- [ ] `HomeViewModelTest.kt`: Kiểm thử nạp dữ liệu, chọn ngày, nhảy về hôm nay, lọc danh sách món đồ, tính tiến độ an toàn khi ngân sách = 0.
-
-**Verification:**
-- [ ] Tests pass: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew testDebugUnitTest --tests com.hoabh.chanko.presentation.screens.home.HomeViewModelTest`
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-
-**Dependencies:** Task 2
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiEvent.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/HomeViewModelTest.kt`
-
-**Estimated scope:** M (4 files)
-
----
+- [x] Task 3: HomeUiState, HomeUiEvent, HomeViewModel & Unit Tests
+  - Acceptance: `HomeUiState`, `HomeUiEvent`, `HomeViewModel` (kết nối `ItemRepository` + `HomeSpendingRepository`), `HomeViewModelTest`.
+  - Verify: Tests pass, build succeeds.
+  - Files: `HomeUiState.kt`, `HomeViewModel.kt`, `HomeViewModelTest.kt`
 
 ## Checkpoint 2: State Engine Complete
-- [ ] `HomeViewModel` hoạt động trơn tru với cả 2 repository.
-- [ ] Unit tests pass 100%, bảo đảm không có exception khi xử lý date hoặc chia tiến độ.
+- [x] `HomeViewModel` hoạt động trơn tru với cả 2 repository.
+- [x] Unit tests pass 100%, bảo đảm không có exception khi xử lý date hoặc chia tiến độ.
 
 ---
 
