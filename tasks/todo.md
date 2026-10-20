@@ -61,49 +61,22 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 7: Custom BottomBar Navigation & Home Route Wiring
-
-**Description:** Tùy biến `MainNavigation` với BottomBar 4 tab có khoảng trống $64-72\text{dp}$ ở trung tâm cho nút Floating Action Button (+), nối tab Trang chủ tới `HomeRoute` và truyền callback `onAddNewItemClick`.
-
-**Acceptance criteria:**
-- [ ] `MainNavigation.kt`: Cập nhật BottomBar với 4 tab (Trang chủ, Món đồ, Ngân sách, Phân tích) bo góc 24dp, nền trắng surface.
-- [ ] Nút (+) trung tâm nổi bật kích thước $56\text{dp}$, icon $28\text{dp}$, background `brandPurple` `#8965F6`, content description "Thêm món đồ", kích hoạt `onAddNewItemClick`.
-- [ ] Tab `TopLevelDestination.Home` render `HomeRoute()`.
-
-**Verification:**
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-- [ ] Tests pass: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew testDebugUnitTest`
-
-**Dependencies:** Task 6
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/navigation/MainNavigation.kt`
-
-**Estimated scope:** S (1 file)
-
----
+- [x] Task 7: Custom BottomBar Navigation & Home Route Wiring
+  - Acceptance: `MainNavigation.kt` với BottomBar 4 tab + Nút (+) trung tâm. Nối `TopLevelDestination.Home` tới `HomeRoute`.
+  - Verify: Build assembleDebug succeeds, testDebugUnitTest passes.
+  - Files: `MainNavigation.kt`, `TopLevelDestination.kt`, `strings.xml`
 
 ## Checkpoint 4: Integration Complete
-- [ ] Màn hình Home đã được nối vào navigation chính của app.
-- [ ] Nút (+) và các tab điều hướng hoạt động theo đúng hợp đồng.
+- [x] Màn hình Home đã được nối vào navigation chính của app.
+- [x] Nút (+) và các tab điều hướng hoạt động theo đúng hợp đồng.
 
 ---
 
-## Task 8: End-to-End Quality Gate & Regression Verification
+- [x] Task 8: End-to-End Quality Gate & Regression Verification
+  - Acceptance: Toàn bộ unit tests pass, assembleDebug build thành công, không vi phạm quy chuẩn dự án.
+  - Verify: `testDebugUnitTest` (100% pass) & `assembleDebug` (thành công).
+  - Files: Toàn bộ codebase liên quan đến Home feature.
 
-**Description:** Chạy toàn bộ test suite của toàn bộ project, build APK debug kiểm tra biên dịch, rà soát code theo [CODING_STANDARDS.md](file:///Users/buihoa/AndroidStudioProjects/chanko/CODING_STANDARDS.md) và kiểm tra các tiêu chí nghiệm thu của [SPEC-home.md](file:///Users/buihoa/AndroidStudioProjects/chanko/SPEC-home.md).
-
-**Acceptance criteria:**
-- [ ] `./gradlew testDebugUnitTest` chạy pass 100% tất cả các test unit trong dự án.
-- [ ] `./gradlew assembleDebug` biên dịch thành công.
-- [ ] Không có chuỗi hardcode hay mã màu hex phân tán ngoài `strings_home.xml` và `Color.kt`.
-- [ ] Không vi phạm quy tắc cấm cài đặt lên máy ảo/thiết bị và không can thiệp vào agent skills.
-
-**Verification:**
-- [ ] Tests pass: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew testDebugUnitTest`
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-
-**Dependencies:** Task 1-7
-**Files likely touched:**
-- Toàn bộ codebase liên quan đến Home feature.
-
-**Estimated scope:** S (Verification & Audit)
+## Checkpoint: Complete & Done
+- [x] Toàn bộ acceptance criteria của `SPEC-home.md` đã hoàn thành.
+- [x] Sẵn sàng bàn giao / tạo Pull Request.
