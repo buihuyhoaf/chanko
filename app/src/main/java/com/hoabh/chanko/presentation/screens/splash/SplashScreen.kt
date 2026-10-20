@@ -22,11 +22,8 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.hoabh.chanko.presentation.OverviewUiState
-import com.hoabh.chanko.presentation.OverviewViewModel
 import com.hoabh.chanko.presentation.navigation.Screen
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,7 +78,6 @@ private val LogoSizeCompact = 48.sp
 private val LogoSizeRegular = 60.sp
 
 fun NavGraphBuilder.splashDestination(
-    overviewViewModel: OverviewViewModel,
     isRestored: () -> Boolean,
     onSplashFinished: () -> Unit
 ) {
@@ -90,9 +86,8 @@ fun NavGraphBuilder.splashDestination(
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
-        val state by overviewViewModel.items.collectAsStateWithLifecycle()
         SplashScreen(
-            isReady = isRestored() && state !is OverviewUiState.Loading,
+            isReady = isRestored(),
             onSplashFinished = onSplashFinished
         )
     }
