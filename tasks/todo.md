@@ -4,26 +4,10 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 1: Assets, Strings & Design Tokens Setup
-
-**Description:** Import 6 ảnh PNG từ handoff vào `app/src/main/res/drawable-nodpi/`, khai báo toàn bộ chuỗi tiếng Việt trong `strings_home.xml` và định nghĩa các token màu sắc từ `tokens.json` vào `Color.kt`.
-
-**Acceptance criteria:**
-- [ ] 6 file PNG (`cooling_snowflake.png`, `mascot_crossed_arms.png`, `ready_open_door.png`, `sample_headphones.png`, `sample_jacket.png`, `sample_keyboard.png`) được đặt tại `app/src/main/res/drawable-nodpi/`.
-- [ ] File `res/values/strings_home.xml` được tạo với đầy đủ các chuỗi giao diện, tiêu đề, nhãn trạng thái và content description tiếng Việt.
-- [ ] Token màu sắc từ `tokens.json` (`readySurface`, `readyAction`, `readyInk`, `readyChip`, `coolingBlue`, `coolingLavender`, `coolingChip`, `speechSurface`, `calendarSurface`, `calendarInnerSurface`, `primarySoft`, `primaryInk`, `divider`, `progressTrack`) được bổ sung trong `Color.kt`.
-
-**Verification:**
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-- [ ] Manual check: Các file ảnh và token truy cập được từ code Compose.
-
-**Dependencies:** None
-**Files likely touched:**
-- `app/src/main/res/drawable-nodpi/*`
-- `app/src/main/res/values/strings_home.xml`
-- `app/src/main/java/com/hoabh/chanko/ui/theme/Color.kt`
-
-**Estimated scope:** S (3 files/folders)
+- [x] Task 1: Assets, Strings & Design Tokens Setup
+  - Acceptance: 6 file PNG được đặt tại `drawable-nodpi/`. File `strings_home.xml` đầy đủ chuỗi tiếng Việt. Bổ sung token màu trong `Color.kt`.
+  - Verify: Build assembleDebug succeeds.
+  - Files: `app/src/main/res/drawable-nodpi/*`, `app/src/main/res/values/strings_home.xml`, `app/src/main/java/com/hoabh/chanko/ui/theme/Color.kt`
 
 ---
 
