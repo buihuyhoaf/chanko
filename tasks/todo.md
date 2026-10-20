@@ -11,35 +11,15 @@ Nhánh: `feature/home-screen` | Theo dõi: `tasks/plan.md` | Tài liệu: `SPEC-
 
 ---
 
-## Task 2: Home Domain Models & Cycle Calculation Logic
-
-**Description:** Xây dựng các data model cho chu kỳ ngân sách, trạng thái từng ô ngày trong lịch, và logic tính toán ngày/thứ bắt đầu chu kỳ cùng bộ Unit Tests kiểm chứng.
-
-**Acceptance criteria:**
-- [ ] `SpendingCycle.kt`: Chứa thông tin ngày bắt đầu, ngày kết thúc, hàm tính 7 nhãn thứ tương ứng bắt đầu từ thứ của ngày neo (ví dụ: ngày 15 bắt đầu T5 $\rightarrow$ T5, T6, T7, CN, T2, T3, T4).
-- [ ] `CalendarDayState.kt`: Mô hình trạng thái từng ngày trên lưới lịch (`Normal`, `CycleStart`, `Today`, `Selected`, `HasPurchases`) và chi tiết giao dịch.
-- [ ] `HomeSpendingRepository.kt`: Interface và In-Memory Mock Implementation cung cấp chu kỳ mẫu (15/10 - 14/11) và các giao dịch mẫu (16/10 và 18/10).
-- [ ] Unit test `SpendingCycleTest.kt`: Kiểm chứng thuật toán tính ngày/thứ chu kỳ và an toàn chia tiến độ.
-
-**Verification:**
-- [ ] Tests pass: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew testDebugUnitTest --tests com.hoabh.chanko.presentation.screens.home.SpendingCycleTest`
-- [ ] Build succeeds: `JAVA_HOME=/Users/buihoa/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./gradlew assembleDebug`
-
-**Dependencies:** Task 1
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/model/SpendingCycle.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/model/CalendarDayState.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/data/HomeSpendingRepository.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/SpendingCycleTest.kt`
-
-**Estimated scope:** M (4 files)
-
----
+- [x] Task 2: Home Domain Models & Cycle Calculation Logic
+  - Acceptance: `SpendingCycle`, `CalendarDayState`, `DailyPurchaseSummary`, `HomeSpendingRepository`, unit tests `SpendingCycleTest`.
+  - Verify: Tests pass, build succeeds.
+  - Files: `SpendingCycle.kt`, `CalendarDayState.kt`, `BudgetSummary.kt`, `HomeSpendingRepository.kt`, `RepositoryModule.kt`, `SpendingCycleTest.kt`
 
 ## Checkpoint 1: Foundation Complete
-- [ ] Toàn bộ asset PNG và strings sẵn sàng.
-- [ ] Unit tests cho logic chu kỳ chi tiêu pass 100%.
-- [ ] Build dự án thành công không lỗi.
+- [x] Toàn bộ asset PNG và strings sẵn sàng.
+- [x] Unit tests cho logic chu kỳ chi tiêu pass 100%.
+- [x] Build dự án thành công không lỗi.
 
 ---
 
