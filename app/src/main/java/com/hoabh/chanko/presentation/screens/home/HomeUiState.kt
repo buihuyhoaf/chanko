@@ -4,6 +4,7 @@ import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.presentation.screens.home.model.BudgetSummary
 import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
 import com.hoabh.chanko.presentation.screens.home.model.DailyPurchaseSummary
+import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
 import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
 import java.time.LocalDate
 
@@ -18,7 +19,7 @@ sealed interface HomeUiState {
         val selectedDate: LocalDate,
         val selectedDateTransactions: DailyPurchaseSummary?,
         val budgetSummary: BudgetSummary,
-        val mascotSpeechMessage: String,
+        val mascotAdvice: MascotAdvice,
         val readyItems: List<CooldownItem>,
         val coolingItems: List<CooldownItem>,
         val today: LocalDate

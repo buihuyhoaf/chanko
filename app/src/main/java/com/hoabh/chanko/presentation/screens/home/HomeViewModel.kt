@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.presentation.screens.home.data.HomeSpendingRepository
 import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
+import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
 import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,13 +60,10 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            val speech = when {
-                budgetSummary.progressPercent >= 100 ->
-                    "Đã vượt ngân sách rồi sen ơi! Cần thắt chặt chi tiêu nhé."
-                budgetSummary.progressPercent >= 75 ->
-                    "Đã tiêu ${budgetSummary.progressPercent}% rồi! Mình chậm lại chút nhé."
-                else ->
-                    "Bạn đang chi tiêu rất hợp lý! Cứ tiếp tục thế này nhé."
+            val mascotAdvice = when {
+                budgetSummary.progressPercent >= 100 -> MascotAdvice.OverBudget
+                budgetSummary.progressPercent >= 75 -> MascotAdvice.Warning(budgetSummary.progressPercent)
+                else -> MascotAdvice.Safe
             }
 
             HomeUiState.Content(
@@ -75,7 +73,7 @@ class HomeViewModel @Inject constructor(
                 selectedDate = effectiveSelected,
                 selectedDateTransactions = dailyPurchases[effectiveSelected],
                 budgetSummary = budgetSummary,
-                mascotSpeechMessage = speech,
+                mascotAdvice = mascotAdvice,
                 readyItems = readyItems,
                 coolingItems = coolingItems,
                 today = today

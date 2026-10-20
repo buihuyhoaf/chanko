@@ -86,6 +86,7 @@ class HomeViewModelTest {
 
         assertEquals(fixedToday, content.selectedDate)
         assertEquals(31, content.calendarDays.size)
+        assertEquals(com.hoabh.chanko.presentation.screens.home.model.MascotAdvice.Warning(80), content.mascotAdvice)
     }
 
     @Test

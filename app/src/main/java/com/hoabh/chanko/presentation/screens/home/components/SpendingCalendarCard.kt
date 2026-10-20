@@ -38,6 +38,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.model.BudgetSummary
 import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
 import com.hoabh.chanko.presentation.screens.home.model.DailyPurchaseSummary
+import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
 import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
 import com.hoabh.chanko.presentation.screens.home.model.toVndCurrency
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -50,7 +51,7 @@ fun SpendingCalendarCard(
     selectedDate: LocalDate,
     selectedTransactions: DailyPurchaseSummary?,
     budgetSummary: BudgetSummary,
-    mascotSpeechMessage: String,
+    mascotAdvice: MascotAdvice,
     onDateClick: (LocalDate) -> Unit,
     onTodayClick: () -> Unit,
     onDayDetailClick: (LocalDate) -> Unit,
@@ -223,7 +224,7 @@ fun SpendingCalendarCard(
 
             // Mascot with dynamic speech bubble
             MascotSpeechBanner(
-                speechMessage = mascotSpeechMessage
+                advice = mascotAdvice
             )
 
             HorizontalDivider(

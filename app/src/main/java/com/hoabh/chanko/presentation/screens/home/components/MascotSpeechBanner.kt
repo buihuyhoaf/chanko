@@ -18,17 +18,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
 import com.hoabh.chanko.ui.theme.CandyColors
 
 @Composable
 fun MascotSpeechBanner(
-    speechMessage: String,
+    advice: MascotAdvice,
     modifier: Modifier = Modifier
 ) {
+    val speechMessage = when (advice) {
+        is MascotAdvice.Safe -> stringResource(R.string.home_mascot_speech_safe)
+        is MascotAdvice.Warning -> stringResource(R.string.home_mascot_speech_warning, advice.percent)
+        is MascotAdvice.OverBudget -> stringResource(R.string.home_mascot_speech_over)
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()

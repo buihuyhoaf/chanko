@@ -195,6 +195,7 @@ fun ChankoBottomBar(
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .padding(top = 8.dp)
                 .size(56.dp)
                 .semantics { contentDescription = addCd }
         ) {

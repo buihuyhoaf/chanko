@@ -38,6 +38,7 @@ import com.hoabh.chanko.presentation.screens.home.components.SpendingCalendarCar
 import com.hoabh.chanko.presentation.screens.home.model.BudgetSummary
 import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
 import com.hoabh.chanko.presentation.screens.home.model.DailyPurchaseSummary
+import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
 import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.ChankoTheme
@@ -154,7 +155,7 @@ fun HomeScreen(
                             selectedDate = state.selectedDate,
                             selectedTransactions = state.selectedDateTransactions,
                             budgetSummary = state.budgetSummary,
-                            mascotSpeechMessage = state.mascotSpeechMessage,
+                            mascotAdvice = state.mascotAdvice,
                             onDateClick = { onEvent(HomeUiEvent.SelectDate(it)) },
                             onTodayClick = { onEvent(HomeUiEvent.JumpToToday) },
                             onDayDetailClick = { /* Could open transaction history bottom sheet */ }
@@ -241,7 +242,7 @@ private fun HomeScreenPreview() {
         selectedDate = LocalDate.of(2026, 10, 18),
         selectedDateTransactions = DailyPurchaseSummary(purchaseCount = 1, totalAmount = 1_400_000L),
         budgetSummary = BudgetSummary(totalBudget = 3_000_000L, totalSpent = 2_400_000L),
-        mascotSpeechMessage = "Đã tiêu 80% rồi! Mình chậm lại chút nhé.",
+        mascotAdvice = MascotAdvice.Warning(percent = 80),
         readyItems = sampleReadyItems,
         coolingItems = sampleCoolingItems,
         today = today
