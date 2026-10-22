@@ -7,7 +7,7 @@ Triển khai theo visual đã duyệt trong chat, SETUP-01…05 và UI UX DS v1.
 ## Đã triển khai
 
 - Toàn bộ nội dung Initial Setup bằng tiếng Việt trong `values/strings_setup.xml`, kể cả semantics, validation, loading, offline, Retry và trạng thái chưa xác nhận.
-- Ngân sách bắt buộc >0, số nguyên VND, không thêm min/max. Giữ dạng chuỗi chữ số để không áp đặt `Long` limit trước khi có contract; không dùng floating point. Định dạng hiển thị nhóm nghìn bằng dấu chấm với OffsetMapping để nhập/chỉnh sửa bằng con trỏ. Paste số âm/thập phân không được biến thành giá trị dương.
+- Ngân sách bắt buộc tối thiểu 100.000 ₫, số nguyên VND. Giữ dạng chuỗi chữ số để không áp đặt `Long` limit trước khi có contract; không dùng floating point. Định dạng hiển thị nhóm nghìn bằng dấu chấm với OffsetMapping để nhập/chỉnh sửa bằng con trỏ. Paste số âm/thập phân không được biến thành giá trị dương.
 - Chọn rõ ngày 1–31, không mặc định. Bottom sheet cuộn, mỗi hàng >=56dp, selected semantics. Cảnh báo ngày cố định và quy tắc tháng thiếu ngày xuất hiện trước nút lưu.
 - Back từ bước 2 giữ cả hai giá trị. Draft ở ViewModel sống qua xoay màn hình; không tuyên bố giữ draft qua process death. Khởi động lại phải kiểm tra server, không tin cờ completed trong saved state/cache. Draft và pending operation bị hủy khi account subtree rời UI (ngoại trừ configuration change).
 - Scroll cả form và CTA, safe drawing + IME insets, hero giảm chiều cao khi IME mở hoặc chữ lớn. Touch >=48dp. Lỗi được đọc bằng live region. Không ellipsis copy cảnh báo/CTA.

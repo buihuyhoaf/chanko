@@ -30,11 +30,31 @@ class SetupViewModelTest {
         assertEquals(SetupPage.FORM, vm.state.value.page)
         assertEquals("", vm.state.value.amount); assertNull(vm.state.value.day)
         vm.continueToDay(); assertTrue(vm.state.value.amountError)
-        listOf("0", "000", "-1", "1.5", "abc").forEach { vm.amountChanged(it); vm.continueToDay(); assertTrue(vm.state.value.amountError) }
+        listOf("0", "000", "-1", "1.5", "abc", "1", "99999", "099999").forEach { vm.amountChanged(it); vm.continueToDay(); assertTrue(vm.state.value.amountError) }
+        vm.amountChanged("100000"); vm.continueToDay(); assertFalse(vm.state.value.amountError); vm.back()
         val large = "9".repeat(80)
         vm.amountChanged(large); vm.continueToDay(); vm.dayChanged(31); vm.back()
         assertEquals(large, vm.state.value.amount); assertEquals(31, vm.state.value.day)
         vm.dayChanged(32); assertEquals(31, vm.state.value.day)
+    }
+    @Test fun minimumBudgetEnforcedAt100000Vnd() = runTest(dispatcher) {
+        val vm = SetupViewModel(Gateway()); runCurrent()
+        listOf("0", "99999", "0099999", "1", "50000").forEach { amount ->
+            vm.amountChanged(amount)
+            vm.continueToDay()
+            assertTrue("Expected amountError for $amount", vm.state.value.amountError)
+            assertEquals(1, vm.state.value.step)
+        }
+        vm.amountChanged("100000")
+        vm.continueToDay()
+        assertFalse(vm.state.value.amountError)
+        assertEquals(2, vm.state.value.step)
+        vm.back()
+
+        vm.amountChanged("100.000")
+        vm.continueToDay()
+        assertFalse(vm.state.value.amountError)
+        assertEquals(2, vm.state.value.step)
     }
     @Test fun requiresExplicitDayAndUsesIanaDeviceZone() = runTest(dispatcher) {
         val gw = Gateway(); val vm = SetupViewModel(gw) { "Asia/Ho_Chi_Minh" }; runCurrent()
@@ -48,16 +68,16 @@ class SetupViewModelTest {
     @Test fun onlyServerConfirmationGrantsHomeAndDoubleSubmitIsBlocked() = runTest(dispatcher) {
         val gw = Gateway(); val blocker = CompletableDeferred<Unit>(); gw.beforeSave = { blocker.await() }
         val vm = SetupViewModel(gw) { "Asia/Ho_Chi_Minh" }; runCurrent()
-        vm.amountChanged("1"); vm.dayChanged(1); vm.save(); vm.save(); runCurrent()
+        vm.amountChanged("100000"); vm.dayChanged(1); vm.save(); vm.save(); runCurrent()
         assertEquals(1,gw.submitted.size); assertTrue(vm.state.value.busy)
-        vm.amountChanged("99"); vm.dayChanged(5); vm.back()
-        assertEquals("1",vm.state.value.amount); assertEquals(1,vm.state.value.day)
+        vm.amountChanged("200000"); vm.dayChanged(5); vm.back()
+        assertEquals("100000",vm.state.value.amount); assertEquals(1,vm.state.value.day)
         gw.status = SetupStatus.COMPLETE; blocker.complete(Unit); runCurrent()
         assertEquals(SetupPage.COMPLETE,vm.state.value.page)
     }
     @Test fun uncertainSaveReconcilesBeforeAnotherSubmission() = runTest(dispatcher) {
         val gw = Gateway(); val vm = SetupViewModel(gw) { "Asia/Ho_Chi_Minh" }; runCurrent()
-        vm.amountChanged("5"); vm.dayChanged(3); gw.status = SetupStatus.UNKNOWN
+        vm.amountChanged("500000"); vm.dayChanged(3); gw.status = SetupStatus.UNKNOWN
         vm.save(); runCurrent(); assertTrue(vm.state.value.needsReconciliation)
         vm.save(); runCurrent(); assertEquals(1, gw.submitted.size)
         gw.status = SetupStatus.INCOMPLETE; vm.save(); runCurrent()
@@ -69,12 +89,12 @@ class SetupViewModelTest {
         assertEquals(SetupPage.FORM, closed.state.value.page)
         closed.checkStatus(); runCurrent(); assertEquals(SetupProblem.UNAVAILABLE,closed.state.value.problem)
         val gw = Gateway(); val vm = SetupViewModel(gw) { "Asia/Ho_Chi_Minh" }; runCurrent()
-        vm.amountChanged("42"); vm.dayChanged(30); gw.response = SetupSubmission.OFFLINE
+        vm.amountChanged("500000"); vm.dayChanged(30); gw.response = SetupSubmission.OFFLINE
         vm.save(); runCurrent(); assertEquals(SetupProblem.OFFLINE,vm.state.value.problem)
         assertTrue(vm.state.value.showErrorDialog)
         vm.dismissErrorDialog()
         assertFalse(vm.state.value.showErrorDialog)
-        assertEquals("42",vm.state.value.amount); assertEquals(30,vm.state.value.day)
+        assertEquals("500000",vm.state.value.amount); assertEquals(30,vm.state.value.day)
         gw.beforeSave = { throw IllegalStateException("private diagnostic") }; gw.status=
         SetupStatus.UNKNOWN
         vm.save(); runCurrent(); assertEquals(SetupProblem.UNKNOWN,vm.state.value.problem)
