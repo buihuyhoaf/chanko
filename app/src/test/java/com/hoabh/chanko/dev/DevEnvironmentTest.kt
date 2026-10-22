@@ -5,6 +5,9 @@ import com.hoabh.chanko.data.local.entity.CooldownItemEntity
 import com.hoabh.chanko.domain.auth.AuthResult
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.domain.model.ItemStatus
+import com.hoabh.chanko.presentation.screens.setup.components.SetupDraft
+import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
+import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,14 +22,15 @@ class DevEnvironmentTest {
     fun devFakeAuthenticationRepository_initialStateAndSignInSuccess() = runTest {
         val repo = DevFakeAuthenticationRepository()
         val initialSession = repo.session.value
-        assertTrue(initialSession is SessionState.Available)
-        assertEquals("dev-user", (initialSession as SessionState.Available).account.value)
-
-        val restoreResult = repo.restore()
-        assertTrue(restoreResult is AuthResult.Success)
+        assertTrue(initialSession is SessionState.SignedOut)
 
         val signInResult = repo.signIn { "fake-token" }
         assertTrue(signInResult is AuthResult.Success)
+        assertTrue(repo.session.value is SessionState.Available)
+        assertEquals("dev-user", (repo.session.value as SessionState.Available).account.value)
+
+        val restoreResult = repo.restore()
+        assertTrue(restoreResult is AuthResult.Success)
         assertTrue(repo.session.value is SessionState.Available)
 
         val logoutResult = repo.logout()
@@ -43,6 +47,19 @@ class DevEnvironmentTest {
         val challenge = (challengeResult as AuthResult.Success).value
         val signInResult = repo.signIn(challenge, "fake-id-token")
         assertTrue(signInResult is AuthResult.Success)
+    }
+
+    @Test
+    fun devSetupGateway_lifecycleAndReset() = runTest {
+        DevSetupGateway.reset()
+        assertEquals(SetupStatus.INCOMPLETE, DevSetupGateway.checkStatus())
+
+        val submission = DevSetupGateway.submit(SetupDraft("5000000", 15, "Asia/Ho_Chi_Minh"))
+        assertEquals(SetupSubmission.ACCEPTED, submission)
+        assertEquals(SetupStatus.COMPLETE, DevSetupGateway.checkStatus())
+
+        DevSetupGateway.reset()
+        assertEquals(SetupStatus.INCOMPLETE, DevSetupGateway.checkStatus())
     }
 
     @Test

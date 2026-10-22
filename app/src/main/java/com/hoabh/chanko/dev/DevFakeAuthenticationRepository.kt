@@ -22,15 +22,21 @@ import javax.inject.Singleton
 @Singleton
 class DevFakeAuthenticationRepository @Inject constructor() : AuthenticationRepository {
     private val devAccount = AccountScope("dev-user")
-    private val _session = MutableStateFlow<SessionState>(SessionState.Available(devAccount))
+    private var hasLoggedIn = false
+    private val _session = MutableStateFlow<SessionState>(SessionState.SignedOut)
     override val session: StateFlow<SessionState> = _session.asStateFlow()
 
     override suspend fun restore(): AuthResult<Unit> {
-        _session.value = SessionState.Available(devAccount)
+        if (hasLoggedIn) {
+            _session.value = SessionState.Available(devAccount)
+        } else {
+            _session.value = SessionState.SignedOut
+        }
         return AuthResult.Success(Unit)
     }
 
     override suspend fun signIn(provider: GoogleTokenProvider): AuthResult<Unit> {
+        hasLoggedIn = true
         _session.value = SessionState.Available(devAccount)
         return AuthResult.Success(Unit)
     }
@@ -40,7 +46,9 @@ class DevFakeAuthenticationRepository @Inject constructor() : AuthenticationRepo
     }
 
     override suspend fun logout(): AuthResult<Revocation> {
+        hasLoggedIn = false
         _session.value = SessionState.SignedOut
+        DevSetupGateway.reset()
         return AuthResult.Success(Revocation.CONFIRMED)
     }
 }
