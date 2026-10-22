@@ -6,7 +6,7 @@
     - `strings_setup.xml` có các chuỗi: `setup_error_dialog_title` ("Chưa thể lưu thiết lập"), `setup_close` ("Đóng").
     - `SetupUiState` có `showErrorDialog: Boolean = false`, khởi tạo mặc định `page = SetupPage.FORM`.
   - **Verification**: `./gradlew compileDebugKotlin`
-  - **Files**: `app/src/main/res/values/strings_setup.xml`, `app/src/main/java/com/hoabh/chanko/presentation/screens/setup/SetupViewModel.kt`
+  - **Files**: `app/src/main/res/values/strings_setup.xml`, `../app/src/main/java/com/hoabh/chanko/presentation/screens/setup/viewmodel/SetupViewModel.kt`
 
 - [x] **Task 2: Refactor SetupViewModel & Unit Tests**
   - **Description**: Loại bỏ tự động check status ở `init`, xử lý khi `save()` lỗi sẽ bật `showErrorDialog` thay vì đổi page, và thêm `dismissErrorDialog()`. Cập nhật `SetupViewModelTest`.
@@ -16,7 +16,7 @@
     - `dismissErrorDialog()` gán `showErrorDialog = false`.
     - Toàn bộ unit tests trong `SetupViewModelTest` pass.
   - **Verification**: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.SetupViewModelTest"`
-  - **Files**: `app/src/main/java/com/hoabh/chanko/presentation/screens/setup/SetupViewModel.kt`, `app/src/test/java/com/hoabh/chanko/SetupViewModelTest.kt`
+  - **Files**: `../app/src/main/java/com/hoabh/chanko/presentation/screens/setup/viewmodel/SetupViewModel.kt`, `app/src/test/java/com/hoabh/chanko/SetupViewModelTest.kt`
 
 - [x] **Checkpoint 1: Logic & ViewModel Unit Tests**
   - Verification: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.SetupViewModelTest"`
@@ -28,7 +28,7 @@
     - Nhấn "Thử lại" gọi hàm save tiếp tục.
     - Nhấn "Đóng" đóng dialog, giữ nguyên dữ liệu đã nhập ở form.
   - **Verification**: `./gradlew compileDebugKotlin`
-  - **Files**: `app/src/main/java/com/hoabh/chanko/presentation/screens/setup/SetupStatusScreen.kt` (hoặc tạo file Dialog riêng), `app/src/main/java/com/hoabh/chanko/presentation/screens/setup/screen/SetupScreen.kt`
+  - **Files**: `../app/src/main/java/com/hoabh/chanko/presentation/screens/setup/screen/SetupStatusScreen.kt` (hoặc tạo file Dialog riêng), `app/src/main/java/com/hoabh/chanko/presentation/screens/setup/screen/SetupScreen.kt`
 
 - [x] **Task 4: Update Existing Tests & Full Verification**
   - **Description**: Điều chỉnh các test case cũ còn phụ thuộc vào luồng `CHECKING`/`STATUS_ERROR` (nếu có), đảm bảo toàn bộ unit test và build compile pass.

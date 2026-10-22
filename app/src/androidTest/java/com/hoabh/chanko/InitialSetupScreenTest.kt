@@ -7,8 +7,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
-import com.hoabh.chanko.presentation.screens.setup.*
+import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
+import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.data.SetupUiState
 import com.hoabh.chanko.presentation.screens.setup.screen.InitialSetupScreen
+import com.hoabh.chanko.presentation.screens.setup.screen.SetupStatusScreen
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import org.junit.Assert.*
 import org.junit.Rule
@@ -60,8 +63,11 @@ class InitialSetupScreenTest {
     }
     @Test fun unknownGateOnlyOffersRetry() {
         var retries = 0
-        compose.setContent { ChankoTheme { SetupStatusScreen(
-            SetupUiState(page=SetupPage.STATUS_ERROR,problem=SetupProblem.UNKNOWN), { retries++ }) } }
+        compose.setContent { ChankoTheme {
+            SetupStatusScreen(
+                SetupUiState(page = SetupPage.STATUS_ERROR, problem = SetupProblem.UNKNOWN),
+                { retries++ })
+        } }
         compose.onNodeWithText("Thử lại").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1,retries) }
         compose.onNodeWithText("Home").assertDoesNotExist()

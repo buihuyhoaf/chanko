@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup
+package com.hoabh.chanko.presentation.screens.setup.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyShape
 

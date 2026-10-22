@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.login
+package com.hoabh.chanko.presentation.screens.login.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.auth.AuthFailure

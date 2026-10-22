@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup
+package com.hoabh.chanko.presentation.screens.setup.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

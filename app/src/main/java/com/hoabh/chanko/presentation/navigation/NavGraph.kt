@@ -11,8 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.dashboard.dashboardDestination
-import com.hoabh.chanko.presentation.screens.login.LoginRoute
-import com.hoabh.chanko.presentation.screens.login.loginDestination
+import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
+import com.hoabh.chanko.presentation.screens.login.screen.loginDestination
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
 
@@ -20,7 +20,8 @@ import com.hoabh.chanko.presentation.screens.splash.splashDestination
 private val UnauthenticatedRoutes = setOf(
     Screen.Splash.route,
     Screen.Login.route,
-    Screen.Setup.route
+    Screen.Setup.route,
+    Screen.Dashboard.route
 )
 
 @Composable

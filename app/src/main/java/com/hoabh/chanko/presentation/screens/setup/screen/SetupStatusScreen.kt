@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup
+package com.hoabh.chanko.presentation.screens.setup.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.setup.components.Ink
+import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
+import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.data.SetupUiState
+import com.hoabh.chanko.presentation.screens.setup.components.SetupButton
+import com.hoabh.chanko.presentation.screens.setup.components.SetupProblemText
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 

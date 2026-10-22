@@ -9,8 +9,8 @@ enum class TopLevelDestination(
     val label: String,
     @get:StringRes val labelRes: Int
 ) {
-    Home("home", "Home", R.string.tab_home),
-    MyItems("my_items", "My Items", R.string.tab_my_items),
-    Budget("budget", "Budget", R.string.tab_budget),
-    Insights("insights", "Insights", R.string.tab_insights);
+    Home("home", "Trang chủ", R.string.tab_home),
+    MyItems("my_items", "Món đồ", R.string.tab_my_items),
+    Budget("budget", "Ngân sách", R.string.tab_budget),
+    Insights("insights", "Phân tích", R.string.tab_insights);
 }

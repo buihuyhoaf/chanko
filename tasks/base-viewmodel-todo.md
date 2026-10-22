@@ -24,7 +24,7 @@ Tài liệu đặc tả: `docs/ideas/base-viewmodel.md`
 - [x] Task 4: Pilot Migration trên LoginViewModel & LoginRoute
   - Acceptance: Refactor `LoginViewModel` kế thừa `BaseViewModel<LoginUiState, LoginUiEffect>`. Tích hợp `CollectEffect` vào UI. Bảo toàn 100% test trong `LoginViewModelTest`.
   - Verify: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.LoginViewModelTest"` && `./gradlew assembleDebug`
-  - Files: `app/src/main/java/com/hoabh/chanko/presentation/screens/login/LoginViewModel.kt`, `LoginScreen.kt`, `app/src/test/java/com/hoabh/chanko/LoginViewModelTest.kt`
+  - Files: `../app/src/main/java/com/hoabh/chanko/presentation/screens/login/viewmodel/LoginViewModel.kt`, `LoginScreen.kt`, `app/src/test/java/com/hoabh/chanko/LoginViewModelTest.kt`
 
 - [x] Task 5: Quality Gate & Regression Check
   - Acceptance: Chạy toàn bộ test suite dự án pass 100%, assembleDebug thành công, kiểm tra tuân thủ CODING_STANDARDS.md.

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home Header -->
+    <string name="home_greeting_morning">Chào buổi sáng, %1$s</string>
+    <string name="home_greeting_afternoon">Chào buổi chiều, %1$s</string>
+    <string name="home_greeting_evening">Chào buổi tối, %1$s</string>
+    <string name="home_greeting_default">Chào buổi sáng</string>
+    <string name="home_cd_settings">Cài đặt</string>
+    <string name="home_cd_profile">Hồ sơ cá nhân</string>
+
+    <!-- Calendar Section -->
+    <string name="home_calendar_title">Lịch chi tiêu</string>
+    <string name="home_btn_today">Hôm nay</string>
+    <string name="home_calendar_month_format">Tháng %1$d – %2$d/%3$d</string>
+    <string name="home_calendar_month_single_format">Tháng %1$d/%2$d</string>
+    <string name="home_legend_start">Bắt đầu</string>
+    <string name="home_legend_today">Hôm nay</string>
+    <string name="home_legend_purchases">Có mua hàng</string>
+    <string name="home_selected_day_detail">%1$d/%2$d · %3$d giao dịch</string>
+    <string name="home_selected_day_no_purchase">%1$d/%2$d · Không có giao dịch</string>
+    <string name="home_cd_open_day_transactions">Xem giao dịch ngày %1$d/%2$d</string>
+
+    <!-- Budget Summary -->
+    <string name="home_budget_title">Ngân sách</string>
+    <string name="home_spent_title">Đã tiêu</string>
+    <string name="home_remaining_title">Còn lại</string>
+    <string name="home_progress_label">Đã tiêu %1$d%%</string>
+    <string name="home_renewal_label">Kỳ mới: %1$s</string>
+
+    <!-- Mascot Speech Messages -->
+    <string name="home_mascot_speech_safe">Bạn đang chi tiêu rất hợp lý! Cứ tiếp tục thế này nhé.</string>
+    <string name="home_mascot_speech_warning">Đã tiêu %1$d%% rồi! Mình chậm lại chút nhé.</string>
+    <string name="home_mascot_speech_over">Đã vượt ngân sách rồi sen ơi! Cần thắt chặt chi tiêu nhé.</string>
+    <string name="home_mascot_speech_countdown">Còn %1$d ngày nữa là tới kỳ lương. Cố lên sen ơi!</string>
+
+    <!-- Ready for Review Section -->
+    <string name="home_section_ready_title">Sẵn sàng xem lại</string>
+    <string name="home_item_count">%1$d món</string>
+    <string name="home_ready_chip_label">Đã hết thời gian chờ</string>
+    <string name="home_btn_review">Xem lại</string>
+    <string name="home_ready_empty">Chưa có món đồ nào cần xem lại</string>
+
+    <!-- Cooling-Off Section -->
+    <string name="home_section_cooling_title">Đang cân nhắc</string>
+    <string name="home_cooling_timer_days_hours">Còn %1$d ngày %2$d giờ</string>
+    <string name="home_cooling_timer_hours_minutes">Còn %1$d giờ %2$d phút</string>
+    <string name="home_cooling_timer_minutes">Còn %1$d phút</string>
+    <string name="home_cooling_empty">Hiện không có món đồ nào đang chờ</string>
+
+    <!-- Navigation -->
+    <string name="home_nav_home">Trang chủ</string>
+    <string name="home_nav_items">Món đồ</string>
+    <string name="home_nav_budget">Ngân sách</string>
+    <string name="home_nav_insights">Phân tích</string>
+    <string name="home_cd_add_item">Thêm món đồ</string>
+
+    <!-- Fallbacks & Errors -->
+    <string name="home_error_load">Không thể tải dữ liệu trang chủ</string>
+    <string name="home_btn_retry">Thử lại</string>
+</resources>

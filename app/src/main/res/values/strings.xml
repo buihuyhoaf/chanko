@@ -39,9 +39,9 @@
     <string name="login_google_error">Không thể đăng nhập bằng Google. Vui lòng thử lại.</string>
     <string name="login_legal_unavailable">Nội dung này hiện chưa sẵn sàng. Vui lòng thử lại sau.</string>
     <string name="login_close">Đóng</string>
-    <string name="tab_home">Home</string>
-    <string name="tab_my_items">My Items</string>
-    <string name="tab_budget">Budget</string>
-    <string name="tab_insights">Insights</string>
+    <string name="tab_home">Trang chủ</string>
+    <string name="tab_my_items">Món đồ</string>
+    <string name="tab_budget">Ngân sách</string>
+    <string name="tab_insights">Phân tích</string>
     <string name="tab_not_implemented">%1$s — Chưa triển khai</string>
 </resources>
