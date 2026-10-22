@@ -198,7 +198,14 @@ class SetupViewModel(
     }
 
     companion object {
-        fun validAmount(raw: String): Boolean =
-            raw.isNotEmpty() && raw.all { it in '0'..'9' } && raw.any { it != '0' }
+        const val MIN_BUDGET_AMOUNT: Long = 100_000L
+        private val MIN_BUDGET: java.math.BigInteger = java.math.BigInteger.valueOf(MIN_BUDGET_AMOUNT)
+
+        fun validAmount(raw: String): Boolean {
+            val normalized = if (raw.matches(DOT_NUMBER_PATTERN)) raw.replace(".", "") else raw
+            if (normalized.isEmpty() || !normalized.all { it in '0'..'9' }) return false
+            val digits = normalized.trimStart('0')
+            return digits.isNotEmpty() && java.math.BigInteger(digits) >= MIN_BUDGET
+        }
     }
 }

@@ -7,7 +7,7 @@
     <string name="setup_budget_placeholder">Nhập số tiền</string>
     <string name="setup_currency">₫</string>
     <string name="setup_budget_hint">Đơn vị VND. Bạn có thể đổi ngân sách sau.</string>
-    <string name="setup_budget_error">Nhập ngân sách lớn hơn 0 ₫ bằng chữ số nhé.</string>
+    <string name="setup_budget_error">Nhập ngân sách tối thiểu 100.000 ₫ bằng chữ số nhé.</string>
     <string name="setup_continue">Tiếp tục</string>
     <string name="setup_budget_footer">Chủ động chi tiêu, theo cách của bạn.</string>
     <string name="setup_day_title">Khởi đầu mới,\nmỗi tháng.</string>
