@@ -41,8 +41,8 @@ fun NavGraph(
 
         val currentRoute = entry?.destination?.route
         if (authenticated && currentRoute == Screen.Login.route) {
-            navController.navigate(Screen.Dashboard.route) {
-                popUpTo(navController.graph.id)
+            navController.navigate(Screen.Setup.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
                 launchSingleTop = true
             }
             return@LaunchedEffect

@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hoabh.chanko.BuildConfig
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.setup.components.Secondary
 import com.hoabh.chanko.presentation.screens.setup.components.SetupAnchorDayStep
@@ -78,7 +79,18 @@ fun SetupGate(
     onConfirmedComplete: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val model: SetupViewModel = viewModel(key = "setup:$accountKey")
+    val gateway: com.hoabh.chanko.presentation.screens.setup.components.SetupGateway = remember {
+        if (BuildConfig.IS_DEV_MOCK) com.hoabh.chanko.dev.DevSetupGateway else com.hoabh.chanko.presentation.screens.setup.components.UnconfiguredSetupGateway
+    }
+    val model: SetupViewModel = viewModel(
+        key = "setup:$accountKey",
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return SetupViewModel(gateway = gateway) as T
+            }
+        }
+    )
     val state by model.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(model) {

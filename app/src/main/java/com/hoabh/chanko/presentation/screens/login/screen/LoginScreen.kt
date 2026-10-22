@@ -91,9 +91,16 @@ fun LoginRoute(
     LoginScreen(
         uiState = state,
         onGoogleLoginClick = {
-            // TODO(auth): Remove this temporary bypass when API/OAuth is configured and restore:
-            // viewModel.loginWithGoogle(AndroidGoogleTokenProvider(context, BuildConfig.GOOGLE_WEB_CLIENT_ID))
-            onLoginSuccess()
+            if (BuildConfig.IS_DEV_MOCK) {
+                viewModel.loginWithGoogle { "dev-mock-google-token" }
+            } else {
+                viewModel.loginWithGoogle(
+                    com.hoabh.chanko.presentation.screens.login.AndroidGoogleTokenProvider(
+                        context,
+                        BuildConfig.GOOGLE_WEB_CLIENT_ID
+                    )
+                )
+            }
         },
         onTermsClick = {
             context.launchSafeWebUrl(BuildConfig.TERMS_URL) { legalUnavailable = true }

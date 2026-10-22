@@ -10,17 +10,31 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.hoabh.chanko.dev.DevDataSeeder
 import com.hoabh.chanko.presentation.navigation.NavGraph
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var devDataSeeder: DevDataSeeder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Release the platform icon immediately so it cannot cover the branded scene.
         installSplashScreen().setOnExitAnimationListener { splash -> splash.remove() }
         super.onCreate(savedInstanceState)
+
+        if (BuildConfig.IS_DEV_MOCK) {
+            lifecycleScope.launch {
+                devDataSeeder.seedIfEmpty()
+            }
+        }
         // MVP uses a light theme even when the device uses dark mode.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),

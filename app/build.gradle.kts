@@ -11,6 +11,11 @@ android {
         version = release(37)
     }
 
+    fun configuredString(name: String, fallback: String = ""): String {
+        val value = providers.gradleProperty(name).orElse(fallback).get()
+        return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") + "\""
+    }
+
     defaultConfig {
         applicationId = "com.hoabh.chanko"
         minSdk = 24
@@ -18,15 +23,34 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        fun configuredString(name: String): String {
-            val value = providers.gradleProperty(name).orElse("").get()
-            return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") + "\""
-        }
-        buildConfigField("String", "API_BASE_URL", configuredString("CHANKO_API_BASE_URL"))
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", configuredString("CHANKO_GOOGLE_WEB_CLIENT_ID"))
         buildConfigField("String", "TERMS_URL", configuredString("CHANKO_TERMS_URL"))
         buildConfigField("String", "PRIVACY_URL", configuredString("CHANKO_PRIVACY_URL"))
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders["appLabel"] = "Chanko Dev"
+            buildConfigField("boolean", "IS_DEV_MOCK", "true")
+            buildConfigField("String", "API_BASE_URL", configuredString("CHANKO_API_BASE_URL_DEV", "https://dev-api.chanko.app/api/v1/"))
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".stg"
+            manifestPlaceholders["appLabel"] = "Chanko Stg"
+            buildConfigField("boolean", "IS_DEV_MOCK", "false")
+            buildConfigField("String", "API_BASE_URL", configuredString("CHANKO_API_BASE_URL_STG", "https://staging-api.chanko.app/api/v1/"))
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appLabel"] = "Chanko"
+            buildConfigField("boolean", "IS_DEV_MOCK", "false")
+            buildConfigField("String", "API_BASE_URL", configuredString("CHANKO_API_BASE_URL"))
+        }
     }
 
     buildTypes {
