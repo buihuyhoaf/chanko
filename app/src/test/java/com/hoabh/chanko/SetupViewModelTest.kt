@@ -1,6 +1,12 @@
 package com.hoabh.chanko
 
-import com.hoabh.chanko.presentation.screens.setup.*
+import com.hoabh.chanko.presentation.screens.setup.components.SetupDraft
+import com.hoabh.chanko.presentation.screens.setup.components.SetupGateway
+import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
+import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
+import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
+import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.viewmodel.SetupViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.*
@@ -35,7 +41,7 @@ class SetupViewModelTest {
         vm.amountChanged("3.000.000"); vm.continueToDay(); vm.save(); runCurrent()
         assertTrue(vm.state.value.dayError); assertTrue(gw.submitted.isEmpty())
         vm.dayChanged(31); vm.save(); runCurrent()
-        assertEquals(SetupDraft("3000000",31,"Asia/Ho_Chi_Minh"), gw.submitted.single())
+        assertEquals(SetupDraft("3000000", 31, "Asia/Ho_Chi_Minh"), gw.submitted.single())
         assertEquals(SetupPage.FORM, vm.state.value.page) // accepted alone never grants Home
         assertFalse(vm.state.value.needsReconciliation)
     }
@@ -69,7 +75,8 @@ class SetupViewModelTest {
         vm.dismissErrorDialog()
         assertFalse(vm.state.value.showErrorDialog)
         assertEquals("42",vm.state.value.amount); assertEquals(30,vm.state.value.day)
-        gw.beforeSave = { throw IllegalStateException("private diagnostic") }; gw.status=SetupStatus.UNKNOWN
+        gw.beforeSave = { throw IllegalStateException("private diagnostic") }; gw.status=
+        SetupStatus.UNKNOWN
         vm.save(); runCurrent(); assertEquals(SetupProblem.UNKNOWN,vm.state.value.problem)
         assertTrue(vm.state.value.showErrorDialog)
         assertTrue(vm.state.value.needsReconciliation)

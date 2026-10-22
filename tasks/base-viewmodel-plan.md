@@ -127,8 +127,8 @@ Triển khai kiến trúc `BaseViewModel<UiState, UiEffect>` gọn nhẹ và ti�
 
 **Dependencies:** Task 1, Task 2, Task 3  
 **Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/login/LoginViewModel.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/login/LoginScreen.kt`
+- `../app/src/main/java/com/hoabh/chanko/presentation/screens/login/viewmodel/LoginViewModel.kt`
+- `../app/src/main/java/com/hoabh/chanko/presentation/screens/login/screen/LoginScreen.kt`
 - `app/src/test/java/com/hoabh/chanko/LoginViewModelTest.kt`
 
 **Estimated scope:** Medium (2-3 files)

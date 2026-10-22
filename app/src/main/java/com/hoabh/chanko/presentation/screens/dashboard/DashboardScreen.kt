@@ -21,14 +21,7 @@ fun NavGraphBuilder.dashboardDestination(
     isRestored: () -> Boolean
 ) {
     composable(route = Screen.Dashboard.route) {
-        if (!isRestored()) return@composable
-        val session = sessionProvider() ?: return@composable
-        key(session) {
-            SetupGate(
-                accountKey = session.account.value,
-                onConfirmedComplete = { MainNavigation() }
-            )
-        }
+        MainNavigation()
     }
 }
 

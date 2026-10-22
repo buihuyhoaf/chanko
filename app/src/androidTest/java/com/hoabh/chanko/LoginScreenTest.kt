@@ -9,7 +9,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hoabh.chanko.domain.auth.AuthFailure
-import com.hoabh.chanko.presentation.screens.login.*
+import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiState
+import com.hoabh.chanko.presentation.screens.login.screen.LoginScreen
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -20,7 +21,12 @@ class LoginScreenTest {
     @get:Rule val compose = createComposeRule()
     @Test fun googleOnlyVietnameseContentAndLegalActions() {
         var google = 0; var terms = 0; var privacy = 0
-        compose.setContent { ChankoTheme { LoginScreen(onGoogleLoginClick = { google++ }, onTermsClick = { terms++ }, onPrivacyClick = { privacy++ }) } }
+        compose.setContent { ChankoTheme {
+            LoginScreen(
+                onGoogleLoginClick = { google++ },
+                onTermsClick = { terms++ },
+                onPrivacyClick = { privacy++ })
+        } }
         compose.onNodeWithText("Tiếp tục với Google").performScrollTo().performClick()
         compose.onNodeWithText("Điều khoản dịch vụ").performScrollTo().performClick()
         compose.onNodeWithText("Chính sách quyền riêng tư").performScrollTo().performClick()
@@ -34,7 +40,13 @@ class LoginScreenTest {
         compose.onNodeWithText("Đang đăng nhập…").performScrollTo().assertIsDisplayed()
     }
     @Test fun configurationErrorStaysOnLoginAndAllowsRetry() {
-        compose.setContent { ChankoTheme { LoginScreen(LoginUiState(error = AuthFailure.NOT_CONFIGURED), {}, {}, {}) } }
+        compose.setContent { ChankoTheme {
+            LoginScreen(
+                LoginUiState(error = AuthFailure.NOT_CONFIGURED),
+                {},
+                {},
+                {})
+        } }
         compose.onNodeWithText("Đăng nhập hiện chưa sẵn sàng. Vui lòng thử lại sau.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Tiếp tục với Google").performScrollTo().assertIsEnabled()
     }
@@ -42,7 +54,12 @@ class LoginScreenTest {
         compose.setContent {
             val density = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
-                ChankoTheme { LoginScreen(onGoogleLoginClick = {}, onTermsClick = {}, onPrivacyClick = {}) }
+                ChankoTheme {
+                    LoginScreen(
+                        onGoogleLoginClick = {},
+                        onTermsClick = {},
+                        onPrivacyClick = {})
+                }
             }
         }
         compose.onNodeWithText("Tiếp tục với Google").performScrollTo().assertIsDisplayed()
@@ -50,7 +67,12 @@ class LoginScreenTest {
         compose.onNodeWithText("Chính sách quyền riêng tư").performScrollTo().assertIsDisplayed()
     }
     @Test fun captureLoginForVisualReview() {
-        compose.setContent { ChankoTheme { LoginScreen(onGoogleLoginClick = {}, onTermsClick = {}, onPrivacyClick = {}) } }
+        compose.setContent { ChankoTheme {
+            LoginScreen(
+                onGoogleLoginClick = {},
+                onTermsClick = {},
+                onPrivacyClick = {})
+        } }
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         File(context.getExternalFilesDir(null), "login-review.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
