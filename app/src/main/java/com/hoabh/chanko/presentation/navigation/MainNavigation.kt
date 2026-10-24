@@ -66,12 +66,14 @@ import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination(
     onNavigateToProfile: () -> Unit = {},
-    onNavigateToItemDetail: (Int) -> Unit = {}
+    onNavigateToItemDetail: (Int) -> Unit = {},
+    onNavigateToArchived: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
             onNavigateToProfile = onNavigateToProfile,
-            onNavigateToItemDetail = onNavigateToItemDetail
+            onNavigateToItemDetail = onNavigateToItemDetail,
+            onNavigateToArchived = onNavigateToArchived
         )
     }
 }
@@ -90,7 +92,8 @@ fun MainNavigation(
     controller: NavHostController = rememberNavController(),
     onAddNewItemClick: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
-    onNavigateToItemDetail: (Int) -> Unit = {}
+    onNavigateToItemDetail: (Int) -> Unit = {},
+    onNavigateToArchived: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -123,9 +126,7 @@ fun MainNavigation(
                 composable(TopLevelDestination.MyItems.route) {
                     MyItemsRoute(
                         onNavigateToDetail = onNavigateToItemDetail,
-                        onNavigateToArchived = {
-                            // Sẽ nối vào ArchivedItemsRoute trong lát cắt tiếp theo
-                        }
+                        onNavigateToArchived = onNavigateToArchived
                     )
                 }
                 listOf(

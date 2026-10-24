@@ -13,10 +13,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ItemDao {
 
-    @Query("SELECT * FROM cooldown_items WHERE status = 'COOLING_DOWN' ORDER BY addedTimestamp DESC")
+    @Query("SELECT * FROM cooldown_items WHERE isArchived = 1 ORDER BY addedTimestamp DESC")
+    fun getArchivedItems(): Flow<List<CooldownItemEntity>>
+
+    @Query("UPDATE cooldown_items SET isArchived = :isArchived WHERE id = :id")
+    suspend fun setArchived(id: Int, isArchived: Boolean): Int
+
+    @Query("SELECT * FROM cooldown_items WHERE status = 'COOLING_DOWN' AND isArchived = 0 ORDER BY addedTimestamp DESC")
     fun getActiveItems(): Flow<List<CooldownItemEntity>>
 
-    @Query("SELECT * FROM cooldown_items WHERE status = :status ORDER BY addedTimestamp DESC")
+    @Query("SELECT * FROM cooldown_items WHERE status = :status AND isArchived = 0 ORDER BY addedTimestamp DESC")
     fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItemEntity>>
 
     @Query("SELECT * FROM cooldown_items WHERE id = :id")

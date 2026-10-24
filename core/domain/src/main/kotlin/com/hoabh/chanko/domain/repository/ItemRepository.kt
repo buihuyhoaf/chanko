@@ -10,6 +10,8 @@ interface ItemRepository {
 
     fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItem>>
 
+    fun getArchivedItems(): Flow<List<CooldownItem>>
+
     fun getItemById(id: Int): Flow<CooldownItem?>
 
     suspend fun insertItem(item: CooldownItem)
@@ -17,6 +19,8 @@ interface ItemRepository {
     suspend fun updateItem(item: CooldownItem)
 
     suspend fun updateItemStatus(id: Int, status: ItemStatus)
+
+    suspend fun setArchived(id: Int, isArchived: Boolean)
 
     suspend fun deleteItem(item: CooldownItem)
 

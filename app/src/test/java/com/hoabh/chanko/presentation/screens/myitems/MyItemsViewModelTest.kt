@@ -198,6 +198,9 @@ class MyItemsViewModelTest {
             return MutableStateFlow(all.find { it.id == id })
         }
 
+        override fun getArchivedItems(): Flow<List<CooldownItem>> = MutableStateFlow(emptyList())
+        override suspend fun setArchived(id: Int, isArchived: Boolean) {}
+
         override suspend fun insertItem(item: CooldownItem) {}
         override suspend fun updateItem(item: CooldownItem) {}
         override suspend fun updateItemStatus(id: Int, status: ItemStatus) {}

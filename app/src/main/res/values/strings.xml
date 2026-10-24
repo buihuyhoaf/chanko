@@ -140,4 +140,12 @@
     <string name="transaction_delete_confirm">Xóa giao dịch</string>
     <string name="transaction_delete_cancel">Giữ giao dịch</string>
     <string name="transaction_not_found">Không tìm thấy thông tin giao dịch.</string>
+
+    <!-- Archived Items Strings -->
+    <string name="archived_items_title">Đã lưu trữ</string>
+    <string name="archived_items_search_hint">Tìm kiếm món đồ đã lưu trữ…</string>
+    <string name="archived_items_empty_title">Chưa có món đồ được lưu trữ</string>
+    <string name="archived_items_empty_desc">Các món đồ bạn tạm gác lại hoặc lưu trữ sẽ xuất hiện tại đây.</string>
+    <string name="archived_items_restore_btn">Khôi phục</string>
+    <string name="archived_items_restore_success">Đã khôi phục món đồ</string>
 </resources>

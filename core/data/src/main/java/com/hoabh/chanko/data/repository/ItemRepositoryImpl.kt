@@ -24,6 +24,10 @@ class ItemRepositoryImpl @Inject constructor(
         return itemDao.getItemsByStatus(status).map { items -> items.map { it.toDomain() } }
     }
 
+    override fun getArchivedItems(): Flow<List<CooldownItem>> {
+        return itemDao.getArchivedItems().map { items -> items.map { it.toDomain() } }
+    }
+
     override fun getItemById(id: Int): Flow<CooldownItem?> {
         return itemDao.getItemById(id).map { it?.toDomain() }
     }
@@ -41,6 +45,10 @@ class ItemRepositoryImpl @Inject constructor(
     override suspend fun updateItemStatus(id: Int, status: ItemStatus) {
         require(status != ItemStatus.COOLING_DOWN)
         check(itemDao.updateItemStatus(id, status, System.currentTimeMillis()) == 1)
+    }
+
+    override suspend fun setArchived(id: Int, isArchived: Boolean) {
+        itemDao.setArchived(id, isArchived)
     }
 
     override suspend fun deleteItem(item: CooldownItem) {

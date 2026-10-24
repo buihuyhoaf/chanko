@@ -125,6 +125,9 @@ class ItemDetailViewModelTest {
 
         override fun getItemById(id: Int): Flow<CooldownItem?> = itemFlow.asStateFlow()
 
+        override fun getArchivedItems(): Flow<List<CooldownItem>> = MutableStateFlow(emptyList())
+        override suspend fun setArchived(id: Int, isArchived: Boolean) {}
+
         override fun getActiveItems(): Flow<List<CooldownItem>> = MutableStateFlow(emptyList())
         override fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItem>> = MutableStateFlow(emptyList())
         override suspend fun insertItem(item: CooldownItem) {}
