@@ -24,6 +24,7 @@ import com.hoabh.chanko.presentation.screens.home.components.BudgetCard
 import com.hoabh.chanko.presentation.screens.home.components.CompactLivingRoom
 import com.hoabh.chanko.presentation.screens.home.components.DraftResumeCard
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
+import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
 import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
 import com.hoabh.chanko.presentation.screens.home.components.QuickActionsRow
 import com.hoabh.chanko.presentation.screens.home.components.YourDecisionsSection
@@ -70,14 +71,15 @@ fun HomeRoute(
 }
 
 /**
- * Stateless HomeScreen tuân thủ cấu trúc vùng cuộn của Chanko Home Specification v1.1:
+ * Stateless HomeScreen tuân thủ cấu trúc vùng cuộn của Chanko Home Specification v2.0 (Image-Aligned):
  * 1. Header (HOME-01)
- * 2. Chanko's Compact Living Room (HOME-02 — P2)
- * 3. Quick Actions (HOME-03 — P3)
- * 4. Budget Snapshot (HOME-04 — P4)
- * 5. Your Decisions (HOME-05 — P5)
- * 6. Observation — optional (HOME-06 — P6)
- * 7. Local Draft Indicator — optional (HOME-07 — P6)
+ * 2. Chanko's Compact Living Room + Embedded ChankoDialogue (HOME-02)
+ * 3. Quick Actions (HOME-03)
+ * 4. Budget Snapshot (HOME-04)
+ * 5. Your Decisions ("Những món cần chú ý" — HOME-05)
+ * 6. Observation ("Góc nhìn hôm nay" — optional — HOME-06)
+ * 7. Local Draft Indicator (optional — HOME-07)
+ * + Modal Overlay Sheet Host (`HomeSheetHost` — HOME-08)
  */
 @Composable
 fun HomeScreen(
@@ -87,9 +89,9 @@ fun HomeScreen(
 ) {
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
-            CandyColors.background,
-            CandyColors.backgroundLavender.copy(alpha = 0.35f),
-            CandyColors.backgroundPink.copy(alpha = 0.25f),
+            CandyColors.homeScreenBackgroundTop,
+            CandyColors.backgroundLavender.copy(alpha = 0.45f),
+            CandyColors.homeScreenBackgroundBottom,
             CandyColors.background
         )
     )
@@ -108,7 +110,7 @@ fun HomeScreen(
                 end = CandySpace.lg,
                 bottom = CandySpace.lg
             ),
-            verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
+            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
         ) {
             // 1. HOME-01 — Header
             item(key = "home_01_header") {
@@ -202,53 +204,111 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(BottomNavClearanceHeight))
             }
         }
+
+        // 8. HOME-08 — Modal Overlay Sheet Host (S16, S17, S22)
+        HomeSheetHost(
+            activeSheet = state.activeSheet,
+            onDismiss = { onEvent(HomeUiEvent.DismissSheet) },
+            onQuickCheckClick = { onEvent(HomeUiEvent.QuickCheckTapped) },
+            onSaveItemClick = { onEvent(HomeUiEvent.SaveItemTapped) },
+            onContextPrimaryAction = { kind, entityId ->
+                onEvent(HomeUiEvent.ContextSheetPrimaryAction(kind, entityId))
+            }
+        )
     }
 }
 
-@Preview(name = "P1 - Default Header", showBackground = true, widthDp = 393)
+@Preview(name = "S21 - Screenshot Baseline (393dp)", showBackground = true, widthDp = 393, heightDp = 1150)
 @Composable
-private fun HomeScreenDefaultPreview() {
+private fun HomeScreenS21BaselinePreview() {
     val fakeDataSource = HomeFakeDataSource()
     ChankoTheme {
         HomeScreen(
-            state = fakeDataSource.getStateForScenario(HomeScenario.DEFAULT),
+            state = fakeDataSource.getStateForScenario(HomeScenario.S21),
             onEvent = {}
         )
     }
 }
 
-@Preview(name = "P1 - Long Name & Narrow 320dp", showBackground = true, widthDp = 320)
+@Preview(name = "S22 - Global Sheet Open Baseline (393dp)", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
-private fun HomeScreenLongNamePreview() {
+private fun HomeScreenS22SheetOpenPreview() {
     val fakeDataSource = HomeFakeDataSource()
     ChankoTheme {
         HomeScreen(
-            state = fakeDataSource.getStateForScenario(HomeScenario.LONG_NAME),
+            state = fakeDataSource.getStateForScenario(HomeScenario.S22),
             onEvent = {}
         )
     }
 }
 
-@Preview(name = "P1 - Empty Name & Offline Badge", showBackground = true, widthDp = 393)
+@Preview(name = "S05 - New User Empty State", showBackground = true, widthDp = 393, heightDp = 900)
 @Composable
-private fun HomeScreenEmptyNameOfflinePreview() {
+private fun HomeScreenS05EmptyPreview() {
     val fakeDataSource = HomeFakeDataSource()
-    val baseState = fakeDataSource.getStateForScenario(HomeScenario.EMPTY_NAME)
     ChankoTheme {
         HomeScreen(
-            state = baseState.copy(header = baseState.header.copy(isOffline = true)),
+            state = fakeDataSource.getStateForScenario(HomeScenario.S05),
             onEvent = {}
         )
     }
 }
 
-@Preview(name = "P1 - Font Scale 1.5x", showBackground = true, widthDp = 393, fontScale = 1.5f)
+@Preview(name = "S06 - Over Budget State (120%)", showBackground = true, widthDp = 393, heightDp = 950)
 @Composable
-private fun HomeScreenLargeFontPreview() {
+private fun HomeScreenS06OverBudgetPreview() {
     val fakeDataSource = HomeFakeDataSource()
     ChankoTheme {
         HomeScreen(
-            state = fakeDataSource.getStateForScenario(HomeScenario.LONG_NAME),
+            state = fakeDataSource.getStateForScenario(HomeScenario.S06),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S09 - Observation + Local Draft", showBackground = true, widthDp = 393, heightDp = 1220)
+@Composable
+private fun HomeScreenS09ObservationAndDraftPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S09),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S13 - Section Error & Loading Isolation", showBackground = true, widthDp = 393, heightDp = 900)
+@Composable
+private fun HomeScreenS13PartialErrorPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S13),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S15 - Narrow 320dp & FontScale 2.0", showBackground = true, widthDp = 320, heightDp = 1400, fontScale = 2.0f)
+@Composable
+private fun HomeScreenS15NarrowLargeFontPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S15),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "Tablet / Wide 600dp", showBackground = true, widthDp = 600, heightDp = 1200)
+@Composable
+private fun HomeScreenWide600dpPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S21),
             onEvent = {}
         )
     }

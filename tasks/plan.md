@@ -88,14 +88,14 @@ Phase 2: v2 State Contracts, 22 Scenarios & HomeHeader (Tasks 2–3)
 ---
 
 ### Phase 9, 10 & 11: Navigation, Sheets, 22 Scenarios & QA Sign-Off
-- [ ] **Task 10 (Phase 9): `HomeSheetHost` (`GlobalQuickActionSheet` `S22` & `ContextualSheet` `S17`) + `MainNavigation` `+` Wiring (`S16`)**
-- [ ] **Task 11 (Phase 10): `HomeScenarioFixtures` (Đầy đủ 22 Scenarios `S01`–`S22`) & `HomeViewModel` Reducer/Effects Integration**
-- [ ] **Task 12 (Phase 11): Responsive/Font-Scale Preview Matrix (`320/393/600dp`, `S21`, `S22`) & Full Unit Test Suite Verification**
+- [x] **Task 10 (Phase 9): `HomeSheetHost` (`GlobalQuickActionSheet` `S22` & `ContextualSheet` `S17`) + `MainNavigation` `+` Wiring (`S16`)**
+- [x] **Task 11 (Phase 10): `HomeScenarioFixtures` (Đầy đủ 22 Scenarios `S01`–`S22`) & `HomeViewModel` Reducer/Effects Integration**
+- [x] **Task 12 (Phase 11): Responsive/Font-Scale Preview Matrix (`320/393/600dp`, `S21`, `S22`) & Full Unit Test Suite Verification**
 
 ### Checkpoint 4: Complete & Ready for Review (After Tasks 10–12)
-- [ ] Toàn bộ 22 scenarios (`S01`–`S22`) có unit tests kiểm chứng trong `HomeViewModelTest`.
-- [ ] Lệnh `./gradlew assembleDebug :app:testDevDebugUnitTest` pass 100%.
-- [ ] Báo cáo đối chiếu đầy đủ các tiêu chí `A01`–`A18` và `V01`–`V05`.
+- [x] Toàn bộ 22 scenarios (`S01`–`S22`) có unit tests kiểm chứng trong `HomeViewModelTest`.
+- [x] Lệnh `./gradlew assembleDebug :app:testDevDebugUnitTest` pass 100%.
+- [x] Báo cáo đối chiếu đầy đủ các tiêu chí `A01`–`A18` và `V01`–`V05`.
 
 ---
 
