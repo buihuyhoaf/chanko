@@ -18,13 +18,13 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ## Phase 2: Navigation & State Contracts
-- [ ] **Task 2: Khai báo Routes và State/Event Models**
+- [x] **Task 2: Khai báo Routes và State/Event Models**
   - **Acceptance:**
-    - [ ] Khai báo `Screen.Profile` và `Screen.Personality` trong `Screen.kt`.
-    - [ ] Định nghĩa `ProfileUiState`, `ProfileUiEvent`, `ProfileUiEffect`.
-    - [ ] Định nghĩa `PersonalityUiState`, `PersonalityUiEvent`, `PersonalityUiEffect`.
+    - [x] Khai báo `Screen.Profile` và `Screen.Personality` trong `Screen.kt`.
+    - [x] Định nghĩa `ProfileUiState`, `ProfileUiEvent`, `ProfileUiEffect`.
+    - [x] Định nghĩa `PersonalityUiState`, `PersonalityUiEvent`, `PersonalityUiEffect`.
   - **Verify:**
-    - [ ] `./gradlew assembleDevDebug` thành công.
+    - [x] `./gradlew assembleDevDebug` thành công.
   - **Files:**
     - `app/src/main/java/com/hoabh/chanko/presentation/navigation/Screen.kt`
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileUiState.kt`
