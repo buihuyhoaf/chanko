@@ -53,13 +53,13 @@ Phase 2: v2 State Contracts, 22 Scenarios & HomeHeader (Tasks 2–3)
 ---
 
 ### Phase 1 & 2: Foundation, State Contracts & Header (v2 + Asset Pack v3)
-- [ ] **Task 1 (Phase 1): Candy Pop v2 Semantic Tokens, Strings & Asset Pack v3 Drawables (6 Living Room PNGs + 3 Sample Thumbnails)**
-- [ ] **Task 2 (Phase 2a): Full v2 State/Event Contracts (`HomeUiState`, `HomeAction`, `SectionState`) & Pure Calculators (`DecisionRanker`, `BudgetCalculator`)**
-- [ ] **Task 3 (Phase 2b): `HomeHeader` v2 (Sun/Heart, Lavender Gear, Purple Avatar) & `HomeScreen` Shell**
+- [x] **Task 1 (Phase 1): Candy Pop v2 Semantic Tokens, Strings & Asset Pack v3 Drawables (6 Living Room PNGs + 3 Sample Thumbnails)**
+- [x] **Task 2 (Phase 2a): Full v2 State/Event Contracts (`HomeUiState`, `HomeAction`, `SectionState`) & Pure Calculators (`DecisionRanker`, `BudgetCalculator`)**
+- [x] **Task 3 (Phase 2b): `HomeHeader` v2 (Sun/Heart, Lavender Gear, Purple Avatar) & `HomeScreen` Shell**
 
 ### Checkpoint 1: Foundation & Header (After Tasks 1–3)
-- [ ] Unit tests cho `DecisionRanker` (`S01`–`S04`, `S18`, `S20`) và `BudgetCalculator` (`S06`–`S08`) pass 100%.
-- [ ] `HomeHeader` hiển thị đúng ảnh chuẩn v2, hỗ trợ tên dài/font 2.0; build `./gradlew assembleDebug` thành công.
+- [x] Unit tests cho `DecisionRanker` (`S01`–`S04`, `S18`, `S20`) và `BudgetCalculator` (`S06`–`S08`) pass 100%.
+- [x] `HomeHeader` hiển thị đúng ảnh chuẩn v2, hỗ trợ tên dài/font 2.0; build `./gradlew assembleDebug` thành công.
 
 ---
 

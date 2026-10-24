@@ -34,37 +34,46 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.GreetingPeriod
 import com.hoabh.chanko.presentation.screens.home.HeaderUiModel
 import com.hoabh.chanko.ui.theme.CandyColors
-import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
 
 private val HeaderControlVisualSize = 40.dp
-private val HeaderSettingsIconSize = 22.dp
+private val HeaderSettingsIconSize = 20.dp
 
 /**
- * HOME-01 — Header:
- * - Hiển thị lời chào theo ngữ cảnh, hỗ trợ tên dài, tên trống và font scaling.
- * - Các control Settings và Avatar có vùng chạm độc lập >= 48dp và callback rõ ràng.
+ * HOME-01 — Header (v2 Image-Aligned):
+ * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng tinh tế (`"Chào buổi sáng, Hoa ☀️"`).
+ * - Phụ đề ấm áp (`"Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜"`).
+ * - Nút Settings hình tròn nền lavender (`CandyColors.primarySoft`) và nút Avatar tròn tím (`CandyColors.brandPurple`),
+ *   mỗi nút có vùng chạm độc lập >= 48dp.
  */
 @Composable
 fun HomeHeader(
     header: HeaderUiModel,
     onSettingsClick: () -> Unit,
     onProfileClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    canOpenSettings: Boolean = true,
+    canOpenProfile: Boolean = true
 ) {
-    val greetingText = resolveGreetingText(header)
+    val greetingText = header.customGreeting ?: resolveGreetingText(header)
+    val greetingEmoji = when (header.greetingPeriod) {
+        GreetingPeriod.MORNING -> " ☀️"
+        GreetingPeriod.AFTERNOON -> " 🌤️"
+        GreetingPeriod.EVENING -> " 🌙"
+    }
+    val subtitleText = header.customSubtitle ?: stringResource(R.string.home_header_subtitle)
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = CandySize.primaryButton),
-            verticalAlignment = Alignment.CenterVertically
+                .heightIn(min = CandySize.touchTarget),
+            verticalAlignment = Alignment.Top
         ) {
             Column(
                 modifier = Modifier
@@ -73,7 +82,7 @@ fun HomeHeader(
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
                 Text(
-                    text = greetingText,
+                    text = "$greetingText$greetingEmoji",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold
                     ),
@@ -82,74 +91,80 @@ fun HomeHeader(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = stringResource(R.string.home_header_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
+                    text = subtitleText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
                     color = CandyColors.textSecondary,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
-            // Settings Button (Touch target >= 48dp)
-            Box(
-                modifier = Modifier
-                    .size(CandySize.touchTarget)
-                    .clip(CircleShape)
-                    .clickable(
-                        role = Role.Button,
-                        onClick = onSettingsClick
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(
-                    modifier = Modifier.size(HeaderControlVisualSize),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = CandyElevation.low,
-                    shadowElevation = CandyElevation.low
+            // Settings Button in Lavender Circle (Touch target >= 48dp)
+            if (canOpenSettings) {
+                val settingsCd = stringResource(R.string.home_cd_settings)
+                Box(
+                    modifier = Modifier
+                        .size(CandySize.touchTarget)
+                        .clip(CircleShape)
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = settingsCd,
+                            onClick = onSettingsClick
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Rounded.Settings,
-                            contentDescription = stringResource(R.string.home_cd_settings),
-                            tint = CandyColors.textPrimary,
-                            modifier = Modifier.size(HeaderSettingsIconSize)
-                        )
+                    Surface(
+                        modifier = Modifier.size(HeaderControlVisualSize),
+                        shape = CircleShape,
+                        color = CandyColors.primarySoft
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
+                                contentDescription = settingsCd,
+                                tint = CandyColors.textSecondary,
+                                modifier = Modifier.size(HeaderSettingsIconSize)
+                            )
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.width(CandySpace.xs))
 
-            // Profile Avatar Button (Touch target >= 48dp)
-            val profileContentDescription = stringResource(R.string.home_cd_profile)
-            Box(
-                modifier = Modifier
-                    .size(CandySize.touchTarget)
-                    .clip(CircleShape)
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = profileContentDescription,
-                        onClick = onProfileClick
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
+            // Profile Avatar Button in Purple Circle (Touch target >= 48dp)
+            if (canOpenProfile) {
+                val profileCd = stringResource(R.string.home_cd_profile)
                 Box(
                     modifier = Modifier
-                        .size(HeaderControlVisualSize)
+                        .size(CandySize.touchTarget)
                         .clip(CircleShape)
-                        .background(CandyColors.brandPurple),
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = profileCd,
+                            onClick = onProfileClick
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = header.avatarInitial,
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(HeaderControlVisualSize)
+                            .clip(CircleShape)
+                            .background(CandyColors.brandPurple),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = header.avatarInitial,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = CandyColors.onReadyAction
+                        )
+                    }
                 }
             }
         }
@@ -161,7 +176,9 @@ fun HomeHeader(
             ) {
                 Text(
                     text = stringResource(R.string.home_header_offline_badge),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = CandyColors.primaryInk,
                     modifier = Modifier.padding(
                         horizontal = CandySpace.md,
