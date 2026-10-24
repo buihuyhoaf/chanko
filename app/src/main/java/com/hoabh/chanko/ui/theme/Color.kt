@@ -67,6 +67,23 @@ object CandyColors {
     val quickCheckGradientEnd = Color(0xFF7B57E8)
     val saveItemSurface = Color(0xFFF7F3FF)
     val saveItemBorder = Color(0xFFE8DFF8)
+    val quickActionAskBg = Color(0xFF7451E8)
+    val quickActionAskBorder = Color(0xFFA48BFF)
+    val quickActionAskText = Color(0xFFFFFFFF)
+    val quickActionSaveBg = Color(0xFFF4B3CB)
+    val quickActionSaveBorder = Color(0xFFE68DB2)
+    val quickActionSaveText = Color(0xFF512B45)
+
+    // Candy Pop 3D Home Budget Snapshot
+    val budgetSnapshotBg = Color(0xFFEEE5FF)
+    val budgetSnapshotBorder = Color(0xFFD9C5FF)
+    val budgetSnapshotAmount = Color(0xFF6F49DE)
+    val budgetSnapshotSecondaryText = Color(0xFF665684)
+    val budgetSnapshotSpendingPanel = Color(0xFFFFFFFF)
+    val budgetSnapshotBadgeBg = Color(0xFFFFE7B8)
+    val budgetSnapshotBadgeText = Color(0xFF8B5814)
+    val budgetSnapshotProgressTrack = Color(0xFFEEE8F5)
+    val budgetSnapshotProgressFill = Color(0xFF8965F6)
 
     // Budget Snapshot
     val budgetWarningBadgeBg = Color(0xFFFFF0DB)
@@ -91,6 +108,23 @@ object CandyColors {
     val decisionSavedRowBg = Color(0xFFF3F4F6)
     val decisionSavedPillBg = Color(0xFFE5E7EB)
     val decisionSavedPillInk = Color(0xFF374151)
+
+    // Candy Item Tile Semantic Tokens
+    val attentionTileReadyBg = Color(0xFFDFF9EE)
+    val attentionTileReadyBorder = Color(0xFFA6EBD1)
+    val attentionTileReadyAccent = Color(0xFF16856B)
+
+    val attentionTileWaitingBg = Color(0xFFE8F4FF)
+    val attentionTileWaitingBorder = Color(0xFFB8DFFF)
+    val attentionTileWaitingAccent = Color(0xFF438BCB)
+
+    val attentionTileConsideringBg = Color(0xFFEEE7FF)
+    val attentionTileConsideringBorder = Color(0xFFD9C8FF)
+    val attentionTileConsideringAccent = Color(0xFF7451E8)
+
+    val attentionTileSavedBg = Color(0xFFFFF0DB)
+    val attentionTileSavedBorder = Color(0xFFFFDBA7)
+    val attentionTileSavedAccent = Color(0xFFB67C28)
 
     // Observation & Global Sheet
     val observationIconTileBg = Color(0xFFF2EBFF)

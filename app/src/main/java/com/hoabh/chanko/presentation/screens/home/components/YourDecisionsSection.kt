@@ -6,21 +6,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.FactCheck
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Schedule
@@ -32,18 +31,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.DecisionStatus
 import com.hoabh.chanko.presentation.screens.home.DecisionUi
@@ -53,21 +57,114 @@ import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
+import com.hoabh.chanko.ui.theme.ChankoTheme
+import com.hoabh.chanko.ui.theme.Nunito
 
-private val SectionIconBoxSize = 28.dp
-private val SectionIconSize = 16.dp
-private val DecisionThumbnailSize = 48.dp
-private val DecisionThumbnailShape = RoundedCornerShape(14.dp)
-private val DecisionRowShape = RoundedCornerShape(18.dp)
-private val StatusPillIconSize = 13.dp
-private val ChevronIconSize = 18.dp
+private val AttentionTileRadius = 24.dp
+private val AttentionTileBorderWidth = 2.dp
+private val ThumbnailSize = 72.dp
+private val ThumbnailRadius = 16.dp
+private val ChevronIconSize = 20.dp
+private val StatusIconSize = 14.dp
+
+@Immutable
+data class AttentionItemStatusStyle(
+    val background: Color,
+    val border: Color,
+    val accent: Color,
+    val icon: ImageVector
+)
+
+fun resolveAttentionItemStyle(status: DecisionStatus): AttentionItemStatusStyle = when (status) {
+    DecisionStatus.Ready -> AttentionItemStatusStyle(
+        background = CandyColors.attentionTileReadyBg,
+        border = CandyColors.attentionTileReadyBorder,
+        accent = CandyColors.attentionTileReadyAccent,
+        icon = Icons.Rounded.CheckCircle
+    )
+    DecisionStatus.Waiting -> AttentionItemStatusStyle(
+        background = CandyColors.attentionTileWaitingBg,
+        border = CandyColors.attentionTileWaitingBorder,
+        accent = CandyColors.attentionTileWaitingAccent,
+        icon = Icons.Rounded.Schedule
+    )
+    DecisionStatus.Considering -> AttentionItemStatusStyle(
+        background = CandyColors.attentionTileConsideringBg,
+        border = CandyColors.attentionTileConsideringBorder,
+        accent = CandyColors.attentionTileConsideringAccent,
+        icon = Icons.Rounded.Visibility
+    )
+    DecisionStatus.Saved -> AttentionItemStatusStyle(
+        background = CandyColors.attentionTileSavedBg,
+        border = CandyColors.attentionTileSavedBorder,
+        accent = CandyColors.attentionTileSavedAccent,
+        icon = Icons.Rounded.BookmarkBorder
+    )
+}
 
 /**
- * HOME-05 — Your Decisions Section (`"Những món cần chú ý"`, v2 Image-Aligned):
- * - Header: Icon checklist tím + `"Những món cần chú ý"` + count badge tròn (`3`) + `"Xem tất cả >"`.
- * - Danh sách hiển thị tối đa 3 `DecisionRow` đã được sắp xếp ổn định `Ready -> Waiting -> Considering -> Saved`.
- * - Hỗ trợ thumbnail mẫu (`S21`) và fallback icon khi `thumbnailResId == null` (`S15`).
- * - Hỗ trợ trạng thái `Loading`, `Empty` (`S05` kèm CTA lưu món đồ) và `Error` (`S13`).
+ * HOME-05 — Home Attention Items Section ("Những món cần chú ý"):
+ * - No outer enclosing white card; items sit directly on the screen background.
+ * - Header: Sparkles icon in lavender container + "Những món cần chú ý" + "Tất cả ›".
+ * - Item list: Up to 3 standalone Candy Item Tiles, stacked vertically with 12dp spacing.
+ * - Semantic tile colors: Ready (mint), Waiting (sky blue), Considering (lavender), Saved (warm peach).
+ * - Full thumbnail (72x72, 16dp radius), title (max 2 lines), price, and status in a compact row.
+ */
+@Composable
+fun HomeAttentionItemsSection(
+    sectionState: SectionState<List<DecisionUi>>,
+    totalCount: Int,
+    onDecisionClick: (String) -> Unit,
+    onViewAllClick: () -> Unit,
+    onSaveFirstItemClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    canOpenViewAll: Boolean = true
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+    ) {
+        // 1. Header
+        AttentionItemsHeader(
+            canOpenViewAll = canOpenViewAll,
+            onViewAllClick = onViewAllClick
+        )
+
+        // 2. Content
+        when (sectionState) {
+            SectionState.Loading -> AttentionItemsLoadingState()
+            is SectionState.Empty -> AttentionItemsEmptyState(onSaveFirstItemClick = onSaveFirstItemClick)
+            is SectionState.Error -> AttentionItemsErrorState(
+                message = sectionState.message,
+                canRetry = sectionState.canRetry,
+                onRetryClick = onRetryClick
+            )
+            is SectionState.Content -> {
+                if (sectionState.data.isEmpty()) {
+                    AttentionItemsEmptyState(onSaveFirstItemClick = onSaveFirstItemClick)
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+                    ) {
+                        sectionState.data.take(3).forEach { decision ->
+                            key(decision.id) {
+                                HomeAttentionItemTile(
+                                    decision = decision,
+                                    onClick = { onDecisionClick(decision.id) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Backward compatibility alias for [HomeAttentionItemsSection].
  */
 @Composable
 fun YourDecisionsSection(
@@ -80,64 +177,20 @@ fun YourDecisionsSection(
     modifier: Modifier = Modifier,
     canOpenViewAll: Boolean = true
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = CandyShape.card,
-        color = CandyColors.homeCardSurface,
-        tonalElevation = CandyElevation.low,
-        shadowElevation = CandyElevation.low,
-        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CandySpace.lg),
-            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-        ) {
-            // Section Header
-            DecisionsHeaderRow(
-                totalCount = totalCount,
-                canOpenViewAll = canOpenViewAll,
-                onViewAllClick = onViewAllClick
-            )
-
-            when (sectionState) {
-                SectionState.Loading -> DecisionsLoadingState()
-                is SectionState.Empty -> DecisionsEmptyState(
-                    onSaveFirstItemClick = onSaveFirstItemClick
-                )
-                is SectionState.Error -> DecisionsErrorState(
-                    message = sectionState.message,
-                    canRetry = sectionState.canRetry,
-                    onRetryClick = onRetryClick
-                )
-                is SectionState.Content -> {
-                    if (sectionState.data.isEmpty()) {
-                        DecisionsEmptyState(onSaveFirstItemClick = onSaveFirstItemClick)
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
-                        ) {
-                            sectionState.data.take(3).forEach { decision ->
-                                key(decision.id) {
-                                    DecisionRow(
-                                        decision = decision,
-                                        onClick = { onDecisionClick(decision.id) }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    HomeAttentionItemsSection(
+        sectionState = sectionState,
+        totalCount = totalCount,
+        onDecisionClick = onDecisionClick,
+        onViewAllClick = onViewAllClick,
+        onSaveFirstItemClick = onSaveFirstItemClick,
+        onRetryClick = onRetryClick,
+        modifier = modifier,
+        canOpenViewAll = canOpenViewAll
+    )
 }
 
 @Composable
-private fun DecisionsHeaderRow(
-    totalCount: Int,
+private fun AttentionItemsHeader(
     canOpenViewAll: Boolean,
     onViewAllClick: () -> Unit
 ) {
@@ -146,380 +199,276 @@ private fun DecisionsHeaderRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Left: Sparkles icon in lavender container + Title
         Row(
-            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
         ) {
             Box(
                 modifier = Modifier
-                    .size(SectionIconBoxSize)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(CandyColors.primarySoft),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.FactCheck,
+                    imageVector = Icons.Rounded.AutoAwesome,
                     contentDescription = null,
                     tint = CandyColors.brandPurple,
-                    modifier = Modifier.size(SectionIconSize)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
             Text(
                 text = stringResource(R.string.home_decisions_title),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
+                style = TextStyle(
+                    fontFamily = Nunito,
+                    fontSize = 17.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
                 ),
-                color = CandyColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = CandyColors.textPrimary
             )
-
-            if (totalCount > 0) {
-                Surface(
-                    shape = CircleShape,
-                    color = CandyColors.primarySoft
-                ) {
-                    Text(
-                        text = totalCount.toString(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = CandyColors.primaryInk,
-                        modifier = Modifier.padding(
-                            horizontal = CandySpace.sm,
-                            vertical = 2.dp
-                        )
-                    )
-                }
-            }
         }
 
+        // Right: "Tất cả ›"
         if (canOpenViewAll) {
-            val viewAllLabel = stringResource(R.string.home_decisions_view_all)
+            val viewAllText = stringResource(R.string.home_decisions_view_all_compact)
             Row(
                 modifier = Modifier
-                    .heightIn(min = 32.dp)
+                    .heightIn(min = CandySize.touchTarget)
                     .clip(CandyShape.chip)
                     .clickable(
                         role = Role.Button,
-                        onClickLabel = viewAllLabel,
+                        onClickLabel = viewAllText,
                         onClick = onViewAllClick
                     )
                     .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = viewAllLabel,
-                    style = MaterialTheme.typography.labelSmall.copy(
+                    text = viewAllText,
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    color = CandyColors.primaryInk
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = CandyColors.primaryInk,
-                    modifier = Modifier.size(ChevronIconSize)
+                    color = CandyColors.brandPurple
                 )
             }
         }
     }
 }
 
+/**
+ * Individual Candy Item Tile:
+ * [Product image (72x72)] [Title (max 2 lines) + Price + Status] [Chevron]
+ */
 @Composable
-fun DecisionRow(
+fun HomeAttentionItemTile(
     decision: DecisionUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val isLargeFont = configuration.fontScale >= 1.4f
+    val effectiveStatus = if (decision.isTimerExpiredLocally) {
+        DecisionStatus.Ready
+    } else {
+        decision.status
+    }
+    val style = resolveAttentionItemStyle(effectiveStatus)
 
-    val rowBg = when (decision.status) {
-        DecisionStatus.Ready -> CandyColors.decisionReadyRowBg
-        DecisionStatus.Waiting -> CandyColors.decisionWaitingRowBg
-        DecisionStatus.Considering -> CandyColors.decisionConsideringRowBg
-        DecisionStatus.Saved -> CandyColors.decisionSavedRowBg
+    val displayStatusText = when (effectiveStatus) {
+        DecisionStatus.Ready -> stringResource(R.string.home_decision_status_ready)
+        DecisionStatus.Waiting -> {
+            if (!decision.secondaryText.isNullOrBlank()) {
+                "${decision.statusLabel} · ${decision.secondaryText}"
+            } else {
+                decision.statusLabel
+            }
+        }
+        DecisionStatus.Considering -> decision.statusLabel
+        DecisionStatus.Saved -> decision.statusLabel
     }
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(DecisionRowShape)
+            .clip(RoundedCornerShape(AttentionTileRadius))
             .clickable(
                 role = Role.Button,
                 onClickLabel = decision.title,
                 onClick = onClick
             ),
-        shape = DecisionRowShape,
-        color = rowBg
+        shape = RoundedCornerShape(AttentionTileRadius),
+        color = style.background,
+        border = BorderStroke(AttentionTileBorderWidth, style.border),
+        shadowElevation = CandyElevation.low
     ) {
-        BoxWithConstraints(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CandySpace.md)
+                .padding(CandySpace.md),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val stackStatusBelow = maxWidth < 310.dp || isLargeFont
-
-            if (stackStatusBelow) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DecisionThumbnail(thumbnailResId = decision.thumbnailResId)
-                        Spacer(modifier = Modifier.width(CandySpace.md))
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Text(
-                                text = decision.title,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = CandyColors.textPrimary,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            // Never clip money with ellipsis (S15)
-                            Text(
-                                text = decision.priceFormatted,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = CandyColors.textSecondary
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = CandyColors.textSecondary,
-                            modifier = Modifier.size(ChevronIconSize)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DecisionStatusBadge(status = decision.status, label = decision.statusLabel)
-                        if (!decision.secondaryText.isNullOrBlank()) {
-                            Text(
-                                text = decision.secondaryText,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = CandyColors.textSecondary
-                            )
-                        }
-                    }
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    DecisionThumbnail(thumbnailResId = decision.thumbnailResId)
-
-                    Spacer(modifier = Modifier.width(CandySpace.md))
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = decision.title,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.ExtraBold
-                            ),
-                            color = CandyColors.textPrimary,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        // Never clip money with ellipsis (S15)
-                        Text(
-                            text = decision.priceFormatted,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = CandyColors.textSecondary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(CandySpace.sm))
-
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        DecisionStatusBadge(status = decision.status, label = decision.statusLabel)
-                        if (!decision.secondaryText.isNullOrBlank()) {
-                            Text(
-                                text = decision.secondaryText,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = CandyColors.textSecondary
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(CandySpace.xs))
-
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            // Thumbnail: 72x72dp, radius 16dp, background white
+            Box(
+                modifier = Modifier
+                    .size(ThumbnailSize)
+                    .clip(RoundedCornerShape(ThumbnailRadius))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                if (decision.thumbnailResId != null) {
+                    Image(
+                        painter = painterResource(id = decision.thumbnailResId),
                         contentDescription = null,
-                        tint = CandyColors.textSecondary,
-                        modifier = Modifier.size(ChevronIconSize)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Rounded.ShoppingBag,
+                        contentDescription = null,
+                        tint = style.accent.copy(alpha = 0.7f),
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun DecisionThumbnail(
-    thumbnailResId: Int?
-) {
-    Box(
-        modifier = Modifier
-            .size(DecisionThumbnailSize)
-            .clip(DecisionThumbnailShape)
-            .background(CandyColors.primarySoft),
-        contentAlignment = Alignment.Center
-    ) {
-        if (thumbnailResId != null) {
-            Image(
-                painter = painterResource(id = thumbnailResId),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
+            Spacer(modifier = Modifier.width(CandySpace.md))
+
+            // Text Column: Title + Price + Status
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = decision.title,
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = CandyColors.textPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = decision.priceFormatted,
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = CandyColors.textPrimary
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = style.icon,
+                        contentDescription = null,
+                        tint = style.accent,
+                        modifier = Modifier.size(StatusIconSize)
+                    )
+                    Text(
+                        text = displayStatusText,
+                        style = TextStyle(
+                            fontFamily = Nunito,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = style.accent
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(CandySpace.sm))
+
+            // Chevron
             Icon(
-                imageVector = Icons.Rounded.ShoppingBag,
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 contentDescription = null,
-                tint = CandyColors.brandPurple,
-                modifier = Modifier.size(22.dp)
+                tint = style.accent.copy(alpha = 0.85f),
+                modifier = Modifier.size(ChevronIconSize)
             )
         }
     }
 }
 
 @Composable
-private fun DecisionStatusBadge(
-    status: DecisionStatus,
-    label: String
-) {
-    val (pillBg, pillInk, icon) = when (status) {
-        DecisionStatus.Ready -> Triple(
-            CandyColors.decisionReadyPillBg,
-            CandyColors.decisionReadyPillInk,
-            Icons.Rounded.CheckCircle
-        )
-        DecisionStatus.Waiting -> Triple(
-            CandyColors.decisionWaitingPillBg,
-            CandyColors.decisionWaitingPillInk,
-            Icons.Rounded.Schedule
-        )
-        DecisionStatus.Considering -> Triple(
-            CandyColors.decisionConsideringPillBg,
-            CandyColors.decisionConsideringPillInk,
-            Icons.Rounded.Visibility
-        )
-        DecisionStatus.Saved -> Triple(
-            CandyColors.decisionSavedPillBg,
-            CandyColors.decisionSavedPillInk,
-            Icons.Rounded.BookmarkBorder
-        )
-    }
-
-    Surface(
-        shape = CandyShape.chip,
-        color = pillBg
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = CandySpace.sm,
-                vertical = CandySpace.xs
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = pillInk,
-                modifier = Modifier.size(StatusPillIconSize)
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = pillInk
-            )
-        }
-    }
-}
-
-@Composable
-private fun DecisionsEmptyState(
+private fun AttentionItemsEmptyState(
     onSaveFirstItemClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = CandySpace.sm),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = CandyColors.attentionTileConsideringBg,
+        border = BorderStroke(1.5.dp, CandyColors.attentionTileConsideringBorder),
+        shadowElevation = CandyElevation.low
     ) {
-        Text(
-            text = stringResource(R.string.home_decisions_empty_title),
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = CandyColors.textPrimary
-        )
-        Text(
-            text = stringResource(R.string.home_decisions_empty_subtitle),
-            style = MaterialTheme.typography.bodySmall,
-            color = CandyColors.textSecondary
-        )
-        val ctaLabel = stringResource(R.string.home_decisions_empty_cta)
-        Surface(
+        Row(
             modifier = Modifier
-                .heightIn(min = CandySize.touchTarget)
-                .clip(CandyShape.chip)
-                .clickable(
-                    role = Role.Button,
-                    onClickLabel = ctaLabel,
-                    onClick = onSaveFirstItemClick
-                ),
-            shape = CandyShape.chip,
-            color = CandyColors.primarySoft
+                .fillMaxWidth()
+                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier.padding(
-                    horizontal = CandySpace.lg,
-                    vertical = CandySpace.sm
-                ),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.home_decisions_empty_title),
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = CandyColors.textPrimary
+                )
+                Text(
+                    text = stringResource(R.string.home_decisions_empty_subtitle),
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal
+                    ),
+                    color = CandyColors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.width(CandySpace.sm))
+
+            val ctaLabel = stringResource(R.string.home_decisions_empty_cta)
+            Surface(
+                modifier = Modifier
+                    .heightIn(min = 36.dp)
+                    .clip(CandyShape.chip)
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = ctaLabel,
+                        onClick = onSaveFirstItemClick
+                    ),
+                shape = CandyShape.chip,
+                color = Color.White
             ) {
                 Text(
                     text = ctaLabel,
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    style = TextStyle(
+                        fontFamily = Nunito,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    color = CandyColors.primaryInk
+                    color = CandyColors.brandPurple,
+                    modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs)
                 )
             }
         }
@@ -527,72 +476,274 @@ private fun DecisionsEmptyState(
 }
 
 @Composable
-private fun DecisionsLoadingState() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = CandySpace.sm),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(CandySpace.md)
+private fun AttentionItemsLoadingState() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(20.dp),
-            color = CandyColors.brandPurple,
-            strokeWidth = 2.dp
-        )
-        Text(
-            text = stringResource(R.string.home_section_loading),
-            style = MaterialTheme.typography.bodySmall,
-            color = CandyColors.textSecondary
-        )
+        repeat(2) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(96.dp),
+                shape = RoundedCornerShape(AttentionTileRadius),
+                color = CandyColors.primarySoft.copy(alpha = 0.35f),
+                border = BorderStroke(1.5.dp, CandyColors.primarySoft)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(CandySpace.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(ThumbnailSize)
+                            .clip(RoundedCornerShape(ThumbnailRadius))
+                            .background(Color.White.copy(alpha = 0.6f))
+                    )
+                    Spacer(modifier = Modifier.width(CandySpace.md))
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .height(14.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.6f))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.4f)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.6f))
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun DecisionsErrorState(
+private fun AttentionItemsErrorState(
     message: String,
     canRetry: Boolean,
     onRetryClick: () -> Unit
 ) {
-    Row(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(20.dp),
+        color = CandyColors.attentionTileSavedBg,
+        border = BorderStroke(1.5.dp, CandyColors.attentionTileSavedBorder)
     ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodySmall,
-            color = CandyColors.textSecondary,
-            modifier = Modifier.weight(1f)
-        )
-        if (canRetry) {
-            Spacer(modifier = Modifier.width(CandySpace.sm))
-            val retryText = stringResource(R.string.home_section_retry)
-            Surface(
-                modifier = Modifier
-                    .heightIn(min = CandySize.touchTarget)
-                    .clip(CandyShape.chip)
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = retryText,
-                        onClick = onRetryClick
-                    ),
-                shape = CandyShape.chip,
-                color = CandyColors.primarySoft
-            ) {
-                Box(
-                    modifier = Modifier.padding(horizontal = CandySpace.md),
-                    contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CandySpace.md),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = message,
+                style = TextStyle(
+                    fontFamily = Nunito,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = CandyColors.textSecondary,
+                modifier = Modifier.weight(1f)
+            )
+            if (canRetry) {
+                Spacer(modifier = Modifier.width(CandySpace.sm))
+                val retryText = stringResource(R.string.home_section_retry)
+                Surface(
+                    modifier = Modifier
+                        .heightIn(min = 36.dp)
+                        .clip(CandyShape.chip)
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = retryText,
+                            onClick = onRetryClick
+                        ),
+                    shape = CandyShape.chip,
+                    color = Color.White
                 ) {
                     Text(
                         text = retryText,
-                        style = MaterialTheme.typography.labelSmall.copy(
+                        style = TextStyle(
+                            fontFamily = Nunito,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         ),
-                        color = CandyColors.primaryInk
+                        color = CandyColors.brandPurple,
+                        modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs)
                     )
                 }
             }
         }
+    }
+}
+
+// ==========================================
+// PREVIEWS
+// ==========================================
+
+private val previewItemReady = DecisionUi(
+    id = "p_ready",
+    title = "Áo khoác vintage",
+    priceMinor = 680_000L,
+    priceFormatted = "680.000 ₫",
+    status = DecisionStatus.Ready,
+    statusLabel = "Sẵn sàng xem lại"
+)
+
+private val previewItemWaiting1 = DecisionUi(
+    id = "p_wait1",
+    title = "Sony WH-1000XM5",
+    priceMinor = 7_490_000L,
+    priceFormatted = "7.490.000 ₫",
+    status = DecisionStatus.Waiting,
+    statusLabel = "Đang chờ",
+    secondaryText = "Còn 18 giờ 24 phút",
+    remainingSeconds = 66_240L
+)
+
+private val previewItemWaiting2 = DecisionUi(
+    id = "p_wait2",
+    title = "Keychron K2",
+    priceMinor = 1_850_000L,
+    priceFormatted = "1.850.000 ₫",
+    status = DecisionStatus.Waiting,
+    statusLabel = "Đang chờ",
+    secondaryText = "Còn 6 giờ 10 phút",
+    remainingSeconds = 22_200L
+)
+
+private val previewItemConsidering = DecisionUi(
+    id = "p_consider",
+    title = "Màn hình LG UltraFine 4K 27 inch",
+    priceMinor = 9_200_000L,
+    priceFormatted = "9.200.000 ₫",
+    status = DecisionStatus.Considering,
+    statusLabel = "Đang cân nhắc"
+)
+
+private val previewItemSaved = DecisionUi(
+    id = "p_saved",
+    title = "Bình giữ nhiệt Stanley Aerolight",
+    priceMinor = 850_000L,
+    priceFormatted = "850.000 ₫",
+    status = DecisionStatus.Saved,
+    statusLabel = "Đã lưu"
+)
+
+private val previewItemLongName = DecisionUi(
+    id = "p_long",
+    title = "Bàn phím cơ Custom HHKB Professional HYBRID Type-S Snow Limited Edition kết nối Bluetooth",
+    priceMinor = 8_500_000L,
+    priceFormatted = "8.500.000 ₫",
+    status = DecisionStatus.Waiting,
+    statusLabel = "Đang chờ",
+    secondaryText = "Còn 12 giờ 30 phút",
+    remainingSeconds = 45_000L
+)
+
+@Preview(name = "1 Ready + 2 Waiting", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeAttentionItemsPreview1Ready2Waiting() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Content(listOf(previewItemReady, previewItemWaiting1, previewItemWaiting2)),
+            totalCount = 3,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "3 Waiting", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeAttentionItemsPreview3Waiting() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Content(listOf(previewItemWaiting1, previewItemWaiting2, previewItemLongName)),
+            totalCount = 3,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Considering + Saved", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeAttentionItemsPreviewConsideringSaved() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Content(listOf(previewItemConsidering, previewItemSaved)),
+            totalCount = 2,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Empty State", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeAttentionItemsPreviewEmpty() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Empty("Chưa có món đồ nào đang chờ"),
+            totalCount = 0,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Long Product Name", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeAttentionItemsPreviewLongName() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Content(listOf(previewItemLongName, previewItemReady)),
+            totalCount = 2,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Large Font (2.0x)", showBackground = true, widthDp = 393, fontScale = 2.0f)
+@Composable
+private fun HomeAttentionItemsPreviewLargeFont() {
+    ChankoTheme {
+        HomeAttentionItemsSection(
+            sectionState = SectionState.Content(listOf(previewItemReady, previewItemWaiting1)),
+            totalCount = 2,
+            onDecisionClick = {},
+            onViewAllClick = {},
+            onSaveFirstItemClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
     }
 }

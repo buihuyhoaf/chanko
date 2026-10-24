@@ -94,6 +94,8 @@ fun MainNavigation(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            containerColor = Color.Transparent,
             bottomBar = {
                 ChankoBottomBar(
                     currentRoute = currentRoute,
@@ -102,11 +104,11 @@ fun MainNavigation(
                     onAddNewItemClick = { isGlobalQuickActionSheetOpen = true }
                 )
             }
-        ) { padding ->
+        ) { _ ->
             NavHost(
                 navController = controller,
                 startDestination = TopLevelDestination.Home.route,
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.fillMaxSize()
             ) {
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(

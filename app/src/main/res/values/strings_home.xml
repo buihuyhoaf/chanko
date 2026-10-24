@@ -30,8 +30,13 @@
     <string name="home_quick_check_subtitle">Hỏi Chanko trước khi mua</string>
     <string name="home_save_item_title">Save an Item</string>
     <string name="home_save_item_subtitle">Lưu để xem lại sau</string>
+    <string name="home_action_ask_title">Hỏi Chanko</string>
+    <string name="home_action_ask_subtitle">Cân nhắc mua</string>
+    <string name="home_action_save_title">Lưu món đồ</string>
+    <string name="home_action_save_subtitle">Để sau nhé</string>
 
     <!-- Budget Snapshot (HOME-04) -->
+    <string name="home_budget_header_title">Ngân sách của bạn</string>
     <string name="home_budget_details_cta">Chi tiết</string>
     <string name="home_budget_spent_label">Đã chi</string>
     <string name="home_budget_remaining_label">Còn lại</string>
@@ -47,6 +52,7 @@
     <!-- Your Decisions (HOME-05) -->
     <string name="home_decisions_title">Những món cần chú ý</string>
     <string name="home_decisions_view_all">Xem tất cả</string>
+    <string name="home_decisions_view_all_compact">Tất cả ›</string>
     <string name="home_decision_status_ready">Sẵn sàng xem lại</string>
     <string name="home_decision_status_waiting">Đang chờ</string>
     <string name="home_decision_status_considering">Đang cân nhắc</string>

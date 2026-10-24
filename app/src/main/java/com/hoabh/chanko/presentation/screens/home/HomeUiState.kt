@@ -240,7 +240,6 @@ enum class HomeTab {
 
 @Immutable
 data class HomeCapabilities(
-    val canOpenSettings: Boolean = true,
     val canOpenProfile: Boolean = true,
     val canOpenBudgetDetails: Boolean = true,
     val canOpenViewAll: Boolean = true,

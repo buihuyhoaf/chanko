@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.DialogueUi
 import com.hoabh.chanko.presentation.screens.home.LivingRoomUi
@@ -54,9 +56,9 @@ import com.hoabh.chanko.ui.theme.CandySpace
 
 private const val SCENE_ASPECT_RATIO = 2.5f
 private const val CALENDAR_TEXT_ROTATION_DEG = -3f
-private val DialogueBubbleShape = RoundedCornerShape(18.dp)
-private val DialogueTailWidth = 14.dp
-private val DialogueTailHeight = 8.dp
+private val DialogueBubbleShape = RoundedCornerShape(12.dp)
+private val DialogueTailWidth = 10.dp
+private val DialogueTailHeight = 6.dp
 private val HitTargetCornerShape = RoundedCornerShape(14.dp)
 
 /**
@@ -193,12 +195,12 @@ fun CompactLivingRoom(
                     dialogue = livingRoom.dialogue,
                     modifier = Modifier
                         .offset(x = bubbleX, y = bubbleY)
-                        .widthIn(min = sceneWidth * 0.32f, max = bubbleMaxWidth)
+                        .widthIn(max = bubbleMaxWidth)
                 )
             }
 
             // 4 Non-Overlapping Interactive Hit Targets (>= 48dp) for Accessibility & Touch
-            val propsByKind = livingRoom.props.associateBy { it.kind }
+            val propsByKind = remember(livingRoom.props) { livingRoom.props.associateBy { it.kind } }
 
             // 1. Hourglass Hit Target: x in [0.01..0.185]
             PropHitTarget(
@@ -366,14 +368,16 @@ fun ChankoDialogueBubble(
         ) {
             Column(
                 modifier = Modifier.padding(
-                    horizontal = CandySpace.md,
-                    vertical = CandySpace.sm
+                    horizontal = CandySpace.sm,
+                    vertical = 5.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 Text(
                     text = dialogue.headline,
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        lineHeight = 13.sp,
                         fontWeight = FontWeight.ExtraBold
                     ),
                     color = CandyColors.textPrimary,
@@ -384,6 +388,8 @@ fun ChankoDialogueBubble(
                     Text(
                         text = dialogue.supportingLine,
                         style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            lineHeight = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = CandyColors.textSecondary,
@@ -397,7 +403,7 @@ fun ChankoDialogueBubble(
         // Đuôi bong bóng thoại hướng về phía Chanko ở bên phải
         Canvas(
             modifier = Modifier
-                .padding(end = CandySpace.lg)
+                .padding(end = CandySpace.md)
                 .size(width = DialogueTailWidth, height = DialogueTailHeight)
         ) {
             val path = Path().apply {

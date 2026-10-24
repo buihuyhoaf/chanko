@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,22 +36,18 @@ import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
 
 private val HeaderControlVisualSize = 40.dp
-private val HeaderSettingsIconSize = 20.dp
 
 /**
  * HOME-01 — Header (v2 Image-Aligned):
  * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng tinh tế (`"Chào buổi sáng, Hoa ☀️"`).
  * - Phụ đề ấm áp (`"Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜"`).
- * - Nút Settings hình tròn nền lavender (`CandyColors.primarySoft`) và nút Avatar tròn tím (`CandyColors.brandPurple`),
- *   mỗi nút có vùng chạm độc lập >= 48dp.
+ * - Nút Avatar tròn tím (`CandyColors.brandPurple`) có vùng chạm độc lập >= 48dp.
  */
 @Composable
 fun HomeHeader(
     header: HeaderUiModel,
-    onSettingsClick: () -> Unit,
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
-    canOpenSettings: Boolean = true,
     canOpenProfile: Boolean = true
 ) {
     val greetingText = header.customGreeting ?: resolveGreetingText(header)
@@ -102,39 +95,6 @@ fun HomeHeader(
             }
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            // Settings Button in Lavender Circle (Touch target >= 48dp)
-            if (canOpenSettings) {
-                val settingsCd = stringResource(R.string.home_cd_settings)
-                Box(
-                    modifier = Modifier
-                        .size(CandySize.touchTarget)
-                        .clip(CircleShape)
-                        .clickable(
-                            role = Role.Button,
-                            onClickLabel = settingsCd,
-                            onClick = onSettingsClick
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier.size(HeaderControlVisualSize),
-                        shape = CircleShape,
-                        color = CandyColors.primarySoft
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.Settings,
-                                contentDescription = settingsCd,
-                                tint = CandyColors.textSecondary,
-                                modifier = Modifier.size(HeaderSettingsIconSize)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(CandySpace.xs))
 
             // Profile Avatar Button in Purple Circle (Touch target >= 48dp)
             if (canOpenProfile) {
@@ -192,19 +152,10 @@ fun HomeHeader(
 
 @Composable
 private fun resolveGreetingText(header: HeaderUiModel): String {
-    return if (header.hasName) {
-        val resId = when (header.greetingPeriod) {
-            GreetingPeriod.MORNING -> R.string.home_greeting_morning_named
-            GreetingPeriod.AFTERNOON -> R.string.home_greeting_afternoon_named
-            GreetingPeriod.EVENING -> R.string.home_greeting_evening_named
-        }
-        stringResource(resId, header.displayName)
-    } else {
-        val resId = when (header.greetingPeriod) {
-            GreetingPeriod.MORNING -> R.string.home_greeting_morning_anonymous
-            GreetingPeriod.AFTERNOON -> R.string.home_greeting_afternoon_anonymous
-            GreetingPeriod.EVENING -> R.string.home_greeting_evening_anonymous
-        }
-        stringResource(resId)
+    val resId = when (header.greetingPeriod) {
+        GreetingPeriod.MORNING -> if (header.hasName) R.string.home_greeting_morning_named else R.string.home_greeting_morning_anonymous
+        GreetingPeriod.AFTERNOON -> if (header.hasName) R.string.home_greeting_afternoon_named else R.string.home_greeting_afternoon_anonymous
+        GreetingPeriod.EVENING -> if (header.hasName) R.string.home_greeting_evening_named else R.string.home_greeting_evening_anonymous
     }
+    return if (header.hasName) stringResource(resId, header.displayName) else stringResource(resId)
 }
