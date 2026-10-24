@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -198,7 +199,7 @@ fun CompactLivingRoom(
             }
 
             // 4 Non-Overlapping Interactive Hit Targets (>= 48dp) for Accessibility & Touch
-            val propsByKind = livingRoom.props.associateBy { it.kind }
+            val propsByKind = remember(livingRoom.props) { livingRoom.props.associateBy { it.kind } }
 
             // 1. Hourglass Hit Target: x in [0.01..0.185]
             PropHitTarget(
