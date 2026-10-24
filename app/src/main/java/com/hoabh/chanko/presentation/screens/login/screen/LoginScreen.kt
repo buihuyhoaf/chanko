@@ -15,27 +15,21 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -164,7 +158,6 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxSize())
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(48.dp)
                     .background(Brush.verticalGradient(listOf(Color.Transparent, CandyColors.background))))
-                LoginWordmark(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 18.dp))
             }
             Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = CandySpace.section),
                 horizontalAlignment = Alignment.CenterHorizontally) {
@@ -208,22 +201,6 @@ fun LoginScreen(
                 Spacer(Modifier.height(CandySpace.md))
             }
         }
-    }
-}
-
-@Composable
-private fun LoginWordmark(modifier: Modifier = Modifier) {
-    val text = buildAnnotatedString {
-        withStyle(SpanStyle(color = LoginPlum)) { append(stringResource(R.string.login_brand).substringBefore('\n')) }
-        append('\n')
-        withStyle(SpanStyle(color = Color(0xFFD72C61))) { append(stringResource(R.string.login_brand).substringAfter('\n')) }
-    }
-    val style = TextStyle(fontFamily = Nunito, fontSize = 36.sp, lineHeight = 38.sp,
-        fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-    Box(modifier.rotate(-5f), contentAlignment = Alignment.Center) {
-        Text(text.text, style = style.copy(color = Color.White, drawStyle = Stroke(width = 15f)),
-            modifier = Modifier.clearAndSetSemantics { })
-        Text(text, style = style)
     }
 }
 
