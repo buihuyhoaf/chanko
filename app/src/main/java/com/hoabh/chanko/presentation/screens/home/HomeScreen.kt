@@ -43,7 +43,6 @@ private val BottomNavClearanceHeight = 88.dp
 fun HomeRoute(
     modifier: Modifier = Modifier,
     onAddNewItemClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -51,7 +50,6 @@ fun HomeRoute(
 
     CollectEffect(effectFlow = viewModel.effect) { effect ->
         when (effect) {
-            HomeUiEffect.NavigateToSettings -> onSettingsClick()
             HomeUiEffect.NavigateToProfile -> onProfileClick()
             HomeUiEffect.OpenQuickCheckFlow,
             HomeUiEffect.OpenSaveItemFlow -> onAddNewItemClick()
@@ -116,9 +114,7 @@ fun HomeScreen(
             item(key = "home_01_header") {
                 HomeHeader(
                     header = state.header,
-                    onSettingsClick = { onEvent(HomeUiEvent.SettingsClick) },
                     onProfileClick = { onEvent(HomeUiEvent.ProfileClick) },
-                    canOpenSettings = state.capabilities.canOpenSettings,
                     canOpenProfile = state.capabilities.canOpenProfile
                 )
             }

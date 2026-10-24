@@ -16,12 +16,6 @@ class HomeViewModel @Inject constructor(
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {
-            HomeUiEvent.SettingsClick -> {
-                if (uiState.value.capabilities.canOpenSettings) {
-                    sendEffect(HomeUiEffect.NavigateToSettings)
-                }
-            }
-
             HomeUiEvent.ProfileClick -> {
                 if (uiState.value.capabilities.canOpenProfile) {
                     sendEffect(HomeUiEffect.NavigateToProfile)

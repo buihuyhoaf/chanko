@@ -4,7 +4,6 @@ import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 
 sealed interface HomeUiEvent {
     // Header (HOME-01)
-    data object SettingsClick : HomeUiEvent
     data object ProfileClick : HomeUiEvent
 
     // Living Room Props (HOME-02)
