@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "width": 1000,
+    "height": 400
+  },
+  "units": "normalized-to-scene",
+  "status": "suggested starting positions, not approved vector measurements",
+  "layers": [
+    {
+      "asset": "room_background.png",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "z": 0,
+      "fit": "fill"
+    },
+    {
+      "asset": "hourglass_books.png",
+      "x": 0.005,
+      "y": 0.395,
+      "width": 0.215,
+      "height": 0.6,
+      "z": 1,
+      "fit": "contain"
+    },
+    {
+      "asset": "calendar_blank.png",
+      "x": 0.19,
+      "y": 0.51,
+      "width": 0.2,
+      "height": 0.46,
+      "z": 2,
+      "fit": "contain"
+    },
+    {
+      "asset": "wallet_mint.png",
+      "x": 0.35,
+      "y": 0.55,
+      "width": 0.18,
+      "height": 0.43,
+      "z": 3,
+      "fit": "contain"
+    },
+    {
+      "asset": "cat_on_cushion.png",
+      "x": 0.47,
+      "y": 0.12,
+      "width": 0.35,
+      "height": 0.875,
+      "z": 4,
+      "fit": "contain"
+    },
+    {
+      "asset": "pause_jar_heart.png",
+      "x": 0.78,
+      "y": 0.48,
+      "width": 0.215,
+      "height": 0.515,
+      "z": 5,
+      "fit": "contain"
+    }
+  ],
+  "dialogue": {
+    "x": 0.19,
+    "y": 0.055,
+    "width": 0.33,
+    "height": 0.39,
+    "z": 6,
+    "render": "Compose text/bubble, not image"
+  },
+  "calendarText": {
+    "assetLocalMonthBox": [
+      0.35,
+      0.25,
+      0.42,
+      0.11
+    ],
+    "assetLocalDayBox": [
+      0.34,
+      0.45,
+      0.45,
+      0.29
+    ],
+    "rotationDegrees": -3,
+    "note": "approximate local boxes; visually align with slanted panel, derive actual date from state"
+  }
+}

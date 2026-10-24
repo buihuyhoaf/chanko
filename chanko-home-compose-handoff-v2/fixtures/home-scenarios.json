@@ -1,0 +1,610 @@
+{
+  "notice": "Fixtures only; partial inputs override a deterministic preview base, not production schema. Money in VND minor units (0 fraction digits). Missing fields are unspecified, not implicit zero. S18 requires TECH decision, not executable expected rank.",
+  "fixedClock": "2026-10-24T03:00:00Z",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "scenarios": [
+    {
+      "id": "S01",
+      "description": "Happy path: dữ liệu minh họa, không là lịch sử tài khoản",
+      "input": {
+        "decisions": [
+          {
+            "id": "S1",
+            "status": "Saved",
+            "title": "Món đồ minh họa S1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "W1",
+            "status": "Waiting",
+            "title": "Món đồ minh họa W1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R1",
+            "status": "Ready",
+            "title": "Món đồ minh họa R1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "C1",
+            "status": "Considering",
+            "title": "Món đồ minh họa C1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R2",
+            "status": "Ready",
+            "title": "Món đồ minh họa R2",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ],
+        "budget": {
+          "limitMinor": 3000000,
+          "spentMinor": 2400000,
+          "currency": "VND"
+        },
+        "observation": null,
+        "draft": null,
+        "dialogue": {
+          "headline": "Bạn có 2 món sẵn sàng xem lại đó!",
+          "supportingLine": "Cùng xem thử nhé? 💜"
+        }
+      },
+      "expected": {
+        "visibleIds": [
+          "R1",
+          "R2",
+          "W1"
+        ],
+        "remainingMinor": 600000,
+        "ratio": 0.8,
+        "optionalSections": 0,
+        "dialoguePlacement": "inside-scene"
+      }
+    },
+    {
+      "id": "S02",
+      "description": "Tất cả Ready",
+      "input": {
+        "decisions": [
+          {
+            "id": "R1",
+            "status": "Ready",
+            "title": "Món đồ minh họa R1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R2",
+            "status": "Ready",
+            "title": "Món đồ minh họa R2",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R3",
+            "status": "Ready",
+            "title": "Món đồ minh họa R3",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R4",
+            "status": "Ready",
+            "title": "Món đồ minh họa R4",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R5",
+            "status": "Ready",
+            "title": "Món đồ minh họa R5",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ]
+      },
+      "expected": {
+        "visibleIds": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      }
+    },
+    {
+      "id": "S03",
+      "description": "Bốn trạng thái và thứ tự trong nhóm",
+      "input": {
+        "decisions": [
+          {
+            "id": "S1",
+            "status": "Saved",
+            "title": "Món đồ minh họa S1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "C1",
+            "status": "Considering",
+            "title": "Món đồ minh họa C1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "W1",
+            "status": "Waiting",
+            "title": "Món đồ minh họa W1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "W2",
+            "status": "Waiting",
+            "title": "Món đồ minh họa W2",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "R1",
+            "status": "Ready",
+            "title": "Món đồ minh họa R1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ]
+      },
+      "expected": {
+        "visibleIds": [
+          "R1",
+          "W1",
+          "W2"
+        ]
+      }
+    },
+    {
+      "id": "S04",
+      "description": "Chỉ Saved",
+      "input": {
+        "decisions": [
+          {
+            "id": "S1",
+            "status": "Saved",
+            "title": "Món đồ minh họa S1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ]
+      },
+      "expected": {
+        "visibleIds": [
+          "S1"
+        ]
+      }
+    },
+    {
+      "id": "S05",
+      "description": "Empty loaded",
+      "input": {
+        "decisions": [],
+        "budget": null
+      },
+      "expected": {
+        "decisionsState": "empty",
+        "showSaveEntry": true,
+        "budgetState": "unknown-or-setup-per-capability"
+      }
+    },
+    {
+      "id": "S06",
+      "description": "Budget vượt mức",
+      "input": {
+        "budget": {
+          "limitMinor": 3000000,
+          "spentMinor": 3600000,
+          "currency": "VND"
+        }
+      },
+      "expected": {
+        "remainingMinor": -600000,
+        "ratioLabelPercent": 120,
+        "visualProgress": 1
+      }
+    },
+    {
+      "id": "S07",
+      "description": "Budget bằng 0",
+      "input": {
+        "budget": {
+          "limitMinor": 0,
+          "spentMinor": 100000,
+          "currency": "VND"
+        }
+      },
+      "expected": {
+        "remainingMinor": -100000,
+        "ratio": null,
+        "visualProgress": null,
+        "noDivisionByZero": true
+      }
+    },
+    {
+      "id": "S08",
+      "description": "Budget unknown",
+      "input": {
+        "budget": {
+          "limitMinor": null,
+          "spentMinor": null,
+          "currency": "VND"
+        }
+      },
+      "expected": {
+        "noFabricatedZero": true,
+        "ratio": null
+      }
+    },
+    {
+      "id": "S09",
+      "description": "Observation + Draft",
+      "input": {
+        "observation": {
+          "id": "O1",
+          "text": "Bạn thường mua các món công nghệ vào cuối tuần.",
+          "title": "Góc nhìn hôm nay",
+          "evidenceText": "3 trong 5 món gần đây được mua vào Thứ 7 hoặc Chủ nhật.",
+          "canExplain": true,
+          "canHide": true,
+          "canDismiss": true
+        },
+        "draft": {
+          "id": "D1",
+          "summary": "Bản nháp tai nghe"
+        }
+      },
+      "expected": {
+        "optionalSections": 2,
+        "resumeDraftId": "D1"
+      }
+    },
+    {
+      "id": "S10",
+      "description": "Observation only",
+      "input": {
+        "observation": {
+          "id": "O1",
+          "text": "Nội dung minh họa."
+        },
+        "draft": null
+      },
+      "expected": {
+        "optionalSections": 1
+      }
+    },
+    {
+      "id": "S11",
+      "description": "Draft only",
+      "input": {
+        "observation": null,
+        "draft": {
+          "id": "D1",
+          "summary": "Bản nháp"
+        }
+      },
+      "expected": {
+        "optionalSections": 1
+      }
+    },
+    {
+      "id": "S12",
+      "description": "Timer hết nhưng source còn Waiting",
+      "input": {
+        "decisions": [
+          {
+            "id": "W1",
+            "status": "Waiting",
+            "title": "Món đồ minh họa W1",
+            "priceMinor": 680000,
+            "currency": "VND",
+            "deadline": "2026-10-24T03:00:00Z"
+          }
+        ],
+        "now": "2026-10-24T03:00:01Z",
+        "zone": "Asia/Ho_Chi_Minh"
+      },
+      "expected": {
+        "visibleIds": [
+          "W1"
+        ],
+        "status": "Waiting",
+        "automaticPurchase": false,
+        "countdownNegative": false
+      }
+    },
+    {
+      "id": "S13",
+      "description": "Section lỗi độc lập",
+      "input": {
+        "budgetState": "Error",
+        "decisionsState": "Loading"
+      },
+      "expected": {
+        "budgetRetry": true,
+        "decisionsEmpty": false,
+        "headerAndNavVisible": true
+      }
+    },
+    {
+      "id": "S14",
+      "description": "Offline snapshot",
+      "input": {
+        "freshness": "stale",
+        "asOf": "2026-10-24T02:00:00Z",
+        "now": "2026-10-24T03:00:00Z"
+      },
+      "expected": {
+        "showFreshnessPerPolicy": true,
+        "noFabricatedFreshData": true
+      }
+    },
+    {
+      "id": "S15",
+      "description": "Tên/tiền dài, ảnh thiếu",
+      "input": {
+        "decisions": [
+          {
+            "id": "L1",
+            "status": "Considering",
+            "title": "Tai nghe chống ồn phiên bản giới hạn với tên sản phẩm rất dài",
+            "priceMinor": 680000,
+            "currency": "VND",
+            "image": null
+          }
+        ],
+        "displayName": "Nguyễn Hoàng Minh Anh",
+        "fontScale": 2.0,
+        "widthDp": 320
+      },
+      "expected": {
+        "noClippedMoney": true,
+        "imageFallback": true,
+        "scrollable": true
+      }
+    },
+    {
+      "id": "S16",
+      "description": "Nút + và back",
+      "input": {
+        "selectedTab": "Home",
+        "actions": [
+          "AddTapped",
+          "AddTapped",
+          "Back"
+        ]
+      },
+      "expected": {
+        "activeSheet": null,
+        "selectedTab": "Home",
+        "maxConcurrentSheets": 1,
+        "focusReturnsTo": "CenterAddAction"
+      }
+    },
+    {
+      "id": "S17",
+      "description": "Context bị xóa",
+      "input": {
+        "sheet": {
+          "kind": "Decision",
+          "entityId": "R1"
+        },
+        "entityExists": false
+      },
+      "expected": {
+        "writeActionEnabled": false,
+        "dismissAvailable": true,
+        "noCrash": true
+      }
+    },
+    {
+      "id": "S18",
+      "description": "Duplicate/unknown status — chờ adapter TECH",
+      "input": {
+        "decisions": [
+          {
+            "id": "X",
+            "status": "Ready",
+            "title": "Món đồ minh họa X",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "X",
+            "status": "Waiting",
+            "title": "Món đồ minh họa X",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "U",
+            "status": "Unknown",
+            "title": "Món đồ minh họa U",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ]
+      },
+      "expected": {
+        "requiresCanonicalizationPolicy": true,
+        "doNotSilentlyPromoteUnknownToReady": true
+      }
+    },
+    {
+      "id": "S19",
+      "description": "Clock/timezone/ngày biên",
+      "input": {
+        "now": "2026-10-24T17:30:00Z",
+        "zone": "Asia/Ho_Chi_Minh"
+      },
+      "expected": {
+        "localDate": "2026-10-25",
+        "hostTimezoneMustNotOverride": true
+      }
+    },
+    {
+      "id": "S20",
+      "description": "Chỉ Considering và Saved",
+      "input": {
+        "decisions": [
+          {
+            "id": "S1",
+            "status": "Saved",
+            "title": "Món đồ minh họa S1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "C1",
+            "status": "Considering",
+            "title": "Món đồ minh họa C1",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "C2",
+            "status": "Considering",
+            "title": "Món đồ minh họa C2",
+            "priceMinor": 680000,
+            "currency": "VND"
+          },
+          {
+            "id": "S2",
+            "status": "Saved",
+            "title": "Món đồ minh họa S2",
+            "priceMinor": 680000,
+            "currency": "VND"
+          }
+        ]
+      },
+      "expected": {
+        "visibleIds": [
+          "C1",
+          "C2",
+          "S1"
+        ]
+      }
+    },
+    {
+      "id": "S21",
+      "description": "Screenshot baseline: một Ready, hai Waiting, Observation visible; chữ/số chỉ là fixture",
+      "input": {
+        "decisions": [
+          {
+            "id": "J1",
+            "status": "Ready",
+            "title": "Áo khoác vintage",
+            "priceMinor": 680000,
+            "currency": "VND",
+            "image": "assets/sample_jacket.png"
+          },
+          {
+            "id": "H1",
+            "status": "Waiting",
+            "title": "Sony WH-1000XM5",
+            "priceMinor": 7490000,
+            "currency": "VND",
+            "image": "assets/sample_headphones.png",
+            "countdownLabel": "Còn 18 giờ 24 phút"
+          },
+          {
+            "id": "K1",
+            "status": "Waiting",
+            "title": "Keychron K2",
+            "priceMinor": 1850000,
+            "currency": "VND",
+            "image": "assets/sample_keyboard.png",
+            "countdownLabel": "Còn 6 giờ 10 phút"
+          }
+        ],
+        "dialogue": {
+          "headline": "Bạn có 1 món sẵn sàng xem lại đó!",
+          "supportingLine": "Cùng xem thử nhé? 💜"
+        },
+        "budget": {
+          "limitMinor": 3000000,
+          "spentMinor": 2400000,
+          "currency": "VND",
+          "cycleLabel": "Ngân sách tháng 10 – 11/2026"
+        },
+        "observation": {
+          "id": "O1",
+          "title": "Góc nhìn hôm nay",
+          "text": "Bạn thường mua các món công nghệ vào cuối tuần.",
+          "evidenceText": "3 trong 5 món gần đây được mua vào Thứ 7 hoặc Chủ nhật.",
+          "canExplain": true,
+          "canHide": true,
+          "canDismiss": true
+        },
+        "draft": null,
+        "sheet": null
+      },
+      "expected": {
+        "visibleIds": [
+          "J1",
+          "H1",
+          "K1"
+        ],
+        "dialoguePlacement": "inside-scene-top-left",
+        "optionalSections": 1
+      }
+    },
+    {
+      "id": "S22",
+      "description": "Sheet-open screenshot baseline",
+      "input": {
+        "baseScenario": "S21",
+        "sheet": {
+          "kind": "Global"
+        }
+      },
+      "expected": {
+        "modalOverlay": true,
+        "scrimVisible": true,
+        "title": "Bạn muốn làm gì?",
+        "entries": [
+          "Quick Check",
+          "Save an Item"
+        ],
+        "selectedTab": "Home",
+        "sheetIsNotScrollContent": true
+      }
+    }
+  ],
+  "visualReference": "references/approved-home-user-reference.png",
+  "previewBase": {
+    "header": {
+      "greeting": "Chào buổi sáng, Hoa",
+      "subtitle": "Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜"
+    },
+    "room": {
+      "catPose": "lying-chin-on-paws-lavender-cushion",
+      "dialoguePlacement": "inside-scene-top-left",
+      "props": [
+        "Hourglass",
+        "Calendar",
+        "Wallet",
+        "PauseJar"
+      ]
+    },
+    "quickActions": [
+      "Quick Check",
+      "Save an Item"
+    ],
+    "selectedTab": "Home",
+    "draft": null
+  }
+}
