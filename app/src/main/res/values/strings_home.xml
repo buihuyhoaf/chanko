@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Navigation -->
-    <string name="home_cd_add_item">Thêm món đồ</string>
+    <!-- Navigation (HOME-08) -->
+    <string name="home_cd_add_item">Mở hành động nhanh</string>
 
-    <!-- Home Clean Slate Placeholder -->
-    <string name="home_placeholder_title">Trang chủ</string>
+    <!-- Header (HOME-01) -->
+    <string name="home_greeting_morning_named">Chào buổi sáng, %1$s</string>
+    <string name="home_greeting_afternoon_named">Chào buổi chiều, %1$s</string>
+    <string name="home_greeting_evening_named">Chào buổi tối, %1$s</string>
+    <string name="home_greeting_morning_anonymous">Chào buổi sáng!</string>
+    <string name="home_greeting_afternoon_anonymous">Chào buổi chiều!</string>
+    <string name="home_greeting_evening_anonymous">Chào buổi tối!</string>
+    <string name="home_header_subtitle">Hôm nay mình cùng mua sắm tỉnh táo nhé</string>
+    <string name="home_header_offline_badge">Đang ngoại tuyến · Hiển thị dữ liệu đã lưu</string>
+    <string name="home_cd_settings">Mở cài đặt</string>
+    <string name="home_cd_profile">Mở hồ sơ cá nhân</string>
+
+    <!-- Section Error / Loading Fallbacks -->
+    <string name="home_section_loading">Đang tải dữ liệu…</string>
+    <string name="home_section_error_budget">Tạm thời chưa tải được ngân sách</string>
+    <string name="home_section_error_decisions">Tạm thời chưa tải được danh sách quyết định</string>
 </resources>

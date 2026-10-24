@@ -22,13 +22,13 @@ Xây dựng lại màn hình `HomeScreen` và nâng cấp điều hướng `Main
 ---
 
 ### Phase P1: Home Foundation + Header (`HOME-01`)
-- [ ] **Task 1: Section-aware `HomeUiState`, `HomeUiEvent`, `HomeFakeDataSource` & `HomeViewModel` Foundation (P1)**
-- [ ] **Task 2: `HomeHeader` (`HOME-01`), `HomeScreen` Scroll/Insets Scaffold & P1 Previews/Tests**
+- [x] **Task 1: Section-aware `HomeUiState`, `HomeUiEvent`, `HomeFakeDataSource` & `HomeViewModel` Foundation (P1)**
+- [x] **Task 2: `HomeHeader` (`HOME-01`), `HomeScreen` Scroll/Insets Scaffold & P1 Previews/Tests**
 
 ### Checkpoint: P1 Complete
-- [ ] Render ổn định với section-aware foundation, `HomeHeader` hỗ trợ tên dài/tên trống/font scaling, tôn trọng system insets.
-- [ ] Có Compose Previews và Unit Tests cho P1; `./gradlew assembleDebug testDebugUnitTest` pass.
-- [ ] Dừng lại chờ người dùng review trước khi qua P2.
+- [x] Render ổn định với section-aware foundation, `HomeHeader` hỗ trợ tên dài/tên trống/font scaling, tôn trọng system insets.
+- [x] Có Compose Previews và Unit Tests cho P1; `./gradlew assembleDebug :app:testDevDebugUnitTest` pass.
+- [x] Dừng lại chờ người dùng review trước khi qua P2.
 
 ---
 

@@ -17,27 +17,27 @@ Nhánh: `refactor/clean-home-screen` | Kế hoạch: `tasks/plan.md` | Đặc t�
 ---
 
 ## Phase P1: Home Foundation + Header (`HOME-01`)
-- [ ] **Task 1: Section-aware `HomeUiState`, `HomeUiEvent`, `HomeFakeDataSource` & `HomeViewModel` Foundation (P1)**
+- [x] **Task 1: Section-aware `HomeUiState`, `HomeUiEvent`, `HomeFakeDataSource` & `HomeViewModel` Foundation (P1)**
   - **Acceptance:**
-    - [ ] Định nghĩa `SectionState<T>` (`Loading`, `Content(data, isFromCache)`, `Error`) và `HomeUiState` hỗ trợ trạng thái độc lập theo section.
-    - [ ] Định nghĩa `HeaderUiModel` (lời chào theo ngữ cảnh, tên người dùng hỗ trợ tên dài/trống, avatar initial).
-    - [ ] Tạo `HomeFakeDataSource` (deterministic scenarios: `Default`, `NewUser`, `LongName`, `EmptyName`) và `HomeViewModel` phát `StateFlow<HomeUiState>`.
+    - [x] Định nghĩa `SectionState<T>` (`Loading`, `Content(data, isFromCache)`, `Error`) và `HomeUiState` hỗ trợ trạng thái độc lập theo section.
+    - [x] Định nghĩa `HeaderUiModel` (lời chào theo ngữ cảnh, tên người dùng hỗ trợ tên dài/trống, avatar initial).
+    - [x] Tạo `HomeFakeDataSource` (deterministic scenarios: `Default`, `NewUser`, `LongName`, `EmptyName`) và `HomeViewModel` phát `StateFlow<HomeUiState>`.
   - **Verify:**
-    - [ ] Unit tests trong `HomeViewModelTest.kt` kiểm tra trạng thái khởi tạo P1, xử lý tên dài/tên trống và callbacks.
-  - **Files:** `HomeUiState.kt`, `HomeUiEvent.kt`, `HomeFakeDataSource.kt`, `HomeViewModel.kt`, `HomeViewModelTest.kt`
+    - [x] Unit tests trong `HomeViewModelTest.kt` kiểm tra trạng thái khởi tạo P1, xử lý tên dài/tên trống và callbacks.
+  - **Files:** `HomeUiState.kt`, `HomeUiEvent.kt`, `HomeUiEffect.kt`, `HomeFakeDataSource.kt`, `HomeViewModel.kt`, `HomeViewModelTest.kt`
 
-- [ ] **Task 2: `HomeHeader` (`HOME-01`), `HomeScreen` Scroll/Insets Scaffold & P1 Previews**
+- [x] **Task 2: `HomeHeader` (`HOME-01`), `HomeScreen` Scroll/Insets Scaffold & P1 Previews**
   - **Acceptance:**
-    - [ ] Xây dựng `HomeHeader.kt` tuân thủ `HOME-01`: hiển thị lời chào theo ngữ cảnh, xử lý tên dài/tên trống và `fontScale = 1.5f`, nút `Settings` và `Avatar` đạt vùng chạm $\ge 48\text{dp}$ kèm semantics và callbacks rõ ràng.
-    - [ ] Cập nhật `HomeScreen.kt` (`HomeRoute` stateful + `HomeScreen` stateless) sử dụng `LazyColumn` tôn trọng system insets và khoảng trống dưới cho Bottom Navigation.
-    - [ ] Cung cấp `@Preview` cho `Default`, `LongName`, `EmptyName` và `FontScale 1.5f`.
+    - [x] Xây dựng `HomeHeader.kt` tuân thủ `HOME-01`: hiển thị lời chào theo ngữ cảnh, xử lý tên dài/tên trống và `fontScale = 1.5f`, nút `Settings` và `Avatar` đạt vùng chạm $\ge 48\text{dp}$ kèm semantics và callbacks rõ ràng.
+    - [x] Cập nhật `HomeScreen.kt` (`HomeRoute` stateful + `HomeScreen` stateless) sử dụng `LazyColumn` tôn trọng system insets và khoảng trống dưới cho Bottom Navigation.
+    - [x] Cung cấp `@Preview` cho `Default`, `LongName`, `EmptyName` và `FontScale 1.5f`.
   - **Verify:**
-    - [ ] `./gradlew assembleDebug testDebugUnitTest` pass 100%.
+    - [x] `./gradlew assembleDebug :app:testDevDebugUnitTest` pass 100%.
   - **Files:** `HomeHeader.kt`, `HomeScreen.kt`, `strings_home.xml`
 
 ### Checkpoint: After P1 (Tasks 1–2)
-- [ ] All unit tests pass (`./gradlew testDebugUnitTest`)
-- [ ] Application builds without errors (`./gradlew assembleDebug`)
+- [x] All unit tests pass (`./gradlew :app:testDevDebugUnitTest`)
+- [x] Application builds without errors (`./gradlew assembleDebug`)
 - [ ] Review P1 with user before proceeding to P2
 
 ---
