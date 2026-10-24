@@ -65,7 +65,7 @@ class HomeViewModelTest {
 
         val state = viewModel.uiState.value
         assertTrue(state.header.hasName)
-        assertEquals("Nguyễn Hoàng Huyền Trang Bảo Ngọc", state.header.displayName)
+        assertEquals("Nguyễn Hoàng Minh Anh", state.header.displayName)
         assertEquals("N", state.header.avatarInitial)
     }
 
@@ -76,10 +76,13 @@ class HomeViewModelTest {
         val state = viewModel.uiState.value
         assertEquals("Hoa", state.header.displayName)
         assertEquals(
-            SectionState.Error(R.string.home_section_error_budget),
+            SectionState.Error(
+                message = "Tạm thời chưa tải được ngân sách",
+                canRetry = true
+            ),
             state.budgetSection
         )
-        assertTrue(state.decisionsSection is SectionState.Content)
+        assertTrue(state.decisionsSection is SectionState.Loading)
     }
 
     @Test

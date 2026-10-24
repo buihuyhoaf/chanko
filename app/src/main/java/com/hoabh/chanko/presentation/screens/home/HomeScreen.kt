@@ -46,6 +46,13 @@ fun HomeRoute(
         when (effect) {
             HomeUiEffect.NavigateToSettings -> onSettingsClick()
             HomeUiEffect.NavigateToProfile -> onProfileClick()
+            HomeUiEffect.OpenQuickCheckFlow,
+            HomeUiEffect.OpenSaveItemFlow -> onAddNewItemClick()
+            HomeUiEffect.NavigateToBudgetDetails,
+            is HomeUiEffect.NavigateToDecisionDetail,
+            HomeUiEffect.NavigateToAllDecisions,
+            is HomeUiEffect.OpenObservationExplanation,
+            is HomeUiEffect.OpenDraftFlow -> Unit
         }
     }
 
