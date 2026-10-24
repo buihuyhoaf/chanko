@@ -274,28 +274,10 @@ fun DecisionRow(
                     ) {
                         DecisionThumbnail(thumbnailResId = decision.thumbnailResId)
                         Spacer(modifier = Modifier.width(CandySpace.md))
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Text(
-                                text = decision.title,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = CandyColors.textPrimary,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            // Never clip money with ellipsis (S15)
-                            Text(
-                                text = decision.priceFormatted,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = CandyColors.textSecondary
-                            )
-                        }
+                        DecisionItemInfo(
+                            decision = decision,
+                            modifier = Modifier.weight(1f)
+                        )
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                             contentDescription = null,
@@ -330,28 +312,10 @@ fun DecisionRow(
 
                     Spacer(modifier = Modifier.width(CandySpace.md))
 
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = decision.title,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.ExtraBold
-                            ),
-                            color = CandyColors.textPrimary,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        // Never clip money with ellipsis (S15)
-                        Text(
-                            text = decision.priceFormatted,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = CandyColors.textSecondary
-                        )
-                    }
+                    DecisionItemInfo(
+                        decision = decision,
+                        modifier = Modifier.weight(1f)
+                    )
 
                     Spacer(modifier = Modifier.width(CandySpace.sm))
 
@@ -382,6 +346,35 @@ fun DecisionRow(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DecisionItemInfo(
+    decision: DecisionUi,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+            text = decision.title,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.ExtraBold
+            ),
+            color = CandyColors.textPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        // Never clip money with ellipsis (S15)
+        Text(
+            text = decision.priceFormatted,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = CandyColors.textSecondary
+        )
     }
 }
 
@@ -419,27 +412,23 @@ private fun DecisionStatusBadge(
     status: DecisionStatus,
     label: String
 ) {
-    val (pillBg, pillInk, icon) = when (status) {
-        DecisionStatus.Ready -> Triple(
-            CandyColors.decisionReadyPillBg,
-            CandyColors.decisionReadyPillInk,
-            Icons.Rounded.CheckCircle
-        )
-        DecisionStatus.Waiting -> Triple(
-            CandyColors.decisionWaitingPillBg,
-            CandyColors.decisionWaitingPillInk,
-            Icons.Rounded.Schedule
-        )
-        DecisionStatus.Considering -> Triple(
-            CandyColors.decisionConsideringPillBg,
-            CandyColors.decisionConsideringPillInk,
-            Icons.Rounded.Visibility
-        )
-        DecisionStatus.Saved -> Triple(
-            CandyColors.decisionSavedPillBg,
-            CandyColors.decisionSavedPillInk,
-            Icons.Rounded.BookmarkBorder
-        )
+    val pillBg = when (status) {
+        DecisionStatus.Ready -> CandyColors.decisionReadyPillBg
+        DecisionStatus.Waiting -> CandyColors.decisionWaitingPillBg
+        DecisionStatus.Considering -> CandyColors.decisionConsideringPillBg
+        DecisionStatus.Saved -> CandyColors.decisionSavedPillBg
+    }
+    val pillInk = when (status) {
+        DecisionStatus.Ready -> CandyColors.decisionReadyPillInk
+        DecisionStatus.Waiting -> CandyColors.decisionWaitingPillInk
+        DecisionStatus.Considering -> CandyColors.decisionConsideringPillInk
+        DecisionStatus.Saved -> CandyColors.decisionSavedPillInk
+    }
+    val icon = when (status) {
+        DecisionStatus.Ready -> Icons.Rounded.CheckCircle
+        DecisionStatus.Waiting -> Icons.Rounded.Schedule
+        DecisionStatus.Considering -> Icons.Rounded.Visibility
+        DecisionStatus.Saved -> Icons.Rounded.BookmarkBorder
     }
 
     Surface(

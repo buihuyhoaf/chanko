@@ -101,26 +101,26 @@ private fun BudgetContent(
     val configuration = LocalConfiguration.current
     val isLargeFont = configuration.fontScale >= 1.4f
 
-    val (badgeBg, badgeInk) = when (budget.stateKind) {
-        BudgetStateKind.Normal -> CandyColors.budgetNormalBadgeBg to CandyColors.budgetNormalBadgeInk
-        BudgetStateKind.Warning -> CandyColors.budgetWarningBadgeBg to CandyColors.budgetWarningBadgeInk
-        BudgetStateKind.Reached -> CandyColors.budgetReachedBadgeBg to CandyColors.budgetReachedBadgeInk
-        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeBg to CandyColors.budgetOverBadgeInk
+    val badgeBg = when (budget.stateKind) {
+        BudgetStateKind.Normal -> CandyColors.budgetNormalBadgeBg
+        BudgetStateKind.Warning -> CandyColors.budgetWarningBadgeBg
+        BudgetStateKind.Reached -> CandyColors.budgetReachedBadgeBg
+        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeBg
         BudgetStateKind.Zero,
-        BudgetStateKind.Unknown -> CandyColors.primarySoft to CandyColors.primaryInk
+        BudgetStateKind.Unknown -> CandyColors.primarySoft
+    }
+    val badgeInk = when (budget.stateKind) {
+        BudgetStateKind.Normal -> CandyColors.budgetNormalBadgeInk
+        BudgetStateKind.Warning -> CandyColors.budgetWarningBadgeInk
+        BudgetStateKind.Reached -> CandyColors.budgetReachedBadgeInk
+        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeInk
+        BudgetStateKind.Zero,
+        BudgetStateKind.Unknown -> CandyColors.primaryInk
     }
 
-    val remainingColor = if (budget.isOverBudget) {
-        CandyColors.budgetOverBadgeInk
-    } else {
-        CandyColors.brandPurple
-    }
-
-    val progressBarFillColor = if (budget.isOverBudget) {
-        CandyColors.overBudget
-    } else {
-        CandyColors.brandPurple
-    }
+    val isOver = budget.isOverBudget
+    val remainingColor = if (isOver) CandyColors.budgetOverBadgeInk else CandyColors.brandPurple
+    val progressBarFillColor = if (isOver) CandyColors.overBudget else CandyColors.brandPurple
 
     Column(
         modifier = Modifier
