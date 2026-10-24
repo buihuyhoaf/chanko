@@ -12,16 +12,6 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-data class LoginUiState(
-    val isLoading: Boolean = false,
-    val error: AuthFailure? = null,
-    val isLoginSuccess: Boolean = false,
-)
-
-sealed interface LoginUiEffect {
-    data object NavigateToHome : LoginUiEffect
-}
-
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val repository: AuthenticationRepository,
