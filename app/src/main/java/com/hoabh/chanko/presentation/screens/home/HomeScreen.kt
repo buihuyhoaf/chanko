@@ -20,9 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.screens.home.components.BudgetCard
 import com.hoabh.chanko.presentation.screens.home.components.CompactLivingRoom
+import com.hoabh.chanko.presentation.screens.home.components.DraftResumeCard
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
+import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
 import com.hoabh.chanko.presentation.screens.home.components.QuickActionsRow
+import com.hoabh.chanko.presentation.screens.home.components.YourDecisionsSection
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -143,6 +147,54 @@ fun HomeScreen(
                     onQuickCheckClick = { onEvent(HomeUiEvent.QuickCheckTapped) },
                     onSaveItemClick = { onEvent(HomeUiEvent.SaveItemTapped) }
                 )
+            }
+
+            // 4. HOME-04 — Budget Snapshot
+            item(key = "home_04_budget") {
+                BudgetCard(
+                    sectionState = state.budgetSection,
+                    onDetailsClick = { onEvent(HomeUiEvent.BudgetDetailsTapped) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) },
+                    canOpenDetails = state.capabilities.canOpenBudgetDetails
+                )
+            }
+
+            // 5. HOME-05 — Your Decisions ("Những món cần chú ý")
+            item(key = "home_05_decisions") {
+                YourDecisionsSection(
+                    sectionState = state.decisionsSection,
+                    totalCount = state.totalAttentionCount,
+                    onDecisionClick = { id -> onEvent(HomeUiEvent.DecisionTapped(id)) },
+                    onViewAllClick = { onEvent(HomeUiEvent.ViewAllTapped) },
+                    onSaveFirstItemClick = { onEvent(HomeUiEvent.SaveItemTapped) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Decisions)) },
+                    canOpenViewAll = state.capabilities.canOpenViewAll
+                )
+            }
+
+            // 6. HOME-06 — Observation ("Góc nhìn hôm nay" — optional)
+            state.observation?.let { observation ->
+                item(key = "home_06_observation_${observation.id}") {
+                    ObservationCard(
+                        observation = observation,
+                        onExplainClick = { id -> onEvent(HomeUiEvent.ObservationExplainTapped(id)) },
+                        onHideClick = { id -> onEvent(HomeUiEvent.ObservationHideTapped(id)) },
+                        onDismissClick = { id -> onEvent(HomeUiEvent.ObservationDismissTapped(id)) },
+                        canExplain = state.capabilities.canOpenObservationExplain,
+                        canHide = state.capabilities.canHideObservation
+                    )
+                }
+            }
+
+            // 7. HOME-07 — Local Draft Indicator (optional)
+            state.draft?.let { draft ->
+                item(key = "home_07_draft_${draft.id}") {
+                    DraftResumeCard(
+                        draft = draft,
+                        onResumeClick = { id -> onEvent(HomeUiEvent.ResumeDraftTapped(id)) },
+                        canResume = state.capabilities.canResumeDraft
+                    )
+                }
             }
 
             // Bottom clearance spacer cho cố định Bottom Navigation

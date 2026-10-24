@@ -76,14 +76,14 @@ Phase 2: v2 State Contracts, 22 Scenarios & HomeHeader (Tasks 2–3)
 ---
 
 ### Phase 6, 7 & 8: Budget, Your Decisions & Optional Sections
-- [ ] **Task 7 (Phase 6): `BudgetCard` (`Đã chi`, `Còn lại`, pill `Chi tiết`, badge `Đã tiêu 80%`, progress bar)**
-- [ ] **Task 8 (Phase 7): `YourDecisionsSection` & `DecisionRow` (`Ready` mint, `Waiting` lavender + countdown, `Considering`, `Saved`)**
-- [ ] **Task 9 (Phase 8): `ObservationCard` (`Góc nhìn hôm nay`, `Explain`/`Hide`/`X`) & `DraftResumeCard`**
+- [x] **Task 7 (Phase 6): `BudgetCard` (`Đã chi`, `Còn lại`, pill `Chi tiết`, badge `Đã tiêu 80%`, progress bar)**
+- [x] **Task 8 (Phase 7): `YourDecisionsSection` & `DecisionRow` (`Ready` mint, `Waiting` lavender + countdown, `Considering`, `Saved`)**
+- [x] **Task 9 (Phase 8): `ObservationCard` (`Góc nhìn hôm nay`, `Explain`/`Hide`/`X`) & `DraftResumeCard`**
 
 ### Checkpoint 3: Content Sections Complete (After Tasks 7–9)
-- [ ] Toàn bộ các section chính render khớp ảnh chuẩn `S21`.
-- [ ] Khi `observation == null` hoặc `draft == null`, không để lại khoảng trống dư (`S01`, `S09`–`S11`).
-- [ ] Khi timer hết hạn nhưng source còn `Waiting` (`S12`), không tự chuyển sang `Ready` hoặc tự mua.
+- [x] Toàn bộ các section chính render khớp ảnh chuẩn `S21`.
+- [x] Khi `observation == null` hoặc `draft == null`, không để lại khoảng trống dư (`S01`, `S09`–`S11`).
+- [x] Khi timer hết hạn nhưng source còn `Waiting` (`S12`), không tự chuyển sang `Ready` hoặc tự mua.
 
 ---
 
