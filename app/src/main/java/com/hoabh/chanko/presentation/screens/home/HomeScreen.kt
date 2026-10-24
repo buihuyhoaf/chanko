@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.screens.home.components.CompactLivingRoom
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
+import com.hoabh.chanko.presentation.screens.home.components.QuickActionsRow
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -109,7 +111,37 @@ fun HomeScreen(
                 HomeHeader(
                     header = state.header,
                     onSettingsClick = { onEvent(HomeUiEvent.SettingsClick) },
-                    onProfileClick = { onEvent(HomeUiEvent.ProfileClick) }
+                    onProfileClick = { onEvent(HomeUiEvent.ProfileClick) },
+                    canOpenSettings = state.capabilities.canOpenSettings,
+                    canOpenProfile = state.capabilities.canOpenProfile
+                )
+            }
+
+            // 2. HOME-02 — Chanko's Compact Living Room (with embedded ChankoDialogue)
+            item(key = "home_02_living_room") {
+                when (val roomState = state.livingRoom) {
+                    is SectionState.Content -> {
+                        CompactLivingRoom(
+                            livingRoom = roomState.data,
+                            onPropTapped = { kind -> onEvent(HomeUiEvent.PropTapped(kind)) }
+                        )
+                    }
+                    SectionState.Loading,
+                    is SectionState.Empty,
+                    is SectionState.Error -> {
+                        CompactLivingRoom(
+                            livingRoom = LivingRoomUi(),
+                            onPropTapped = { kind -> onEvent(HomeUiEvent.PropTapped(kind)) }
+                        )
+                    }
+                }
+            }
+
+            // 3. HOME-03 — Quick Actions
+            item(key = "home_03_quick_actions") {
+                QuickActionsRow(
+                    onQuickCheckClick = { onEvent(HomeUiEvent.QuickCheckTapped) },
+                    onSaveItemClick = { onEvent(HomeUiEvent.SaveItemTapped) }
                 )
             }
 

@@ -64,14 +64,14 @@ Phase 2: v2 State Contracts, 22 Scenarios & HomeHeader (Tasks 2–3)
 ---
 
 ### Phase 3, 4 & 5: Living Room Scene, Dialogue Overlay & Quick Actions
-- [ ] **Task 4 (Phase 3): `CompactLivingRoom` Scene Assembly (`scene-layout.json`, 6 PNG Layers, `-3°` Dynamic Calendar Overlay & 4 $\ge 48\text{dp}$ Hit Targets)**
-- [ ] **Task 5 (Phase 4): `ChankoDialogue` Bubble Overlay (`z = 6`) bên trong `CompactLivingRoom`**
-- [ ] **Task 6 (Phase 5): `QuickActionsRow` (`Quick Check` Gradient Card & `Save an Item` Card)**
+- [x] **Task 4 (Phase 3): `CompactLivingRoom` Scene Assembly (`scene-layout.json`, 6 PNG Layers, `-3°` Dynamic Calendar Overlay & 4 $\ge 48\text{dp}$ Hit Targets)**
+- [x] **Task 5 (Phase 4): `ChankoDialogue` Bubble Overlay (`z = 6`) bên trong `CompactLivingRoom`**
+- [x] **Task 6 (Phase 5): `QuickActionsRow` (`Quick Check` Gradient Card & `Save an Item` Card)**
 
 ### Checkpoint 2: Scene & Direct Actions (After Tasks 4–6)
-- [ ] 4 `RoomProp` có vùng chạm độc lập $\ge 48\text{dp}$, không chồng lấn; `Calendar` hiển thị ngày/tháng động từ `Clock`/`ZoneId` (`S19`).
-- [ ] `ChankoDialogue` nằm ở góc trên-trái bên trong scene, ẩn sạch khi `null`, không tràn ở `fontScale = 2.0`.
-- [ ] `Quick Check` và `Save an Item` phát 2 intent riêng biệt, tự xếp dọc ở `320dp` / font lớn.
+- [x] 4 `RoomProp` có vùng chạm độc lập $\ge 48\text{dp}$, không chồng lấn; `Calendar` hiển thị ngày/tháng động từ `Clock`/`ZoneId` (`S19`).
+- [x] `ChankoDialogue` nằm ở góc trên-trái bên trong scene, ẩn sạch khi `null`, không tràn ở `fontScale = 2.0`.
+- [x] `Quick Check` và `Save an Item` phát 2 intent riêng biệt, tự xếp dọc ở `320dp` / font lớn.
 
 ---
 
