@@ -52,4 +52,49 @@ object CandyColors {
     val coolingLavender = Color(0xFFE7E1FF)
     val coolingChip = Color(0xFFD3D9FF)
     val speechSurface = Color(0xFFFFECE5)
+
+    // Home v2 Image-Aligned Semantic Tokens (approved-home-user-reference.png & 11-ASSET-DELIVERY.md)
+    val homeScreenBackgroundTop = Color(0xFFF6F0FF)
+    val homeScreenBackgroundBottom = Color(0xFFFDF7FA)
+    val homeCardSurface = Color(0xFFFDFBFF)
+    val homeCardBorder = Color(0xFFEDE6F8)
+    val dialogueBubbleSurface = Color(0xFFFFFBF8)
+    val dialogueBubbleBorder = Color(0xFFF2E6DE)
+    val calendarDayInk = Color(0xFF585066)
+
+    // Quick Actions
+    val quickCheckGradientStart = Color(0xFF9C7AF8)
+    val quickCheckGradientEnd = Color(0xFF7B57E8)
+    val saveItemSurface = Color(0xFFF7F3FF)
+    val saveItemBorder = Color(0xFFE8DFF8)
+
+    // Budget Snapshot
+    val budgetWarningBadgeBg = Color(0xFFFFF0DB)
+    val budgetWarningBadgeInk = Color(0xFFD97706)
+    val budgetReachedBadgeBg = Color(0xFFFFE8CC)
+    val budgetReachedBadgeInk = Color(0xFFB45309)
+    val budgetOverBadgeBg = Color(0xFFFFE4E6)
+    val budgetOverBadgeInk = Color(0xFFBE123C)
+    val budgetNormalBadgeBg = Color(0xFFE6FFF0)
+    val budgetNormalBadgeInk = Color(0xFF075C48)
+
+    // Your Decisions Rows & Pills
+    val decisionReadyRowBg = Color(0xFFECFDF5)
+    val decisionReadyPillBg = Color(0xFFD1FAE5)
+    val decisionReadyPillInk = Color(0xFF065F46)
+    val decisionWaitingRowBg = Color(0xFFF5F2FF)
+    val decisionWaitingPillBg = Color(0xFFEDE7FF)
+    val decisionWaitingPillInk = Color(0xFF5731C6)
+    val decisionConsideringRowBg = Color(0xFFFFFBEB)
+    val decisionConsideringPillBg = Color(0xFFFEF3C7)
+    val decisionConsideringPillInk = Color(0xFF92400E)
+    val decisionSavedRowBg = Color(0xFFF3F4F6)
+    val decisionSavedPillBg = Color(0xFFE5E7EB)
+    val decisionSavedPillInk = Color(0xFF374151)
+
+    // Observation & Global Sheet
+    val observationIconTileBg = Color(0xFFF2EBFF)
+    val observationBulbYellow = Color(0xFFF59E0B)
+    val globalSheetSaveIconTileBg = Color(0xFFFFEBF3)
+    val globalSheetSaveIconInk = Color(0xFFE11D74)
 }

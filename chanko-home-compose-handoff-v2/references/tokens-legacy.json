@@ -1,0 +1,18 @@
+{
+  "status": "Reference implementation values for approved v5 visual; not original vector design tokens",
+  "colors": {
+    "brandPurple": "#8965F6", "brandPink": "#FF85B3", "background": "#FAF8F5",
+    "backgroundLavender": "#F0E7FF", "backgroundPink": "#FCEAF4", "surface": "#FFFFFF",
+    "calendarSurface": "#F4EEFF", "calendarInnerSurface": "#FAF7FF", "primarySoft": "#EBE1FF",
+    "primaryInk": "#5731C6", "textPrimary": "#151329", "textSecondary": "#585C82",
+    "divider": "#E4DDF2", "progressTrack": "#E3DEEC", "readySurface": "#D9FAE6",
+    "readySurfaceEnd": "#CFF6DF", "readyAction": "#00634F", "onReadyAction": "#FFFFFF",
+    "readyInk": "#075C48", "readyChip": "#E6FFF0", "coolingBlue": "#E0EBFF",
+    "coolingLavender": "#E7E1FF", "coolingChip": "#D3D9FF", "speechSurface": "#FFECE5"
+  },
+  "fontFamily": "Nunito",
+  "spacingDp": [4, 8, 12, 16, 20, 24, 32],
+  "radiusDp": {"calendar": 24, "item": 20, "thumbnail": 14, "day": 12, "bottomBar": 24},
+  "sizeDp": {"headerMinHeight": 56, "touchTarget": 48, "thumbnail": 64, "addButton": 56, "addIcon": 28, "navContentHeight": 72, "progressHeight": 10},
+  "layout": {"referenceWidthDp": 393, "gutterDp": 16, "calendarPaddingDp": 12, "listGapDp": 12, "sectionGapDp": 24}
+}

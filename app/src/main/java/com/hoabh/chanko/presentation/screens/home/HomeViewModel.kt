@@ -1,109 +1,163 @@
 package com.hoabh.chanko.presentation.screens.home
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.hoabh.chanko.domain.repository.ItemRepository
-import com.hoabh.chanko.presentation.screens.home.data.HomeSpendingRepository
-import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
-import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
-import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
+import com.hoabh.chanko.presentation.base.BaseViewModel
+import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
+import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDate
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val itemRepository: ItemRepository,
-    private val spendingRepository: HomeSpendingRepository
-) : ViewModel() {
-
-    var todayProvider: () -> LocalDate = { LocalDate.now() }
-    var nowMillisProvider: () -> Long = { System.currentTimeMillis() }
-    var anchorDay: Int = 15
-
-    private val _selectedDate = MutableStateFlow<LocalDate?>(null)
-
-    val uiState: StateFlow<HomeUiState> = combine(
-        itemRepository.getActiveItems(),
-        _selectedDate
-    ) { activeItems, selected ->
-        val today = todayProvider()
-        val effectiveSelected = selected ?: today
-        val nowMillis = nowMillisProvider()
-
-        val readyItems = activeItems.filter { it.canDecide(nowMillis) }
-        val coolingItems = activeItems.filter { !it.canDecide(nowMillis) && it.remainingMillis(nowMillis) > 0 }
-
-        val cycle = SpendingCycle.create(anchorDay = anchorDay, referenceDate = today)
-
-        spendingRepository.getDailyPurchases(cycle).combine(
-            spendingRepository.getBudgetSummary(cycle)
-        ) { dailyPurchases, budgetSummary ->
-            val calendarDays = cycle.dates.map { date ->
-                val purchase = dailyPurchases[date]
-                CalendarDayState(
-                    date = date,
-                    isCycleStart = (date == cycle.startDate),
-                    isToday = (date == today),
-                    isSelected = (date == effectiveSelected),
-                    purchaseCount = purchase?.purchaseCount ?: 0,
-                    totalSpent = purchase?.totalAmount ?: 0L
-                )
-            }
-
-            val mascotAdvice = when {
-                budgetSummary.progressPercent >= 100 -> MascotAdvice.OverBudget
-                budgetSummary.progressPercent >= 75 -> MascotAdvice.Warning(budgetSummary.progressPercent)
-                else -> MascotAdvice.Safe
-            }
-
-            HomeUiState.Content(
-                userName = "Hoa",
-                cycle = cycle,
-                calendarDays = calendarDays,
-                selectedDate = effectiveSelected,
-                selectedDateTransactions = dailyPurchases[effectiveSelected],
-                budgetSummary = budgetSummary,
-                mascotAdvice = mascotAdvice,
-                readyItems = readyItems,
-                coolingItems = coolingItems,
-                today = today
-            ) as HomeUiState
-        }
-    }.flatMapLatest { it }
-        .catch { emit(HomeUiState.Error) }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            HomeUiState.Loading
-        )
+    private val fakeDataSource: HomeFakeDataSource
+) : BaseViewModel<HomeUiState, HomeUiEffect>(
+    initialState = fakeDataSource.getStateForScenario(HomeScenario.S21)
+) {
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {
-            is HomeUiEvent.SelectDate -> {
-                _selectedDate.value = event.date
+            HomeUiEvent.SettingsClick -> {
+                if (uiState.value.capabilities.canOpenSettings) {
+                    sendEffect(HomeUiEffect.NavigateToSettings)
+                }
             }
-            HomeUiEvent.JumpToToday -> {
-                _selectedDate.value = todayProvider()
-            }
-            is HomeUiEvent.ReviewItem,
-            is HomeUiEvent.OpenItem,
-            HomeUiEvent.AddItem,
-            HomeUiEvent.SettingsClick,
+
             HomeUiEvent.ProfileClick -> {
-                // Delegated to outer screen lambda navigation callbacks
+                if (uiState.value.capabilities.canOpenProfile) {
+                    sendEffect(HomeUiEffect.NavigateToProfile)
+                }
             }
-            HomeUiEvent.Retry -> {
-                _selectedDate.value = _selectedDate.value
+
+            is HomeUiEvent.PropTapped -> {
+                val room = (uiState.value.livingRoom as? SectionState.Content)?.data
+                val prop = room?.props?.firstOrNull { it.kind == event.kind }
+                val contextKind = when (event.kind) {
+                    RoomPropKind.Hourglass -> ContextKind.Hourglass
+                    RoomPropKind.Calendar -> ContextKind.Calendar
+                    RoomPropKind.Wallet -> ContextKind.Wallet
+                    RoomPropKind.PauseJar -> ContextKind.PauseJar
+                }
+                updateState {
+                    it.copy(
+                        activeSheet = HomeSheet.Contextual(
+                            kind = contextKind,
+                            entityId = event.kind.name,
+                            title = prop?.label ?: event.kind.name,
+                            subtitle = prop?.summaryText.orEmpty(),
+                            highlightValue = prop?.badgeText,
+                            isEntityMissing = false
+                        )
+                    )
+                }
+            }
+
+            HomeUiEvent.QuickCheckTapped -> {
+                updateState { it.copy(activeSheet = null) }
+                sendEffect(HomeUiEffect.OpenQuickCheckFlow)
+            }
+
+            HomeUiEvent.SaveItemTapped -> {
+                updateState { it.copy(activeSheet = null) }
+                sendEffect(HomeUiEffect.OpenSaveItemFlow)
+            }
+
+            HomeUiEvent.BudgetDetailsTapped -> {
+                if (uiState.value.capabilities.canOpenBudgetDetails) {
+                    sendEffect(HomeUiEffect.NavigateToBudgetDetails)
+                }
+            }
+
+            is HomeUiEvent.DecisionTapped -> {
+                sendEffect(HomeUiEffect.NavigateToDecisionDetail(event.id))
+            }
+
+            HomeUiEvent.ViewAllTapped -> {
+                if (uiState.value.capabilities.canOpenViewAll) {
+                    sendEffect(HomeUiEffect.NavigateToAllDecisions)
+                }
+            }
+
+            is HomeUiEvent.ObservationExplainTapped -> {
+                if (uiState.value.capabilities.canOpenObservationExplain) {
+                    sendEffect(HomeUiEffect.OpenObservationExplanation(event.id))
+                }
+            }
+
+            is HomeUiEvent.ObservationHideTapped,
+            is HomeUiEvent.ObservationDismissTapped -> {
+                updateState { it.copy(observation = null) }
+            }
+
+            is HomeUiEvent.ResumeDraftTapped -> {
+                if (uiState.value.capabilities.canResumeDraft) {
+                    sendEffect(HomeUiEffect.OpenDraftFlow(event.id))
+                }
+            }
+
+            HomeUiEvent.GlobalAddTapped -> {
+                // S16: Single active sheet policy, preserve selectedTab
+                updateState { it.copy(activeSheet = HomeSheet.Global) }
+            }
+
+            HomeUiEvent.DismissSheet -> {
+                updateState { it.copy(activeSheet = null) }
+            }
+
+            is HomeUiEvent.ContextSheetPrimaryAction -> {
+                val currentSheet = uiState.value.activeSheet as? HomeSheet.Contextual
+                if (currentSheet != null && !currentSheet.isEntityMissing) {
+                    updateState { it.copy(activeSheet = null) }
+                    when (event.kind) {
+                        ContextKind.Hourglass,
+                        ContextKind.Calendar,
+                        ContextKind.PauseJar -> sendEffect(HomeUiEffect.NavigateToAllDecisions)
+                        ContextKind.Wallet -> sendEffect(HomeUiEffect.NavigateToBudgetDetails)
+                        ContextKind.Decision -> {
+                            event.entityId?.let { id ->
+                                sendEffect(HomeUiEffect.NavigateToDecisionDetail(id))
+                            }
+                        }
+                    }
+                }
+            }
+
+            is HomeUiEvent.TabSelected -> {
+                updateState { it.copy(selectedTab = event.tab) }
+            }
+
+            is HomeUiEvent.RetrySection -> {
+                val baseline = fakeDataSource.getStateForScenario(HomeScenario.S21)
+                updateState { current ->
+                    when (event.section) {
+                        HomeSection.Budget -> current.copy(
+                            budgetSection = SectionState.Content(
+                                BudgetCalculator.compute(
+                                    cycleLabel = HomeFakeDataSource.DEFAULT_CYCLE_LABEL,
+                                    spentMinor = 2_400_000L,
+                                    limitMinor = 3_000_000L
+                                )
+                            )
+                        )
+                        HomeSection.Decisions -> current.copy(
+                            decisionsSection = baseline.decisionsSection,
+                            totalAttentionCount = baseline.totalAttentionCount
+                        )
+                        HomeSection.LivingRoom -> current.copy(
+                            livingRoom = baseline.livingRoom
+                        )
+                        HomeSection.Observation,
+                        HomeSection.Draft -> current
+                    }
+                }
+            }
+
+            is HomeUiEvent.SelectScenario -> {
+                updateState {
+                    fakeDataSource.getStateForScenario(
+                        scenario = event.scenario,
+                        greetingPeriod = it.header.greetingPeriod
+                    )
+                }
             }
         }
     }

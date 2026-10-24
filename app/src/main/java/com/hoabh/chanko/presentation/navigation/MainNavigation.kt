@@ -33,6 +33,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +59,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
+import com.hoabh.chanko.presentation.screens.home.HomeSheet
+import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
 import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination() {
@@ -80,40 +85,61 @@ fun MainNavigation(
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
+    var isGlobalQuickActionSheetOpen by rememberSaveable { mutableStateOf(false) }
 
-    Scaffold(
-        bottomBar = {
-            ChankoBottomBar(
-                currentRoute = currentRoute,
-                onTabSelected = { controller.selectTab(it) },
-                onAddNewItemClick = onAddNewItemClick
-            )
-        }
-    ) { padding ->
-        NavHost(
-            navController = controller,
-            startDestination = TopLevelDestination.Home.route,
-            modifier = Modifier.padding(padding)
-        ) {
-            composable(TopLevelDestination.Home.route) {
-                HomeRoute(
-                    onAddNewItemClick = onAddNewItemClick
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                ChankoBottomBar(
+                    currentRoute = currentRoute,
+                    onTabSelected = { controller.selectTab(it) },
+                    // S16 / HOME-08: Tapping + opens GlobalQuickActionSheet without changing selected tab
+                    onAddNewItemClick = { isGlobalQuickActionSheetOpen = true }
                 )
             }
-            listOf(
-                TopLevelDestination.MyItems,
-                TopLevelDestination.Budget,
-                TopLevelDestination.Insights
-            ).forEach { tab ->
-                composable(tab.route) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stringResource(R.string.tab_not_implemented, stringResource(tab.labelRes)),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+        ) { padding ->
+            NavHost(
+                navController = controller,
+                startDestination = TopLevelDestination.Home.route,
+                modifier = Modifier.padding(padding)
+            ) {
+                composable(TopLevelDestination.Home.route) {
+                    HomeRoute(
+                        onAddNewItemClick = onAddNewItemClick
+                    )
+                }
+                listOf(
+                    TopLevelDestination.MyItems,
+                    TopLevelDestination.Budget,
+                    TopLevelDestination.Insights
+                ).forEach { tab ->
+                    composable(tab.route) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(R.string.tab_not_implemented, stringResource(tab.labelRes)),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     }
                 }
             }
+        }
+
+        // Global + Modal Bottom Sheet Overlay (S16, S22)
+        if (isGlobalQuickActionSheetOpen) {
+            HomeSheetHost(
+                activeSheet = HomeSheet.Global,
+                onDismiss = { isGlobalQuickActionSheetOpen = false },
+                onQuickCheckClick = {
+                    isGlobalQuickActionSheetOpen = false
+                    onAddNewItemClick()
+                },
+                onSaveItemClick = {
+                    isGlobalQuickActionSheetOpen = false
+                    onAddNewItemClick()
+                },
+                onContextPrimaryAction = { _, _ -> isGlobalQuickActionSheetOpen = false }
+            )
         }
     }
 }

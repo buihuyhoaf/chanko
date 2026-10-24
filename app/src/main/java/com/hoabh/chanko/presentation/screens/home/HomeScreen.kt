@@ -3,260 +3,313 @@ package com.hoabh.chanko.presentation.screens.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hoabh.chanko.R
-import com.hoabh.chanko.domain.model.CooldownItem
-import com.hoabh.chanko.presentation.screens.home.components.CoolingOffSection
+import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.screens.home.components.BudgetCard
+import com.hoabh.chanko.presentation.screens.home.components.CompactLivingRoom
+import com.hoabh.chanko.presentation.screens.home.components.DraftResumeCard
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
-import com.hoabh.chanko.presentation.screens.home.components.ReadyReviewSection
-import com.hoabh.chanko.presentation.screens.home.components.SpendingCalendarCard
-import com.hoabh.chanko.presentation.screens.home.model.BudgetSummary
-import com.hoabh.chanko.presentation.screens.home.model.CalendarDayState
-import com.hoabh.chanko.presentation.screens.home.model.DailyPurchaseSummary
-import com.hoabh.chanko.presentation.screens.home.model.MascotAdvice
-import com.hoabh.chanko.presentation.screens.home.model.SpendingCycle
+import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
+import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
+import com.hoabh.chanko.presentation.screens.home.components.QuickActionsRow
+import com.hoabh.chanko.presentation.screens.home.components.YourDecisionsSection
+import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
+import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
-import java.time.LocalDate
 
+private val BottomNavClearanceHeight = 88.dp
+
+/**
+ * Stateful entry point cho màn hình Home (Tab Trang chủ trong MainNavigation).
+ */
 @Composable
 fun HomeRoute(
-    onAddNewItemClick: () -> Unit,
+    onAddNewItemClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     onSettingsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onReviewItemClick: (Int) -> Unit = {},
-    onItemClick: (Int) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    CollectEffect(effectFlow = viewModel.effect) { effect ->
+        when (effect) {
+            HomeUiEffect.NavigateToSettings -> onSettingsClick()
+            HomeUiEffect.NavigateToProfile -> onProfileClick()
+            HomeUiEffect.OpenQuickCheckFlow,
+            HomeUiEffect.OpenSaveItemFlow -> onAddNewItemClick()
+            HomeUiEffect.NavigateToBudgetDetails,
+            is HomeUiEffect.NavigateToDecisionDetail,
+            HomeUiEffect.NavigateToAllDecisions,
+            is HomeUiEffect.OpenObservationExplanation,
+            is HomeUiEffect.OpenDraftFlow -> Unit
+        }
+    }
+
     HomeScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onAddNewItemClick = onAddNewItemClick,
-        onSettingsClick = onSettingsClick,
-        onProfileClick = onProfileClick,
-        onReviewItemClick = onReviewItemClick,
-        onItemClick = onItemClick,
         modifier = modifier
     )
 }
 
+/**
+ * Stateless HomeScreen tuân thủ cấu trúc vùng cuộn của Chanko Home Specification v2.0 (Image-Aligned):
+ * 1. Header (HOME-01)
+ * 2. Chanko's Compact Living Room + Embedded ChankoDialogue (HOME-02)
+ * 3. Quick Actions (HOME-03)
+ * 4. Budget Snapshot (HOME-04)
+ * 5. Your Decisions ("Những món cần chú ý" — HOME-05)
+ * 6. Observation ("Góc nhìn hôm nay" — optional — HOME-06)
+ * 7. Local Draft Indicator (optional — HOME-07)
+ * + Modal Overlay Sheet Host (`HomeSheetHost` — HOME-08)
+ */
 @Composable
 fun HomeScreen(
     state: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
-    onAddNewItemClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onReviewItemClick: (Int) -> Unit,
-    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Subtle lavender to pink gradient overlay on background cream per UI-HANDOFF §1
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
-            CandyColors.background,
-            CandyColors.backgroundLavender.copy(alpha = 0.35f),
-            CandyColors.backgroundPink.copy(alpha = 0.30f),
+            CandyColors.homeScreenBackgroundTop,
+            CandyColors.backgroundLavender.copy(alpha = 0.45f),
+            CandyColors.homeScreenBackgroundBottom,
             CandyColors.background
         )
     )
+    val statusBarTopPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(backgroundBrush)
     ) {
-        when (state) {
-            is HomeUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = CandyColors.brandPurple)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = CandySpace.lg,
+                top = statusBarTopPadding + CandySpace.md,
+                end = CandySpace.lg,
+                bottom = CandySpace.lg
+            ),
+            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+        ) {
+            // 1. HOME-01 — Header
+            item(key = "home_01_header") {
+                HomeHeader(
+                    header = state.header,
+                    onSettingsClick = { onEvent(HomeUiEvent.SettingsClick) },
+                    onProfileClick = { onEvent(HomeUiEvent.ProfileClick) },
+                    canOpenSettings = state.capabilities.canOpenSettings,
+                    canOpenProfile = state.capabilities.canOpenProfile
+                )
+            }
+
+            // 2. HOME-02 — Chanko's Compact Living Room (with embedded ChankoDialogue)
+            item(key = "home_02_living_room") {
+                when (val roomState = state.livingRoom) {
+                    is SectionState.Content -> {
+                        CompactLivingRoom(
+                            livingRoom = roomState.data,
+                            onPropTapped = { kind -> onEvent(HomeUiEvent.PropTapped(kind)) }
+                        )
+                    }
+                    SectionState.Loading,
+                    is SectionState.Empty,
+                    is SectionState.Error -> {
+                        CompactLivingRoom(
+                            livingRoom = LivingRoomUi(),
+                            onPropTapped = { kind -> onEvent(HomeUiEvent.PropTapped(kind)) }
+                        )
+                    }
                 }
             }
 
-            is HomeUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.home_error_load),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = CandyColors.textPrimary
-                        )
-                        Button(
-                            onClick = { onEvent(HomeUiEvent.Retry) },
-                            colors = ButtonDefaults.buttonColors(containerColor = CandyColors.brandPurple),
-                            shape = CircleShape
-                        ) {
-                            Text(
-                                text = stringResource(R.string.home_btn_retry),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight(800))
-                            )
-                        }
-                    }
+            // 3. HOME-03 — Quick Actions
+            item(key = "home_03_quick_actions") {
+                QuickActionsRow(
+                    onQuickCheckClick = { onEvent(HomeUiEvent.QuickCheckTapped) },
+                    onSaveItemClick = { onEvent(HomeUiEvent.SaveItemTapped) }
+                )
+            }
+
+            // 4. HOME-04 — Budget Snapshot
+            item(key = "home_04_budget") {
+                BudgetCard(
+                    sectionState = state.budgetSection,
+                    onDetailsClick = { onEvent(HomeUiEvent.BudgetDetailsTapped) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) },
+                    canOpenDetails = state.capabilities.canOpenBudgetDetails
+                )
+            }
+
+            // 5. HOME-05 — Your Decisions ("Những món cần chú ý")
+            item(key = "home_05_decisions") {
+                YourDecisionsSection(
+                    sectionState = state.decisionsSection,
+                    totalCount = state.totalAttentionCount,
+                    onDecisionClick = { id -> onEvent(HomeUiEvent.DecisionTapped(id)) },
+                    onViewAllClick = { onEvent(HomeUiEvent.ViewAllTapped) },
+                    onSaveFirstItemClick = { onEvent(HomeUiEvent.SaveItemTapped) },
+                    onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Decisions)) },
+                    canOpenViewAll = state.capabilities.canOpenViewAll
+                )
+            }
+
+            // 6. HOME-06 — Observation ("Góc nhìn hôm nay" — optional)
+            state.observation?.let { observation ->
+                item(key = "home_06_observation_${observation.id}") {
+                    ObservationCard(
+                        observation = observation,
+                        onExplainClick = { id -> onEvent(HomeUiEvent.ObservationExplainTapped(id)) },
+                        onHideClick = { id -> onEvent(HomeUiEvent.ObservationHideTapped(id)) },
+                        onDismissClick = { id -> onEvent(HomeUiEvent.ObservationDismissTapped(id)) },
+                        canExplain = state.capabilities.canOpenObservationExplain,
+                        canHide = state.capabilities.canHideObservation
+                    )
                 }
             }
 
-            is HomeUiState.Content -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    // 1. Header (Greeting + Settings + Avatar)
-                    item(key = "header") {
-                        HomeHeader(
-                            userName = state.userName,
-                            onSettingsClick = onSettingsClick,
-                            onProfileClick = onProfileClick
-                        )
-                    }
-
-                    // 2. Spending Calendar Card
-                    item(key = "spending_calendar") {
-                        SpendingCalendarCard(
-                            cycle = state.cycle,
-                            days = state.calendarDays,
-                            selectedDate = state.selectedDate,
-                            selectedTransactions = state.selectedDateTransactions,
-                            budgetSummary = state.budgetSummary,
-                            mascotAdvice = state.mascotAdvice,
-                            onDateClick = { onEvent(HomeUiEvent.SelectDate(it)) },
-                            onTodayClick = { onEvent(HomeUiEvent.JumpToToday) },
-                            onDayDetailClick = { /* Could open transaction history bottom sheet */ }
-                        )
-                    }
-
-                    // 3. Ready for Review Section
-                    item(key = "ready_review") {
-                        ReadyReviewSection(
-                            items = state.readyItems,
-                            onReviewClick = onReviewItemClick
-                        )
-                    }
-
-                    // 4. Cooling-off Section
-                    item(key = "cooling_off") {
-                        CoolingOffSection(
-                            items = state.coolingItems,
-                            onItemClick = onItemClick
-                        )
-                    }
-
-                    // Bottom padding spacer to clear the elevated bottom bar (72dp + gap)
-                    item(key = "bottom_spacer") {
-                        Spacer(modifier = Modifier.height(84.dp))
-                    }
+            // 7. HOME-07 — Local Draft Indicator (optional)
+            state.draft?.let { draft ->
+                item(key = "home_07_draft_${draft.id}") {
+                    DraftResumeCard(
+                        draft = draft,
+                        onResumeClick = { id -> onEvent(HomeUiEvent.ResumeDraftTapped(id)) },
+                        canResume = state.capabilities.canResumeDraft
+                    )
                 }
+            }
+
+            // Bottom clearance spacer cho cố định Bottom Navigation
+            item(key = "bottom_nav_clearance") {
+                Spacer(modifier = Modifier.height(BottomNavClearanceHeight))
             }
         }
+
+        // 8. HOME-08 — Modal Overlay Sheet Host (S16, S17, S22)
+        HomeSheetHost(
+            activeSheet = state.activeSheet,
+            onDismiss = { onEvent(HomeUiEvent.DismissSheet) },
+            onQuickCheckClick = { onEvent(HomeUiEvent.QuickCheckTapped) },
+            onSaveItemClick = { onEvent(HomeUiEvent.SaveItemTapped) },
+            onContextPrimaryAction = { kind, entityId ->
+                onEvent(HomeUiEvent.ContextSheetPrimaryAction(kind, entityId))
+            }
+        )
     }
 }
 
-@Preview(showBackground = true, widthDp = 393, heightDp = 1200)
+@Preview(name = "S21 - Screenshot Baseline (393dp)", showBackground = true, widthDp = 393, heightDp = 1150)
 @Composable
-private fun HomeScreenPreview() {
-    val today = LocalDate.of(2026, 10, 19)
-    val cycle = SpendingCycle.create(anchorDay = 15, referenceDate = today)
-
-    val sampleDays = cycle.dates.map { date ->
-        CalendarDayState(
-            date = date,
-            isCycleStart = (date == cycle.startDate),
-            isToday = (date == today),
-            isSelected = (date == LocalDate.of(2026, 10, 18)),
-            purchaseCount = if (date == LocalDate.of(2026, 10, 16) || date == LocalDate.of(2026, 10, 18)) 1 else 0,
-            totalSpent = if (date == LocalDate.of(2026, 10, 18)) 1_400_000L else if (date == LocalDate.of(2026, 10, 16)) 1_000_000L else 0L
-        )
-    }
-
-    val sampleReadyItems = listOf(
-        CooldownItem(
-            id = 1,
-            name = "Áo khoác vintage",
-            price = 680_000L,
-            addedTimestamp = System.currentTimeMillis() - 7 * 86_400_000L,
-            cooldownDurationMillis = 7 * 86_400_000L,
-            reason = "Thích màu retro"
-        )
-    )
-
-    val sampleCoolingItems = listOf(
-        CooldownItem(
-            id = 2,
-            name = "Sony WH-1000XM5",
-            price = 7_490_000L,
-            addedTimestamp = System.currentTimeMillis() - 10_000_000L,
-            cooldownDurationMillis = 86_400_000L,
-            reason = "Chống ồn khi làm việc"
-        ),
-        CooldownItem(
-            id = 3,
-            name = "Keychron K2",
-            price = 1_850_000L,
-            addedTimestamp = System.currentTimeMillis() - 20_000_000L,
-            cooldownDurationMillis = 86_400_000L,
-            reason = "Bàn phím cơ văn phòng"
-        )
-    )
-
-    val contentState = HomeUiState.Content(
-        userName = "Hoa",
-        cycle = cycle,
-        calendarDays = sampleDays,
-        selectedDate = LocalDate.of(2026, 10, 18),
-        selectedDateTransactions = DailyPurchaseSummary(purchaseCount = 1, totalAmount = 1_400_000L),
-        budgetSummary = BudgetSummary(totalBudget = 3_000_000L, totalSpent = 2_400_000L),
-        mascotAdvice = MascotAdvice.Warning(percent = 80),
-        readyItems = sampleReadyItems,
-        coolingItems = sampleCoolingItems,
-        today = today
-    )
-
+private fun HomeScreenS21BaselinePreview() {
+    val fakeDataSource = HomeFakeDataSource()
     ChankoTheme {
         HomeScreen(
-            state = contentState,
-            onEvent = {},
-            onAddNewItemClick = {},
-            onSettingsClick = {},
-            onProfileClick = {},
-            onReviewItemClick = {},
-            onItemClick = {}
+            state = fakeDataSource.getStateForScenario(HomeScenario.S21),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S22 - Global Sheet Open Baseline (393dp)", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HomeScreenS22SheetOpenPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S22),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S05 - New User Empty State", showBackground = true, widthDp = 393, heightDp = 900)
+@Composable
+private fun HomeScreenS05EmptyPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S05),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S06 - Over Budget State (120%)", showBackground = true, widthDp = 393, heightDp = 950)
+@Composable
+private fun HomeScreenS06OverBudgetPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S06),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S09 - Observation + Local Draft", showBackground = true, widthDp = 393, heightDp = 1220)
+@Composable
+private fun HomeScreenS09ObservationAndDraftPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S09),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S13 - Section Error & Loading Isolation", showBackground = true, widthDp = 393, heightDp = 900)
+@Composable
+private fun HomeScreenS13PartialErrorPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S13),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "S15 - Narrow 320dp & FontScale 2.0", showBackground = true, widthDp = 320, heightDp = 1400, fontScale = 2.0f)
+@Composable
+private fun HomeScreenS15NarrowLargeFontPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S15),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "Tablet / Wide 600dp", showBackground = true, widthDp = 600, heightDp = 1200)
+@Composable
+private fun HomeScreenWide600dpPreview() {
+    val fakeDataSource = HomeFakeDataSource()
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.S21),
+            onEvent = {}
         )
     }
 }
