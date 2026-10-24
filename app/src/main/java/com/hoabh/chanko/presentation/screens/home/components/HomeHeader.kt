@@ -192,19 +192,10 @@ fun HomeHeader(
 
 @Composable
 private fun resolveGreetingText(header: HeaderUiModel): String {
-    return if (header.hasName) {
-        val resId = when (header.greetingPeriod) {
-            GreetingPeriod.MORNING -> R.string.home_greeting_morning_named
-            GreetingPeriod.AFTERNOON -> R.string.home_greeting_afternoon_named
-            GreetingPeriod.EVENING -> R.string.home_greeting_evening_named
-        }
-        stringResource(resId, header.displayName)
-    } else {
-        val resId = when (header.greetingPeriod) {
-            GreetingPeriod.MORNING -> R.string.home_greeting_morning_anonymous
-            GreetingPeriod.AFTERNOON -> R.string.home_greeting_afternoon_anonymous
-            GreetingPeriod.EVENING -> R.string.home_greeting_evening_anonymous
-        }
-        stringResource(resId)
+    val resId = when (header.greetingPeriod) {
+        GreetingPeriod.MORNING -> if (header.hasName) R.string.home_greeting_morning_named else R.string.home_greeting_morning_anonymous
+        GreetingPeriod.AFTERNOON -> if (header.hasName) R.string.home_greeting_afternoon_named else R.string.home_greeting_afternoon_anonymous
+        GreetingPeriod.EVENING -> if (header.hasName) R.string.home_greeting_evening_named else R.string.home_greeting_evening_anonymous
     }
+    return if (header.hasName) stringResource(resId, header.displayName) else stringResource(resId)
 }
