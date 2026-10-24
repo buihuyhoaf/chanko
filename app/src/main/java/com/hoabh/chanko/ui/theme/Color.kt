@@ -74,6 +74,17 @@ object CandyColors {
     val quickActionSaveBorder = Color(0xFFE68DB2)
     val quickActionSaveText = Color(0xFF512B45)
 
+    // Candy Pop 3D Home Budget Snapshot
+    val budgetSnapshotBg = Color(0xFFEEE5FF)
+    val budgetSnapshotBorder = Color(0xFFD9C5FF)
+    val budgetSnapshotAmount = Color(0xFF6F49DE)
+    val budgetSnapshotSecondaryText = Color(0xFF665684)
+    val budgetSnapshotSpendingPanel = Color(0xFFFFFFFF)
+    val budgetSnapshotBadgeBg = Color(0xFFFFE7B8)
+    val budgetSnapshotBadgeText = Color(0xFF8B5814)
+    val budgetSnapshotProgressTrack = Color(0xFFEEE8F5)
+    val budgetSnapshotProgressFill = Color(0xFF8965F6)
+
     // Budget Snapshot
     val budgetWarningBadgeBg = Color(0xFFFFF0DB)
     val budgetWarningBadgeInk = Color(0xFFD97706)

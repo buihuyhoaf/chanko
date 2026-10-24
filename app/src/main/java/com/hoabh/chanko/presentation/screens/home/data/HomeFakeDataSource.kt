@@ -518,6 +518,6 @@ class HomeFakeDataSource @Inject constructor() {
     companion object {
         const val FIXED_CLOCK_ISO = "2026-10-24T03:00:00Z"
         const val FIXED_TIMEZONE = "Asia/Ho_Chi_Minh"
-        const val DEFAULT_CYCLE_LABEL = "Ngân sách tháng 10 – 11/2026"
+        const val DEFAULT_CYCLE_LABEL = "15/10 – 14/11/2026"
     }
 }

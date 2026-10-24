@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.home.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.NorthEast
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,35 +31,46 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.BudgetStateKind
 import com.hoabh.chanko.presentation.screens.home.BudgetUi
 import com.hoabh.chanko.presentation.screens.home.SectionState
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetCalculator
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
+import com.hoabh.chanko.ui.theme.ChankoTheme
+import com.hoabh.chanko.ui.theme.Nunito
 
-private val ProgressTrackHeight = 10.dp
-private val VerticalDividerHeight = 36.dp
-private val DetailsChevronSize = 16.dp
+private val SnapshotCardRadius = 32.dp
+private val SnapshotBorderWidth = 2.dp
+private val SpendingPanelRadius = 20.dp
+private val ProgressBarHeight = 12.dp
+private val DetailsIconSize = 14.dp
+private val CalendarIconSize = 14.dp
 
 /**
- * HOME-04 — Budget Snapshot Card (v2 Image-Aligned):
- * - Header: Tiêu đề chu kỳ (`"Ngân sách tháng 10 – 11/2026"`) + pill `"Chi tiết >"`.
- * - Cột số tiền: `"Đã chi"` (`2.400.000 ₫ / 3.000.000 ₫`), `"Còn lại"` (`600.000 ₫`) và badge `"Đã tiêu 80%"`.
- * - Thanh tiến độ: Thanh tím bo tròn + nhãn phần trăm bên phải (`"80%"`).
- * - Tuyệt đối không dùng dấu ba chấm cắt ngắn số tiền (S15); tự động xếp dọc trên màn hẹp hoặc font lớn.
- * - Hỗ trợ đầy đủ Loading, Error (có nút Thử lại — S13), Zero (S07), Unknown (S08) và OverBudget (S06).
+ * HOME-04 — Home Budget Snapshot (Candy Pop 3D):
+ * 1. Chu kỳ ngân sách hiện tại (Header: "Ngân sách của bạn", icon calendar + ngày thực tế, nút "Chi tiết ↗").
+ * 2. Số tiền còn lại (Main section: "Còn lại" / "Vượt hạn mức", số tiền lớn 28sp Nunito ExtraBold).
+ * 3. Mascot Chanko 3D (Mascot Chanko 96–112dp, biểu cảm theo trạng thái ngân sách).
+ * 4. Spending section (Panel trắng bo góc: "Đã chi", số tiền đã chi, badge phần trăm, thanh progress capsule 12dp).
  */
 @Composable
-fun BudgetCard(
+fun HomeBudgetSnapshot(
     sectionState: SectionState<BudgetUi>,
     onDetailsClick: () -> Unit,
     onRetryClick: () -> Unit,
@@ -65,11 +79,11 @@ fun BudgetCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = CandyShape.card,
-        color = CandyColors.homeCardSurface,
+        shape = RoundedCornerShape(SnapshotCardRadius),
+        color = CandyColors.budgetSnapshotBg,
         tonalElevation = CandyElevation.low,
         shadowElevation = CandyElevation.low,
-        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+        border = BorderStroke(SnapshotBorderWidth, CandyColors.budgetSnapshotBorder)
     ) {
         when (sectionState) {
             SectionState.Loading -> BudgetLoadingState()
@@ -83,7 +97,7 @@ fun BudgetCard(
                 canRetry = sectionState.canRetry,
                 onRetryClick = onRetryClick
             )
-            is SectionState.Content -> BudgetContent(
+            is SectionState.Content -> BudgetSnapshotContent(
                 budget = sectionState.data,
                 canOpenDetails = canOpenDetails,
                 onDetailsClick = onDetailsClick
@@ -92,8 +106,28 @@ fun BudgetCard(
     }
 }
 
+/**
+ * Alias for [HomeBudgetSnapshot] to maintain backward compatibility with HomeScreen and existing callers.
+ */
 @Composable
-private fun BudgetContent(
+fun BudgetCard(
+    sectionState: SectionState<BudgetUi>,
+    onDetailsClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    canOpenDetails: Boolean = true
+) {
+    HomeBudgetSnapshot(
+        sectionState = sectionState,
+        onDetailsClick = onDetailsClick,
+        onRetryClick = onRetryClick,
+        modifier = modifier,
+        canOpenDetails = canOpenDetails
+    )
+}
+
+@Composable
+private fun BudgetSnapshotContent(
     budget: BudgetUi,
     canOpenDetails: Boolean,
     onDetailsClick: () -> Unit
@@ -101,26 +135,20 @@ private fun BudgetContent(
     val configuration = LocalConfiguration.current
     val isLargeFont = configuration.fontScale >= 1.4f
 
-    val badgeBg = when (budget.stateKind) {
-        BudgetStateKind.Normal -> CandyColors.budgetNormalBadgeBg
-        BudgetStateKind.Warning -> CandyColors.budgetWarningBadgeBg
-        BudgetStateKind.Reached -> CandyColors.budgetReachedBadgeBg
-        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeBg
+    val isOver = budget.isOverBudget
+    val remainingColor = if (isOver) CandyColors.budgetOverBadgeInk else CandyColors.budgetSnapshotAmount
+    val progressBarFillColor = if (isOver) CandyColors.overBudget else CandyColors.budgetSnapshotProgressFill
+
+    val mascotRes = when (budget.stateKind) {
+        BudgetStateKind.Normal -> R.drawable.mascot_sleepy
+        BudgetStateKind.Warning,
+        BudgetStateKind.Reached,
+        BudgetStateKind.OverBudget -> R.drawable.mascot_worried
         BudgetStateKind.Zero,
-        BudgetStateKind.Unknown -> CandyColors.primarySoft
-    }
-    val badgeInk = when (budget.stateKind) {
-        BudgetStateKind.Normal -> CandyColors.budgetNormalBadgeInk
-        BudgetStateKind.Warning -> CandyColors.budgetWarningBadgeInk
-        BudgetStateKind.Reached -> CandyColors.budgetReachedBadgeInk
-        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeInk
-        BudgetStateKind.Zero,
-        BudgetStateKind.Unknown -> CandyColors.primaryInk
+        BudgetStateKind.Unknown -> R.drawable.mascot_sleepy
     }
 
-    val isOver = budget.isOverBudget
-    val remainingColor = if (isOver) CandyColors.budgetOverBadgeInk else CandyColors.brandPurple
-    val progressBarFillColor = if (isOver) CandyColors.overBudget else CandyColors.brandPurple
+    val cycleDateText = cleanCycleDateRange(budget.cycleLabel)
 
     Column(
         modifier = Modifier
@@ -128,133 +156,210 @@ private fun BudgetContent(
             .padding(CandySpace.lg),
         verticalArrangement = Arrangement.spacedBy(CandySpace.md)
     ) {
-        // Row 1: Cycle Title + "Chi tiết >" Pill
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // 1. Header: "Ngân sách của bạn" + cycle date & "Chi tiết" pill
+        SnapshotHeader(
+            cycleDateText = cycleDateText,
+            canOpenDetails = canOpenDetails,
+            onDetailsClick = onDetailsClick
+        )
+
+        // 2. Main section: "Còn lại" / Amount (Left) + Mascot 3D (Right)
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val useCompactMascot = maxWidth < 330.dp || isLargeFont
+            val mascotSize = if (useCompactMascot) 80.dp else 104.dp
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Text(
+                        text = if (isOver) {
+                            stringResource(R.string.home_budget_over_label)
+                        } else {
+                            stringResource(R.string.home_budget_remaining_label)
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = CandyColors.budgetSnapshotSecondaryText
+                    )
+                    Text(
+                        text = budget.remainingFormatted,
+                        style = TextStyle(
+                            fontFamily = Nunito,
+                            fontSize = 28.sp,
+                            lineHeight = 34.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = remainingColor
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(CandySpace.sm))
+
+                Image(
+                    painter = painterResource(mascotRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(mascotSize),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+
+        // 3. Spending section: White rounded panel
+        SpendingPanel(
+            budget = budget,
+            progressBarFillColor = progressBarFillColor
+        )
+    }
+}
+
+@Composable
+private fun SnapshotHeader(
+    cycleDateText: String,
+    canOpenDetails: Boolean,
+    onDetailsClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = budget.cycleLabel,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
+                text = stringResource(R.string.home_budget_header_title),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
                 ),
-                color = CandyColors.textPrimary,
-                modifier = Modifier.weight(1f)
+                color = CandyColors.textPrimary
             )
-
-            if (canOpenDetails) {
-                Spacer(modifier = Modifier.width(CandySpace.sm))
-                val detailsLabel = stringResource(R.string.home_budget_details_cta)
-                Surface(
-                    modifier = Modifier
-                        .heightIn(min = 32.dp)
-                        .clip(CandyShape.chip)
-                        .clickable(
-                            role = Role.Button,
-                            onClickLabel = detailsLabel,
-                            onClick = onDetailsClick
-                        ),
-                    shape = CandyShape.chip,
-                    color = CandyColors.primarySoft
-                ) {
-                    Row(
-                        modifier = Modifier.padding(
-                            horizontal = CandySpace.md,
-                            vertical = CandySpace.xs
-                        ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = detailsLabel,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = CandyColors.primaryInk
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = CandyColors.primaryInk,
-                            modifier = Modifier.size(DetailsChevronSize)
-                        )
-                    }
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.CalendarToday,
+                    contentDescription = null,
+                    tint = CandyColors.budgetSnapshotSecondaryText,
+                    modifier = Modifier.size(CalendarIconSize)
+                )
+                Text(
+                    text = cycleDateText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = CandyColors.budgetSnapshotSecondaryText
+                )
             }
         }
 
-        // Row 2: Spent / Remaining Columns + Status Badge (Adaptive for narrow 320dp & fontScale 2.0)
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val useStackedAmounts = maxWidth < 330.dp || isLargeFont
-
-            if (useStackedAmounts) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
-                ) {
-                    SpentMetricColumn(budget = budget)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RemainingMetricColumn(
-                            budget = budget,
-                            remainingColor = remainingColor
-                        )
-                        BudgetStatusPill(
-                            text = budget.badgeText,
-                            backgroundColor = badgeBg,
-                            contentColor = badgeInk
-                        )
-                    }
-                }
-            } else {
+        if (canOpenDetails) {
+            Spacer(modifier = Modifier.width(CandySpace.sm))
+            val detailsLabel = stringResource(R.string.home_budget_details_cta)
+            Surface(
+                modifier = Modifier
+                    .heightIn(min = 36.dp)
+                    .clip(CandyShape.chip)
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = detailsLabel,
+                        onClick = onDetailsClick
+                    ),
+                shape = CandyShape.chip,
+                color = Color.White,
+                shadowElevation = CandyElevation.low
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.padding(
+                        horizontal = CandySpace.md,
+                        vertical = CandySpace.xs
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                 ) {
-                    SpentMetricColumn(
-                        budget = budget,
-                        modifier = Modifier.weight(1.25f)
+                    Text(
+                        text = detailsLabel,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = CandyColors.budgetSnapshotAmount
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = CandySpace.sm)
-                            .width(1.dp)
-                            .height(VerticalDividerHeight)
-                            .background(CandyColors.divider)
-                    )
-
-                    RemainingMetricColumn(
-                        budget = budget,
-                        remainingColor = remainingColor,
-                        modifier = Modifier.weight(0.85f)
-                    )
-
-                    Spacer(modifier = Modifier.width(CandySpace.xs))
-
-                    BudgetStatusPill(
-                        text = budget.badgeText,
-                        backgroundColor = badgeBg,
-                        contentColor = badgeInk
+                    Icon(
+                        imageVector = Icons.Rounded.NorthEast,
+                        contentDescription = null,
+                        tint = CandyColors.budgetSnapshotAmount,
+                        modifier = Modifier.size(DetailsIconSize)
                     )
                 }
             }
         }
+    }
+}
 
-        // Row 3: Rounded Progress Bar + Percentage Label on Right
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+@Composable
+private fun SpendingPanel(
+    budget: BudgetUi,
+    progressBarFillColor: Color
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(SpendingPanelRadius),
+        color = CandyColors.budgetSnapshotSpendingPanel,
+        shadowElevation = CandyElevation.low
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Row 1: "Đã chi" + Amount (Left) & Percentage badge (Right)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Text(
+                        text = stringResource(R.string.home_budget_spent_label),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = CandyColors.budgetSnapshotSecondaryText
+                    )
+                    Text(
+                        text = budget.spentFormatted,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = CandyColors.textPrimary
+                    )
+                }
+
+                BudgetPercentageBadge(
+                    text = budget.progressRightLabel,
+                    stateKind = budget.stateKind
+                )
+            }
+
+            // Row 2: Capsule progress bar (12dp height, no duplicate % label)
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .height(ProgressTrackHeight)
+                    .fillMaxWidth()
+                    .height(ProgressBarHeight)
                     .clip(CircleShape)
-                    .background(CandyColors.progressTrack)
+                    .background(CandyColors.budgetSnapshotProgressTrack)
             ) {
                 Box(
                     modifier = Modifier
@@ -264,104 +369,48 @@ private fun BudgetContent(
                         .background(progressBarFillColor)
                 )
             }
-
-            Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            Text(
-                text = budget.progressRightLabel,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = CandyColors.textSecondary
-            )
         }
     }
 }
 
 @Composable
-private fun SpentMetricColumn(
-    budget: BudgetUi,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.home_budget_spent_label),
-            style = MaterialTheme.typography.labelSmall,
-            color = CandyColors.textSecondary
-        )
-        // Never use ellipsis for money amounts (S15)
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-        ) {
-            Text(
-                text = budget.spentFormatted,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = CandyColors.textPrimary
-            )
-            if (budget.limitMinor != null && budget.limitMinor > 0L) {
-                Text(
-                    text = "/ ${budget.limitFormatted}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CandyColors.textSecondary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RemainingMetricColumn(
-    budget: BudgetUi,
-    remainingColor: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.home_budget_remaining_label),
-            style = MaterialTheme.typography.labelSmall,
-            color = CandyColors.textSecondary
-        )
-        Text(
-            text = budget.remainingFormatted,
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.ExtraBold
-            ),
-            color = remainingColor
-        )
-    }
-}
-
-@Composable
-private fun BudgetStatusPill(
+private fun BudgetPercentageBadge(
     text: String,
-    backgroundColor: androidx.compose.ui.graphics.Color,
-    contentColor: androidx.compose.ui.graphics.Color
+    stateKind: BudgetStateKind
 ) {
+    val (badgeBg, badgeText) = when (stateKind) {
+        BudgetStateKind.OverBudget -> CandyColors.budgetOverBadgeBg to CandyColors.budgetOverBadgeInk
+        BudgetStateKind.Warning,
+        BudgetStateKind.Reached -> CandyColors.budgetSnapshotBadgeBg to CandyColors.budgetSnapshotBadgeText
+        BudgetStateKind.Normal -> CandyColors.budgetSnapshotBadgeBg to CandyColors.budgetSnapshotBadgeText
+        BudgetStateKind.Zero,
+        BudgetStateKind.Unknown -> CandyColors.primarySoft to CandyColors.primaryInk
+    }
+
     Surface(
         shape = CandyShape.chip,
-        color = backgroundColor
+        color = badgeBg
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.ExtraBold
             ),
-            color = contentColor,
+            color = badgeText,
             modifier = Modifier.padding(
                 horizontal = CandySpace.sm,
-                vertical = CandySpace.xs
+                vertical = 4.dp
             )
         )
     }
+}
+
+private fun cleanCycleDateRange(rawCycleLabel: String): String {
+    return rawCycleLabel
+        .removePrefix("Ngân sách tháng ")
+        .removePrefix("Ngân sách ")
+        .trim()
+        .ifBlank { "15/10 – 14/11/2026" }
 }
 
 @Composable
@@ -374,14 +423,14 @@ private fun BudgetLoadingState() {
         horizontalArrangement = Arrangement.spacedBy(CandySpace.md)
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.size(20.dp),
-            color = CandyColors.brandPurple,
+            modifier = Modifier.size(24.dp),
+            color = CandyColors.budgetSnapshotAmount,
             strokeWidth = 2.dp
         )
         Text(
             text = stringResource(R.string.home_section_loading),
             style = MaterialTheme.typography.bodySmall,
-            color = CandyColors.textSecondary
+            color = CandyColors.budgetSnapshotSecondaryText
         )
     }
 }
@@ -404,7 +453,7 @@ private fun BudgetErrorOrEmptyState(
             style = MaterialTheme.typography.bodySmall.copy(
                 fontWeight = FontWeight.Medium
             ),
-            color = CandyColors.textSecondary,
+            color = CandyColors.budgetSnapshotSecondaryText,
             modifier = Modifier.weight(1f)
         )
         if (canRetry) {
@@ -420,7 +469,7 @@ private fun BudgetErrorOrEmptyState(
                         onClick = onRetryClick
                     ),
                 shape = CandyShape.chip,
-                color = CandyColors.primarySoft
+                color = Color.White
             ) {
                 Box(
                     modifier = Modifier.padding(horizontal = CandySpace.md),
@@ -431,10 +480,128 @@ private fun BudgetErrorOrEmptyState(
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = CandyColors.primaryInk
+                        color = CandyColors.budgetSnapshotAmount
                     )
                 }
             }
         }
+    }
+}
+
+// ==========================================
+// PREVIEWS
+// ==========================================
+
+@Preview(name = "Home Budget Snapshot - Normal (< 80%)", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeBudgetSnapshotPreviewNormal() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 1_500_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Home Budget Snapshot - Warning (80%)", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeBudgetSnapshotPreviewWarning() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 2_400_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Home Budget Snapshot - Reached (100%)", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeBudgetSnapshotPreviewReached() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 3_000_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Home Budget Snapshot - Over Budget (120%)", showBackground = true, widthDp = 393)
+@Composable
+private fun HomeBudgetSnapshotPreviewOverBudget() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 3_600_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Home Budget Snapshot - Large Font (2.0x)", showBackground = true, widthDp = 393, fontScale = 2.0f)
+@Composable
+private fun HomeBudgetSnapshotPreviewLargeFont() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 2_400_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
+    }
+}
+
+@Preview(name = "Home Budget Snapshot - Narrow Screen (320dp)", showBackground = true, widthDp = 320)
+@Composable
+private fun HomeBudgetSnapshotPreviewNarrowScreen() {
+    ChankoTheme {
+        HomeBudgetSnapshot(
+            sectionState = SectionState.Content(
+                BudgetCalculator.compute(
+                    cycleLabel = "15/10 – 14/11/2026",
+                    spentMinor = 2_400_000L,
+                    limitMinor = 3_000_000L
+                )
+            ),
+            onDetailsClick = {},
+            onRetryClick = {},
+            modifier = Modifier.padding(CandySpace.screen)
+        )
     }
 }

@@ -36,6 +36,7 @@
     <string name="home_action_save_subtitle">Để sau nhé</string>
 
     <!-- Budget Snapshot (HOME-04) -->
+    <string name="home_budget_header_title">Ngân sách của bạn</string>
     <string name="home_budget_details_cta">Chi tiết</string>
     <string name="home_budget_spent_label">Đã chi</string>
     <string name="home_budget_remaining_label">Còn lại</string>
