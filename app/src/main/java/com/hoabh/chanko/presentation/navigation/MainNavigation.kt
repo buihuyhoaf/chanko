@@ -63,9 +63,13 @@ import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
 import com.hoabh.chanko.ui.theme.CandyColors
 
-fun NavGraphBuilder.mainDestination() {
+fun NavGraphBuilder.mainDestination(
+    onNavigateToProfile: () -> Unit = {}
+) {
     composable(route = Screen.Main.route) {
-        MainNavigation()
+        MainNavigation(
+            onNavigateToProfile = onNavigateToProfile
+        )
     }
 }
 
@@ -81,7 +85,8 @@ internal fun NavHostController.selectTab(destination: TopLevelDestination) {
 @Composable
 fun MainNavigation(
     controller: NavHostController = rememberNavController(),
-    onAddNewItemClick: () -> Unit = {}
+    onAddNewItemClick: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -105,7 +110,8 @@ fun MainNavigation(
             ) {
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
-                        onAddNewItemClick = onAddNewItemClick
+                        onAddNewItemClick = onAddNewItemClick,
+                        onProfileClick = onNavigateToProfile
                     )
                 }
                 listOf(

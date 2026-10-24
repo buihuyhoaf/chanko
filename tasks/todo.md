@@ -63,13 +63,13 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ## Phase 5: ViewModels, Data Flow & Navigation Integration
-- [ ] **Task 5: Triển khai `ProfileViewModel` và `PersonalityViewModel`**
+- [x] **Task 5: Triển khai `ProfileViewModel` và `PersonalityViewModel`**
   - **Acceptance:**
-    - [ ] `ProfileViewModel` kết nối dữ liệu user Google, switch thông báo, đăng xuất xóa backstack về Login.
-    - [ ] `PersonalityViewModel` quản lý dirty state machine, lưu thành công cập nhật profile và pop back.
-    - [ ] Kết nối `onProfileClick` từ `HomeScreen` -> mở `ProfileRoute`, từ Profile -> mở `PersonalityRoute`.
+    - [x] `ProfileViewModel` kết nối dữ liệu user Google, switch thông báo, đăng xuất xóa backstack về Login.
+    - [x] `PersonalityViewModel` quản lý dirty state machine, lưu thành công cập nhật profile và pop back.
+    - [x] Kết nối `onProfileClick` từ `HomeScreen` -> mở `ProfileRoute`, từ Profile -> mở `PersonalityRoute`.
   - **Verify:**
-    - [ ] `./gradlew :app:testDevDebugUnitTest` pass.
+    - [x] `./gradlew :app:testDevDebugUnitTest` pass.
   - **Files:**
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileViewModel.kt`
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/PersonalityViewModel.kt`
