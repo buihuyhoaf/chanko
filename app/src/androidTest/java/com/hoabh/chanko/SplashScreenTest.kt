@@ -52,7 +52,7 @@ class SplashScreenTest {
         // Commit the first draw and let its effect start the presentation interval.
         repeat(4) { compose.mainClock.advanceTimeByFrame() }
         compose.runOnIdle { assertEquals(0, calls) }
-        compose.onNodeWithText("Pause. Think. Decide.").assertIsDisplayed()
+        compose.onNodeWithText("Tạm dừng. Suy nghĩ. Quyết định.").assertIsDisplayed()
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").assertDoesNotExist()
         compose.mainClock.advanceTimeBy(1800)
         compose.runOnIdle { assertEquals(0, calls) }
@@ -69,9 +69,9 @@ class SplashScreenTest {
                 ChankoTheme { SplashContent() }
             }
         }
-        compose.onNodeWithText("Should I", useUnmergedTree = true).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Buy It?", useUnmergedTree = true).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Pause. Think. Decide.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Nên mua", useUnmergedTree = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Không nhỉ?", useUnmergedTree = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Tạm dừng. Suy nghĩ. Quyết định.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Đang mở dữ liệu của bạn…").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Kiểm soát chi tiêu bắt đầu từ một quyết định tốt hơn")
             .performScrollTo().assertIsDisplayed()
@@ -80,7 +80,7 @@ class SplashScreenTest {
 
     @Test fun staticPresentationCanBeCapturedForVisualReview() {
         compose.setContent { ChankoTheme { Box(Modifier.fillMaxSize()) { SplashContent() } } }
-        compose.onNodeWithText("Pause. Think. Decide.").assertIsDisplayed()
+        compose.onNodeWithText("Tạm dừng. Suy nghĩ. Quyết định.").assertIsDisplayed()
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val file = File(context.getExternalFilesDir(null), "splash-review.png")

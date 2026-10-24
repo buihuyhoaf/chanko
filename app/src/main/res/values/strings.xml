@@ -5,11 +5,11 @@
     <string name="add_item">Thêm món đồ</string>
     <string name="load_error">Không thể tải dữ liệu. Hãy mở lại màn hình để thử lại.</string>
     <string name="active_count">%1$d món</string>
-    <string name="splash_title">Should I Buy It?</string>
-    <string name="splash_title_first">Should I</string>
-    <string name="splash_title_second">Buy It?</string>
+    <string name="splash_title">Nên mua không nhỉ?</string>
+    <string name="splash_title_first">Nên mua</string>
+    <string name="splash_title_second">Không nhỉ?</string>
     <string name="splash_loading">Đang mở dữ liệu của bạn…</string>
-    <string name="splash_tagline">Pause. Think. Decide.</string>
+    <string name="splash_tagline">Tạm dừng. Suy nghĩ. Quyết định.</string>
     <string name="splash_subtitle">Kiểm soát chi tiêu bắt đầu từ một quyết định tốt hơn</string>
     <string name="cooling_items">Món đồ đang hạ nhiệt</string>
     <string name="history">Lịch sử</string>

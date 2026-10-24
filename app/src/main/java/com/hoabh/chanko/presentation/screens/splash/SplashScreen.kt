@@ -62,7 +62,7 @@ import kotlinx.coroutines.delay
 
 private const val SPLASH_BRANDING_DURATION_MS = 2_000L
 private const val MAX_DECORATION_FONT_SCALE = 1.3f
-private const val LOGO_LINE_HEIGHT_RATIO = 1.08f
+private const val LOGO_LINE_HEIGHT_RATIO = 1.18f
 private const val TEXT_SHADOW_BLUR_RADIUS = 8f
 private const val LOGO_SHADOW_BLUR_RADIUS = 4f
 private val LogoShadowColor = CandyColors.logoBrown.copy(alpha = 0.33f)
@@ -72,10 +72,10 @@ private val MascotMinHeight = 120.dp
 private val MascotMaxHeight = 400.dp
 private const val MascotHeightFraction = 0.46f
 private val SplashSubtitleMaxWidth = 360.dp
-private val LogoStrokeWidth = 7.dp
+private val LogoStrokeWidth = 5.dp
 
-private val LogoSizeCompact = 48.sp
-private val LogoSizeRegular = 60.sp
+private val LogoSizeCompact = 38.sp
+private val LogoSizeRegular = 46.sp
 
 fun NavGraphBuilder.splashDestination(
     isRestored: () -> Boolean,
