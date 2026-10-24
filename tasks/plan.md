@@ -1,110 +1,143 @@
-# Implementation Plan: Chanko Home — Compose v2.0 (Image-Aligned)
+# Implementation Plan: Chanko Profile & Settings (`docs/features/profile-and-settings.md`)
 
 ## Overview
-Triển khai màn hình `HomeScreen` và `GlobalQuickActionSheet` trên Jetpack Compose bám sát 100% ảnh chuẩn [`approved-home-user-reference.png`](file:///Users/buihoa/HocTap/Android/chanko/chanko-home-compose-handoff-v2/references/approved-home-user-reference.png) và đặc tả [`SPEC-home.md`](file:///Users/buihoa/HocTap/Android/chanko/SPEC-home.md) (v2.0). Kiến trúc sử dụng Clean Architecture + MVVM (`BaseViewModel`), trạng thái độc lập theo từng khu vực (`SectionState<T>`), tiêm đồng hồ (`Clock` / `ZoneId`), và bộ dữ liệu kịch bản xác định gồm **22 scenarios (`S01`–`S22`)** từ `fixtures/home-scenarios.json`.
+Triển khai màn hình **Profile & Settings** và màn hình con **Cat Personality** bám sát tài liệu bàn giao `chanko-profile-handoff` v1.0 và đặc tả đã duyệt tại `docs/features/profile-and-settings.md`. Toàn bộ giao diện sử dụng Jetpack Compose, Material 3, font Nunito, hệ màu Candy Pop 3D, 100% copy Tiếng Việt, hỗ trợ đầy đủ các tiêu chuẩn trợ năng (TalkBack, Font Scale 200%, Touch Target >= 48dp, Reduce Motion).
 
 ## Architecture Decisions
-1. **Image-Aligned Visual Hierarchy (`v2.0`):**
-   - Thứ tự vùng cuộn trong `HomeScreen`: `HomeHeader` (có icon `☀️` và dòng phụ kèm `💜`, nút Gear tròn lavender, Avatar tròn tím) → `CompactLivingRoom` (chứa luôn `ChankoDialogue` bubble ở góc trên-trái bên trong scene, mèo trắng 3D nằm chống cằm trên đệm tím, và 4 `RoomProp`: `Hourglass`, `Calendar` ngày động, `Wallet`, `PauseJar` hũ tim hồng) → `QuickActionsRow` (`Quick Check` & `Save an Item`) → `BudgetCard` (kèm pill `"Chi tiết >"`, cột `"Đã chi"` / `"Còn lại"`, badge cam `"Đã tiêu 80%"`, thanh progress tím) → `YourDecisionsSection` (`"Những món cần chú ý"`, tối đa 3 dòng `Ready` / `Waiting` / `Considering` / `Saved`) → `ObservationCard` (`"Góc nhìn hôm nay"`, optional) → `DraftResumeCard` (optional).
-2. **Global Quick Action Bottom Sheet (`Modal Overlay`):**
-   - Nhấn nút `+` ở giữa `ChankoBottomBar` mở `GlobalQuickActionSheet` dưới dạng modal overlay có scrim (`"Bạn muốn làm gì?"`, nút `X`, 2 tile ngang `Quick Check` và `Save an Item` với bộ icon riêng), giữ nguyên tab `Home` đang chọn và chỉ cho phép tối đa 1 sheet hoạt động tại một thời điểm (`S16`, `S22`).
-3. **Pure Kotlin Domain Helpers cho Ranking & Budget:**
-   - `DecisionRanker`: Dedup theo ID, lọc bỏ status không hợp lệ (`S18`), sắp xếp ổn định `Ready → Waiting → Considering → Saved`, giữ nguyên thứ tự upstream trong cùng nhóm và lấy tối đa 3 items (`S01`–`S04`, `S20`).
-   - `BudgetCalculator`: Xử lý bằng `Long` minor units (VND), không chia cho 0 (`S07`), không biến `null` thành `0 ₫` (`S08`), giữ số âm khi vượt hạn mức và kẹp thanh tiến độ trong `0f..1f` (`S06`).
-4. **Living Room Layered Asset Pack v3 (`T14` — `11-ASSET-DELIVERY.md`):**
-   - Sử dụng bộ 6 file PNG tách lớp trong `chanko-home-compose-handoff-v2/assets/living-room/` (`room_background.png`, `cat_on_cushion.png`, `hourglass_books.png`, `calendar_blank.png`, `wallet_mint.png`, `pause_jar_heart.png`) lắp ráp theo tọa độ chuẩn hóa trong `scene-layout.json` (`z = 0..6`, tỷ lệ `2.5:1`), kèm chữ động `month` / `day` nghiêng `-3°` trên `calendar_blank.png` và 3 ảnh thumbnail mẫu (`sample_jacket.png`, `sample_headphones.png`, `sample_keyboard.png`) cho kịch bản `S21`.
+1. **Single Entry Point & Child Destination (PROFILE-01, PROFILE-02, PROFILE-03):**
+   - Nút Avatar tròn tím trên `HomeHeader` (`onProfileClick`) là cổng duy nhất dẫn vào Profile.
+   - Profile & Settings là một child screen, không hiển thị Bottom Navigation Bar.
+   - Nút Back (TopBar và System Gesture) đưa người dùng quay lại Home, giữ nguyên ngữ cảnh tab và vị trí cuộn.
+2. **Cozy Corner (Linh thú Chanko) (PROFILE-04):**
+   - Card minh họa scene chú mèo trắng ngồi ôm cốc tím tại bàn trà (`cozy_corner_candidate_v1.png`).
+   - Tương tác tap kích hoạt chuyển động co dãn nhẹ nhàng toàn khung cảnh (`whole-scene scale 1.00 -> 1.025 -> 1.00`), không gọi AI/LLM, không pet game, tắt chuyển động phóng to khi Reduce Motion bật.
+3. **Cat Personality Sub-screen & State Machine (PROFILE-05, PROFILE-06):**
+   - Màn hình riêng `PersonalityScreen` cho phép chọn giữa 3 tính cách: *Thân thiện (Friendly)*, *Lém lỉnh (Sassy - Mặc định)*, *Thẳng thắn (Savage)*.
+   - Chọn tính cách cập nhật ngay khung thoại mẫu xem trước (Preview) hoàn toàn offline.
+   - Nút "Lưu thay đổi" (Save) chỉ kích hoạt khi có thay đổi (`isDirty`) và có kết nối mạng (`isOnline`).
+   - Khi có thay đổi chưa lưu mà bấm Back -> Hiển thị `UnsavedChangesDialog` ("Hủy thay đổi?" / "Tiếp tục chỉnh sửa" / "Hủy bỏ").
+4. **Ready for Review Notification Preference (PROFILE-07):**
+   - Switch cấu hình thông báo nhắc nhở đợt duyệt đồ hạ nhiệt.
+   - Phối hợp giữa preference của ứng dụng và quyền thông báo hệ thống Android (`POST_NOTIFICATIONS`).
+5. **Google Account & Safety Policy (PROFILE-08, PROFILE-10):**
+   - Card Google Account chỉ đọc (Read-only: Avatar, Tên hiển thị, Email).
+   - Dialog xác nhận Đăng xuất (Sign Out), thu hồi token/phiên, dọn dẹp state và điều hướng sạch sẽ về `Screen.Login` xóa trắng back stack.
 
 ---
 
 ## Dependency Graph
 
 ```text
-Phase 0: Discovery & TECH Alignment (Done)
+Phase 1: Foundation (Tokens, Assets & Strings)
    │
    ▼
-Phase 1: Candy Pop v2 Tokens & Sample Assets (Task 1)
+Phase 2: Navigation & State Contracts (Screen.kt, NavGraph.kt, UiStates)
    │
-   ▼
-Phase 2: v2 State Contracts, 22 Scenarios & HomeHeader (Tasks 2–3)
+   ├──► Phase 3: Profile & Settings UI Components (Header, Cozy Corner, Setting Rows, Google Card, Sign Out)
    │
-   ├──► Phase 3 & 4: CompactLivingRoom + ChankoDialogue Overlay (Tasks 4–5)
+   ├──► Phase 4: Cat Personality Sub-Screen (PersonalityOption, Preview, UnsavedChangesDialog)
    │
-   ├──► Phase 5: QuickActionsRow — Quick Check & Save an Item (Task 6)
-   │
-   ├──► Phase 6: BudgetCard & BudgetCalculator (Task 7)
-   │
-   ├──► Phase 7: YourDecisionsSection & DecisionRanker (Task 8)
-   │
-   ├──► Phase 8: Optional ObservationCard & DraftResumeCard (Task 9)
-   │
-   └──► Phase 9: ChankoBottomNavigation + HomeSheetHost (Task 10)
+   └──► Phase 5: ViewModels & Business Logic (ProfileViewModel, PersonalityViewModel, Offline/Online, Sign Out)
            │
            ▼
-   Phase 10 & 11: Full 22-Scenario Integration, Matrix Previews & QA Sign-off (Tasks 11–12)
+   Phase 6: Integration, Accessibility (Font 200%, TalkBack, Insets) & Unit Tests
 ```
 
 ---
 
 ## Task List
 
-### Phase 0: Clean Slate & Discovery (`T01`–`T18`)
-- [x] **Task 0: Clean Slate Teardown & Phase 0 Discovery (`SPEC-home.md` v2.0)**
+### Phase 1: Foundation (Assets, Strings & Tokens)
+- [ ] **Task 1: Cài đặt Resource Strings Tiếng Việt & Import Cozy Corner Asset**
+  - **Description:** Thêm toàn bộ các chuỗi tiếng Việt chuẩn mực cho Profile, Personality, Notification, Dialogs vào `res/values/strings_profile.xml`. Import file ảnh `cozy_corner_candidate_v1.png` từ handoff vào `res/drawable-nodpi/chanko_profile_cozy_corner.png`.
+  - **Acceptance criteria:**
+    - [ ] `strings_profile.xml` chứa 100% tiếng Việt theo đặc tả (tên màn, mô tả 3 tính cách, preview copy tiếng Việt, dialog xác nhận hủy/đăng xuất).
+    - [ ] `chanko_profile_cozy_corner.png` sẵn sàng trong `drawable-nodpi`.
+  - **Verification:**
+    - [ ] `./gradlew assembleDevDebug` biên dịch thành công.
+  - **Files likely touched:**
+    - `app/src/main/res/values/strings_profile.xml`
+    - `app/src/main/res/drawable-nodpi/chanko_profile_cozy_corner.png`
 
 ---
 
-### Phase 1 & 2: Foundation, State Contracts & Header (v2 + Asset Pack v3)
-- [x] **Task 1 (Phase 1): Candy Pop v2 Semantic Tokens, Strings & Asset Pack v3 Drawables (6 Living Room PNGs + 3 Sample Thumbnails)**
-- [x] **Task 2 (Phase 2a): Full v2 State/Event Contracts (`HomeUiState`, `HomeAction`, `SectionState`) & Pure Calculators (`DecisionRanker`, `BudgetCalculator`)**
-- [x] **Task 3 (Phase 2b): `HomeHeader` v2 (Sun/Heart, Lavender Gear, Purple Avatar) & `HomeScreen` Shell**
-
-### Checkpoint 1: Foundation & Header (After Tasks 1–3)
-- [x] Unit tests cho `DecisionRanker` (`S01`–`S04`, `S18`, `S20`) và `BudgetCalculator` (`S06`–`S08`) pass 100%.
-- [x] `HomeHeader` hiển thị đúng ảnh chuẩn v2, hỗ trợ tên dài/font 2.0; build `./gradlew assembleDebug` thành công.
-
----
-
-### Phase 3, 4 & 5: Living Room Scene, Dialogue Overlay & Quick Actions
-- [x] **Task 4 (Phase 3): `CompactLivingRoom` Scene Assembly (`scene-layout.json`, 6 PNG Layers, `-3°` Dynamic Calendar Overlay & 4 $\ge 48\text{dp}$ Hit Targets)**
-- [x] **Task 5 (Phase 4): `ChankoDialogue` Bubble Overlay (`z = 6`) bên trong `CompactLivingRoom`**
-- [x] **Task 6 (Phase 5): `QuickActionsRow` (`Quick Check` Gradient Card & `Save an Item` Card)**
-
-### Checkpoint 2: Scene & Direct Actions (After Tasks 4–6)
-- [x] 4 `RoomProp` có vùng chạm độc lập $\ge 48\text{dp}$, không chồng lấn; `Calendar` hiển thị ngày/tháng động từ `Clock`/`ZoneId` (`S19`).
-- [x] `ChankoDialogue` nằm ở góc trên-trái bên trong scene, ẩn sạch khi `null`, không tràn ở `fontScale = 2.0`.
-- [x] `Quick Check` và `Save an Item` phát 2 intent riêng biệt, tự xếp dọc ở `320dp` / font lớn.
+### Phase 2: Navigation & State Contracts
+- [ ] **Task 2: Khai báo Routes và State/Event Models**
+  - **Description:** Cập nhật `Screen.kt` với `Profile` và `Personality`. Định nghĩa immutable `ProfileUiState`, `ProfileUiEvent`, `ProfileUiEffect`, và `PersonalityUiState`, `PersonalityUiEvent`, `PersonalityUiEffect`.
+  - **Acceptance criteria:**
+    - [ ] Routes `Screen.Profile` (`"profile"`) và `Screen.Personality` (`"personality"`) được định nghĩa chuẩn.
+    - [ ] Các data classes biểu diễn đầy đủ trạng thái UI: `accountInfo`, `committedPersonality`, `notificationEnabled`, `isOnline`, `isLoading`, `isDirty`, `draftPersonality`.
+  - **Verification:**
+    - [ ] `./gradlew assembleDevDebug` biên dịch thành công.
+  - **Files likely touched:**
+    - `app/src/main/java/com/hoabh/chanko/presentation/navigation/Screen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileUiState.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/PersonalityUiState.kt`
 
 ---
 
-### Phase 6, 7 & 8: Budget, Your Decisions & Optional Sections
-- [x] **Task 7 (Phase 6): `BudgetCard` (`Đã chi`, `Còn lại`, pill `Chi tiết`, badge `Đã tiêu 80%`, progress bar)**
-- [x] **Task 8 (Phase 7): `YourDecisionsSection` & `DecisionRow` (`Ready` mint, `Waiting` lavender + countdown, `Considering`, `Saved`)**
-- [x] **Task 9 (Phase 8): `ObservationCard` (`Góc nhìn hôm nay`, `Explain`/`Hide`/`X`) & `DraftResumeCard`**
-
-### Checkpoint 3: Content Sections Complete (After Tasks 7–9)
-- [x] Toàn bộ các section chính render khớp ảnh chuẩn `S21`.
-- [x] Khi `observation == null` hoặc `draft == null`, không để lại khoảng trống dư (`S01`, `S09`–`S11`).
-- [x] Khi timer hết hạn nhưng source còn `Waiting` (`S12`), không tự chuyển sang `Ready` hoặc tự mua.
-
----
-
-### Phase 9, 10 & 11: Navigation, Sheets, 22 Scenarios & QA Sign-Off
-- [x] **Task 10 (Phase 9): `HomeSheetHost` (`GlobalQuickActionSheet` `S22` & `ContextualSheet` `S17`) + `MainNavigation` `+` Wiring (`S16`)**
-- [x] **Task 11 (Phase 10): `HomeScenarioFixtures` (Đầy đủ 22 Scenarios `S01`–`S22`) & `HomeViewModel` Reducer/Effects Integration**
-- [x] **Task 12 (Phase 11): Responsive/Font-Scale Preview Matrix (`320/393/600dp`, `S21`, `S22`) & Full Unit Test Suite Verification**
-
-### Checkpoint 4: Complete & Ready for Review (After Tasks 10–12)
-- [x] Toàn bộ 22 scenarios (`S01`–`S22`) có unit tests kiểm chứng trong `HomeViewModelTest`.
-- [x] Lệnh `./gradlew assembleDebug :app:testDevDebugUnitTest` pass 100%.
-- [x] Báo cáo đối chiếu đầy đủ các tiêu chí `A01`–`A18` và `V01`–`V05`.
+### Phase 3: Profile & Settings UI Components
+- [ ] **Task 3: Xây dựng các Composable cho màn hình chính Profile & Settings**
+  - **Description:** Tạo các component giao diện theo Candy Pop 3D: `ProfileTopBar`, `AccountIdentityCard`, `CozyCornerCard` (kèm hiệu ứng co dãn 1.0 -> 1.025 -> 1.0 khi tap), `PersonalitySettingRow`, `ReviewNotificationRow`, `GoogleAccountCard`, `LegalAndAboutSection`, `SignOutAction`.
+  - **Acceptance criteria:**
+    - [ ] `CozyCornerCard` có animation scale mượt mà khi chạm, hỗ trợ `reduceMotion` (không scale nếu bật).
+    - [ ] Mọi item tương tác đều có vùng chạm >= 48dp, có semantics/contentDescription đầy đủ.
+    - [ ] `ProfileScreen` hiển thị cuộn mượt mà với nền cream `#FAF8F5`, hỗ trợ font scale 200%.
+  - **Verification:**
+    - [ ] `@Preview` hiển thị đúng trên Android Studio và biên dịch `./gradlew assembleDevDebug`.
+  - **Files likely touched:**
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/components/CozyCornerCard.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/components/ProfileComponents.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileScreen.kt`
 
 ---
 
-## Risks and Mitigations
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Bong bóng thoại che mặt mèo hoặc đè lên vùng chạm của 4 vật thể khi chữ to (`fontScale = 2.0`) | High | Thiết kế `CompactLivingRoom` cho phép chiều cao linh hoạt theo nội dung bubble ở nửa trên-trái, đặt mèo ở giữa-phải và hàng 4 prop ở dải dưới có vùng chạm tách biệt. |
-| Cắt chữ số tiền trên màn hẹp `320dp` (`S15`) | High | Dùng `Adaptive/Flow` layout trong `BudgetCard` và `DecisionRow` để tự động xuống dòng khi thiếu chiều ngang; không bao giờ dùng `TextOverflow.Ellipsis` cho số tiền. |
-| Nhấn `+` nhiều lần mở chồng nhiều Bottom Sheet (`S16`) | Medium | Quản lý `activeSheet: HomeSheet?` làm nguồn sự thật duy nhất; `AddTapped` chỉ gán `activeSheet = HomeSheet.Global`. |
+### Phase 4: Cat Personality Sub-Screen Components
+- [ ] **Task 4: Xây dựng Composable cho màn hình chọn Tính cách linh thú (`PersonalityScreen`)**
+  - **Description:** Tạo `PersonalityScreen` gồm TopBar có nút Back, danh sách 3 thẻ chọn Radio (`PersonalityOptionCard`: Thân thiện, Lém lỉnh, Thẳng thắn), khung xem trước câu thoại tĩnh (`PersonalityPreviewCard`), nút "Lưu thay đổi" (Save) ở cuối màn hình, và `UnsavedChangesDialog`.
+  - **Acceptance criteria:**
+    - [ ] Chọn radio đổi ngay câu thoại preview offline tĩnh tương ứng.
+    - [ ] Nút Save bị disabled khi chưa thay đổi (`!isDirty`) hoặc khi mất mạng (`!isOnline`).
+    - [ ] Bấm Back khi dirty mở `UnsavedChangesDialog` ("Tiếp tục chỉnh sửa" / "Hủy bỏ").
+  - **Verification:**
+    - [ ] `@Preview` hiển thị đủ các trạng thái và biên dịch `./gradlew assembleDevDebug`.
+  - **Files likely touched:**
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/PersonalityScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/components/PersonalityComponents.kt`
 
-## Open Questions
-- Không còn (Người dùng đã phê duyệt `SPEC-home.md` v2.0 và phương án xử lý `T14`).
+---
+
+### Phase 5: ViewModels, Data Flow & Navigation Integration
+- [ ] **Task 5: Triển khai `ProfileViewModel` và `PersonalityViewModel`**
+  - **Description:** Viết logic ViewModel quản lý state, kết nối với dữ liệu tài khoản hiện hành (Google Auth), xử lý toggle notification preference, cập nhật personality draft vs committed, xử lý timeout/error/retry, và flow Sign Out thu hồi phiên an toàn.
+  - **Acceptance criteria:**
+    - [ ] `ProfileViewModel` phát đúng effect mở Personality, mở URL điều khoản, và điều hướng về Login khi Đăng xuất.
+    - [ ] `PersonalityViewModel` quản lý chuẩn state machine: dirty check, online/offline guard, lưu thành công cập nhật committed và pop back.
+  - **Verification:**
+    - [ ] Unit tests pass: `./gradlew :app:testDevDebugUnitTest`
+  - **Files likely touched:**
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileViewModel.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/PersonalityViewModel.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/navigation/NavGraph.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeScreen.kt` (gắn callback `onProfileClick`)
+
+---
+
+### Phase 6: Unit Test Suite & QA Checkpoint
+- [ ] **Task 6: Bộ Unit Test toàn diện (AC-01 đến AC-20) & Build Verification**
+  - **Description:** Viết unit tests kiểm thử chặt chẽ các hành vi cốt lõi: Navigation, Dirty Guard, Save Idempotency, Offline guard, Sign Out flow, và kiểm tra Accessibility (Font 200%, System Insets).
+  - **Acceptance criteria:**
+    - [ ] Toàn bộ unit tests cho `ProfileViewModel` và `PersonalityViewModel` pass 100%.
+    - [ ] `./gradlew assembleDevDebug :app:testDevDebugUnitTest` pass toàn bộ.
+  - **Verification:**
+    - [ ] Terminal check: `./gradlew assembleDevDebug :app:testDevDebugUnitTest`
+  - **Files likely touched:**
+    - `app/src/test/java/com/hoabh/chanko/presentation/screens/profile/ProfileViewModelTest.kt`
+    - `app/src/test/java/com/hoabh/chanko/presentation/screens/profile/PersonalityViewModelTest.kt`
+
+---
+
+## Checkpoint: Final Verification
+- [ ] Build dự án hoàn toàn sạch: `./gradlew assembleDevDebug`
+- [ ] Toàn bộ unit tests pass: `./gradlew testDevDebugUnitTest`
+- [ ] Sẵn sàng để nghiệm thu thực tế theo đúng yêu cầu handoff.
