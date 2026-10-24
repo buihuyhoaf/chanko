@@ -61,14 +61,19 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
+import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination(
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToItemDetail: (Int) -> Unit = {},
+    onNavigateToArchived: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
-            onNavigateToProfile = onNavigateToProfile
+            onNavigateToProfile = onNavigateToProfile,
+            onNavigateToItemDetail = onNavigateToItemDetail,
+            onNavigateToArchived = onNavigateToArchived
         )
     }
 }
@@ -86,7 +91,9 @@ internal fun NavHostController.selectTab(destination: TopLevelDestination) {
 fun MainNavigation(
     controller: NavHostController = rememberNavController(),
     onAddNewItemClick: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToItemDetail: (Int) -> Unit = {},
+    onNavigateToArchived: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -116,8 +123,13 @@ fun MainNavigation(
                         onProfileClick = onNavigateToProfile
                     )
                 }
+                composable(TopLevelDestination.MyItems.route) {
+                    MyItemsRoute(
+                        onNavigateToDetail = onNavigateToItemDetail,
+                        onNavigateToArchived = onNavigateToArchived
+                    )
+                }
                 listOf(
-                    TopLevelDestination.MyItems,
                     TopLevelDestination.Budget,
                     TopLevelDestination.Insights
                 ).forEach { tab ->

@@ -43,4 +43,111 @@
     <string name="tab_budget">Ngân sách</string>
     <string name="tab_insights">Phân tích</string>
     <string name="tab_not_implemented">%1$s — Chưa triển khai</string>
+
+    <!-- My Items Strings -->
+    <string name="my_items_title">Món đồ</string>
+    <string name="my_items_archived_menu">Đã lưu trữ</string>
+    <string name="my_items_hero_title">Hãy dành thời gian\ncho những mong muốn</string>
+    <string name="my_items_hero_subtitle">Mỗi khoảnh khắc chờ đợi là một cơ hội để bạn nhìn rõ điều thực sự quan trọng.</string>
+    <string name="my_items_tile_all">Tất cả món đồ</string>
+    <string name="my_items_tile_cooling">Đang hạ nhiệt</string>
+    <string name="my_items_tile_ready">Đến lúc xem lại</string>
+    <string name="my_items_search_placeholder">Tìm kiếm món đồ…</string>
+    <string name="my_items_filter_button">Lọc &amp; sắp xếp</string>
+    <string name="my_items_filter_title">Lọc &amp; sắp xếp</string>
+    <string name="my_items_filter_status_primary">Trạng thái chính</string>
+    <string name="my_items_filter_status_sub">Trạng thái phụ (Đang hoạt động)</string>
+    <string name="my_items_filter_sort">Sắp xếp</string>
+    <string name="my_items_filter_apply">Áp dụng</string>
+    <string name="my_items_filter_reset">Đặt lại</string>
+    <string name="my_items_filter_close">Đóng bộ lọc</string>
+    <string name="my_items_empty_title">Chưa có món nào ở đây</string>
+    <string name="my_items_empty_description">Đưa món đồ bạn đang phân vân vào đây để cùng Chanko hạ nhiệt nhé.</string>
+    <string name="my_items_empty_filtered_title">Không tìm thấy món đồ phù hợp</string>
+    <string name="my_items_empty_filtered_description">Thử thay đổi từ khóa tìm kiếm hoặc làm mới bộ lọc xem sao nhé.</string>
+    <string name="my_items_empty_clear_filter">Xóa bộ lọc</string>
+    <string name="my_items_results_count">%1$d món đồ</string>
+    <string name="my_items_cd_thumbnail">Hình ảnh minh họa món đồ</string>
+    <string name="my_items_status_saved">Đã lưu</string>
+    <string name="my_items_status_considering">Đang cân nhắc</string>
+    <string name="my_items_status_cooling">Đang hạ nhiệt</string>
+    <string name="my_items_status_ready">Đến lúc xem lại</string>
+    <string name="my_items_status_postponed">Đã hoãn</string>
+    <string name="my_items_status_purchased">Đã mua</string>
+    <string name="my_items_status_skipped">Đã bỏ qua</string>
+    <string name="my_items_filter_all">Tất cả</string>
+    <string name="my_items_filter_active">Đang hoạt động</string>
+    <string name="my_items_sort_updated">Cập nhật gần nhất</string>
+    <string name="my_items_sort_newest">Thêm mới gần nhất</string>
+    <string name="my_items_sort_price_asc">Giá: Thấp đến cao</string>
+    <string name="my_items_sort_price_desc">Giá: Cao đến thấp</string>
+    <string name="my_items_sort_name_az">Tên: A → Z</string>
+
+    <!-- Item Detail Strings -->
+    <string name="item_detail_title">Chi tiết món đồ</string>
+    <string name="item_detail_more_options">Tùy chọn khác</string>
+    <string name="item_detail_price_unit">Giá dự kiến / đơn vị</string>
+    <string name="item_detail_countdown_title">Thời gian hạ nhiệt</string>
+    <string name="item_detail_countdown_ready">Đã đến lúc xem lại!</string>
+    <string name="item_detail_countdown_sub">Thời gian để bạn cân nhắc và suy nghĩ thấu đáo hơn.</string>
+    <string name="item_detail_expandable_header">Thông tin chi tiết</string>
+    <string name="item_detail_field_reason">Lý do muốn mua</string>
+    <string name="item_detail_field_date">Ngày thêm vào</string>
+    <string name="item_detail_field_duration">Thời gian chờ</string>
+    <string name="item_detail_decision_journey_title">Hành trình quyết định</string>
+    <string name="item_detail_decision_journey_view_more">Xem thêm hành trình</string>
+    <string name="item_detail_decision_journey_collapse">Thu gọn</string>
+    <string name="item_detail_purchase_history_title">Lịch sử giao dịch</string>
+    <string name="item_detail_purchase_history_empty">Chưa có giao dịch được ghi nhận</string>
+    <string name="item_detail_purchase_history_view">Xem chi tiết giao dịch</string>
+    <string name="item_detail_cta_ready">Xem lại nhu cầu</string>
+    <string name="item_detail_cta_cooling">Xem nhận định</string>
+    <string name="item_detail_cta_purchased">Xem lịch sử mua</string>
+    <string name="item_detail_cta_skipped">Xem lại hành trình</string>
+    <string name="item_detail_more_record_purchase">Ghi nhận mua hàng</string>
+    <string name="item_detail_more_buy_again">Mua lại</string>
+    <string name="item_detail_more_skip_waiting">Bỏ qua thời gian chờ</string>
+    <string name="item_detail_more_adjust_wait">Điều chỉnh thời gian</string>
+    <string name="item_detail_more_skip_item">Bỏ qua món đồ này</string>
+    <string name="item_detail_more_archive">Lưu trữ món đồ</string>
+    <string name="item_detail_dialog_skip_title">Bỏ qua thời gian chờ?</string>
+    <string name="item_detail_dialog_skip_msg">Kết thúc phiên chờ sẽ đưa bạn sang bước đưa ra quyết định mà không tự động bỏ qua món đồ.</string>
+    <string name="item_detail_dialog_skip_confirm">Kết thúc chờ</string>
+    <string name="item_detail_dialog_cancel">Hủy</string>
+    <string name="item_detail_not_found">Không tìm thấy thông tin món đồ.</string>
+
+    <!-- Record Purchase Strings -->
+    <string name="purchase_record_title">Ghi nhận mua hàng</string>
+    <string name="purchase_record_subtitle">Thao tác này chỉ ghi lại giao dịch bạn đã thực hiện.</string>
+    <string name="purchase_record_price_label">Đơn giá thực tế (₫)</string>
+    <string name="purchase_record_qty_label">Số lượng</string>
+    <string name="purchase_record_total_label">Tổng thanh toán</string>
+    <string name="purchase_record_payment_type">Phương thức thanh toán</string>
+    <string name="purchase_record_pay_now">Trả ngay (Tiền mặt / Chuyển khoản)</string>
+    <string name="purchase_record_credit">Thẻ tín dụng (Credit)</string>
+    <string name="purchase_record_note_label">Ghi chú (tùy chọn)</string>
+    <string name="purchase_record_save_btn">Lưu giao dịch</string>
+    <string name="purchase_record_success">Đã ghi nhận giao dịch</string>
+
+    <!-- Transaction Detail Strings -->
+    <string name="transaction_detail_title">Chi tiết giao dịch</string>
+    <string name="transaction_detail_date">Thời gian mua</string>
+    <string name="transaction_detail_edit_action">Sửa thông tin nhập sai</string>
+    <string name="transaction_detail_delete_action">Xóa giao dịch nhập sai</string>
+    <string name="transaction_detail_save_changes">Lưu thay đổi</string>
+    <string name="transaction_detail_cancel">Hủy</string>
+    <string name="transaction_detail_total_format">Tổng: %1$s</string>
+    <string name="transaction_delete_dialog_title">Xóa giao dịch nhập sai?</string>
+    <string name="transaction_delete_dialog_msg">Giao dịch sẽ được loại khỏi chi tiêu. Trạng thái món đồ và lịch sử đánh giá vẫn được giữ.</string>
+    <string name="transaction_delete_confirm">Xóa giao dịch</string>
+    <string name="transaction_delete_cancel">Giữ giao dịch</string>
+    <string name="transaction_not_found">Không tìm thấy thông tin giao dịch.</string>
+
+    <!-- Archived Items Strings -->
+    <string name="archived_items_title">Đã lưu trữ</string>
+    <string name="archived_items_search_hint">Tìm kiếm món đồ đã lưu trữ…</string>
+    <string name="archived_items_empty_title">Chưa có món đồ được lưu trữ</string>
+    <string name="archived_items_empty_desc">Các món đồ bạn tạm gác lại hoặc lưu trữ sẽ xuất hiện tại đây.</string>
+    <string name="archived_items_restore_btn">Khôi phục</string>
+    <string name="archived_items_restore_success">Đã khôi phục món đồ</string>
 </resources>

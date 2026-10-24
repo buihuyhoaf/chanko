@@ -15,7 +15,8 @@ data class CooldownItem(
     val addedTimestamp: Long,
     val cooldownDurationMillis: Long,
     val reason: String,
-    val status: ItemStatus = ItemStatus.COOLING_DOWN
+    val status: ItemStatus = ItemStatus.COOLING_DOWN,
+    val isArchived: Boolean = false
 ) {
     fun remainingMillis(now: Long): Long =
         (cooldownDurationMillis - (now - addedTimestamp)).coerceIn(0, cooldownDurationMillis)

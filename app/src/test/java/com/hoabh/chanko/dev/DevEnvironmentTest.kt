@@ -91,6 +91,18 @@ class DevEnvironmentTest {
         override fun getItemById(id: Int): Flow<CooldownItemEntity?> =
             MutableStateFlow(items.find { it.id == id })
 
+        override fun getArchivedItems(): Flow<List<CooldownItemEntity>> =
+            MutableStateFlow(items.filter { it.isArchived })
+
+        override suspend fun setArchived(id: Int, isArchived: Boolean): Int {
+            val idx = items.indexOfFirst { it.id == id }
+            if (idx >= 0) {
+                items[idx] = items[idx].copy(isArchived = isArchived)
+                return 1
+            }
+            return 0
+        }
+
         override suspend fun insertItem(item: CooldownItemEntity) {
             items.add(item)
             itemsFlow.value = items.filter { it.status == ItemStatus.COOLING_DOWN }

@@ -13,5 +13,6 @@ data class CooldownItemEntity(
     val addedTimestamp: Long,
     val cooldownDurationMillis: Long,
     val reason: String,
-    val status: ItemStatus
+    val status: ItemStatus,
+    val isArchived: Boolean = false
 )

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.hoabh.chanko.data.local.MIGRATION_1_2
 import com.hoabh.chanko.data.local.AppDatabase
 import com.hoabh.chanko.data.local.dao.ItemDao
+import com.hoabh.chanko.data.local.dao.PurchaseDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,12 +24,21 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "chanko_database"
-        ).addMigrations(MIGRATION_1_2).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .fallbackToDestructiveMigration(dropAllTables = false)
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideItemDao(database: AppDatabase): ItemDao {
         return database.itemDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePurchaseDao(database: AppDatabase): PurchaseDao {
+        return database.purchaseDao()
     }
 }
