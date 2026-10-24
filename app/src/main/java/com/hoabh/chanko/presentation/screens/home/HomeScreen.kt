@@ -106,7 +106,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = CandySpace.lg,
-                top = statusBarTopPadding + CandySpace.md,
+                top = statusBarTopPadding + CandySpace.xs,
                 end = CandySpace.lg,
                 bottom = CandySpace.lg
             ),
