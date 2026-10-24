@@ -8,6 +8,8 @@ sealed interface ItemDetailUiEvent {
     data object ConfirmSkipWaiting : ItemDetailUiEvent
     data object DismissSkipWaitingDialog : ItemDetailUiEvent
     data object RequestRecordPurchase : ItemDetailUiEvent
+    data object DismissRecordPurchaseSheet : ItemDetailUiEvent
+    data class ConfirmPurchase(val purchase: com.hoabh.chanko.domain.model.PurchaseTransaction) : ItemDetailUiEvent
     data object RequestArchiveItem : ItemDetailUiEvent
     data class PurchaseItemClicked(val purchaseId: String) : ItemDetailUiEvent
 }

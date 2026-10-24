@@ -48,6 +48,7 @@ import com.hoabh.chanko.presentation.screens.itemdetail.components.ProductStageH
 import com.hoabh.chanko.presentation.screens.itemdetail.components.PurchaseHistorySection
 import com.hoabh.chanko.presentation.screens.itemdetail.components.StickyBottomActionBar
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
+import com.hoabh.chanko.presentation.screens.purchase.RecordPurchaseBottomSheet
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 
@@ -55,7 +56,6 @@ import com.hoabh.chanko.ui.theme.CandySpace
 fun ItemDetailRoute(
     viewModel: ItemDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
-    onOpenRecordPurchase: (Int) -> Unit = {},
     onOpenTransactionDetail: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,7 +63,7 @@ fun ItemDetailRoute(
     CollectEffect(viewModel.effect) { effect ->
         when (effect) {
             is ItemDetailUiEffect.NavigateBack -> onNavigateBack()
-            is ItemDetailUiEffect.OpenRecordPurchaseSheet -> onOpenRecordPurchase(effect.itemId)
+            is ItemDetailUiEffect.OpenRecordPurchaseSheet -> {}
             is ItemDetailUiEffect.OpenTransactionDetail -> onOpenTransactionDetail(effect.purchaseId)
             is ItemDetailUiEffect.ShowToast -> {
                 // Toast / Snackbar thông báo
@@ -270,6 +270,19 @@ fun ItemDetailScreen(
                 onSkipWaiting = { onEvent(ItemDetailUiEvent.RequestSkipWaiting) },
                 onArchive = { onEvent(ItemDetailUiEvent.RequestArchiveItem) },
                 onDismiss = { onEvent(ItemDetailUiEvent.DismissMoreOptions) }
+            )
+        }
+
+        // Record Purchase Bottom Sheet (DETAIL-11)
+        if (uiState.isRecordPurchaseSheetOpen) {
+            RecordPurchaseBottomSheet(
+                itemId = uiState.id,
+                itemName = uiState.name,
+                estimatedPrice = uiState.rawPrice,
+                onConfirmPurchase = { tx ->
+                    onEvent(ItemDetailUiEvent.ConfirmPurchase(tx))
+                },
+                onDismiss = { onEvent(ItemDetailUiEvent.DismissRecordPurchaseSheet) }
             )
         }
 

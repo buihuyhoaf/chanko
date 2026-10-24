@@ -3,7 +3,9 @@ package com.hoabh.chanko.presentation.screens.itemdetail
 import androidx.lifecycle.SavedStateHandle
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
+import com.hoabh.chanko.domain.model.PurchaseTransaction
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.domain.repository.PurchaseRepository
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,12 +29,14 @@ class ItemDetailViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var fakeRepository: FakeItemRepository
+    private lateinit var fakePurchaseRepository: FakePurchaseRepository
     private lateinit var viewModel: ItemDetailViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         fakeRepository = FakeItemRepository()
+        fakePurchaseRepository = FakePurchaseRepository()
     }
 
     @After
@@ -55,7 +59,7 @@ class ItemDetailViewModelTest {
         fakeRepository.setItem(item)
 
         val savedStateHandle = SavedStateHandle(mapOf("itemId" to 42))
-        viewModel = ItemDetailViewModel(fakeRepository, savedStateHandle)
+        viewModel = ItemDetailViewModel(fakeRepository, fakePurchaseRepository, savedStateHandle)
         runCurrent()
 
         val state = viewModel.uiState.value
@@ -83,7 +87,7 @@ class ItemDetailViewModelTest {
         fakeRepository.setItem(item)
 
         val savedStateHandle = SavedStateHandle(mapOf("itemId" to 42))
-        viewModel = ItemDetailViewModel(fakeRepository, savedStateHandle)
+        viewModel = ItemDetailViewModel(fakeRepository, fakePurchaseRepository, savedStateHandle)
         runCurrent()
 
         // 1. Yêu cầu Skip Waiting -> mở confirmation dialog
@@ -98,6 +102,18 @@ class ItemDetailViewModelTest {
         assertFalse(state.isSkipWaitingConfirmDialogOpen)
         assertEquals(ItemDisplayStatus.ReadyForReview, state.displayStatus)
         assertEquals(0L, state.remainingMillis)
+    }
+
+    private class FakePurchaseRepository : PurchaseRepository {
+        override fun getPurchasesByItemId(itemId: Int): Flow<List<PurchaseTransaction>> =
+            MutableStateFlow(emptyList())
+
+        override fun getPurchaseById(id: String): Flow<PurchaseTransaction?> =
+            MutableStateFlow(null)
+
+        override suspend fun recordPurchase(purchase: PurchaseTransaction) {}
+        override suspend fun updatePurchase(purchase: PurchaseTransaction) {}
+        override suspend fun deletePurchase(purchaseId: String) {}
     }
 
     private class FakeItemRepository : ItemRepository {

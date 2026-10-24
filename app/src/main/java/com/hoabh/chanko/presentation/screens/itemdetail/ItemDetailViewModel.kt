@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
+import com.hoabh.chanko.domain.model.PurchaseTransaction
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.domain.repository.PurchaseRepository
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -26,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ItemDetailViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
+    private val purchaseRepository: PurchaseRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -43,7 +47,12 @@ class ItemDetailViewModel @Inject constructor(
 
     private fun loadItem() {
         viewModelScope.launch {
-            itemRepository.getItemById(itemId).collect { item ->
+            combine(
+                itemRepository.getItemById(itemId),
+                purchaseRepository.getPurchasesByItemId(itemId)
+            ) { item, purchases ->
+                Pair(item, purchases)
+            }.collect { (item, purchases) ->
                 if (item == null) {
                     _uiState.update { it.copy(isLoading = false, itemNotFound = true) }
                     return@collect
@@ -119,6 +128,17 @@ class ItemDetailViewModel @Inject constructor(
                     }
                 }
 
+                val mappedPurchases = purchases.map { p ->
+                    PurchaseHistoryItemUi(
+                        purchaseId = p.id,
+                        formattedDate = dateFormat.format(Date(p.purchasedTimestamp)),
+                        actualUnitPriceFormatted = HomeCurrencyFormatter.formatVnd(p.actualUnitPrice),
+                        quantity = p.quantity,
+                        totalAmountFormatted = HomeCurrencyFormatter.formatVnd(p.totalAmount),
+                        paymentType = p.paymentType.name
+                    )
+                }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -137,7 +157,7 @@ class ItemDetailViewModel @Inject constructor(
                         speechBubbleText = speechText,
                         primaryCtaText = ctaText,
                         decisionJourney = journey,
-                        purchaseHistory = emptyList() // Phục vụ lát cắt tiếp theo
+                        purchaseHistory = mappedPurchases
                     )
                 }
             }
@@ -156,9 +176,7 @@ class ItemDetailViewModel @Inject constructor(
                 // Nhấn CTA chính theo ngữ cảnh
                 when (_uiState.value.displayStatus) {
                     ItemDisplayStatus.ReadyForReview -> {
-                        viewModelScope.launch {
-                            _effect.emit(ItemDetailUiEffect.OpenRecordPurchaseSheet(itemId))
-                        }
+                        _uiState.update { it.copy(isRecordPurchaseSheetOpen = true) }
                     }
                     else -> {}
                 }
@@ -172,7 +190,6 @@ class ItemDetailViewModel @Inject constructor(
                 viewModelScope.launch {
                     val current = _uiState.value
                     if (current.id > 0) {
-                        // Cập nhật remaining về 0
                         _uiState.update {
                             it.copy(
                                 remainingMillis = 0L,
@@ -188,9 +205,16 @@ class ItemDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isSkipWaitingConfirmDialogOpen = false) }
             }
             is ItemDetailUiEvent.RequestRecordPurchase -> {
-                _uiState.update { it.copy(isMoreOptionsSheetOpen = false) }
+                _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isRecordPurchaseSheetOpen = true) }
+            }
+            is ItemDetailUiEvent.DismissRecordPurchaseSheet -> {
+                _uiState.update { it.copy(isRecordPurchaseSheetOpen = false) }
+            }
+            is ItemDetailUiEvent.ConfirmPurchase -> {
+                _uiState.update { it.copy(isRecordPurchaseSheetOpen = false) }
                 viewModelScope.launch {
-                    _effect.emit(ItemDetailUiEffect.OpenRecordPurchaseSheet(itemId))
+                    purchaseRepository.recordPurchase(event.purchase)
+                    _effect.emit(ItemDetailUiEffect.ShowToast("Đã ghi nhận giao dịch"))
                 }
             }
             is ItemDetailUiEvent.RequestArchiveItem -> {

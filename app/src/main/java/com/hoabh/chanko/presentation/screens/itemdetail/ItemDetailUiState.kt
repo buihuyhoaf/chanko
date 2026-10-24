@@ -40,5 +40,6 @@ data class ItemDetailUiState(
     val decisionJourney: List<DecisionJourneyStepUi> = emptyList(),
     val purchaseHistory: List<PurchaseHistoryItemUi> = emptyList(),
     val isMoreOptionsSheetOpen: Boolean = false,
-    val isSkipWaitingConfirmDialogOpen: Boolean = false
+    val isSkipWaitingConfirmDialogOpen: Boolean = false,
+    val isRecordPurchaseSheetOpen: Boolean = false
 )

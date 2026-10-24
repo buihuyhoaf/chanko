@@ -115,4 +115,29 @@
     <string name="item_detail_dialog_skip_confirm">Kết thúc chờ</string>
     <string name="item_detail_dialog_cancel">Hủy</string>
     <string name="item_detail_not_found">Không tìm thấy thông tin món đồ.</string>
+
+    <!-- Record Purchase Strings -->
+    <string name="purchase_record_title">Ghi nhận mua hàng</string>
+    <string name="purchase_record_subtitle">Thao tác này chỉ ghi lại giao dịch bạn đã thực hiện.</string>
+    <string name="purchase_record_price_label">Đơn giá thực tế (₫)</string>
+    <string name="purchase_record_qty_label">Số lượng</string>
+    <string name="purchase_record_total_label">Tổng thanh toán</string>
+    <string name="purchase_record_payment_type">Phương thức thanh toán</string>
+    <string name="purchase_record_pay_now">Trả ngay (Tiền mặt / Chuyển khoản)</string>
+    <string name="purchase_record_credit">Thẻ tín dụng (Credit)</string>
+    <string name="purchase_record_note_label">Ghi chú (tùy chọn)</string>
+    <string name="purchase_record_save_btn">Lưu giao dịch</string>
+    <string name="purchase_record_success">Đã ghi nhận giao dịch</string>
+
+    <!-- Transaction Detail Strings -->
+    <string name="transaction_detail_title">Chi tiết giao dịch</string>
+    <string name="transaction_detail_date">Thời gian mua</string>
+    <string name="transaction_detail_edit_action">Sửa thông tin nhập sai</string>
+    <string name="transaction_detail_delete_action">Xóa giao dịch nhập sai</string>
+    <string name="transaction_detail_save_changes">Lưu thay đổi</string>
+    <string name="transaction_delete_dialog_title">Xóa giao dịch nhập sai?</string>
+    <string name="transaction_delete_dialog_msg">Giao dịch sẽ được loại khỏi chi tiêu. Trạng thái món đồ và lịch sử đánh giá vẫn được giữ.</string>
+    <string name="transaction_delete_confirm">Xóa giao dịch</string>
+    <string name="transaction_delete_cancel">Giữ giao dịch</string>
+    <string name="transaction_not_found">Không tìm thấy thông tin giao dịch.</string>
 </resources>

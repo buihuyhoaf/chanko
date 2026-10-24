@@ -12,6 +12,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
+import com.hoabh.chanko.presentation.screens.transaction.TransactionDetailRoute
 import com.hoabh.chanko.presentation.screens.login.screen.loginDestination
 import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
 import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
@@ -116,12 +117,19 @@ fun NavGraph(
         ) {
             ItemDetailRoute(
                 onNavigateBack = { navController.popBackStack() },
-                onOpenRecordPurchase = { itemId ->
-                    // Sẽ nối vào RecordPurchaseBottomSheet trong Lát cắt 3
-                },
                 onOpenTransactionDetail = { purchaseId ->
-                    // Sẽ nối vào TransactionDetail trong Lát cắt 3
+                    navController.navigate(Screen.TransactionDetail.createRoute(purchaseId)) {
+                        launchSingleTop = true
+                    }
                 }
+            )
+        }
+
+        composable(
+            route = Screen.TransactionDetail.route
+        ) {
+            TransactionDetailRoute(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

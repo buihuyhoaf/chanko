@@ -5,18 +5,24 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.hoabh.chanko.data.local.converter.Converters
 import com.hoabh.chanko.data.local.dao.ItemDao
+import com.hoabh.chanko.data.local.dao.PurchaseDao
 import com.hoabh.chanko.data.local.entity.CooldownItemEntity
+import com.hoabh.chanko.data.local.entity.PurchaseTransactionEntity
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [CooldownItemEntity::class],
-    version = 2,
+    entities = [
+        CooldownItemEntity::class,
+        PurchaseTransactionEntity::class
+    ],
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
+    abstract fun purchaseDao(): PurchaseDao
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
