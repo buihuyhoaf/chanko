@@ -65,11 +65,13 @@ import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination(
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToItemDetail: (Int) -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
-            onNavigateToProfile = onNavigateToProfile
+            onNavigateToProfile = onNavigateToProfile,
+            onNavigateToItemDetail = onNavigateToItemDetail
         )
     }
 }
@@ -87,7 +89,8 @@ internal fun NavHostController.selectTab(destination: TopLevelDestination) {
 fun MainNavigation(
     controller: NavHostController = rememberNavController(),
     onAddNewItemClick: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToItemDetail: (Int) -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -119,9 +122,7 @@ fun MainNavigation(
                 }
                 composable(TopLevelDestination.MyItems.route) {
                     MyItemsRoute(
-                        onNavigateToDetail = { itemId ->
-                            // Sẽ nối vào ItemDetailRoute trong lát cắt tiếp theo
-                        },
+                        onNavigateToDetail = onNavigateToItemDetail,
                         onNavigateToArchived = {
                             // Sẽ nối vào ArchivedItemsRoute trong lát cắt tiếp theo
                         }

@@ -82,4 +82,37 @@
     <string name="my_items_sort_price_asc">Giá: Thấp đến cao</string>
     <string name="my_items_sort_price_desc">Giá: Cao đến thấp</string>
     <string name="my_items_sort_name_az">Tên: A → Z</string>
+
+    <!-- Item Detail Strings -->
+    <string name="item_detail_title">Chi tiết món đồ</string>
+    <string name="item_detail_more_options">Tùy chọn khác</string>
+    <string name="item_detail_price_unit">Giá dự kiến / đơn vị</string>
+    <string name="item_detail_countdown_title">Thời gian hạ nhiệt</string>
+    <string name="item_detail_countdown_ready">Đã đến lúc xem lại!</string>
+    <string name="item_detail_countdown_sub">Thời gian để bạn cân nhắc và suy nghĩ thấu đáo hơn.</string>
+    <string name="item_detail_expandable_header">Thông tin chi tiết</string>
+    <string name="item_detail_field_reason">Lý do muốn mua</string>
+    <string name="item_detail_field_date">Ngày thêm vào</string>
+    <string name="item_detail_field_duration">Thời gian chờ</string>
+    <string name="item_detail_decision_journey_title">Hành trình quyết định</string>
+    <string name="item_detail_decision_journey_view_more">Xem thêm hành trình</string>
+    <string name="item_detail_decision_journey_collapse">Thu gọn</string>
+    <string name="item_detail_purchase_history_title">Lịch sử giao dịch</string>
+    <string name="item_detail_purchase_history_empty">Chưa có giao dịch được ghi nhận</string>
+    <string name="item_detail_purchase_history_view">Xem chi tiết giao dịch</string>
+    <string name="item_detail_cta_ready">Xem lại nhu cầu</string>
+    <string name="item_detail_cta_cooling">Xem nhận định</string>
+    <string name="item_detail_cta_purchased">Xem lịch sử mua</string>
+    <string name="item_detail_cta_skipped">Xem lại hành trình</string>
+    <string name="item_detail_more_record_purchase">Ghi nhận mua hàng</string>
+    <string name="item_detail_more_buy_again">Mua lại</string>
+    <string name="item_detail_more_skip_waiting">Bỏ qua thời gian chờ</string>
+    <string name="item_detail_more_adjust_wait">Điều chỉnh thời gian</string>
+    <string name="item_detail_more_skip_item">Bỏ qua món đồ này</string>
+    <string name="item_detail_more_archive">Lưu trữ món đồ</string>
+    <string name="item_detail_dialog_skip_title">Bỏ qua thời gian chờ?</string>
+    <string name="item_detail_dialog_skip_msg">Kết thúc phiên chờ sẽ đưa bạn sang bước đưa ra quyết định mà không tự động bỏ qua món đồ.</string>
+    <string name="item_detail_dialog_skip_confirm">Kết thúc chờ</string>
+    <string name="item_detail_dialog_cancel">Hủy</string>
+    <string name="item_detail_not_found">Không tìm thấy thông tin món đồ.</string>
 </resources>
