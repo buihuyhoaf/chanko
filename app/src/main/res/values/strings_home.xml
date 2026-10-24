@@ -52,6 +52,7 @@
     <!-- Your Decisions (HOME-05) -->
     <string name="home_decisions_title">Những món cần chú ý</string>
     <string name="home_decisions_view_all">Xem tất cả</string>
+    <string name="home_decisions_view_all_compact">Tất cả ›</string>
     <string name="home_decision_status_ready">Sẵn sàng xem lại</string>
     <string name="home_decision_status_waiting">Đang chờ</string>
     <string name="home_decision_status_considering">Đang cân nhắc</string>

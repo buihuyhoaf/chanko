@@ -109,6 +109,23 @@ object CandyColors {
     val decisionSavedPillBg = Color(0xFFE5E7EB)
     val decisionSavedPillInk = Color(0xFF374151)
 
+    // Candy Item Tile Semantic Tokens
+    val attentionTileReadyBg = Color(0xFFDFF9EE)
+    val attentionTileReadyBorder = Color(0xFFA6EBD1)
+    val attentionTileReadyAccent = Color(0xFF16856B)
+
+    val attentionTileWaitingBg = Color(0xFFE8F4FF)
+    val attentionTileWaitingBorder = Color(0xFFB8DFFF)
+    val attentionTileWaitingAccent = Color(0xFF438BCB)
+
+    val attentionTileConsideringBg = Color(0xFFEEE7FF)
+    val attentionTileConsideringBorder = Color(0xFFD9C8FF)
+    val attentionTileConsideringAccent = Color(0xFF7451E8)
+
+    val attentionTileSavedBg = Color(0xFFFFF0DB)
+    val attentionTileSavedBorder = Color(0xFFFFDBA7)
+    val attentionTileSavedAccent = Color(0xFFB67C28)
+
     // Observation & Global Sheet
     val observationIconTileBg = Color(0xFFF2EBFF)
     val observationBulbYellow = Color(0xFFF59E0B)
