@@ -33,13 +33,13 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ## Phase 3: Profile & Settings UI Components
-- [ ] **Task 3: Xây dựng các Composable cho màn hình chính Profile & Settings**
+- [x] **Task 3: Xây dựng các Composable cho màn hình chính Profile & Settings**
   - **Acceptance:**
-    - [ ] `CozyCornerCard` có hiệu ứng scale chạm 1.0 -> 1.025 -> 1.0, hỗ trợ Reduce Motion (pressed feedback nhẹ, không scale).
-    - [ ] Đầy đủ các phần: TopBar, AccountIdentity, Setting rows (Personality, Ready for Review switch, Google Account read-only, Điều khoản & Về ứng dụng, Nút Đăng xuất).
-    - [ ] Mọi control đạt chuẩn touch target >= 48dp, có semantics/contentDescription, cuộn mượt ở font 200%.
+    - [x] `CozyCornerCard` có hiệu ứng scale chạm 1.0 -> 1.025 -> 1.0, hỗ trợ Reduce Motion (pressed feedback nhẹ, không scale).
+    - [x] Đầy đủ các phần: TopBar, AccountIdentity, Setting rows (Personality, Ready for Review switch, Google Account read-only, Điều khoản & Về ứng dụng, Nút Đăng xuất).
+    - [x] Mọi control đạt chuẩn touch target >= 48dp, có semantics/contentDescription, cuộn mượt ở font 200%.
   - **Verify:**
-    - [ ] `./gradlew assembleDevDebug` thành công.
+    - [x] `./gradlew assembleDevDebug` thành công.
   - **Files:**
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/components/CozyCornerCard.kt`
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/components/ProfileComponents.kt`
