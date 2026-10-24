@@ -79,13 +79,13 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ## Phase 6: Unit Test Suite & QA Checkpoint
-- [ ] **Task 6: Bộ Unit Test toàn diện (AC-01 đến AC-20) & Build Verification**
+- [x] **Task 6: Bộ Unit Test toàn diện (AC-01 đến AC-20) & Build Verification**
   - **Acceptance:**
-    - [ ] Unit tests cho `ProfileViewModel` (navigation, sign-out, preferences) pass 100%.
-    - [ ] Unit tests cho `PersonalityViewModel` (dirty back guard, save idempotency, online check) pass 100%.
-    - [ ] `./gradlew assembleDevDebug :app:testDevDebugUnitTest` hoàn tất không lỗi.
+    - [x] Unit tests cho `ProfileViewModel` (navigation, sign-out, preferences) pass 100%.
+    - [x] Unit tests cho `PersonalityViewModel` (dirty back guard, save idempotency, online check) pass 100%.
+    - [x] `./gradlew assembleDevDebug :app:testDevDebugUnitTest` hoàn tất không lỗi.
   - **Verify:**
-    - [ ] `./gradlew assembleDevDebug :app:testDevDebugUnitTest` thành công.
+    - [x] `./gradlew assembleDevDebug :app:testDevDebugUnitTest` thành công.
   - **Files:**
     - `app/src/test/java/com/hoabh/chanko/presentation/screens/profile/ProfileViewModelTest.kt`
     - `app/src/test/java/com/hoabh/chanko/presentation/screens/profile/PersonalityViewModelTest.kt`
@@ -93,6 +93,6 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ### Checkpoint: Hoàn tất & Nghiệm thu
-- [ ] Toàn bộ unit tests pass.
-- [ ] Build dự án thành công.
-- [ ] Sẵn sàng nghiệm thu theo `AC-01` đến `AC-20`.
+- [x] Toàn bộ unit tests pass.
+- [x] Build dự án thành công.
+- [x] Sẵn sàng nghiệm thu theo `AC-01` đến `AC-20`.
