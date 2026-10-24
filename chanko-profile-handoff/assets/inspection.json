@@ -1,0 +1,38 @@
+[
+  {
+    "file": "assets/production-candidate/cozy_corner_candidate_v1.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "alpha_range": [
+      0,
+      254
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "file": "assets/reference/mascot_crossed_arms.png",
+    "size": [
+      1231,
+      1278
+    ],
+    "mode": "RGBA",
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+]

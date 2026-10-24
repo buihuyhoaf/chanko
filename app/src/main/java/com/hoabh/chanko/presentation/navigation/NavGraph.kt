@@ -12,8 +12,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
 import com.hoabh.chanko.presentation.screens.login.screen.loginDestination
+import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
+import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
+import androidx.navigation.compose.composable
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(
@@ -94,6 +97,35 @@ fun NavGraph(
             }
         )
 
-        mainDestination()
+        mainDestination(
+            onNavigateToProfile = {
+                navController.navigate(Screen.Profile.route) {
+                    launchSingleTop = true
+                }
+            }
+        )
+
+        composable(Screen.Profile.route) {
+            ProfileRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPersonality = {
+                    navController.navigate(Screen.Personality.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onSignOutSuccess = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Personality.route) {
+            PersonalityRoute(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }
