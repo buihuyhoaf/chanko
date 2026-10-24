@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profile & Settings Screen Titles & Headings -->
+    <string name="profile_settings_title">Hồ sơ &amp; Cài đặt</string>
+    <string name="profile_default_display_name">Bạn đồng hành Chanko</string>
+    <string name="profile_account_status_synced">Đã đồng bộ</string>
+    <string name="profile_action_back">Quay lại</string>
+
+    <!-- Cozy Corner -->
+    <string name="profile_cozy_corner_title">Góc ấm cúng</string>
+    <string name="profile_cozy_corner_tap_description">Chạm để tương tác với Chanko</string>
+
+    <!-- Section Headings -->
+    <string name="profile_section_mascot">Linh thú đồng hành</string>
+    <string name="profile_section_notifications">Thông báo &amp; Nhắc nhở</string>
+    <string name="profile_section_account">Tài khoản</string>
+    <string name="profile_section_information">Thông tin &amp; Hỗ trợ</string>
+
+    <!-- Personality Row & Screen -->
+    <string name="profile_personality_row_title">Tính cách của Mèo</string>
+    <string name="profile_personality_title">Tính cách của Mèo</string>
+    <string name="profile_personality_friendly">Thân thiện</string>
+    <string name="profile_personality_friendly_desc">Nhẹ nhàng, ấm áp và luôn động viên từng bước cân nhắc của bạn.</string>
+    <string name="profile_personality_sassy">Lém lỉnh</string>
+    <string name="profile_personality_sassy_desc">Hóm hỉnh, thông minh, sẵn sàng đưa ra góc nhìn thứ hai cho ví tiền của bạn.</string>
+    <string name="profile_personality_savage">Thẳng thắn</string>
+    <string name="profile_personality_savage_desc">Dứt khoát, thực tế và nghiêm túc để giữ kỷ luật tài chính tối đa.</string>
+
+    <!-- Personality Preview -->
+    <string name="profile_personality_preview_badge">Xem trước</string>
+    <string name="profile_personality_preview_friendly">\"Hãy dành chút thời gian xem món này có thật sự vừa vặn với kế hoạch của bạn không nhé.\"</string>
+    <string name="profile_personality_preview_sassy">\"Món đồ xinh đấy. Nhưng để mình cho ví của bạn một ý kiến thứ hai nha!\"</string>
+    <string name="profile_personality_preview_savage">\"Giỏ hàng chờ được mà. Cùng xem món này có thật sự xứng đáng nhận tiền về không.\"</string>
+
+    <!-- Save & Dialogs for Personality -->
+    <string name="profile_action_save">Lưu thay đổi</string>
+    <string name="profile_personality_saved_success">Đã cập nhật tính cách linh thú thành công</string>
+    <string name="profile_personality_save_error">Không thể lưu thay đổi. Vui lòng thử lại.</string>
+    <string name="profile_network_required">Cần kết nối mạng để lưu thay đổi</string>
+    <string name="profile_unsaved_changes_title">Hủy thay đổi?</string>
+    <string name="profile_unsaved_changes_message">Bạn có các thay đổi chưa được lưu. Bạn có chắc chắn muốn thoát?</string>
+    <string name="profile_action_keep_editing">Tiếp tục chỉnh sửa</string>
+    <string name="profile_action_discard">Hủy bỏ</string>
+
+    <!-- Ready for Review Notification -->
+    <string name="profile_ready_for_review_title">Nhắc duyệt đồ hạ nhiệt</string>
+    <string name="profile_ready_for_review_desc">Nhận thông báo khi một món đồ trong thời gian suy nghĩ đã sẵn sàng để bạn đưa ra quyết định.</string>
+    <string name="profile_notifications_blocked">Thông báo đang bị tắt trong cài đặt hệ thống</string>
+    <string name="profile_action_open_settings">Mở cài đặt</string>
+
+    <!-- Google Account Card -->
+    <string name="profile_google_account_title">Tài khoản Google</string>
+    <string name="profile_google_provider_label">Đăng nhập bằng Google</string>
+
+    <!-- Information Rows -->
+    <string name="profile_row_privacy">Điều khoản &amp; Chính sách bảo mật</string>
+    <string name="profile_row_about">Về Chanko</string>
+    <string name="profile_app_version">Phiên bản %1$s</string>
+
+    <!-- Sign Out -->
+    <string name="profile_action_sign_out">Đăng xuất</string>
+    <string name="profile_sign_out_dialog_title">Đăng xuất khỏi Chanko?</string>
+    <string name="profile_sign_out_dialog_message">Bạn sẽ cần đăng nhập lại bằng tài khoản Google để tiếp tục đồng bộ dữ liệu.</string>
+    <string name="profile_action_cancel">Hủy</string>
+</resources>
