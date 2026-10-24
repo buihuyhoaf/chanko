@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -56,6 +57,12 @@ import androidx.navigation.compose.rememberNavController
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.ui.theme.CandyColors
+
+fun NavGraphBuilder.mainDestination() {
+    composable(route = Screen.Main.route) {
+        MainNavigation()
+    }
+}
 
 internal fun NavHostController.selectTab(destination: TopLevelDestination) {
     navigate(destination.route) {

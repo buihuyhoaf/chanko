@@ -10,7 +10,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
-import com.hoabh.chanko.presentation.screens.dashboard.dashboardDestination
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
 import com.hoabh.chanko.presentation.screens.login.screen.loginDestination
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
@@ -21,7 +20,7 @@ private val UnauthenticatedRoutes = setOf(
     Screen.Splash.route,
     Screen.Login.route,
     Screen.Setup.route,
-    Screen.Dashboard.route
+    Screen.Main.route
 )
 
 @Composable
@@ -88,16 +87,13 @@ fun NavGraph(
                 (identity as? SessionState.Available)?.account?.value ?: "dummy_account"
             },
             onConfirmedComplete = {
-                navController.navigate(Screen.Dashboard.route) {
+                navController.navigate(Screen.Main.route) {
                     popUpTo(Screen.Setup.route) { inclusive = true }
                     launchSingleTop = true
                 }
             }
         )
 
-        dashboardDestination(
-            sessionProvider = { identity as? SessionState.Available },
-            isRestored = { restored }
-        )
+        mainDestination()
     }
 }
