@@ -10,13 +10,77 @@
     <string name="home_greeting_morning_anonymous">Chào buổi sáng!</string>
     <string name="home_greeting_afternoon_anonymous">Chào buổi chiều!</string>
     <string name="home_greeting_evening_anonymous">Chào buổi tối!</string>
-    <string name="home_header_subtitle">Hôm nay mình cùng mua sắm tỉnh táo nhé</string>
+    <string name="home_header_subtitle">Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜</string>
     <string name="home_header_offline_badge">Đang ngoại tuyến · Hiển thị dữ liệu đã lưu</string>
     <string name="home_cd_settings">Mở cài đặt</string>
     <string name="home_cd_profile">Mở hồ sơ cá nhân</string>
+
+    <!-- Living Room & Props (HOME-02) -->
+    <string name="home_cd_prop_hourglass">Đồng hồ cát: %1$s</string>
+    <string name="home_cd_prop_calendar">Lịch xem lại (%1$s %2$s): %3$s</string>
+    <string name="home_cd_prop_wallet">Ví ngân sách: %1$s</string>
+    <string name="home_cd_prop_pause_jar">Hũ tạm dừng: %1$s</string>
+    <string name="home_prop_hourglass_label">Đang chờ hạ nhiệt</string>
+    <string name="home_prop_calendar_label">Sẵn sàng xem lại</string>
+    <string name="home_prop_wallet_label">Ngân sách tháng</string>
+    <string name="home_prop_pause_jar_label">Lần dừng suy nghĩ</string>
+
+    <!-- Quick Actions (HOME-03) -->
+    <string name="home_quick_check_title">Quick Check</string>
+    <string name="home_quick_check_subtitle">Hỏi Chanko trước khi mua</string>
+    <string name="home_save_item_title">Save an Item</string>
+    <string name="home_save_item_subtitle">Lưu để xem lại sau</string>
+
+    <!-- Budget Snapshot (HOME-04) -->
+    <string name="home_budget_details_cta">Chi tiết</string>
+    <string name="home_budget_spent_label">Đã chi</string>
+    <string name="home_budget_remaining_label">Còn lại</string>
+    <string name="home_budget_over_label">Vượt hạn mức</string>
+    <string name="home_budget_status_normal">Đã tiêu %1$d%%</string>
+    <string name="home_budget_status_warning">Đã tiêu %1$d%%</string>
+    <string name="home_budget_status_reached">Chạm hạn mức 100%%</string>
+    <string name="home_budget_status_over">Vượt ngân sách %1$d%%</string>
+    <string name="home_budget_status_zero">Chưa đặt hạn mức</string>
+    <string name="home_budget_status_unknown">Chưa xác định</string>
+    <string name="home_budget_unknown_value">Chưa có dữ liệu</string>
+
+    <!-- Your Decisions (HOME-05) -->
+    <string name="home_decisions_title">Những món cần chú ý</string>
+    <string name="home_decisions_view_all">Xem tất cả</string>
+    <string name="home_decision_status_ready">Sẵn sàng xem lại</string>
+    <string name="home_decision_status_waiting">Đang chờ</string>
+    <string name="home_decision_status_considering">Đang cân nhắc</string>
+    <string name="home_decision_status_saved">Đã lưu</string>
+    <string name="home_decisions_empty_title">Chưa có món đồ nào đang chờ</string>
+    <string name="home_decisions_empty_subtitle">Khi phân vân một món đồ, hãy lưu lại hoặc hỏi Chanko nhé.</string>
+    <string name="home_decisions_empty_cta">Lưu món đồ đầu tiên</string>
+
+    <!-- Observation (HOME-06) -->
+    <string name="home_observation_header">Góc nhìn hôm nay</string>
+    <string name="home_observation_explain_cta">Giải thích thêm</string>
+    <string name="home_observation_hide_cta">Ẩn gợi ý này</string>
+    <string name="home_cd_observation_dismiss">Đóng góc nhìn hôm nay</string>
+
+    <!-- Local Draft (HOME-07) -->
+    <string name="home_draft_header">Bản nháp chưa hoàn tất</string>
+    <string name="home_draft_resume_cta">Tiếp tục</string>
+    <string name="home_draft_status_local">Đã lưu trên máy</string>
+    <string name="home_draft_status_pending">Đang chờ đồng bộ</string>
+    <string name="home_draft_status_failed">Đồng bộ thất bại · Chạm để thử lại</string>
+
+    <!-- Global Quick Action Sheet & Contextual Sheet (HOME-08) -->
+    <string name="home_global_sheet_title">Bạn muốn làm gì?</string>
+    <string name="home_global_sheet_quick_check_desc">Cùng Chanko cân nhắc trước khi quyết định mua.</string>
+    <string name="home_global_sheet_save_item_desc">Lưu một món đồ để xem lại sau.</string>
+    <string name="home_cd_close_sheet">Đóng bảng</string>
+    <string name="home_context_sheet_missing_title">Món đồ không còn khả dụng</string>
+    <string name="home_context_sheet_missing_body">Mục này đã bị xóa hoặc cập nhật ở nơi khác. Bạn có thể đóng bảng này.</string>
+    <string name="home_context_sheet_primary_cta">Xem chi tiết</string>
+    <string name="home_context_sheet_close_cta">Đóng</string>
 
     <!-- Section Error / Loading Fallbacks -->
     <string name="home_section_loading">Đang tải dữ liệu…</string>
     <string name="home_section_error_budget">Tạm thời chưa tải được ngân sách</string>
     <string name="home_section_error_decisions">Tạm thời chưa tải được danh sách quyết định</string>
+    <string name="home_section_retry">Thử lại</string>
 </resources>
