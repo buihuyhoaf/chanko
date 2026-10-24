@@ -67,6 +67,12 @@ object CandyColors {
     val quickCheckGradientEnd = Color(0xFF7B57E8)
     val saveItemSurface = Color(0xFFF7F3FF)
     val saveItemBorder = Color(0xFFE8DFF8)
+    val quickActionAskBg = Color(0xFF7451E8)
+    val quickActionAskBorder = Color(0xFFA48BFF)
+    val quickActionAskText = Color(0xFFFFFFFF)
+    val quickActionSaveBg = Color(0xFFF4B3CB)
+    val quickActionSaveBorder = Color(0xFFE68DB2)
+    val quickActionSaveText = Color(0xFF512B45)
 
     // Budget Snapshot
     val budgetWarningBadgeBg = Color(0xFFFFF0DB)

@@ -30,6 +30,10 @@
     <string name="home_quick_check_subtitle">Hỏi Chanko trước khi mua</string>
     <string name="home_save_item_title">Save an Item</string>
     <string name="home_save_item_subtitle">Lưu để xem lại sau</string>
+    <string name="home_action_ask_title">Hỏi Chanko</string>
+    <string name="home_action_ask_subtitle">Cân nhắc mua</string>
+    <string name="home_action_save_title">Lưu món đồ</string>
+    <string name="home_action_save_subtitle">Để sau nhé</string>
 
     <!-- Budget Snapshot (HOME-04) -->
     <string name="home_budget_details_cta">Chi tiết</string>
