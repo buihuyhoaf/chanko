@@ -375,7 +375,7 @@ private fun EditTransactionForm(
             OutlinedTextField(
                 value = priceText,
                 onValueChange = { if (it.all { ch -> ch.isDigit() }) priceText = it },
-                label = { Text("Đơn giá thực tế (₫)") },
+                label = { Text(stringResource(R.string.purchase_record_price_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
@@ -384,18 +384,22 @@ private fun EditTransactionForm(
             OutlinedTextField(
                 value = qtyText,
                 onValueChange = { if (it.all { ch -> ch.isDigit() }) qtyText = it },
-                label = { Text("Số lượng") },
+                label = { Text(stringResource(R.string.purchase_record_qty_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Text("Tổng: ${HomeCurrencyFormatter.formatVnd(total)}", fontWeight = FontWeight.Bold, color = CandyColors.primary)
+            Text(
+                text = stringResource(R.string.transaction_detail_total_format, HomeCurrencyFormatter.formatVnd(total)),
+                fontWeight = FontWeight.Bold,
+                color = CandyColors.primary
+            )
 
             OutlinedTextField(
                 value = noteText,
                 onValueChange = { noteText = it },
-                label = { Text("Ghi chú") },
+                label = { Text(stringResource(R.string.purchase_record_note_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
@@ -409,7 +413,7 @@ private fun EditTransactionForm(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("Hủy")
+                    Text(stringResource(R.string.transaction_detail_cancel))
                 }
                 Button(
                     onClick = { onSave(unitPrice, quantity, selectedPType, noteText) },

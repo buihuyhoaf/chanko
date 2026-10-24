@@ -135,6 +135,8 @@
     <string name="transaction_detail_edit_action">Sửa thông tin nhập sai</string>
     <string name="transaction_detail_delete_action">Xóa giao dịch nhập sai</string>
     <string name="transaction_detail_save_changes">Lưu thay đổi</string>
+    <string name="transaction_detail_cancel">Hủy</string>
+    <string name="transaction_detail_total_format">Tổng: %1$s</string>
     <string name="transaction_delete_dialog_title">Xóa giao dịch nhập sai?</string>
     <string name="transaction_delete_dialog_msg">Giao dịch sẽ được loại khỏi chi tiêu. Trạng thái món đồ và lịch sử đánh giá vẫn được giữ.</string>
     <string name="transaction_delete_confirm">Xóa giao dịch</string>
