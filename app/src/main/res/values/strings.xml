@@ -43,4 +43,43 @@
     <string name="tab_budget">Ngân sách</string>
     <string name="tab_insights">Phân tích</string>
     <string name="tab_not_implemented">%1$s — Chưa triển khai</string>
+
+    <!-- My Items Strings -->
+    <string name="my_items_title">Món đồ</string>
+    <string name="my_items_archived_menu">Đã lưu trữ</string>
+    <string name="my_items_hero_title">Hãy dành thời gian\ncho những mong muốn</string>
+    <string name="my_items_hero_subtitle">Mỗi khoảnh khắc chờ đợi là một cơ hội để bạn nhìn rõ điều thực sự quan trọng.</string>
+    <string name="my_items_tile_all">Tất cả món đồ</string>
+    <string name="my_items_tile_cooling">Đang hạ nhiệt</string>
+    <string name="my_items_tile_ready">Đến lúc xem lại</string>
+    <string name="my_items_search_placeholder">Tìm kiếm món đồ…</string>
+    <string name="my_items_filter_button">Lọc &amp; sắp xếp</string>
+    <string name="my_items_filter_title">Lọc &amp; sắp xếp</string>
+    <string name="my_items_filter_status_primary">Trạng thái chính</string>
+    <string name="my_items_filter_status_sub">Trạng thái phụ (Đang hoạt động)</string>
+    <string name="my_items_filter_sort">Sắp xếp</string>
+    <string name="my_items_filter_apply">Áp dụng</string>
+    <string name="my_items_filter_reset">Đặt lại</string>
+    <string name="my_items_filter_close">Đóng bộ lọc</string>
+    <string name="my_items_empty_title">Chưa có món nào ở đây</string>
+    <string name="my_items_empty_description">Đưa món đồ bạn đang phân vân vào đây để cùng Chanko hạ nhiệt nhé.</string>
+    <string name="my_items_empty_filtered_title">Không tìm thấy món đồ phù hợp</string>
+    <string name="my_items_empty_filtered_description">Thử thay đổi từ khóa tìm kiếm hoặc làm mới bộ lọc xem sao nhé.</string>
+    <string name="my_items_empty_clear_filter">Xóa bộ lọc</string>
+    <string name="my_items_results_count">%1$d món đồ</string>
+    <string name="my_items_cd_thumbnail">Hình ảnh minh họa món đồ</string>
+    <string name="my_items_status_saved">Đã lưu</string>
+    <string name="my_items_status_considering">Đang cân nhắc</string>
+    <string name="my_items_status_cooling">Đang hạ nhiệt</string>
+    <string name="my_items_status_ready">Đến lúc xem lại</string>
+    <string name="my_items_status_postponed">Đã hoãn</string>
+    <string name="my_items_status_purchased">Đã mua</string>
+    <string name="my_items_status_skipped">Đã bỏ qua</string>
+    <string name="my_items_filter_all">Tất cả</string>
+    <string name="my_items_filter_active">Đang hoạt động</string>
+    <string name="my_items_sort_updated">Cập nhật gần nhất</string>
+    <string name="my_items_sort_newest">Thêm mới gần nhất</string>
+    <string name="my_items_sort_price_asc">Giá: Thấp đến cao</string>
+    <string name="my_items_sort_price_desc">Giá: Cao đến thấp</string>
+    <string name="my_items_sort_name_az">Tên: A → Z</string>
 </resources>

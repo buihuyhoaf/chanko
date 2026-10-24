@@ -1,0 +1,33 @@
+[
+  {
+    "path": "sources/functional_v1_1.txt",
+    "drive_id": "1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go",
+    "modified_time": "2026-10-17T10:10:59.447Z",
+    "retrieved_date": "2026-10-24",
+    "sha256": "ce29303ecaf6311416f618d912b632cc4af77589e42c9b1702daeeaec762b8a8",
+    "normalized_match_v0_9": true
+  },
+  {
+    "path": "sources/tech_02.txt",
+    "drive_id": "1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ",
+    "modified_time": "2026-10-17T10:11:01.531Z",
+    "retrieved_date": "2026-10-24",
+    "sha256": "52559d9451d3f618eaebb845104f9a3a9eaeb81147d26fc1682732ceaa9b4031",
+    "normalized_match_v0_9": true
+  },
+  {
+    "path": "sources/design_system_v1_0.txt",
+    "drive_id": "1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg",
+    "modified_time": "2026-10-18T03:50:21.858Z",
+    "retrieved_date": "2026-10-24",
+    "sha256": "49c2a1a7ad8047ded57a6d9b11471a68447386d17ed4ef29788cc71ef8466b3d",
+    "normalized_match_v0_9": true
+  },
+  {
+    "path": "sources/approved_ux_recovery_baseline.md",
+    "source": "user-supplied approved UX recovery baseline",
+    "received_date": "2026-10-24",
+    "sha256": "59a56aa855f7b22173c598d20f0948feabf7484ad136cf9a1fc35c4a62f37837",
+    "approved_decision_count": 29
+  }
+]

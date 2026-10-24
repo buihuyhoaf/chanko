@@ -1,0 +1,108 @@
+{
+  "version": "1.0",
+  "created": "2026-10-24",
+  "root": "chanko_android_v1.0",
+  "assets": [
+    {
+      "id": "ic_product_placeholder",
+      "path": "assets/android/res/drawable/ic_product_placeholder.xml",
+      "bytes": 834,
+      "sha256": "4a60c190156c91d7dc35967e5f6181b177503b3dd3f85c8383532fdf5bd2124b",
+      "dimensions_px": null,
+      "intrinsic_dp": [
+        96,
+        96
+      ],
+      "background": "opaque neutral #F0EFED",
+      "usage": "Product media fallback only; never mascot",
+      "license": "CC0-1.0 (original procedural geometry in this handoff)"
+    },
+    {
+      "id": "product_placeholder_1024",
+      "path": "assets/android/res/drawable-nodpi/product_placeholder_1024.png",
+      "bytes": 7152,
+      "sha256": "4e818c6443911b41cac9493ad39f7fde317eaf80f9f7985c9322ef36b9c0041a",
+      "dimensions_px": [
+        1024,
+        1024
+      ],
+      "intrinsic_dp": null,
+      "background": "opaque neutral #F0EFED",
+      "usage": "Product media fallback only; never mascot",
+      "license": "CC0-1.0 (original procedural geometry in this handoff)"
+    },
+    {
+      "id": "product_placeholder_256",
+      "path": "assets/android/res/drawable-nodpi/product_placeholder_256.png",
+      "bytes": 1039,
+      "sha256": "268007d02210c11c29c2bbbc85d54252488a163405aede0b3ef9ec79b9052ab7",
+      "dimensions_px": [
+        256,
+        256
+      ],
+      "intrinsic_dp": null,
+      "background": "opaque neutral #F0EFED",
+      "usage": "Product media fallback only; never mascot",
+      "license": "CC0-1.0 (original procedural geometry in this handoff)"
+    },
+    {
+      "id": "product_placeholder_512",
+      "path": "assets/android/res/drawable-nodpi/product_placeholder_512.png",
+      "bytes": 2651,
+      "sha256": "59de453427e856318cf8d4592db373842cf37af72f4608920c3355777791621d",
+      "dimensions_px": [
+        512,
+        512
+      ],
+      "intrinsic_dp": null,
+      "background": "opaque neutral #F0EFED",
+      "usage": "Product media fallback only; never mascot",
+      "license": "CC0-1.0 (original procedural geometry in this handoff)"
+    },
+    {
+      "id": "product_placeholder",
+      "path": "assets/source/product_placeholder.svg",
+      "bytes": 398,
+      "sha256": "177f536f2bf09f00096caaea8c4605afd782a0bb87e1dc6cb1ce29b7a45da12e",
+      "dimensions_px": [
+        512,
+        512
+      ],
+      "intrinsic_dp": null,
+      "background": "opaque neutral #F0EFED",
+      "usage": "Product media fallback only; never mascot",
+      "license": "CC0-1.0 (original procedural geometry in this handoff)"
+    }
+  ],
+  "mascot": {
+    "status": "not supplied; canonical original required",
+    "fallback": "hide image, retain UI speech text",
+    "allowed_placements": [
+      "MyItems hero",
+      "empty states",
+      "speech below status"
+    ],
+    "forbidden_placements": [
+      "product hero",
+      "product detail media",
+      "product thumbnail",
+      "beside or overlaid on product media"
+    ],
+    "canonical_verified": false,
+    "blocking_scope": "final mascot visual only; canonical source asset required",
+    "required_compositions": [
+      "Compact MyItems Hero",
+      "Empty State: canonical Chanko with candy box",
+      "Small contextual speech below status"
+    ]
+  },
+  "fonts": {
+    "Nunito": "not bundled; obtain licensed repo font with OFL notice"
+  },
+  "icons": {
+    "Material Symbols Rounded": "not bundled; reuse licensed repo resources"
+  },
+  "handoff_version": "1.0",
+  "product_hero_policy": "dummy placeholder only in handoff and previews; no sample product photos; no mascot",
+  "approved_ux_source": "sources/approved_ux_recovery_baseline.md"
+}

@@ -61,6 +61,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
+import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination(
@@ -116,8 +117,17 @@ fun MainNavigation(
                         onProfileClick = onNavigateToProfile
                     )
                 }
+                composable(TopLevelDestination.MyItems.route) {
+                    MyItemsRoute(
+                        onNavigateToDetail = { itemId ->
+                            // Sẽ nối vào ItemDetailRoute trong lát cắt tiếp theo
+                        },
+                        onNavigateToArchived = {
+                            // Sẽ nối vào ArchivedItemsRoute trong lát cắt tiếp theo
+                        }
+                    )
+                }
                 listOf(
-                    TopLevelDestination.MyItems,
                     TopLevelDestination.Budget,
                     TopLevelDestination.Insights
                 ).forEach { tab ->

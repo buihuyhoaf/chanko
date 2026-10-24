@@ -1,0 +1,945 @@
+--- v0.9/01_UX_BASELINE.md
++++ v1.0/01_UX_BASELINE.md
+@@ -22,7 +22,7 @@
+ 
+ ## Visual Candy Pop 3D
+ 
+-Design System nguồn là Approved; bố cục cụ thể dưới đây là Reference vì ảnh preview màn hình chưa truy xuất được. UI 2D sạch, chỉ hero và mascot dùng chiều sâu soft clay. Không raster hóa chữ, nút hoặc cả màn hình.
++Design System nguồn là Approved; bố cục đã nêu trong Recovery Baseline là Approved; kích thước/microcopy chưa có nguồn cụ thể vẫn Reference. UI 2D sạch, chỉ hero và mascot dùng chiều sâu soft clay. Không raster hóa chữ, nút hoặc cả màn hình.
+ 
+ | Vai trò | Token nguồn |
+ |---|---|
+@@ -38,13 +38,15 @@
+ 
+ Nguồn chưa chốt tất cả foreground/on-colors. Reference trong mockup tài liệu: text #211E2B trên surface cream/trắng; CTA chữ #15131D trên Purple (xấp xỉ 4.60:1 theo tài liệu nguồn). Khi hiện thực phải đo từng cặp, kể cả disabled/pressed/focus. Không mặc định chữ trắng trên Purple, không dùng semantic bright làm chữ nhỏ trên trắng. Màu status dùng như container đi kèm nhãn và icon.
+ 
+-Reference layout: margin màn hình 20dp; spacing 4/8/12/16/20/24/32dp; card padding 16dp; primary tối thiểu 56dp cao; hit area ≥48×48dp. Insets hệ thống và IME bắt buộc. Một cột trên mobile; mở rộng chiều rộng nội dung thay vì kéo card vô hạn trên tablet. Kích thước cụ thể mới là Reference, không thay breakpoint chuẩn của repo.
++Approved UI-08/09: spacing 4/8/12/16/24/32/48dp, horizontal screen padding 20dp, section spacing 24dp; primary 56dp (cho grow khi font lớn), touch target ≥48×48dp. Insets hệ thống và IME bắt buộc. Compact một cột + Bottom Navigation; Medium có thể hai cột; Expanded dùng Navigation Rail + multi-column. Không ép một cột cho mọi thiết bị. Ngưỡng breakpoint cụ thể theo repo/contract là Reference.
++
++Reference riêng cho màn này: card padding 16dp, spacing list 12dp, khoảng 20dp ngoài screen padding nếu cần. Không thêm 20dp vào thang spacing Approved. Foreground, gradient angle, hero ratio và kích thước MyItems mascot vẫn Reference.
+ 
+ ## Mascot và product media
+ 
+ Chanko phải là mèo trắng canonical, soft clay 3D, mắt đen tròn tối giản. Không dùng chó; không đổi hình mèo giữa các màn. Không có asset canonical trong nguồn truy xuất nên bundle không tạo một mascot giả. Dùng registry asset có sẵn trong repo đích; nếu chưa có thì ẩn slot hình và giữ lời thoại.
+ 
+-Được dùng mèo ở hero MyItems, empty states, speech bubble độc lập dưới status ItemDetail. **Product hero/detail, thumbnail và TransactionDetail product image chỉ có ảnh sản phẩm hoặc placeholder trung tính. Tuyệt đối không ghép mèo vào, không nằm cạnh ảnh sản phẩm; không dùng túi/tai nghe/giày minh họa cũ.** Trong ItemDetail cần tách rõ media container với status/speech section, không overlay mascot lên ảnh.
++Được dùng mèo ở hero MyItems, empty states, speech bubble độc lập dưới status ItemDetail. **Trong bản bàn giao/preview v1.0, Product Hero chỉ dùng dummy placeholder trung tính; không đưa ảnh sản phẩm mẫu vào. Thumbnail và TransactionDetail cũng dùng dummy assets của bundle. Luồng ảnh thật do user nhập trong sản phẩm tương lai là khả năng theo SPEC, không phải asset được cung cấp hoặc nội dung preview v1.0. Tuyệt đối không ghép mèo vào, không nằm cạnh ảnh sản phẩm; không dùng túi/tai nghe/giày minh họa cũ.** Trong ItemDetail cần tách rõ media container với status/speech section, không overlay mascot lên ảnh.
+ 
+ Reference kích thước MyItems mascot 140–180dp nếu có nguồn, empty 140–180dp, supporting speech 48–72dp. Không ép mascot vào mọi card hoặc form. Hình trang trí không được TalkBack đọc; lời thoại là text thật. Không Happy/confetti khi ghi purchase; dùng Neutral.
+ 
+@@ -63,3 +65,19 @@
+ Mọi mutation giữ form khi lỗi, hiển thị pending và chống double tap. Sau timeout có thể đã commit: “Chưa xác nhận được kết quả”, đối chiếu/retry cùng ý định, không báo thất bại chắc chắn. Danh sách có thể phản ánh mutation sau server ack, không cập nhật chi tiêu giả trước ack.
+ 
+ Nunito chưa có trong bundle; không lấy font từ web không rõ quyền. Dùng font và OFL hợp lệ từ repo/nguồn được cấp. Material Symbols Rounded weight 400, icon thường 24dp, selected có thể fill. Reduce Motion tắt bounce/trang trí; tài chính chuyển động tối thiểu; sound là tùy chọn, không tự bật starter pack âm thanh.
++
++## Approved UX theo Recovery Baseline
++
++MyItems: default list card ngang, thumbnail trái; Compact3D Chanko Hero;3 tiles All Items/Cooling Off/Ready nhấn lọc. Filter hai cấp: All/Active/Purchased/Skipped; Active gồm Saved/Considering/Cooling Off/Ready/Postponed. Search/Sort có sẵn, option/default sort cụ thể Reference. Cards compact read-only, tap detail; không inline More hoặc mutation. Giữ4 navigation tabs và nút+ toàn cục, không thêm FAB/Add trùng. Archived Items trong menu. Empty state Chanko + hộp kẹo, Save an Item hoặc Clear Filters theo ngữ cảnh.
++
++ItemDetail: Pastel Candy Product Stage dummy-only, summary + expandable facts, Edit trong More. Chanko nhỏ bên contextual bubble dưới status, tách khỏi product media. Sticky primary CTA + More Options; contextual nội dung/CTA theo state. Purchased/Skipped ưu tiên read-only; Decision Journey collapsible từ lịch sử thật, Purchase History là section riêng. Countdown nổi bật, Adjust/Skip Wait trong More. Ready review ngắn có thể bỏ qua; bỏ qua review UI không tự xử lý Ready.
++
++Need More Time có2 nhánh: thời gian mới→ACTIVE mới sau COMPLETED; hoặc chuyển/giữ Considering + Postponed event, next review time khi có. Direct Mark as Purchased/Buy Again trong More đều mở sheet ghi purchase, không bắt buộc Quick Check, không đặt nhãn thay transaction.
++
++Offline đến deadline: hiển thị Ready tạm thời, nêu chưa đồng bộ; cache ItemStatus/CoolingOffStatus giữ nguyên, không tự ghi review hay purchase. Khi có mạng refetch; không auto-replay form mua.
++
++## Phân loại hiệu lực
++
++Approved: toàn bộ29 mã tại07,5 status và các bất biến từ Drive, tokens Design System. Reference: exact dimensions không có nguồn, copy, ratio, sort defaults, logic layout chi tiết ngoài baseline. Pending contract: persisted Ready resolution, postponed metadata/clear, archive ACTIVE/restore lifecycle và archived write permissions. Không hạ cấp UX đã duyệt chỉ vì backend chưa có field.
++
++Budget UI Normal<80%, Warning80–100% gồm đúng80/100, Over>100%; là tín hiệu thiết kế đã duyệt, không chặn mua; backend threshold pairing cần contract. Budget0/missing không NaN hoặc chia0. Amount sửa hiệu lực ngay cycle hiện hành; cycle đóng giữ snapshot; recap tính lại khi xem.
+--- v0.9/02_STATE_TRANSITIONS.md
++++ v1.0/02_STATE_TRANSITIONS.md
+@@ -1,73 +1,68 @@
+-# State và transition matrix
++# State và transition matrix • Recovery Baseline
+ 
+-## Các trục dữ liệu độc lập
++## Các trục độc lập
+ 
+-| Trục | Giá trị / nguồn |
+-|---|---|
+-| ItemStatus | 5 giá trị đã xác minh: WISHLIST, CONSIDERING, WAITING, PURCHASED, SKIPPED |
+-| CoolingOffStatus | ACTIVE, COMPLETED, CANCELLED, RESOLVED; resolution PURCHASED/SKIPPED khi phù hợp |
+-| AI verdict | BUY, WAIT, SKIP; evaluation history append, không ghi đè |
+-| Visibility | active/archived (Reference mapping archived_at, không dùng deleted_at nếu contract không xác nhận) |
+-| Transaction | N purchase hợp lệ; correction/revision riêng; xóa nhập sai loại khỏi tổng |
+-| UI state | Loading, Content, Empty, FilteredEmpty, CachedOffline, Error, Pending, UnknownOutcome |
++ItemStatus chỉ WISHLIST/CONSIDERING/WAITING/PURCHASED/SKIPPED. UI Saved→WISHLIST, Cooling Off→WAITING+ACTIVE. CoolingOffStatus chỉ ACTIVE/COMPLETED/CANCELLED/RESOLVED; PURCHASED/SKIPPED là kết quả resolve, không status ghép. AI verdict BUY/WAIT/SKIP riêng; không tự mutate item/tiền. Ready derived UI; Postponed event/presentation, không status thứ6/7. Archived là visibility, không reset status và không xóa purchase/history.
+ 
+-### Ready và Postponed
++## Approved transition
+ 
+-Ready không persist vào ItemStatus. Đã chốt: hết ACTIVE thì server ghi COMPLETED và WAITING→CONSIDERING. **Reference predicate cần đối chiếu quyết định GAP/EDGE:** readyForReview = item không archived AND item.status=CONSIDERING AND phiên mới nhất=COMPLETED AND chưa có quyết định sau phiên đó. Backend nên trả derived field hoặc marker review đã xử lý; không chỉ suy từ “từng có phiên COMPLETED” vì sẽ gắn Ready mãi. Nếu contract thiếu marker thì chỉ hiển thị sự kiện “Phiên chờ đã kết thúc”, không tự khẳng định Ready đã được xử lý. Ready có thể xuất hiện ở filter như view dẫn xuất, không phải status payload.
++Mọi mutation chính thức cần online, owner/version hợp lệ, server commit các dữ liệu liên đới atomically; khi timeout giữ UnknownOutcome và reconcile, không tạo ý định mới.
+ 
+-Offline countdown ≤0 chỉ đổi copy local, không đổi ItemStatus/cooling status hoặc xác nhận Ready chính thức. Postponed không được thêm enum, không có timer độc lập. Chưa có nội dung quyết định gốc cho cách dùng Postponed: không render badge này mặc định; nếu dùng cần dựa action/deadline rõ trong server, không suy từ SKIPPED.
++| Trước | Trigger | Item sau | Cooling-off / history | Purchase/budget |
++|---|---|---|---|---|
++| Chưa item | Save Wishlist | WISHLIST | Không tự tạo phiên | Không chi |
++| Item được phép | User xác nhận start | WAITING | ACTIVE mới; tối đa1 ACTIVE/item | Không chi |
++| WAITING+ACTIVE | Adjust extend/shorten | WAITING | Cập nhật ACTIVE và adjustment | Không chi |
++| WAITING+ACTIVE | Server xác nhận hết deadline | CONSIDERING | COMPLETED | Không chi; Ready dẫn xuất |
++| WAITING+ACTIVE | Cancel | CONSIDERING | CANCELLED | Không chi |
++| WAITING+ACTIVE | Skip Waiting | CONSIDERING | Kết thúc ACTIVE bằng cơ chế cancel theo phụ lục; mở lựa chọn quyết định | Không tự SKIPPED, không purchase |
++| WAITING+ACTIVE | Chuyển Wishlist/Considering | Nhãn đã chọn | CANCELLED | Không chi |
++| WAITING+ACTIVE | User rõ ràng chọn Skip item/Not Anymore | SKIPPED | RESOLVED, kết quả SKIPPED | Không chi |
++| Item writable, kể cả WAITING | Xác nhận Record Purchase/Direct Mark as Purchased/Buy Again | PURCHASED | Resolve ACTIVE nếu có, kết quả PURCHASED | Tạo1 purchase; tính đúng cycle |
++| CONSIDERING+COMPLETED | Need More Time, chọn thời gian mới | WAITING | ACTIVE mới; giữ COMPLETED cũ | Không chi |
++| Ready/CONSIDERING | Need More Time, chọn hoãn không timer | CONSIDERING | Ghi Postponed event; next review khi có; không tạo ACTIVE giả | Không chi |
++| Ready | Not Anymore | SKIPPED | Giữ lịch sử COMPLETED | Không chi |
++| Ready | Still Want It | Không tự đổi nhãn thành Purchased | Mời re-evaluation1–2 câu, có thể bỏ qua và tự quyết | Không tự purchase |
++| Ready | Xem detail/Back/bỏ qua review UI | Không đổi | Ready duy trì đến action xử lý rõ | Không chi |
++| Có purchase | Edit thông tin nhập sai | Giữ status hiện tại | Revision server; không sửa evaluations/periods | Cùng purchaseId; recompute cycle cũ/mới |
++| Có purchase, kể cả cuối | Delete nhập sai | Giữ status hiện tại bất kỳ | Revision; không hồi sinh ACTIVE | Loại khỏi spent/count, không refund |
++| Bất kỳ | AI evaluate | Không đổi | Append evaluation, giữ history | Không chi |
++| Offline, cache ACTIVE đến deadline | Local countdown hết | Cache status không đổi | Ready tạm thời có nhãn chưa đồng bộ | Không mutation/chi |
+ 
+-## Transition nghiệp vụ đã xác minh
++Skip Waiting ≠ Skip item: cancel được server ack rồi mở lựa chọn ở detail (component, không route mới). User đóng lựa chọn sau đó thì item vẫn Considering, không tự Skip. Nếu request cancel chưa xác nhận thì không báo phiên đã kết thúc. GAP-02 chốt UX; wiring endpoint/decision event thực theo contract, không tự tạo enum SKIP_WAITING trong backend.
+ 
+-Mọi hàng mutation cần online, owner hợp lệ, server validate version và commit liên đới atomically. UI chỉ tiếp nhận kết quả server; lỗi rollback không được để item và period lệch nhau.
++## Ready persistence và resolution
+ 
+-| Trước | Trigger / guard | Item sau | Cooling-off sau | Purchase / budget |
+-|---|---|---|---|---|
+-| Chưa có item | User lưu Wishlist | WISHLIST | Không tự tạo | Không chi |
+-| Item hợp lệ | User xác nhận start, deadline hợp lệ; tối đa 1 ACTIVE | WAITING | Tạo ACTIVE mới | Không chi |
+-| WAITING + ACTIVE | Extend/shorten; version và deadline hợp lệ | WAITING | ACTIVE, update deadline + adjustment | Không chi |
+-| WAITING + ACTIVE | Server xác nhận hết deadline | CONSIDERING | COMPLETED | Không chi |
+-| WAITING + ACTIVE | User cancel | CONSIDERING | CANCELLED | Không chi |
+-| WAITING + ACTIVE | User đổi sang WISHLIST/CONSIDERING | Nhãn đã chọn | CANCELLED | Không chi |
+-| WAITING + ACTIVE | User skip / Not Anymore | SKIPPED | RESOLVED / SKIPPED | Không chi |
+-| WAITING + ACTIVE | User xác nhận ghi purchase | PURCHASED | RESOLVED / PURCHASED | Tạo 1 purchase, tính chi đúng cycle |
+-| CONSIDERING + COMPLETED | Need More Time, deadline xác nhận | WAITING | Tạo ACTIVE mới, giữ COMPLETED cũ | Không chi |
+-| CONSIDERING + COMPLETED | Not Anymore | SKIPPED | Giữ COMPLETED cũ | Không chi |
+-| CONSIDERING + COMPLETED | Still Want It | Giữ nguyên đến action tiếp theo | Giữ COMPLETED | Mời re-evaluation 1–2 câu hoặc tự quyết, không tạo purchase |
+-| Bất kỳ non-archived hợp lệ | Ghi purchase / Buy Again, không cần AI | PURCHASED | Resolve ACTIVE nếu có; không hồi sinh phiên cũ | Tạo giao dịch mới; actual_unit_price×quantity |
+-| Có purchase hợp lệ | Edit đơn giá/quantity/ngày/payment | Giữ nguyên | Giữ nguyên | Revision; tính lại total và cả cycle cũ/mới |
+-| Có purchase hợp lệ | Delete nhập sai, kể cả cuối | Giữ nguyên | Giữ nguyên | Revision; loại khỏi spent; không refund |
+-| Bất kỳ | AI evaluate/re-evaluate | Không đổi | Không đổi | Thêm evaluation, không chi |
+-| Bất kỳ cache | Offline local deadline hết | Không đổi chính thức | Không đổi chính thức | Không chi |
++GAP-01 Approved: Ready duy trì đến action xử lý rõ, không tự mất chỉ vì mở màn hoặc bỏ qua mindful review (DETAIL-08). Server completion giữ lịch sử COMPLETED; không sửa thành RESOLVED chỉ để tắt banner. Need More Time có2 nhánh theo DETAIL-12. UI hiển thị Ready không đòi thêm ItemStatus.
+ 
+-## Ma trận chuyển nhãn thủ công
++| Action | UX đã duyệt | Contract còn phải xác định |
++|---|---|---|
++| Xem/Back/dismiss/bỏ qua review | Giữ Ready | Cách đọc eligibility và bảo toàn qua restart/thiết bị khác |
++| Not Anymore | Item Skipped, Ready được xử lý bằng quyết định rõ | Marker liên kết review/decision và atomicity |
++| Need More Time→new wait | Item Waiting, ACTIVE mới, giữ COMPLETED | Marker xử lý Ready và reference phiên mới |
++| Need More Time→Postponed | Considering + event; next review nếu có | Marker Ready clear, event fields, tái hiện Ready khi đến next review; không tự lên lịch server |
++| Still Want It | Cho re-evaluation hoặc bỏ AI/tự quyết, không bắt mua | Chính xác clear ngay lúc chọn hay sau quyết định tiếp: chưa được baseline/Drive đặc tả |
++| Purchase | Purchased và1 transaction | Consistent clear/eligibility sau ack |
++| Archive/restore | Preserve history/budget | Ready bị ẩn/khôi phục như thế nào |
+ 
+-Không coi SPEC “linh hoạt” là bằng chứng endpoint chấp nhận mọi cặp. Bảng này chỉ rõ phần verified và phần Reference cần contract.
++Predicate Reference: item visibility hợp lệ + phiên kết thúc chưa có action xử lý tương ứng. Không chỉ suy `ever COMPLETED` hoặc `latest COMPLETED`; không dùng marker chỉ trong UI memory. Không invent field reviewed_at, TTL, deadline hay endpoint. Các UX đã có nguồn giữ Approved; phần còn mở là persistence/contract, không phải thiếu quyết định29 mã.
+ 
+-| From \ To | WISHLIST | CONSIDERING | WAITING | PURCHASED | SKIPPED |
+-|---|---|---|---|---|---|
+-| WISHLIST | No-op | Reference manual | Start cooling | Record Purchase; manual label chỉ nếu contract cho phép | User skip |
+-| CONSIDERING | Reference manual | No-op | Start cooling | Record Purchase; manual label chỉ nếu contract cho phép | User skip |
+-| WAITING | Cancel ACTIVE | Cancel ACTIVE | Extend/shorten, không tạo ACTIVE thứ hai | Bắt buộc Record Purchase | Resolve ACTIVE/SKIPPED |
+-| PURCHASED | Reference manual | Reference manual | Reference start phiên mới nếu domain cho phép | Buy Again hoặc no-op nhãn | Reference manual |
+-| SKIPPED | Reference manual | Reference manual | Reference start phiên mới nếu domain cho phép | Record Purchase | No-op |
++EDGE-01: offline hiển thị Ready tạm thời dựa deadline đã cache (có thể stale), không hoàn tất period chính thức. Có mạng lại refetch item/period/decisions/capabilities; thay provisional UI bằng kết quả server. Không gửi draft hoặc replay form mua khi reconnect.
+ 
+-Manual label PURCHASED ngoài WAITING nếu được contract cho phép không tạo purchase; UI phải giải thích điều đó. Reference thiết kế an toàn: CTA “Đã mua” luôn mở Record Purchase, không cung cấp shortcut gán PURCHASED thiếu giao dịch. Các lần mua trước không bị xóa khi đổi status sang Wishlist/Skipped.
++## Postponed
+ 
+-## Archive/restore — Reference để triển khai sau đối chiếu
++DETAIL-10/12 và ITEM-04 Approved: Postponed nằm trong Active subfilter; là decision/event hoặc label, status Considering. Có next review time thì hiển thị ngày/giờ/timezone, không có thì không bịa deadline. Không tạo CoolingOffPeriod chỉ để có countdown cho Postponed. Chính sách edit/remove/clear event, precedence Ready/Postponed, tái đến hạn và persistence còn cần backend contract. Không map mọi Considering thành Postponed, không suy từ Skipped.
+ 
+-Archive là ẩn khỏi MyItems mặc định; ArchivedItems là lối truy cập riêng. Preserve item ID, status, purchase, evaluations, decisions và cooling history; không tác động ngân sách. Restore bỏ cờ archive và hiện lại status hiện tại, không reset sang Wishlist hoặc tạo purchase. Không phục hồi timer cũ.
++## Archive/restore
+ 
+-Chưa có nội dung quyết định EDGE/GAP về ACTIVE: Reference tạm **chặn archive khi ACTIVE**, hướng dẫn user hủy/kết thúc phiên qua luồng hiện có rồi archive. Không tự hủy timer ngầm. Đây không phải diễn giải của “A”; nếu nguồn gốc quy định khác phải thay đúng hàng này.
++EDGE-03/GAP-03 Approved: Archive/Hide item có purchase, Archived Items trong menu và Restore. Bảo toàn ID, status, purchases, evaluations, decision/cooling history và budget. Restore không mặc định Wishlist, không tạo purchase, không hồi sinh phiên đã kết thúc. Counts/visibility cập nhật sau ack; filters đang chọn vẫn được giữ.
+ 
+-Archived ItemDetail đọc được; Reference tạm yêu cầu restore trước edit/AI/start cooling/record purchase. TransactionDetail vẫn đọc và cho correction giao dịch đã ghi, vì correction là sự thật chi tiêu; không tự restore item. Nếu API contract chưa hỗ trợ quyền này thì hiển thị lý do và điểm tích hợp, không báo save thành công giả.
++**Chưa chốt:** archive khi WAITING/ACTIVE sẽ bị chặn, giữ timer chạy hay cancel; completion/reminder/Ready trong archived; restore khi deadline đã qua; quyền edit/AI/purchase/correction khi archived. Không áp guard chặn ACTIVE hoặc bắt restore trước mọi mutation như Approved. UI đọc capability contract; chưa có contract thì thể hiện integration gap, không fake success hoặc tự quyết backend policy. Không hard-delete/cascade thay archive.
+ 
+-Archive/restore pending: khóa action lặp; ack xong refresh hai danh sách và detail. Conflict refresh bản server rồi cho user quyết định lại. Có thể snackbar “Hoàn tác” gọi restore online, không xóa purchase; không tạo outbox nếu offline.
++## Manual labels, accounting và concurrency
+ 
+-## Concurrency và accounting
++SPEC-03 cho chuyển nhãn linh hoạt; phụ lục chốt rõ WAITING transitions ở trên. Các cặp khác theo contract, không dựng quyền từ màu/chip. Direct Mark as Purchased luôn đi qua purchase confirmation; không ép Quick Check. Đổi nhãn không tự tạo/xóa transaction; đổi estimated price không sửa purchase cũ.
+ 
+-- Retry cùng purchase intent dùng lại idempotency key; Buy Again mới dùng key mới. Payload khác với key cũ phải conflict.
+-- Version stale không ghi đè. Mua trong khi extend: đọc lại item + ACTIVE + purchases sau conflict; không ép cả hai mutation thành công.
+-- total_amount server là nguồn chính thức; VND nguyên, quantity INTEGER≥1, đơn giá≥0 theo TECH-02. Giới hạn trên lấy contract, không float/rounding.
+-- purchased_at dùng timezone tài khoản để gán [start,end); không dùng created_at hay ngày trả thẻ. Credit có/không card đều tính giống PAY_NOW.
+-- Budget start day 1–31 cố định, clamp tháng ngắn nhưng giữ anchor gốc; remaining có thể âm. Budget amount sửa hiệu lực ngay chu kỳ hiện hành; chu kỳ đã đóng giữ snapshot. Không chỉnh budget trong scope 4 màn.
++VND nguyên exact, actual_unit_price≥0, quantity INTEGER≥1 default1; server total=unit×qty, Android preview. Một item nhiều purchases, count khác quantity. Buy Again chủ động mới dùng key mới; retry cùng intent giữ key, khác payload/key cũ conflict; stale version không overwrite.
++
++PAY_NOW=CREDIT, Credit optional card, ngày purchased_at theo timezone nghiệp vụ gán [start,end), không created_at/ngày trả thẻ. Cycle start day1–31 cố định; clamp tháng ngắn giữ anchor; remaining được âm. Budget amount cập nhật ngay setting+current snapshot cùng transaction; closed snapshots giữ nguyên, không rollover. Correction chuyển ngày mua recompute cả cycle cũ/mới và recap khi xem; không refund âm.
+--- v0.9/03_SCREENS_COMPONENTS.md
++++ v1.0/03_SCREENS_COMPONENTS.md
+@@ -1,57 +1,60 @@
+ # Screen và component specifications
+ 
+-Tất cả bố cục, thứ tự CTA, filter/sort defaults và copy trong file này là **Reference** để coding agent có bản thiết kế cụ thể. Bất biến nghiệp vụ tuân thủ tài liệu 01–02. Không gán các thiết kế này vào ITEM/DETAIL chưa đọc được.
++Approved UX theo29 mã ở07; chỉ exact dimensions, microcopy và sort defaults ngoài baseline là Reference. Backend gaps theo02/08.
+ 
+ ## Navigation và state restoration
+ 
+-MyItems thuộc tab thứ hai của Home / My Items / Budget / Insights. Add Item là action, không phải tab thứ năm. MyItems → ItemDetail(itemId) → TransactionDetail(purchaseId). MyItems → ArchivedItems → ItemDetail(itemId, archiveContext). Route chỉ truyền opaque ID, không truyền object snapshot làm source of truth. Bottom sheets nhận ID/ngữ cảnh và đọc state hiện tại.
++MyItems thuộc tab thứ hai của Home / My Items / Budget / Insights. Giữ nút+ toàn cục; không thêm FAB hoặc nút Add trùng ở app bar. Archived Items vào từ menu. MyItems → ItemDetail(itemId) → TransactionDetail(purchaseId). MyItems → ArchivedItems → ItemDetail(itemId, archiveContext). Route chỉ truyền opaque ID, không truyền object snapshot làm source of truth. Bottom sheets nhận ID/ngữ cảnh và đọc state hiện tại.
+ 
+ Back đóng sheet/dialog trước, rồi quay lại route nguồn. Dữ liệu form chưa lưu: hỏi “Bỏ thay đổi?” trước khi đóng; không hỏi nếu không dirty. Back từ detail giữ query, filters, sort, vị trí scroll ở list nguồn. Khi item không còn match filter sau mutation, list bỏ item và cập nhật count; không tự đổi filter của user. Sau process death phục hồi view state và form đang nhập theo chính sách bảo mật của app; không tự submit request.
+ 
+ ### MyItems
+ 
+-Mục tiêu: xem danh sách item chưa archived theo ngữ cảnh ra quyết định.
++Approved ITEM-01..07:
+ 
+-| Thứ tự | Component / nội dung | Hành vi |
++| Thứ tự | Component | Hành vi |
+ |---|---|---|
+-| 1 | App bar “My Items”; action Archived, Add Item | Archived mở màn riêng; Add chuyển luồng hiện có |
+-| 2 | Hero gradient radius 32, headline ngắn + mascot slot | “Mỗi món đồ, một quyết định.” Không giả count/budget; slot mèo tách khỏi mọi product thumbnail |
+-| 3 | Search field + Filter & Sort button | Query theo tên Reference; giữ nguyên query khi mở sheet; badge đếm filter áp dụng |
+-| 4 | Quick chips All, Wishlist, Considering, Waiting, Purchased, Skipped; Ready là optional derived view | Chip multi/select semantics rõ; Reference chỉ chọn một status quick chip, sheet có multi-select; đồng bộ cùng filter state |
+-| 5 | Result count + applied filter chips | “12 món”; clear từng chip hoặc “Xóa bộ lọc”; query và filters kết hợp AND |
+-| 6 | ItemCard list, spacing 12 | Stable itemId key, tap card mở detail, More button mở More Options |
+-| 7 | Bottom navigation gốc | Không che last card; giữ selected tab |
++| 1 | App bar My Items + menu | Archived Items trong menu; không inline add trùng nút+ toàn cục |
++| 2 | Compact3D Chanko Hero | Canonical cat, không product media; copy/kích thước cụ thể Reference |
++| 3 | Overview tiles All Items / Cooling Off / Ready | Counts thật của tập non-archived, không dùng page length; tap lọc tương ứng |
++| 4 | Search + hai cấp filter + Sort | Cấp1 All/Active/Purchased/Skipped; cấp2 trong Active: Saved/Considering/Cooling Off/Ready/Postponed |
++| 5 | Result count, applied filters | Query AND filter; giữ khi Back; tile và filters đồng bộ |
++| 6 | List mặc định card ngang compact read-only | Thumbnail trái, tên/giá/status rõ; tap mở detail; không More, checkbox, swipe mutation hoặc Buy Again trên card |
++| 7 |4 navigation tabs + global+ | Không FAB lặp; system insets đầy đủ |
+ 
+-Reference list một cột, thumbnail 72×72dp, radius16; title tối đa 2 dòng ở font thường, giá dự kiến dưới title, status chip riêng. Tiền không ellipsis: cho xuống dòng/grow card. Metadata mua “Đã mua 3 lần · gần nhất 20/10/2026” chỉ khi dữ liệu thật. Frequently Purchased từ ≥3 giao dịch hợp lệ là ngưỡng trình bày tham khảo, không hard-code business status. Sau correction count có thể giảm. Không dùng price badge kiểu sale hoặc yêu cầu mua lại.
++Reference selection mapping để implement nhất quán: tile All Items→All; Cooling Off→Active/Cooling Off; Ready→Active/Ready; giữ query/sort. Cấp2 single selection, Active chưa chọn subfilter nghĩa tất cả active items. Saved→WISHLIST; Considering→CONSIDERING; Cooling Off→WAITING+ACTIVE; Ready→derived review pending; Postponed→event/label hợp lệ (CONSIDERING). Active không phải enum server. Derived subfilters có thể giao nhau (Considering/Ready/Postponed); không cộng counts subfilters thành All Items hoặc tự hard-code exclusive precedence chưa có nguồn. Count/category/filter semantics toàn cục theo contract; marker còn thiếu thì báo integration gap, không giấu feature đã Approved bằng cách coi optional.
+ 
+-Loading lần đầu skeleton layout đơn giản, không fake data tài chính. Refresh có cache giữ nội dung + indicator. Empty global có copy “Chưa có món đồ nào”, CTA “Thêm món đồ”, mascot canonical nếu có. Filtered empty có “Không có món phù hợp”, action clear filters/query; không dùng Add làm cách duy nhất thoát. Offline cache có banner và timestamp nếu biết; không cache thì “Chưa có dữ liệu trên thiết bị” + kết nối lại; không gọi đó là tài khoản rỗng. Error không cache có Retry; pagination error nằm cuối, retry page không xóa list. Kết quả tìm kiếm cũ không được ghi đè query mới.
++Default List View và thumbnail trái là Approved. Width72dp/title2 dòng/spacing12dp là Reference; cho wrap/grow ở font200%, không ellipsis tiền. Frequent indicator dùng transactions hợp lệ, không quantity, không khuyến khích mua thêm. Adaptive theo01.
++
++Empty global: Chanko canonical + hộp kẹo, Save an Item; filtered empty: Clear Filters (copy Việt Reference), không thêm FAB. Chưa có canonical composition thì giữ text/slot trống có ghi thiếu asset, không tự vẽ mèo/hộp để giả approved art. Offline có cache giữ banner/timestamp; no-cache không tuyên bố account rỗng. Đến hạn offline có Ready tạm thời và label chưa đồng bộ. Loading/cache refresh/error/pagination/retry không xóa phần dữ liệu còn dùng được; result query cũ không ghi đè query mới.
+ 
+ ### ItemDetail
+ 
+ | Thứ tự | Thành phần | Dữ liệu và action |
+ |---|---|---|
+ | 1 | Top bar Back / “Chi tiết món đồ” / More | Back về đúng list nguồn; More Options theo quyền hiện tại |
+-| 2 | ProductMedia hero, ratio 4:3 Reference, radius24 | Fit ảnh sản phẩm, không crop mất nội dung; neutral placeholder khi không có/loading/error; không mèo hoặc minh họa túi/tai nghe/giày |
++| 2 | Pastel Candy Product Stage Approved; ratio4:3 Reference, radius24 | Trong handoff/preview chỉ dùng neutral dummy placeholder (kể cả trạng thái loaded); Fit, không stretch; không mèo hoặc minh họa túi/tai nghe/giày |
+ | 3 | Tên / giá dự kiến mỗi đơn vị / category optional | Title wrap, không đồng nhất giá dự kiến với giao dịch gần nhất |
+-| 4 | ItemStatus chip + CoolingOffPanel khi có | Status đọc đúng server; Ready hiển thị “Đến lúc xem lại” riêng; deadline có ngày giờ/timezone dễ hiểu |
++| 4 | ItemStatus chip + CoolingOffPanel khi có | Status đọc đúng server; Ready hiển thị “Đến lúc xem lại” riêng, có provisional label khi offline đến hạn; deadline có ngày giờ/timezone dễ hiểu |
+ | 5 | SpeechBubble dưới status | Text riêng; mascot supporting ngoài media container; có thể không có hình khi thiếu canonical |
+ | 6 | Actions theo status | Xem bảng CTA; hành động secondary đủ tương phản |
+-| 7 | Item facts | Note, lý do, source link nếu có; thiếu thì ẩn hàng, không bịa; external link mở theo cơ chế an toàn app |
++| 7 | Expandable item details | Note, lý do, source link nếu có; thiếu thì ẩn hàng, không bịa; external link mở theo cơ chế an toàn app |
+ | 8 | AI evaluation section | Latest verdict có label “Nhận định của Chanko”, thời gian; xem lại history; không gọi BUY thành Purchased |
+ | 9 | Purchase history | Count giao dịch hợp lệ, tổng chi lịch sử nếu server cung cấp, list mới nhất trước; tap TransactionDetail |
+-| 10 | Cooling-off / decision history | Chronological events, phiên cũ giữ nguyên; rút gọn mặc định và “Xem thêm” |
++| 10 | Collapsible Decision Journey | Chronological events, phiên cũ giữ nguyên; rút gọn mặc định và “Xem thêm” |
+ 
+-Reference sticky CTA vùng đáy có nền surface, insets, một primary; phần cuối cuộn được lên trên CTA. Không để Buy Again là primary nổi bật kiểu thúc đẩy mua. Không autoplay âm thanh.
++Approved DETAIL-06: sticky Primary CTA + More Options vùng đáy có nền surface, insets, một primary; phần cuối cuộn được lên trên CTA. Không để Buy Again là primary nổi bật kiểu thúc đẩy mua. Không autoplay âm thanh.
+ 
+ | Item state | Primary | Secondary / More |
+ |---|---|---|
+ | Wishlist | “Cân nhắc cùng Chanko” → AI existing | “Ghi nhận mua”, “Bắt đầu chờ”, Edit, Skip |
+ | Considering thường | “Xem lại quyết định” → AI existing | “Ghi nhận mua”, “Bắt đầu chờ”, Skip |
+-| Waiting ACTIVE | “Điều chỉnh thời gian chờ” → cooling editor existing | “Ghi nhận mua” luôn khả dụng online; Skip; Cancel |
+-| Ready derived | “Xem lại nhu cầu” → inline review block | 3 lựa chọn Not Anymore / Need More Time / Still Want It; ghi mua vẫn chủ động |
+-| Purchased | “Xem lịch sử mua” → scroll section | “Ghi nhận lần mua mới” → Record Purchase; Edit/More |
+-| Skipped | “Xem lại món đồ” → luồng cân nhắc existing | “Ghi nhận mua”, chuyển nhãn theo quyền server |
+-| Archived | “Khôi phục món đồ” | Read-only item/history; correction transaction theo matrix |
++| Waiting ACTIVE | CTA contextual; countdown nổi bật | Adjust / Skip Waiting trong More; Direct Mark as Purchased mở sheet; Skip item riêng và rõ nghĩa |
++| Ready derived | “Xem lại nhu cầu” → inline review block | Review ngắn có thể bỏ qua (giữ Ready); Not Anymore / Need More Time2 nhánh / Still Want It; ghi mua vẫn chủ động |
++| Purchased | “Xem lịch sử mua” → scroll section | Buy Again trong More → Record Purchase; Edit trong More |
++| Skipped | Ưu tiên đọc lịch sử, không thúc đẩy mua | Reconsider/Direct Mark as Purchased trong More theo quyền |
++| Postponed (Considering + event) | Contextual review; next review time khi có | Need More Time2 nhánh; không timer/status mới |
++| Archived | “Khôi phục món đồ” | View item/history; quyền edit/correction theo capability contract, các guard archived còn Pending Verification |
+ 
+ Speech Reference: Wishlist “Cứ để ở đây, bạn có thể cân nhắc sau.”; Waiting “Bạn vẫn có quyền quyết định trong thời gian chờ.”; Ready “Bạn còn muốn món này không?”; Purchased “Lịch sử mua được lưu ở bên dưới.”; Skipped “Bạn có thể xem lại khi cần.” Không bịa lý do hoặc khen mua hàng.
+ 
+@@ -77,15 +80,15 @@
+ 
+ Sheet top radius28, drag handle trang trí, title “Lọc & sắp xếp”, close action có label. Nội dung scroll; footer “Đặt lại” + “Áp dụng”, không bị IME/system bars che. Selection tạm chỉ có hiệu lực sau Apply; Back/dismiss hủy thay đổi chưa apply. Apply giữ nguyên search.
+ 
+-Reference fields: status multi-select 5 giá trị, tất cả không chọn tương đương All; toggle Ready view chỉ enable khi có predicate server và phải giải thích là “Đến lúc xem lại”. Ready giao với status không tương thích trả filtered empty, không âm thầm đổi filter. Không có Postponed status, không filter archived trong sheet này vì màn riêng. Category optional chỉ khi contract có dữ liệu; không tạo taxonomies mới.
++Approved ITEM-04: hai cấp All/Active/Purchased/Skipped và Active→Saved/Considering/Cooling Off/Ready/Postponed, dùng chung filter state với chips/overview tiles. Không thay bằng5 status chips/multi-select status hoặc Ready optional toggle. Ready/Postponed chỉ filter UI không payload ItemStatus. Selection cơ chế single-select là Reference triển khai, xem MyItems mapping; Apply giữ query, reset vềAll/default sort. Category nếu có contract là phần Reference, không thêm taxonomy.
+ 
+ Sort single-select: cập nhật gần nhất (default), thêm mới gần nhất, giá dự kiến thấp→cao/cao→thấp, tên A→Z. Stable tie-breaker itemId; missing price cuối list cho cả hai chiều. Nếu backend không hỗ trợ một sort thì không sort riêng từng trang rồi giả global order: thêm contract hoặc ẩn option chưa hỗ trợ. Reset về All/default, chờ Apply. Query/filter/sort thay đổi reset pagination cursor; count lấy đúng tập kết quả, không số phần tử page hiện tại.
+ 
+ ### More Options
+ 
+-Item context hiển thị tên + status để tránh thao tác nhầm. Reference action list: Edit Item; Cân nhắc/đánh giá lại; Record Purchase/ghi lần mua mới; Start/Adjust/Cancel Cooling-off theo state; Skip; Move to Wishlist/Considering theo contract; Archive hoặc Restore. Ẩn action không liên quan, nhưng action cần online nên disabled + lý do khi offline. Đừng dồn tất cả action vào một màn không phân nhóm. Chọn action đóng sheet rồi điều hướng/hỏi xác nhận.
++Item context hiển thị tên + status để tránh thao tác nhầm. Approved placements: Edit Item, Direct Mark as Purchased, Buy Again (khi phù hợp), Adjust/Skip Waiting đều ở More; Direct Mark as Purchased và Buy Again mở sheet không bắt Quick Check. Các action khác contextual theo02 và contract. Skip Waiting phải tách Skip item: kết thúc phiên rồi mở lựa chọn, không tự SKIPPED. Ẩn action không liên quan, nhưng action cần online nên disabled + lý do khi offline. Đừng dồn tất cả action vào một màn không phân nhóm. Chọn action đóng sheet rồi điều hướng/hỏi xác nhận.
+ 
+-Archive mở dialog mô tả bảo toàn history/budget. Khi ACTIVE, Reference chặn và mở đường dẫn điều chỉnh/hủy theo matrix; không tự cancel. Hard delete item không nằm trong Reference menu này; SPEC có quyền xóa nhưng chi tiết retention chưa chốt. Nếu repo có delete flow, giữ ngoài scope bàn giao cho đến đối chiếu quyết định gốc, tuyệt đối không cascade purchases.
++Archive mở dialog mô tả bảo toàn history/budget. Archive ACTIVE chưa chốt: không hard-code guard hoặc tự cancel; theo capability/contract thực, chưa có thì báo gap. Hard delete item không nằm trong Reference menu này; SPEC có quyền xóa nhưng chi tiết retention chưa chốt. Nếu repo có delete flow, giữ ngoài scope bàn giao cho đến đối chiếu quyết định gốc, tuyệt đối không cascade purchases.
+ 
+ ### Record Purchase
+ 
+@@ -111,7 +114,7 @@
+ 
+ | Component | Input tối thiểu | Trách nhiệm |
+ |---|---|---|
+-| ProductMedia | image reference?, load state, semantic name | 1 ảnh/item; placeholder chung no-cat; refresh quyền ảnh hết hạn qua cơ chế app; không persist signed URL như địa chỉ vĩnh viễn |
++| ProductMedia | image reference?, load state, semantic name | Handoff/preview dummy-only; cơ chế ảnh thật hiện hữu nếu triển khai riêng theo SPEC: tối đa1 ảnh/item, URL hết hạn refresh qua app, không persist signed URL vĩnh viễn |
+ | ItemStatusChip | ItemStatus | Label/icon/color; không tự chuyển state |
+ | ReadyReviewBanner | server-derived eligibility + deadline | Render derived view, review choices; không mutation từ countdown |
+ | CoolingOffPanel | periodId/status/ends_at/version + connection | countdown display; actions theo period thật; giữ lịch sử riêng |
+@@ -126,3 +129,11 @@
+ Focus theo thứ tự đọc, khi sheet mở focus vào title/control đầu; đóng trả focus về nút mở. Modal không cho TalkBack chạm nội dung phía dưới. Error được đọc và gắn field; selected chips/radio có state semantics. Product placeholder trang trí không đọc “image” dư thừa; tên item text đã đủ, ảnh chỉ thêm content description nếu cần phân biệt. Action icon luôn có label.
+ 
+ Test 200% font, width320dp và360dp Reference, portrait/landscape, IME, gesture/3-button navigation. CTA tăng cao nếu wrap; không cố định chiều cao card có text. Không chỉ phân biệt status bằng màu. Reduced Motion dùng ảnh tĩnh/transition nhẹ; không đổi kết quả nghiệp vụ. Mọi pending state có thông báo rõ, không loading spinner vô hạn thiếu retry/reconcile.
++
++## Ranh giới triển khai v1.0
++
++Mindful Ready review có thể bỏ qua; Ready duy trì đến action xử lý rõ, không tự clear do mở/Back/dismiss. Still Want It không mua hoặc đổi verdict tự động; thời điểm clear sau lựa chọn này cần contract. Need More Time2 nhánh Approved: new wait hoặc Considering+Postponed. Next review time hiển thị khi có; chưa có không bịa ngày.
++
++Purchase Confirmation Bottom Sheet DETAIL-11 chính là Record a Purchase trong3 sheets, không thêm sheet thứ4. Mark as Purchased là user mở sheet rồi xác nhận transaction; không ép Quick Check hoặc đặt nhãn Purchased thiếu giao dịch. Decision Journey/Purchase History là section, không route riêng.
++
++Product Hero mọi fixtures/preview dùng dummy manifest; canonical cat chỉ ở MyItems hero/empty/bubble dưới status, không trong/cạnh/chồng media. Assets thiếu thì báo thiếu, không tự tạo mascot.
+--- v0.9/04_ACCEPTANCE_EDGE_CASES.md
++++ v1.0/04_ACCEPTANCE_EDGE_CASES.md
+@@ -1,6 +1,6 @@
+ # Acceptance criteria và edge cases
+ 
+-Các ID AC/EC dưới đây mới được tạo cho bàn giao; không thay thế hoặc diễn giải các mã ITEM/DETAIL/EDGE/GAP gốc. Cần chạy kiểm chứng khi có implementation; file QA bundle chỉ kiểm tra tài liệu/assets, không chứng nhận app.
++Các ID AC/EC dưới đây mới được tạo cho bàn giao; được map với Recovery Baseline trong07; không tạo thêm quyết định cho EDGE chưa được chọn. Cần chạy kiểm chứng khi có implementation; file QA bundle chỉ kiểm tra tài liệu/assets, không chứng nhận app.
+ 
+ | ID | Given / When | Then |
+ |---|---|---|
+@@ -8,16 +8,16 @@
+ | AC-02 | Mở list, tìm tên, apply status và sort, vào detail rồi Back | Giữ query/filter/sort/scroll; kết quả đúng AND; không lặp/bỏ item giữa pages |
+ | AC-03 | Query/filter không có kết quả | FilteredEmpty + clear; không tuyên bố account chưa có item |
+ | AC-04 | Không có cache và offline | State chưa có dữ liệu thiết bị; không giả list rỗng chính thức |
+-| AC-05 | Load ProductMedia mọi màn | Chỉ product image hoặc dummy neutral; không mèo/chó/túi/tai nghe/giày cũ, không text thiết yếu raster |
++| AC-05 | Load ProductMedia mọi màn | Handoff/preview chỉ dummy neutral của manifest; không ảnh sản phẩm mẫu, mèo/chó/túi/tai nghe/giày, không text thiết yếu raster |
+ | AC-06 | Mascot asset canonical thiếu/lỗi | Ẩn hình mascot, giữ speech; không thay chó hoặc sinh mèo khác; product media không đổi |
+ | AC-07 | AI trả BUY/WAIT/SKIP | Không tự đổi status, cooling-off hoặc chi tiêu; evaluation history giữ riêng |
+ | AC-08 | User ghi purchase dù verdict SKIP | Được phép; giữ verdict cũ; không shaming |
+-| AC-09 | Item WAITING + ACTIVE, user mua | Sau ack: đúng1 purchase, item PURCHASED, period RESOLVED/PURCHASED trong kết quả nhất quán |
++| AC-09 | Item WAITING + ACTIVE, user mua | Sau ack: đúng1 purchase, item PURCHASED, period RESOLVED (kết quả PURCHASED) trong kết quả nhất quán |
+ | AC-10 | ACTIVE hết deadline online | Server COMPLETED, item CONSIDERING; không purchase/chi tiêu; Ready chỉ là view dẫn xuất theo contract |
+-| AC-11 | ACTIVE hết deadline offline | Countdown copy đổi, status chính thức không đổi; reconnect refresh trước mutation |
+-| AC-12 | COMPLETED, user Need More Time | Tạo period ACTIVE mới, giữ period COMPLETED cũ; item WAITING |
++| AC-11 | ACTIVE hết deadline offline | Hiển thị Ready tạm thời + chưa đồng bộ; cache ItemStatus/CoolingOffStatus không đổi; reconnect refetch trước mutation |
++| AC-12 | COMPLETED, user Need More Time | Nhánh new wait tạo ACTIVE mới, giữ COMPLETED cũ, item WAITING; nhánh Postponed giữ/chuyển Considering + event, không ACTIVE giả |
+ | AC-13 | User cancel hoặc move WAITING→Wishlist | Period CANCELLED; status target đúng; không chi |
+-| AC-14 | User skip khi ACTIVE | RESOLVED/SKIPPED; item SKIPPED; không purchase |
++| AC-14 | User skip khi ACTIVE | RESOLVED (kết quả SKIPPED); item SKIPPED; không purchase |
+ | AC-15 | Nhập đơn giá200000, qty2 | Preview400000; server total400000 VND; không float/rounding |
+ | AC-16 | Giá0, qty1 hợp contract | Total0; không ép lớn hơn0; count vẫn là1 giao dịch hợp lệ |
+ | AC-17 | Qty0, âm,1.5, exponential, overflow | Chặn/hiện lỗi dễ hiểu; server vẫn validate; không truncate thành số khác |
+@@ -29,8 +29,8 @@
+ | AC-23 | Xóa purchase cuối của item PURCHASED | Count0, empty history; status vẫn PURCHASED; evaluation/cooling history giữ nguyên |
+ | AC-24 | Archive item hợp lệ | Ẩn MyItems mặc định, có ở ArchivedItems; status và purchases/budget không đổi |
+ | AC-25 | Restore archived item | Giữ itemId/status/history; không tạo hoặc hồi sinh cooling-off; không tạo chi |
+-| AC-26 | Archive ACTIVE theo Reference | Bị chặn rõ lý do, không cancel timer ngầm; thay expected khi quyết định gốc được bổ sung |
+-| AC-27 | Sửa transaction thuộc archived item theo Reference | Correction cập nhật accounting; không tự restore; kiểm tra permission theo API thật |
++| AC-26 | Archive ACTIVE | Pending Verification: expected chưa có nguồn; chặn chỉ là đề xuất preview, không dùng làm acceptance production. Không tự cancel/pause timer |
++| AC-27 | Sửa transaction thuộc archived item | Pending Verification quyền thao tác; khi được phép correction phải cập nhật accounting, không tự restore. Không đánh pass khi chỉ dùng guard đề xuất |
+ | AC-28 | User mất mạng khi form đang nhập | Giữ input; không queue mutation hoặc gửi ngầm khi online trở lại |
+ | AC-29 | Draft manual có trên thiết bị, mạng trở lại | Không tự tạo item/purchase; phải review+submit rõ; draft không xuất hiện như item chính thức |
+ | AC-30 | Font200%, screen nhỏ, IME mở | Không cắt tiền/error/CTA; focus đúng, touch≥48dp, insets đầy đủ |
+@@ -68,6 +68,32 @@
+ 
+ Tạo fixtures/test account riêng:5 status; item0/1/3 purchases; qty2; giá0; Credit không card; archived Purchased; completed period + chưa review; ACTIVE gần hết; tên tiếng Việt dài; note dài; cache stale. Mỗi fixture phải đánh dấu dữ liệu test, không đưa vào dữ liệu người dùng thật. Không đưa ảnh thương hiệu/sản phẩm cũ làm fixture.
+ 
+-## Điểm kiểm soát trước release
++## Acceptance bổ sung theo Recovery Baseline
+ 
+-Đối chiếu nội dung ITEM-01..07, DETAIL-01..14, EDGE-01/03/04/07=A, GAP-01..04=A; cập nhật các Reference ảnh hưởng behavior. Chốt predicate Ready, archive ACTIVE và quyền transaction corrections trên archived item. Kiểm tra semantics/TalkBack, contrast, font200%, offline, idempotency/version và accounting liên đới. Không gọi bundle này là bằng chứng acceptance app đã pass.
++| ID | Given / When | Expected / nguồn |
++|---|---|---|
++| AC-35 | Mở MyItems mặc định | List card ngang, thumbnail trái; read-only, tap detail; không inline More/mutation — ITEM01/05 |
++| AC-36 | Xem header/navigation | Compact Chanko Hero;3 tiles All Items/Cooling Off/Ready;4 tabs+global+; không FAB trùng — ITEM02/03/07 |
++| AC-37 | Lọc Active | Saved/Considering/Cooling Off/Ready/Postponed đúng UI mapping; Search/Sort cùng state; không thêm ItemStatus — ITEM04 |
++| AC-38 | Empty global/filtered empty | Chanko + hộp kẹo khi có đúng canonical asset; Save an Item hoặc Clear Filters; thiếu asset báo gap — ITEM06 |
++| AC-39 | Ready rồi xem detail/Back/bỏ qua review/restart | Ready vẫn tồn tại đến action rõ; không tự clear do bỏ UI; backend persistence cần contract — DETAIL08/GAP01 |
++| AC-40 | Skip Waiting khi ACTIVE | Online ack kết thúc phiên→Considering rồi mở lựa chọn; dismiss không tự SKIPPED, không purchase; không lẫn Skip item — GAP02/phụ lục |
++| AC-41 | Need More Time chọn hoãn không timer | Considering + Postponed event; next review nếu có, không bịa ngày hoặc tạo ACTIVE — DETAIL10/12 |
++| AC-42 | Direct Mark as Purchased / Buy Again | Trong More, mở cùng Record a Purchase sheet; không Quick Check bắt buộc; mỗi xác nhận intent mới→purchase mới — DETAIL11/13,EDGE04 |
++| AC-43 | Detail Purchased/Skipped | Ưu tiên read-only, Edit trong More; Purchase History riêng, transaction tap mở detail correction — DETAIL02/09/14,GAP04 |
++| AC-44 | Decision Journey và status content | Collapsible từ lịch sử thật; Chanko bubble dưới status; sticky primary+More; countdown nổi bật, Adjust/Skip Wait trong More — DETAIL03..07 |
++| AC-45 | Archive/restore item có purchase | Menu Archived Items và Restore; giữ ID/status/history/transactions/budget; ACTIVE/lifecycle chưa có expected cuối — EDGE03/GAP03 |
++| AC-46 | Still Want It rồi bỏ AI | Không purchase/BUY tự động; thời điểm Ready clear **Pending contract**, không tự chọn — GAP01/SPEC05 |
++| AC-47 | Budget amount đổi giữa cycle | Setting+current snapshot cập nhật cùng transaction; closed snapshot/purchases không đổi |
++| AC-48 | Budget80%,100%,>100%,0,missing | Warning/Warning/Over; không NaN/chia0, không khóa mua; thresholds UI khác backend policy |
++| AC-49 |2 purchases, mỗi qty2 | Count2 giao dịch, tổng qty4, keys riêng; mỗi total tính1 lần; retry cùng key không tạo lần3 |
++| AC-50 | Xóa purchase cuối của item đã thành SKIPPED | Giữ SKIPPED, count0; spent giảm đúng cycle, không hồi sinh timer |
++| AC-51 | Correction cycle đã đóng | Recompute spent/remaining/recap khi xem; budget snapshot giữ nguyên |
++| AC-52 | Compact/Medium/Expanded và font200% | Adaptive đúng Design System, không cắt tiền/CTA; không ép mọi thiết bị1 cột |
++| AC-53 | Hero loaded/loading/error/empty | Dummy neutral cả4 trạng thái preview; không ảnh mẫu/mèo/chó/túi/tai nghe/giày |
++
++## Test gaps và fixtures
++
++AC26/27, phần persisted marker của AC39/41/46 và archive ACTIVE/restore của AC45 cần backend contract để có expected toàn vẹn; không coi UX Approved bị thiếu phê duyệt. Không ghi pass bằng fixture tự chọn.
++
++Fixtures cần đủ:5 statuses, Ready unresolved sau restart, Ready provisional offline, cả2 nhánh Need More Time, Postponed có/không next review, Skip Waiting rồi dismiss/Not Anymore/Purchase, archived có history, multi-purchase qty2, xóa cuối status Purchased/Skipped, correction qua cycle đóng. Fixtures không phải dữ liệu thực và không dùng ảnh sản phẩm mẫu. Chạy runtime tests sau khi có app; QA bundle chỉ kiểm tra tài liệu/assets.
+--- v0.9/05_ASSETS.md
++++ v1.0/05_ASSETS.md
+@@ -1,6 +1,6 @@
+ # Asset manifest và tích hợp Android
+ 
+-Root bàn giao: `/Users/buihoa/Documents/ChatGPT/Chanko/handoff/chanko_android/`.
++Root bàn giao: thư mục `chanko_android_v1.0/` trong ZIP; mọi asset path tương đối với root này.
+ 
+ `assets/manifest.json` ghi path tương đối từ root, kích thước, dung lượng và SHA-256. Đây là resource bàn giao, không phải code ứng dụng đã implement.
+ 
+@@ -18,7 +18,7 @@
+ 
+ Sao chép tài nguyên được chọn từ `assets/android/res/` vào module Android có sẵn, giữ tên lowercase_underscore. Không cần ship cả ba PNG nếu Vector Drawable đủ. Dùng `ic_product_placeholder` cho fallback tại thumbnail/hero; nếu dùng PNG nodpi thì layout tự quy định dp, không giả đó là mdpi. Không nhét1024px vào drawable-mdpi hoặc tự suy kích thước UI từ pixel.
+ 
+-Hero ratio4:3 Reference dùng container neutral và **Fit**, không stretch ảnh vuông. Thumbnail72dp clip radius16; hero clip radius24. Ảnh product thật có thể đến từ private storage đã được server xác minh; placeholder không tạo item_images record giả. Mất ảnh hoặc quyền URL hết hạn vẫn render fallback, không đổi item data. Không hard-code signed URL vào source/resource hoặc lưu vĩnh viễn trong Room.
++Hero ratio4:3 Reference dùng container neutral và **Fit**, không stretch ảnh vuông. Thumbnail72dp clip radius16; hero clip radius24. Trong handoff/preview Product Hero chỉ dùng dummy từ manifest. Khả năng dùng ảnh thật trong app theo SPEC nằm ngoài asset preview này; placeholder không tạo item_images record giả. Mất ảnh hoặc quyền URL hết hạn vẫn render fallback, không đổi item data. Không hard-code signed URL vào source/resource hoặc lưu vĩnh viễn trong Room.
+ 
+ ## Mascot canonical
+ 
+@@ -33,3 +33,13 @@
+ Nunito và Material Symbols không nằm trong ZIP. Coding agent dùng bản đã có quyền của repo và giữ thông báo OFL/Apache tương ứng với tài nguyên thật nhận được; xác minh license package cụ thể. Không coi việc đề cập tên font/icon là đã bàn giao file hoặc giấy phép.
+ 
+ Snapshot Drive trong sources là nội dung dự án phục vụ nội bộ, không thuộc CC0 của placeholder. Không phân phối public hoặc đưa vào APK. Bộ âm thanh có sẵn không được sao chép, sửa hoặc tái cấp phép trong bundle này.
++
++## Kết quả review v1.0
++
++Đã xem trực tiếp PNG512: khung ảnh hình học trung tính, nền xám nhạt, không mascot hoặc sản phẩm cụ thể. Kiểm tra cả3 PNG: kích thước/IHDR, CRC, giải nén RGB, checksum khớp; SVG/Vector Drawable parse được. Chưa compile bằng Android aapt hoặc chạy UI vì không có repo/build.
++
++**Cần asset mèo canonical**: file gốc được chủ sản phẩm xác nhận (cùng nhận dạng Chanko), phiên bản, state/pose, alpha, kích thước, nguồn/quyền sử dụng và reduced-motion pose. Chỉ mô tả “mèo trắng” không đủ xác nhận canonical. Không sinh/tải một con mèo khác để lấp slot. Thiếu asset chặn visual mascot final, không chặn placeholder hay review nghiệp vụ.
++
++## Approved Empty State composition (Recovery Baseline)
++
++ITEM-06 yêu cầu Chanko canonical và hộp kẹo. Bundle chưa có đúng composition/asset này: cần file canonical hoặc các lớp được xác nhận cùng provenance. Không dùng icon hộp kẹo thay mèo, không sinh một mèo mới để hoàn thiện composition. Thiếu asset chặn visual final của Empty State/hero/bubble, không chặn dummy Product Hero. Các5 placeholder giữ nguyên bytes/checksum và CC0 như v0.9; không có asset mascot mới được thêm trong recovery.
+--- v0.9/06_CODING_AGENT_PROMPT.md
++++ v1.0/06_CODING_AGENT_PROMPT.md
+@@ -1,44 +1,38 @@
+-# Prompt cho coding agent
++# Prompt cho coding agent • Chanko My Items & Item Detail v1.0
+ 
+-Bạn triển khai Android Native Chanko: My Items & Item Detail theo toàn bộ bundle này. Chủ sản phẩm hiện chỉ yêu cầu tạo bàn giao; chỉ bắt đầu implementation khi nhận nhiệm vụ triển khai riêng. Không tạo PR hay deploy nếu nhiệm vụ triển khai không yêu cầu.
++Đọc README,01–05,07–09, manifest, Recovery Baseline và snapshots Functional/TECH-02/Design System; đọc AGENTS.md và quy ước repo đích. Đây là bộ bàn giao tài liệu; chỉ implement khi được giao nhiệm vụ riêng. Không PR/deploy ngoài scope được giao. Không suy ra package/routes/API/schema đã tồn tại vì có logical fields trong tài liệu.
+ 
+-## Đọc trước
++## Approved UX phải giữ
+ 
+-Đọc README và 01→05, manifest, snapshot Functional v1.1/TECH-02 và Design System. Đọc AGENTS.md cùng quy ước repo đích. Hiện workspace bàn giao chỉ có starter pack âm thanh, không có app Android; không suy ra package, DI, navigation hay endpoints đã tồn tại. Giữ code/user changes hiện có.
++-4 routes MyItemsScreen, ItemDetailScreen, TransactionDetailScreen (view/edit cùng route), ArchivedItemsScreen.3 sheets Filter & Sort, More Options, Record a Purchase; Purchase Confirmation là cùng sheet, không thêm màn/sheet. Journey/Purchase History là sections.
++- MyItems default list card ngang thumbnail trái, compact read-only, tap detail, không More/inline purchase trên card. Compact3D Chanko Hero,3 tiles All Items/Cooling Off/Ready tap lọc. Hai cấp All/Active/Purchased/Skipped và Active→Saved/Considering/Cooling Off/Ready/Postponed; Search/Sort có sẵn. Active/Saved/Cooling Off/Ready/Postponed là UI mapping ở03, không thêm enums.4 tabs+global+, không FAB hoặc Add trùng.
++- Empty state canonical Chanko+hộp kẹo; Save an Item hoặc Clear Filters. Archived Items trong menu, Restore giữ history/budget.
++- Detail Pastel Candy Product Stage dummy-only, summary/expandable details, Edit trong More. Contextual content/CTA, bubble+small Chanko dưới status, collapsible Journey, sticky primary+More. Countdown nổi bật; Adjust/Skip Waiting trong More. Purchased/Skipped ưu tiên read-only, Purchase History section riêng; tap transaction mở TransactionDetail xem/sửa/xóa nhập sai.
++- Ready mindful review ngắn có thể bỏ qua; Ready giữ đến action xử lý rõ, không clear vì mở/Back/dismiss. Need More Time2 nhánh: new wait hoặc Considering+Postponed event, next review khi có. Still Want It mời AI1–2 câu, có thể bỏ qua; không bắt mua.
++- Direct Mark as Purchased và Buy Again trong More mở Record a Purchase; không Quick Check bắt buộc; phải xác nhận transaction, không gán Purchased thiếu purchase bằng shortcut.
+ 
+-Tách Approved business rules, Reference UI và missing decisions. Hồ sơ ITEM-01..07, DETAIL-01..14 chưa có nội dung; EDGE-01/03/04/07=A và GAP-01..04=A mới xác nhận nhãn lựa chọn. Không bịa nghĩa A hoặc đánh dấu đã đối chiếu. Khi được cung cấp nguồn gốc, cập nhật traceability và resolve Reference trước production. Có thể dựng UI preview với đề xuất hiện tại nhưng không âm thầm chốt rule chưa biết.
++## Business contract
+ 
+-## Deliverables khi được giao triển khai
++5 ItemStatus WISHLIST/CONSIDERING/WAITING/PURCHASED/SKIPPED; verdict BUY/WAIT/SKIP độc lập. ACTIVE completion do server→COMPLETED/CONSIDERING; Need More Time sau COMPLETED tạo ACTIVE mới, giữ phiên cũ. Skip Waiting kết thúc ACTIVE qua cancel theo phụ lục→Considering và mở lựa chọn, không tự Skip item; Skip item rõ ràng mới RESOLVED/SKIPPED. Mua ACTIVE tạo purchase và RESOLVED/PURCHASED atomically; không khóa quyền mua.
+ 
+-4 routes MyItems, ItemDetail(itemId), TransactionDetail(purchaseId; view/edit mode), ArchivedItems. 3 sheets Filter & Sort, More Options, Record Purchase. Dùng existing Add/Edit Item, AI conversation và cooling-off editor nếu repo có; nêu rõ integration gaps nếu chưa có. Không thêm màn/feature mới để lấp khoảng trống.
++Postponed không ItemStatus/timer giả, Considering+event. Ready temporary offline theo EDGE01 không mutation chính thức: cache statuses giữ nguyên, label chưa đồng bộ, reconnect refetch. Persist/clear marker sau Still Want It/Postponed, next-review scheduling và archive ACTIVE/restore lifecycle còn Pending contract; không invent schema/enum/endpoints hoặc thay UX đã Approved.
+ 
+-Dùng Kotlin/Jetpack Compose, Material3 và kiến trúc repo hiện hữu. Tách immutable UiState, events và domain-derived capabilities để UI không đoán quyền từ màu/chip. Room là read cache và manual drafts; server nguồn chính thức. Không dùng general business outbox, không auto-submit/replay draft. Giữ query/filter/sort/scroll và form qua lifecycle theo chính sách repo; query change hủy/bỏ result cũ, reset cursor, stable order/tie-breaker.
++Một item N purchases, expected fields chuẩn estimated_unit_price/actual_unit_price; không DTO mới bằng tên cũ. VND nguyên exact, quantity INTEGER≥1 default1, unit≥0, server tính unit×qty. Retry cùng intent giữ idempotency key; Buy Again mới key mới; key cũ khác payload conflict; stale version không overwrite. Edit purchase cùng purchaseId và revision, delete correction không refund. Xóa cuối giữ status hiện tại bất kỳ, evaluations/cooling history; không hồi sinh timer. Counts khác quantity, tổng history không tính từ1 page.
+ 
+-## Domain contract không được vi phạm
++PAY_NOW=CREDIT tại purchased_at/account timezone [start,end), Credit card optional; không debt/refund/discovery/rollover. Cycle anchor1–31 cố định, clamp giữ anchor, remaining có thể âm. Budget amount ngay current cycle setting+snapshot cùng transaction; closed snapshots giữ nguyên; correction recompute đúng cycles và recap khi xem. Không dùng budget threshold UI để chặn mua.
+ 
+-- ItemStatus chỉ5: WISHLIST/CONSIDERING/WAITING/PURCHASED/SKIPPED. Ready derived; Postponed không status. AI verdict BUY/WAIT/SKIP độc lập, không mutate business.
+-- estimated_unit_price và actual_unit_price là tên contract mới. Không tạo DTO/schema mới bằng actual_price/expected_price/estimated_price. VND nguyên exact; qty INTEGER≥1 default1; unit≥0; server tính total=unit×qty, không float/rounding. Giới hạn trên và dates theo contract thật.
+-- POST mua do user xác nhận tạo1 Purchase, item PURCHASED và resolve ACTIVE atomically. Buy Again là request chủ động mới cùng itemId, key mới; retry cùng ý định giữ key. Không auto-buy, refunds, debt/limit/statement/repayment hoặc discovery.
+-- Delete/edit purchase là correction, revision server, recompute đúng cycles. Xóa cuối giữ item status, evaluations và cooling history; không khôi phục phiên chờ cũ. Edit item price không sửa purchases cũ.
+-- ACTIVE hết hạn: server COMPLETED và WAITING→CONSIDERING. Need More Time sau COMPLETED tạo ACTIVE mới. Cancel ACTIVE→CANCELLED/CONSIDERING. WAITING→Wishlist/Considering cancel ACTIVE. Skip ACTIVE→RESOLVED/SKIPPED. WAITING→Purchased phải ghi Purchase. Local timer không commit state.
+-- Credit optional card và PAY_NOW tác động chi tiêu như nhau theo purchased_at/account timezone; cycle [start,end), không double count; remaining có thể âm. Ngày31 clamp tháng ngắn nhưng giữ anchor.
+-- Archive/restore độc lập status, bảo toàn history/accounting. Không hard-delete/cascade. Reference archive ACTIVE bị chặn và restore trước item mutations; corrections trên archived parent vẫn cho phép nếu contract hỗ trợ. Đối chiếu quyết định gốc, không giả endpoint archive đã có.
++Archive/restore giữ ID/status/history/accounting. Không tự hard-delete/cascade, cancel/pause ACTIVE hay reset Wishlist. Backend policy ACTIVE/archived write chưa chốt: theo capability thật hoặc báo gap; không áp guard chặn/restore-trước-edit tự chọn làm Approved.
+ 
+-## Visual và asset
++## Offline, state và feedback
+ 
+-Candy Pop 3D light mode; Nunito, Purple#8965F6, cream#FAF8F5, white cards, radius theo01. Clean2D data, một hero điểm nhấn. Material Symbols Rounded. Dùng semantic tokens cho on-colors; đo contrast, không mặc định white-on-purple. Target≥48dp, primary≥56dp và grow; font200%, TalkBack, reduced motion, system/IME insets.
++Room read cache và manual item drafts, không general business outbox. Offline giữ form mua theo EDGE07, xác nhận cần online, không auto-submit reconnect. Manual draft item chưa là item/purchase, không budget; ảnh draft bền vững. Server ack mới success; timeout UnknownOutcome giữ key, reconcile không key mới. Account ownership/caches tách biệt. Form/filters/search/sort/scroll qua lifecycle theo repo; result query cũ không ghi đè, sort/count toàn bộ không giả từ từng page.
+ 
+-Mascot chỉ mèo trắng canonical có quyền dùng. Bundle không chứa mascot canonical. Lấy asset registry đã duyệt của repo/chủ sản phẩm; thiếu thì hide slot và giữ speech text, không sinh mèo mới hoặc dùng chó. Được ở MyItems hero/empty/speech dưới status. TUYỆT ĐỐI không đặt mèo trong hoặc cạnh ProductMedia hero/detail/thumbnail. Dùng neutral dummy `assets/android/res/drawable/ic_product_placeholder.xml` hoặc PNG nodpi; không túi/tai nghe/giày cũ. Không rasterize text/controls, không dùng screenshot tài liệu làm UI. Không tự bật âm thanh starter pack.
++## Visual/assets
+ 
+-## Trình tự thực hiện
++Candy Pop3D light mode, Nunito, palette/radii/spacing/adaptive của01/Design System; controls2D thật, ≥48dp, primary56 grow, font200%, TalkBack/reduced motion/insets. Exact dimensions/copy/default sort chưa có nguồn là Reference, không đòi phê duyệt lại tokens Approved.
+ 
+-1. Audit repo read-only trước, lập mapping route/model/API/image/theme và nêu gaps ngắn gọn; không dựng backend schema chỉ vì handoff có logical fields.
+-2. Reuse components, implement UI states và view navigation; attach fixtures rõ là test. Scope missing integrations qua interfaces của repo; không báo action fake là đã save server.
+-3. Nối read cache và official mutations có server ack/version/idempotency. Tách unknown outcome khỏi error; giữ form khi lỗi. Sau mutation invalidate/refetch list, detail, histories/counts, budget/cycles và recap liên quan theo app data layer.
+-4. Tạo4 màn/3 sheets đúng03; status-based capabilities theo02. Record Purchase create; transaction edit giữ purchaseId; delete correction confirmation.
+-5. Chạy checks repo yêu cầu và tests nghiệp vụ cần thiết:5 status/Ready, countdown offline, completion mới, purchase retry, version conflict, correction cycle move, xóa cuối giữ status, archive history, Credit optional card. Không chỉ test snapshot giống implementation.
+-6. Verify screenshot các states chính ở font thường/200%, màn nhỏ, IME, TalkBack và reduce motion. Báo gì pass/chưa chạy, rủi ro integration và Reference chưa chốt. Không tuyên bố ảnh preview đã được match pixel khi chưa nhận ảnh gốc.
++Chỉ canonical white Chanko có provenance, không chó hoặc mèo khác. Hero MyItems/Empty/bubble được phép; cấm trong/cạnh/chồng Product Hero/media. Bundle không có canonical+hộp kẹo: cần asset, tạm giữ text/slot trống có báo gap. Product Hero/fixtures/preview chỉ dummy từ manifest, không túi/tai nghe/giày; không tự tìm ảnh mạng. Không confetti/celebration mua/shaming/upsell; sound không tự bật.
+ 
+-## Definition of done
++## Delivery khi có nhiệm vụ implement
+ 
+-AC trong04 đạt theo phạm vi được triển khai; không giả persistence/API; assets đúng manifest và license; không có mascot sai/product art bị cấm; không mở rộng MVP. Chủ sản phẩm được xem kết quả cụ thể và danh sách phần chưa đối chiếu. Không tạo PR trừ khi nhiệm vụ riêng yêu cầu.
++Audit repo, map read models/capabilities/API/image/theme; giữ user changes. Implement theo kiến trúc Kotlin/Compose/M3 hiện có, không tự dựng backend thay policy còn thiếu. Wire mutation version/idempotency/ack và invalidate đúng list/detail/history/budget/recap. Chạy AC/EC ở04 cùng repo checks, đặc biệt Ready provisional/persistence,2 nhánh Need More Time, Skip Waiting khác Skip item, purchase retry/cycle correction/xóa cuối/archive. Review screenshots layouts/accessibility. Báo rõ phần pass/chưa test, visual asset thiếu và contract gaps; không gọi bundle QA là runtime pass.29 mã đã có Recovery Baseline và mapping, không tiếp tục báo thiếu nội dung29 mã.
+--- v0.9/07_DECISION_TRACEABILITY.md
++++ v1.0/07_DECISION_TRACEABILITY.md
+@@ -1,60 +1,43 @@
+-# Decision traceability register
++# Decision traceability • Recovery Baseline
+ 
+-Không có nội dung nguyên văn thì không gán nghĩa quyết định. “Đã chốt” dưới đây là xác nhận của người dùng trong request, chưa phải kết quả đối chiếu nội dung.
++Nguồn trực tiếp: `sources/approved_ux_recovery_baseline.md`, user cung cấp24/10/2026. Cả29 quyết định UX đã Approved; mapping dưới đây không chứng nhận backend đã implement. Không gán DETAIL-03 thành lựa chọn A/B mới.
+ 
+-| Mã | Lựa chọn truyền đạt | Nội dung nguồn |
++| ID | Approved UX (nguyên văn baseline) | Mapping |
+ |---|---|---|
+-| ITEM-01 | Đã chốt | Chưa truy xuất được |
+-| ITEM-02 | Đã chốt | Chưa truy xuất được |
+-| ITEM-03 | Đã chốt | Chưa truy xuất được |
+-| ITEM-04 | Đã chốt | Chưa truy xuất được |
+-| ITEM-05 | Đã chốt | Chưa truy xuất được |
+-| ITEM-06 | Đã chốt | Chưa truy xuất được |
+-| ITEM-07 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-01 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-02 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-03 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-04 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-05 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-06 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-07 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-08 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-09 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-10 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-11 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-12 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-13 | Đã chốt | Chưa truy xuất được |
+-| DETAIL-14 | Đã chốt | Chưa truy xuất được |
+-| EDGE-01 | A | Chưa truy xuất được |
+-| EDGE-03 | A | Chưa truy xuất được |
+-| EDGE-04 | A | Chưa truy xuất được |
+-| EDGE-07 | A | Chưa truy xuất được |
+-| GAP-01 | A | Chưa truy xuất được |
+-| GAP-02 | A | Chưa truy xuất được |
+-| GAP-03 | A | Chưa truy xuất được |
+-| GAP-04 | A | Chưa truy xuất được |
++| ITEM-01 | A — List View mặc định, card ngang, thumbnail bên trái | 03 MyItems; AC35 |
++| ITEM-02 | B — Compact 3D Chanko Hero | 03 Hero; AC36 |
++| ITEM-03 | A — Ba overview tiles: All Items, Cooling Off, Ready; nhấn để lọc | 03 tiles; AC36 |
++| ITEM-04 | B — Filter hai cấp: All / Active / Purchased / Skipped; Active gồm Saved / Considering / Cooling Off / Ready / Postponed. Có Search và Sort | 03 Filter; AC37 |
++| ITEM-05 | A — Compact read-only item cards; nhấn mở Item Detail | 03 card; AC35 |
++| ITEM-06 | A — Empty State với Chanko và hộp kẹo; có Save an Item hoặc Clear Filters | 03 Empty/05 assets; AC38 |
++| ITEM-07 | Giữ 4 navigation tabs và nút + toàn cục; không thêm FAB trùng lặp | 03 navigation; AC36 |
++| DETAIL-01 | A — Pastel Candy Product Stage; chỉ hiển thị ảnh sản phẩm hoặc dummy placeholder | 03 Stage; AC53 |
++| DETAIL-02 | A — Product summary và expandable details; Edit trong More Options | 03 summary/More; AC43 |
++| DETAIL-03 | CTA và nội dung thay đổi theo trạng thái item | 03 contextual; AC44 |
++| DETAIL-04 | A — Chanko nhỏ bên cạnh contextual speech bubble, nằm dưới status | 01/03 bubble; AC44 |
++| DETAIL-05 | A — Collapsible Decision Journey dựa trên lịch sử thật | 03 Journey; AC44 |
++| DETAIL-06 | A — Sticky Primary CTA + More Options | 03 sticky CTA; AC44 |
++| DETAIL-07 | A — Cooling Off countdown nổi bật; Adjust/Skip Wait trong More Options | 02/03 countdown; AC40/44 |
++| DETAIL-08 | A — Ready có mindful review ngắn, có thể bỏ qua | 02 Ready; AC39 |
++| DETAIL-09 | A — Purchased/Skipped ưu tiên read-only | 03 read-only; AC43 |
++| DETAIL-10 | A — Postponed hiển thị thời gian review tiếp theo khi có | 02 Postponed; AC41 |
++| DETAIL-11 | A — Purchase Confirmation Bottom Sheet | 03 purchase sheet; AC42 |
++| DETAIL-12 | A — Need More Time có thể đặt thời gian chờ mới hoặc chuyển Considering và ghi nhận Postponed | 02 two branches; AC12/41 |
++| DETAIL-13 | A — Direct Mark as Purchased trong More Options, không bắt buộc Quick Check | 03 More; AC42 |
++| DETAIL-14 | A — Purchase History là section riêng trong Item Detail | 03 history; AC43 |
++| EDGE-01 | A — Cooling Off hết hạn offline: hiển thị Ready tạm thời, đồng bộ sau | 02 offline; AC11 |
++| EDGE-03 | A — Archive/Hide item có purchase, giữ nguyên transaction và budget | 02 archive; AC24/45 |
++| EDGE-04 | A — Buy Again trong More Options, tạo purchase transaction mới | 03 More; AC42/49 |
++| EDGE-07 | A — Offline giữ dữ liệu form mua; yêu cầu online để xác nhận | 03 form; AC28 |
++| GAP-01 | A — Ready duy trì đến khi người dùng thực hiện hành động xử lý rõ ràng | 02 Ready; AC39/46 |
++| GAP-02 | A — Skip Waiting kết thúc phiên chờ và mở lựa chọn quyết định, không tự Skip item | 02 Skip Waiting; AC40 |
++| GAP-03 | A — Archived Items trong menu, hỗ trợ Restore | 03 menu/Archive; AC45 |
++| GAP-04 | A — Nhấn purchase transaction mở Transaction Detail để xem/sửa/xóa giao dịch nhập sai | 03 TransactionDetail; AC21/23/43 |
+ 
+-Mỗi hàng cần đối chiếu nguyên văn trước production; không tự suy nội dung từ số mã hoặc nhãn A. Reply “ok” với thông báo thiếu nguồn không cung cấp thêm nội dung các mã.
++## Đối chiếu với Functional/TECH-02
+ 
+-## Quyết định xác minh được
++Không có mâu thuẫn trực tiếp bắt buộc đổi5 status, accounting, multi-purchase, correction, offline/cache/draft hoặc scope. EDGE01 Ready tạm thời là presentation, không server completion offline. GAP02 Skip Waiting map cancel ACTIVE→Considering rồi decision choices, tách Skip item. DETAIL12 bổ sung nhánh UX Considering+Postponed bên cạnh new ACTIVE đã chốt trong phụ lục; event persistence còn cần contract.
+ 
+-| Quyết định | Bằng chứng | Mapping |
+-|---|---|---|
+-| Mèo thay chó | User trong chat tham chiếu và request hiện tại | 01,03,05: chỉ canonical white cat |
+-| Không mèo cạnh sản phẩm | User trong chat và request hiện tại | ProductMedia invariant; AC-05 |
+-| Dummy thay ảnh túi/tai nghe/giày cũ | Chat và request hiện tại | 5 resources neutral trong manifest |
+-| 5 status, multi-purchase | SPEC-03/04; TECH-02 | 02; AC-01,09,23 |
+-| Unit price/quantity/correction | Phụ lục cuối cả2 nguồn | 02; Record Purchase; TransactionDetail |
+-| Cooling completion/new period | Phụ lục cuối cả2 nguồn | 02; AC-10..14 |
+-| Offline cache/manual draft | ADR-09/SPEC-09; TECH-02 mục8 | 01; AC-11,28,29 |
+-| Candy Pop 3D, Nunito, tokens | Design System v1.0 | 01; bố cục03 vẫn Reference |
++GAP01 chốt giữ Ready đến action rõ; không đủ định nghĩa lúc clear sau Still Want It, Postponed hoặc archive. EDGE03/GAP03 chốt archive item có purchase và Restore, không chốt ACTIVE timer lifecycle/quyền ghi archived. Các khoảng này là contract gaps còn lại, không còn thiếu nội dung mã. Các EDGE ngoài4 mã được cung cấp không được tự nâng Approved.
+ 
+-## Reference cần ưu tiên đối chiếu
+-
+-1. Ready eligibility và marker review để không gắn Ready mãi.
+-2. Archive ACTIVE và quyền mutation trên archived parent.
+-3. Cặp chuyển nhãn thủ công chưa có quy tắc chi tiết trong phụ lục.
+-4. Hard delete item/retention; menu Reference hiện chỉ archive.
+-5. Filter/sort options, defaults và API support.
+-
+-Không gán những dòng này thành GAP-01..04 hoặc EDGE-xx=A vì chưa có bằng chứng nội dung.
++Visual tokens và business invariants độc lập đã Approved theo nguồn09. Canonical mascot/Empty State composition chưa có file, không được coi là đã bàn giao hình.
+--- v0.9/08_REVIEW_DIFF_BLOCKERS.md
++++ v1.0/08_REVIEW_DIFF_BLOCKERS.md
+@@ -0,0 +1,55 @@
++# Review và thay đổi v0.9 → v1.0 (Recovery) • 24/10/2026
++
++## Kết luận
++
++Đã đối chiếu đủ29 quyết định UX từ Recovery Baseline user cung cấp với Functional Specification v1.1 và TECH-02 vừa đọc lại Drive. Không còn blocker thiếu nội dung ITEM/DETAIL/EDGE/GAP. Các sửa đổi dưới đây thay thế phần Reference trái baseline; exact dimensions/copy/sort defaults chưa có nguồn vẫn Reference. Đây là bộ bàn giao hoàn chỉnh theo phạm vi tài liệu/assets, không phải chứng nhận app production-ready.
++
++Input v0.9 là attachment được chat trả về; `/mnt/data` không tồn tại ở máy này. SHA256 `0ec26810cc85fdf5079525ba60c86ee7e49cfbea54e7d11f4b6a5e4f57c33cc6`,19 files, CRC hợp lệ, trùng bytes ZIP workspace. Bản v1.0 trước Recovery giữ tên `...v1.0_pre_recovery.zip`; ZIP v1.0 hiện tại đã thay nội dung. Không dùng bản trước recovery để triển khai.
++
++## Diff chính so với v0.9
++
++| Vùng | v0.9 | v1.0 Approved theo baseline |
++|---|---|---|
++| MyItems list | List Reference, card có More | List mặc định, horizontal/left thumbnail, compact read-only, tap detail; bỏ More/inline mutations — ITEM01/05 |
++| Header | Hero chung, thiếu overview tiles | Compact3D Chanko Hero +3 tiles All Items/Cooling Off/Ready tap filter — ITEM02/03 |
++| Filters |5 status chips/multi-select, Ready optional, không Postponed filter |2 cấp All/Active/Purchased/Skipped; Active: Saved/Considering/Cooling Off/Ready/Postponed +Search/Sort — ITEM04 |
++| Empty/navigation | Empty chung, app bar Add | Chanko+hộp kẹo, Save an Item/Clear Filters;4 tabs+global+, không FAB/Add trùng — ITEM06/07 |
++| Detail structure | Layout/CTA gần như toàn Reference | Stage/summary/expandable facts/bubble/Journey/sticky primary+More/contextual content Approved — DETAIL01..06 |
++| Waiting actions | Adjust primary, Skip dễ lẫn nghĩa | Countdown nổi bật, Adjust/Skip Waiting trong More; Skip Waiting kết thúc phiên rồi mở lựa chọn, không tự Skip item — DETAIL07/GAP02 |
++| Ready | Chỉ dựa server eligibility, resolution thiếu source | Ready duy trì đến action rõ, mindful review có thể bỏ qua; offline Ready tạm thời không mutate cache/server — DETAIL08/GAP01/EDGE01 |
++| Need More Time/Postponed | Chỉ new wait; badge Postponed tạm ẩn |2 nhánh new ACTIVE hoặc Considering+Postponed; hiển thị next review khi có — DETAIL10/12 |
++| Purchased/Skipped | Primary có thể thúc re-evaluation | Ưu tiên read-only; Buy Again/Direct Mark as Purchased trong More, không Quick Check bắt buộc — DETAIL09/13/EDGE04 |
++| Purchase/transactions | Sheet/history/correction là đề xuất | Purchase Confirmation=Record sheet, History section riêng, tap mở transaction correction — DETAIL11/14/GAP04 |
++| Archive | Chặn ACTIVE/restore-trước-ghi là guard đề xuất | Archive có purchase +Restore Approved; không coi guard đề xuất là policy; ACTIVE/permissions còn contract gaps — EDGE03/GAP03 |
++| Visual | Product image hoặc placeholder; một số token bị Reference | Handoff hero dummy-only; canonical cat ngoài media, không tự thay; tokens/spacing/adaptive đúng Design System |
++
++README,01/02/03/04/05/06/07 và manifest đã đồng bộ;09 lưu provenance; nguồn Recovery giữ nguyên trong sources. Detailed diff tại `qa/v0.9_to_v1.0.diff`.
++
++## Các điểm Reference đã chuyển Approved
++
++Đủ29 rows tại07 có nguồn và mapping acceptance. DETAIL03 giữ là tổng hợp contextual UI, không bịa option A/B. Mỗi placement/filter/interaction nêu trong baseline được nâng Approved; không nâng sort options/defaults, kích thước mới, microcopy hoặc guard backend không có nguồn. Giữ Approved5 status, purchase correction/accounting/offline của phụ lục, không mở lại vấn đề đã giải quyết.
++
++## Đối chiếu nghiệp vụ trọng tâm
++
++- Ready: giữ đến hành động rõ, xem/Back/bỏ review không clear. Backend COMPLETED history không bị viết lại chỉ để ẩn banner. Still Want It→mời AI1–2 câu có thể bỏ qua; timing marker clear chưa rõ. Need More Time→new ACTIVE giữ phiên cũ hoặc Considering+Postponed event.
++- Offline: EDGE01 cho provisional Ready theo deadline cache; không official status mutation, purchase hoặc budget. Reconnect refetch; EDGE07 giữ form, không tự submit. Room read cache/manual item drafts như ADR09, không business outbox.
++- Skip Waiting: GAP02 khác Skip item. Map cơ chế cancel ACTIVE→CANCELLED/Considering theo phụ lục rồi mở choices. Explicit Not Anymore mới Skipped; dismiss không tự Skip/mua. Không invent backend action enum.
++- Archive/Restore: giữ transaction/history/budget và item identity/status. Chưa có rule ACTIVE/restore overdue/Ready/permissions; không auto-cancel/pause/reset Wishlist/cascade.
++- Xóa purchase cuối: giữ status hiện tại bất kỳ, không hồi sinh timer, giữ evaluation/history; spent/count/cycles/recap tính lại. Không refund.
++- Budget: actual unit×integer qty, server total; purchased_at gán [start,end), PAY_NOW=CREDIT optional card; amount ngay current cycle setting+snapshot atomically; closed snapshots giữ, recap tính lại; no rollover/debt. UI thresholds không chặn quyền mua.
++- Multi-purchase: N transactions/item, Buy Again chủ động trong More; mỗi intent mới key mới, retry giữ key; count không quantity, tổng history không suy từ1 page. Frequent≥3 là presentation threshold tham khảo.
++- Visual: Candy Pop3D/Nunito/M3/rounded, canonical white cat không chó/mèo thay; không trong/cạnh/chồng product media; dummy-only hero, không túi/tai nghe/giày; không celebration/shaming/upsell.
++
++## Blockers còn thực sự tồn tại
++
++| ID | Thiếu gì | Phạm vi bị chặn / cần cung cấp |
++|---|---|---|
++| C-01 | Backend Ready/Postponed persistence và resolution | Contract cho marker eligibility/clear sau Still Want It và Postponed, restart/thiết bị khác; event/next-review trigger/clear/precedence. UX Approved không cần duyệt lại |
++| C-02 | Archive khi WAITING/ACTIVE và Restore lifecycle | Contract chọn rõ chặn/giữ/cancel, deadline/reminder/completion/Ready khi archived, restore overdue và archived write/correction permissions. Không tự chọn policy |
++| A-01 | File mèo Chanko canonical, Empty State Chanko+hộp kẹo | Cần đúng source asset/pose/state/provenance/quyền/alpha/size. Chặn mascot visual final, không chặn dummy hero/text UI; không tạo mèo khác |
++
++Integration prerequisites: repo/API thật để map routes/models/version/idempotency/timezone/limits và build/runtime tests; licensed Nunito/icons và contrast pairing. Approved screen images chưa có để pixel-match; baseline mô tả đủ bố cục nhưng không khẳng định đã match mockup. Các prerequisites này không phải thiếu nội dung29 mã hoặc lý do hỏi duyệt lại toàn bộ UX.
++
++## Xác minh
++
++Input CRC/safe paths/hash; Recovery Baseline lưu nguyên văn và đủ29 mappings; source Drive vừa fetch lại có modified time như trước;5 dummy assets giữ checksum/bytes, PNG512 đã xem, PNG chunks/dimensions/XML được kiểm tra. QA và checksums v1.0 được tái tạo, ZIP kiểm CRC và round-trip bytes. Không chạy Android build/aapt/runtime/TalkBack hoặc test backend vì không có repo. Không sửa app/Drive, không PR, không triển khai ứng dụng.
+--- v0.9/09_SOURCE_EVIDENCE.md
++++ v1.0/09_SOURCE_EVIDENCE.md
+@@ -0,0 +1,42 @@
++# Source evidence • 24/10/2026 • Asia/Ho_Chi_Minh
++
++## Nguồn trực tiếp đã đọc lại (cập nhật sau Recovery)
++
++| Source | URL / ID | Tình trạng |
++|---|---|---|
++| S1 Functional Specification | https://docs.google.com/document/d/1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go/edit | Fetch thành công, modified2026-10-17T10:10:59.447Z; phụ lục có hiệu lực đọc đủ |
++| S2 TECH-02 | https://docs.google.com/document/d/1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ/edit | Fetch thành công, modified2026-10-17T10:11:01.531Z; phụ lục có hiệu lực đọc đủ |
++| S3 Design System v1.0 | https://docs.google.com/document/d/1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg/edit | Fetch readable text thành công, modified2026-10-18T03:50:21.858Z; provider báo Word MIME; không giả đây là native Google Doc mới |
++| S4 Chat Thiết kế màn hình Món đồ | 6adcb6ee-a8f4-83ec-b3e0-16d60e40d5ae | read_thread trả5 lượt, hasMore=false,nextCursor=null; nhiều agent messages chỉ content-reference; attachment v0.9 truy cập được |
++| S5 Chat Soạn bàn giao Android My Items | 01a16e40-2c53-7b81-95cd-8402efa9c877 | Xác minh request trước và giới hạn truy xuất nguồn; không có body29 mã bổ sung |
++| S6 Yêu cầu review hiện tại | Chat Review Chanko handoff ZIP | Dummy-only hero, canonical/no-dog/no-cat-in-product, scope documents/assets, no app/PR |
++
++Các query Drive `Chanko` và metadata name Chanko/ITEM/My Items/mascot không có kết quả; không suy điều đó có nghĩa các file không tồn tại. Fetch trực tiếp3 URL đã biết thành công. Không truy xuất được canonical bằng các nguồn này, không tự dùng ảnh mèo từ chat khác chưa được xác nhận.
++
++## Mốc hiệu lực và mapping
++
++S1/S2 phụ lục cuối17/10/2026 ưu tiên các đoạn cũ trái ngược:
++
++- Mục1 và6: estimated_unit_price, actual_unit_price; VND nguyên, quantity INTEGER≥1; backend total; xóa cuối giữ item status.
++- Mục2: cycle start day cố định, clamp giữ anchor, amount tức thì current cycle trong cùng transaction, closed snapshots giữ nguyên.
++- Mục3: ACTIVE completion→COMPLETED/CONSIDERING; Need More Time tạo phiên mới; các nhánh cancel/buy/skip/manual từ WAITING atomically.
++- Mục4: Story Recap tính lại khi xem, không snapshot recap cố định.
++- Mục5: Credit=PAY_NOW, không debt/refund/discovery/rollover.
++- S1 SPEC-03/04: multi-purchase, correction, Frequent UI; SPEC-05: review3 lựa chọn; ADR-09/SPEC-09: cache/draft/no-outbox.
++- S2 mục5/6/8/9: history/count, cycles, draft, concurrency/authorization/idempotency. Đề xuất vật lý trong TECH-02 không tự thành endpoint hoặc schema đã triển khai.
++- S3 mục15/16 và bảng UI-01..09: Approved tokens/spacing/adaptive/a11y; mục17/PV giữ phần chưa xác minh. Không dùng ngưỡng budget UI để tạo business restriction.
++
++Ba snapshot nguồn giữ trong sources, nội dung khớp v0.9 sau chuẩn hóa BOM/newline. Bảng tuyến tính hóa không mang ảnh/visual gốc. Không public snapshot hoặc đưa vào APK; không gán license CC0 của placeholder cho tài liệu nguồn.
++
++## Lời user truy xuất được
++
++Chat S4 có yêu cầu: “ảnh chi tiết món đồ sẽ ko có con mèo nằm cạnh sản phẩm đâu nhé, chỉ cần hiển thị ảnh của sản phẩm”; sau đó: “về ảnh chi tiết sản phẩm thì nên để ảnh dummy thôi nhé, không cần để ảnh túi và tai nghe như thế kia đâu.” Request S6 nhắc thêm không giày và phải canonical white Chanko, không chó. Đây là căn cứ hero dummy-only và cấm mascot trong/cạnh media; không phải bằng chứng nội dung ITEM/DETAIL cụ thể.
++
++Baseline recovery user cung cấp sau báo cáo trước đã khôi phục đủ29 body, thay thế giới hạn thiếu nội dung lịch sử cho mục đích đối chiếu UX. Các câu ghi thiếu29 mã trong bản pre-recovery nay đã được giải quyết; không dùng chúng như blocker còn mở.
++
++
++## S7 — User Approved UX Decisions — Recovery Baseline
++
++Nguồn file user cung cấp: `Văn bản đã dán.txt`, lưu nguyên văn tại `sources/approved_ux_recovery_baseline.md`. Status Approved UX, đủ29 rows; không thay Functional/TECH-02 làm chuẩn backend. Source này cho phép khôi phục Approved filter/tiles/card/navigation/detail/Ready/Postponed/Skip Waiting/archive/transaction UI như07. Không suy diễn lựa chọn cho các EDGE khác.
++
++Sau khi nhận S7, fetch trực tiếp lại S1/S2 từ Drive thành công, modified times giữ nguyên2026-10-17T10:10:59.447Z /10:11:01.531Z. S3 dùng bản đã fetch/so khớp trước trong cùng phiên. Recovery reconciles EDGE01 như presentation-only và GAP02 với cancel ACTIVE; không tìm thấy rule backend rõ cho C01/C02. Canonical file/approved screen image không nằm trong S7; A01 vẫn cần asset.
+--- v0.9/README.md
++++ v1.0/README.md
+@@ -1,42 +1,26 @@
+-# Chanko • Android My Items & Item Detail
++# Chanko • Android My Items & Item Detail • v1.0
+ 
+-Bộ bàn giao triển khai • 24/10/2026 • v0.9 — baseline đã đối chiếu nguồn; còn thiếu hồ sơ quyết định theo mã.
+-
+-Chỉ tài liệu, đặc tả và asset placeholder. Không có implementation ứng dụng, migration, PR hay thay đổi bộ âm thanh hiện có.
++Bản hoàn thiện theo Approved UX Decisions — Recovery Baseline do chủ sản phẩm cung cấp ngày24/10/2026. Phạm vi: tài liệu và assets, 4 màn + 3 sheets. Không sửa ứng dụng, không PR, không deploy.
+ 
+ ## Bắt đầu
+ 
+-1. Đọc `01_UX_BASELINE.md` và `02_STATE_TRANSITIONS.md` trước khi dựng UI.
+-2. Dùng `03_SCREENS_COMPONENTS.md` cho 4 màn + 3 bottom sheets.
+-3. Kiểm tra `04_ACCEPTANCE_EDGE_CASES.md` và `05_ASSETS.md`.
+-4. Giao nguyên `06_CODING_AGENT_PROMPT.md` cùng cả thư mục này cho coding agent.
+-5. `assets/manifest.json` ghi đường dẫn tương đối trong bundle; `assets/android/res/` là tài nguyên có thể nhập vào Android. Không tự sao chép thư mục đó vào app trong lần bàn giao này.
+-6. `07_DECISION_TRACEABILITY.md` liệt kê từng mã quyết định còn thiếu nội dung và các quy tắc đã xác minh.
++1. Đọc01 UX baseline và02 state matrix; UI Approved khác với API/schema chưa xác nhận.
++2. Dùng03 cho MyItems, ItemDetail, TransactionDetail, ArchivedItems và Filter & Sort, More Options, Record a Purchase.
++3. Dùng04 cho acceptance/edge cases,05 và manifest cho assets,06 làm prompt coding agent.
++4. 07 map đủ29 quyết định;08 là báo cáo thay đổi so v0.9 và blockers còn lại;09 là evidence.
++5. `sources/approved_ux_recovery_baseline.md` giữ nguyên nguồn khôi phục. Snapshot Drive nội bộ trong sources; không ship APK/public.
++6. `qa/v0.9_to_v1.0.diff`, `qa/bundle_integrity.json`, `qa/checksums.sha256` phục vụ kiểm tra tài liệu/ZIP, không chứng nhận runtime app.
+ 
+-## Nguồn và độ tin cậy
++## Nguồn và hiệu lực
+ 
+-| Nguồn | Tình trạng |
+-|---|---|
+-| [Functional Specification v1.1](https://docs.google.com/document/d/1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go/edit) | Đã đọc toàn văn, gồm phụ lục có hiệu lực 17/10/2026 |
+-| [TECH-02](https://docs.google.com/document/d/1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ/edit) | Đã đọc toàn văn, gồm phụ lục có hiệu lực |
+-| [Design System v1.0](https://docs.google.com/document/d/1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg/edit) | Đã đọc bản text; một số bảng bị tuyến tính hóa, giữ bản trích xuất trong sources |
+-| Chat “Tư vấn thiết kế màn hình”, 6adcb6ee-a8f4-83ec-b3e0-16d60e40d5ae | Chỉ đọc được 5 lượt cuối. Xác minh yêu cầu thay chó bằng mèo, product hero không có mèo, dùng dummy thay ảnh sản phẩm minh họa cũ |
+-| ITEM-01..07, DETAIL-01..14 | Người dùng xác nhận có quyết định đã chốt; không truy xuất được nội dung từng mã |
+-| EDGE-01/03/04/07=A; GAP-01..04=A | Giữ nguyên lựa chọn A do người dùng chỉ định; không biết nội dung phương án A nên chưa thể gán nghĩa hoặc xác nhận tương thích |
++Approved Recovery Baseline là nguồn quyết định UX được user cung cấp trực tiếp, đủ ITEM01–07, DETAIL01–14, EDGE01/03/04/07 và GAP01–04. Không còn blocker thiếu nội dung29 mã. Functional Specification v1.1/TECH-02 là chuẩn backend; phụ lục có hiệu lực17/10/2026 ưu tiên các đoạn cũ. Đã fetch lại cả2 từ Drive sau khi nhận baseline, nguồn không thay đổi. Design System v1.0 dùng snapshot đã đối chiếu Drive trong lần review trước.
+ 
+-Snapshot text trong `sources/` phục vụ đối chiếu, không phải bản sao có đầy đủ ảnh, bảng hay bố cục gốc. Không đưa snapshot vào APK hoặc public website.
++Ready tạm thời offline là UI theo EDGE-01, không chuyển state server hoặc tạo transaction. Skip Waiting là kết thúc phiên và mở lựa chọn, không tự Skip item. Postponed có nhánh Considering + event, không thêm ItemStatus.
+ 
+-## Quy tắc hiệu lực
++Approved không đồng nghĩa contract đã implement: persistence/clear marker của Ready/Postponed, archive khi ACTIVE và quyền ghi archived còn cần contract cụ thể (08). Không chặn archive ACTIVE hoặc bắt restore-trước-edit như một policy đã được duyệt.
+ 
+-Yêu cầu hiện tại của chủ sản phẩm và các sửa đổi mới nhất có hiệu lực trước. Trong hai tài liệu nghiệp vụ, phụ lục cuối thay thế đoạn cũ trái ngược. Chi tiết UI mới do bộ bàn giao đề xuất được ghi **Reference**; không đổi thành “đã chốt”. Không dùng các mã ITEM/DETAIL chưa đọc được làm bằng chứng cho một hành vi tự suy ra.
++## Assets và mức sẵn sàng
+ 
+-## Những phần cần đối chiếu trước khi chốt production
++Product Hero/preview dùng dummy trung tính trong bundle, không mèo trong/cạnh/đè ảnh, không túi/tai nghe/giày. **Cần asset mèo trắng Chanko canonical**, gồm Empty State Chanko + hộp kẹo; không tự thay mèo khác. Thiếu thì giữ text/slot trống cho review, không gọi đó là visual hoàn chỉnh. Nunito/Material Symbols chưa bundle; dùng resource có quyền của repo.
+ 
+-- Nội dung nguyên văn từng quyết định ITEM/DETAIL/EDGE/GAP và ảnh preview đã duyệt. Không tái tạo lịch sử bằng suy đoán.
+-- Asset mèo trắng canonical gốc và quyền sử dụng. Bundle không có ảnh mèo thay thế tự vẽ hoặc sinh mới; các slot mascot có thể bỏ trống và giữ speech text.
+-- Chính sách archive khi cooling-off ACTIVE, điều kiện chính xác của Ready, chuyển status thủ công ngoài các trường hợp đã có phụ lục, và quyền ghi purchase trên archived item. Các lựa chọn tạm Reference có trong matrix.
+-- API archive/restore, các giới hạn số/chuỗi/ngày, timezone tài khoản và cơ chế trả lỗi/version theo repo/API thật. TECH-02 không xác nhận endpoint cụ thể.
+-
+-## Không gian làm việc đã kiểm tra
+-
+-Thư mục hiện tại chỉ có `chanko_playful_cat_starter_pack/` cùng ZIP âm thanh, không có repo Android hay build files. Không giả định kiến trúc package, thư viện ảnh hoặc route đã tồn tại. Coding agent phải đọc AGENTS.md và repo đích sau khi nhận bàn giao.
++Bộ bàn giao đã hoàn thiện nội dung theo baseline, đủ để triển khai phần đã có contract. Các backend policy còn mở và visual canonical chưa đủ điều kiện nghiệm thu cuối. Không có repo Android ở workspace nên chưa build/test runtime. Bản ZIP v1.0 trước recovery được giữ riêng dưới tên `...v1.0_pre_recovery.zip`; ZIP v1.0 hiện tại là bản mới cần dùng.
+--- v0.9/assets/manifest.json
++++ v1.0/assets/manifest.json
+@@ -1,7 +1,7 @@
+ {
+   "version": "1.0",
+   "created": "2026-10-24",
+-  "root": "handoff/chanko_android",
++  "root": "chanko_android_v1.0",
+   "assets": [
+     {
+       "id": "ic_product_placeholder",
+@@ -85,7 +85,15 @@
+     "forbidden_placements": [
+       "product hero",
+       "product detail media",
+-      "product thumbnail"
++      "product thumbnail",
++      "beside or overlaid on product media"
++    ],
++    "canonical_verified": false,
++    "blocking_scope": "final mascot visual only; canonical source asset required",
++    "required_compositions": [
++      "Compact MyItems Hero",
++      "Empty State: canonical Chanko with candy box",
++      "Small contextual speech below status"
+     ]
+   },
+   "fonts": {
+@@ -93,5 +101,8 @@
+   },
+   "icons": {
+     "Material Symbols Rounded": "not bundled; reuse licensed repo resources"
+-  }
++  },
++  "handoff_version": "1.0",
++  "product_hero_policy": "dummy placeholder only in handoff and previews; no sample product photos; no mascot",
++  "approved_ux_source": "sources/approved_ux_recovery_baseline.md"
+ }
+--- v0.9/sources/approved_ux_recovery_baseline.md
++++ v1.0/sources/approved_ux_recovery_baseline.md
+@@ -0,0 +1,110 @@
++# Chanko — My Items & Item Detail
++## Approved UX Decisions — Recovery Baseline
++
++**Status:** Approved UX decisions  
++**Purpose:** Khôi phục các quyết định từ cuộc trò chuyện thiết kế để hoàn thiện handoff v1.0.
++
++### 1. My Items — ITEM-01 đến ITEM-07
++
++| ID | Approved decision |
++|---|---|
++| ITEM-01 | A — List View mặc định, card ngang, thumbnail bên trái |
++| ITEM-02 | B — Compact 3D Chanko Hero |
++| ITEM-03 | A — Ba overview tiles: All Items, Cooling Off, Ready; nhấn để lọc |
++| ITEM-04 | B — Filter hai cấp: All / Active / Purchased / Skipped; Active gồm Saved / Considering / Cooling Off / Ready / Postponed. Có Search và Sort |
++| ITEM-05 | A — Compact read-only item cards; nhấn mở Item Detail |
++| ITEM-06 | A — Empty State với Chanko và hộp kẹo; có Save an Item hoặc Clear Filters |
++| ITEM-07 | Giữ 4 navigation tabs và nút + toàn cục; không thêm FAB trùng lặp |
++
++### 2. Item Detail — DETAIL-01 đến DETAIL-14
++
++| ID | Approved decision |
++|---|---|
++| DETAIL-01 | A — Pastel Candy Product Stage; chỉ hiển thị ảnh sản phẩm hoặc dummy placeholder |
++| DETAIL-02 | A — Product summary và expandable details; Edit trong More Options |
++| DETAIL-03 | CTA và nội dung thay đổi theo trạng thái item |
++| DETAIL-04 | A — Chanko nhỏ bên cạnh contextual speech bubble, nằm dưới status |
++| DETAIL-05 | A — Collapsible Decision Journey dựa trên lịch sử thật |
++| DETAIL-06 | A — Sticky Primary CTA + More Options |
++| DETAIL-07 | A — Cooling Off countdown nổi bật; Adjust/Skip Wait trong More Options |
++| DETAIL-08 | A — Ready có mindful review ngắn, có thể bỏ qua |
++| DETAIL-09 | A — Purchased/Skipped ưu tiên read-only |
++| DETAIL-10 | A — Postponed hiển thị thời gian review tiếp theo khi có |
++| DETAIL-11 | A — Purchase Confirmation Bottom Sheet |
++| DETAIL-12 | A — Need More Time có thể đặt thời gian chờ mới hoặc chuyển Considering và ghi nhận Postponed |
++| DETAIL-13 | A — Direct Mark as Purchased trong More Options, không bắt buộc Quick Check |
++| DETAIL-14 | A — Purchase History là section riêng trong Item Detail |
++
++**Lưu ý:** DETAIL-03 là tổng hợp quy tắc contextual UI; không được tự suy diễn thành một lựa chọn A/B mới.
++
++### 3. Edge Cases
++
++| ID | Approved decision |
++|---|---|
++| EDGE-01 | A — Cooling Off hết hạn offline: hiển thị Ready tạm thời, đồng bộ sau |
++| EDGE-03 | A — Archive/Hide item có purchase, giữ nguyên transaction và budget |
++| EDGE-04 | A — Buy Again trong More Options, tạo purchase transaction mới |
++| EDGE-07 | A — Offline giữ dữ liệu form mua; yêu cầu online để xác nhận |
++
++Các EDGE khác phải tuân theo Functional Spec và TECH-02; không tự đánh dấu Approved nếu chưa có lựa chọn riêng.
++
++### 4. UX Gaps đã chốt
++
++| ID | Approved decision |
++|---|---|
++| GAP-01 | A — Ready duy trì đến khi người dùng thực hiện hành động xử lý rõ ràng |
++| GAP-02 | A — Skip Waiting kết thúc phiên chờ và mở lựa chọn quyết định, không tự Skip item |
++| GAP-03 | A — Archived Items trong menu, hỗ trợ Restore |
++| GAP-04 | A — Nhấn purchase transaction mở Transaction Detail để xem/sửa/xóa giao dịch nhập sai |
++
++### 5. State Machine & Business Invariants
++
++Chỉ có **5 Item Status chính thức**: WISHLIST, CONSIDERING, WAITING, PURCHASED, SKIPPED.
++
++- Ready for Review là derived UI state, không phải Item Status.
++- Postponed là decision/event hoặc presentation label, không phải Item Status.
++- Cooling Off ACTIVE tương ứng WAITING.
++- Khi hết hạn: Cooling Off → COMPLETED; Item → CONSIDERING.
++- Need More Time sau Completed tạo phiên ACTIVE mới, không gia hạn phiên cũ.
++- Mua khi Waiting kết thúc Cooling Off và tạo transaction.
++- AI Verdict không tự thay đổi Item Status hoặc tạo Purchase.
++- Một item có thể có nhiều Purchase Transactions.
++- Xóa Purchase cuối cùng không tự động thay đổi Item Status.
++- Archive/Restore phải giữ nguyên lịch sử và budget.
++- Offline Room là read cache và nơi lưu manual drafts, không phải nguồn dữ liệu nghiệp vụ chính thức.
++
++### 6. Screen & Component Scope
++
++**4 màn hình điều hướng:**
++1. MyItemsScreen
++2. ItemDetailScreen
++3. TransactionDetailScreen
++4. ArchivedItemsScreen
++
++**3 Bottom Sheets:**
++1. Filter & Sort
++2. More Options
++3. Record a Purchase
++
++Purchase History và Decision Journey là sections/components trong Item Detail, không phải màn hình điều hướng riêng.
++
++### 7. Visual Design — Mandatory
++
++- Candy Pop 3D, warm cream background, vibrant purple, pink và pastel accents.
++- Typography Nunito, rounded cards, Material 3.
++- Mascot phải là **mèo trắng Chanko canonical đã duyệt**, không phải chó hoặc mascot tự tạo khác.
++- Chanko được phép xuất hiện ở My Items Hero, Empty State và contextual speech bubble.
++- **Không đặt Chanko trong Product Hero, cạnh ảnh sản phẩm hoặc chồng lên ảnh sản phẩm.**
++- Product Hero dùng dummy image/placeholder trung tính, không dùng ảnh túi, tai nghe hoặc giày từ mockup trước.
++- Không celebration mua hàng, không shaming, không khuyến khích mua thêm.
++
++### 8. Handoff Instructions
++
++1. Đối chiếu các quyết định trên với Functional Specification v1.1 và TECH-02 trên Google Drive.
++2. Thay những phần Reference trong v0.9 bằng Approved chỉ khi có bằng chứng tương ứng từ baseline này.
++3. Ghi rõ những hành vi chưa được đặc tả trong Functional Spec hoặc TECH-02, đặc biệt Ready resolution, Archive khi Waiting và Restore.
++4. Không tự tạo mascot canonical mới nếu chưa có đúng asset.
++5. Xuất ZIP handoff v1.0 và báo cáo thay đổi so với v0.9.
++6. Không sửa Android code, không tạo PR, không triển khai ứng dụng.
++
++**Đây là bản khôi phục các quyết định UX từ cuộc trò chuyện, không thay thế Functional Spec/TECH-02 làm nguồn chuẩn cho các quy tắc backend.**
+--- v0.9/sources/functional_v1_1.txt
++++ v1.0/sources/functional_v1_1.txt
+@@ -1,4 +1,4 @@
+-﻿SHOULD I BUY IT?
++SHOULD I BUY IT?
+ FUNCTIONAL SPECIFICATION — APPROVED BASELINE
+ SPEC-01 đến SPEC-07 | Cập nhật: 17/10/2026
+ Trạng thái: Các lựa chọn sản phẩm chính đã được người dùng phê duyệt. Đây là bản tổng hợp các yêu cầu đã chốt, phục vụ Giai đoạn 4 — Technical Design; không phải mô tả API/database cuối cùng.
+--- v0.9/sources/provenance.json
++++ v1.0/sources/provenance.json
+@@ -0,0 +1,33 @@
++[
++  {
++    "path": "sources/functional_v1_1.txt",
++    "drive_id": "1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go",
++    "modified_time": "2026-10-17T10:10:59.447Z",
++    "retrieved_date": "2026-10-24",
++    "sha256": "ce29303ecaf6311416f618d912b632cc4af77589e42c9b1702daeeaec762b8a8",
++    "normalized_match_v0_9": true
++  },
++  {
++    "path": "sources/tech_02.txt",
++    "drive_id": "1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ",
++    "modified_time": "2026-10-17T10:11:01.531Z",
++    "retrieved_date": "2026-10-24",
++    "sha256": "52559d9451d3f618eaebb845104f9a3a9eaeb81147d26fc1682732ceaa9b4031",
++    "normalized_match_v0_9": true
++  },
++  {
++    "path": "sources/design_system_v1_0.txt",
++    "drive_id": "1OPZt4JU1WpGYJHL5RIjJYmmx847Cg7Yg",
++    "modified_time": "2026-10-18T03:50:21.858Z",
++    "retrieved_date": "2026-10-24",
++    "sha256": "49c2a1a7ad8047ded57a6d9b11471a68447386d17ed4ef29788cc71ef8466b3d",
++    "normalized_match_v0_9": true
++  },
++  {
++    "path": "sources/approved_ux_recovery_baseline.md",
++    "source": "user-supplied approved UX recovery baseline",
++    "received_date": "2026-10-24",
++    "sha256": "59a56aa855f7b22173c598d20f0948feabf7484ad136cf9a1fc35c4a62f37837",
++    "approved_decision_count": 29
++  }
++]
+--- v0.9/sources/tech_02.txt
++++ v1.0/sources/tech_02.txt
+@@ -1,4 +1,4 @@
+-﻿TECH-02 — Data Architecture
++TECH-02 — Data Architecture
+ SHOULD I BUY IT? • Version 1.1 • 17/10/2026
+ 1. Phạm vi và mức độ phê duyệt
+ Bản tổng hợp kiến trúc dữ liệu phục vụ MVP Android Native + FastAPI Modular Monolith. Các quy tắc nghiệp vụ đã duyệt được giữ nguyên theo Functional Specification, TECH-01 và yêu cầu tiếp nối ngày 17/10/2026. Tài liệu này không phải migration đã chạy hay bằng chứng database đã tồn tại.
