@@ -1,78 +1,90 @@
-# Implementation Plan: Màn hình Home (Chanko Home v5)
+# Implementation Plan: Chanko Home — Product UX & Implementation Specification v1.1
 
 ## Overview
-Xây dựng và tích hợp hoàn chỉnh màn hình Trang chủ (`HomeScreen`) cho ứng dụng Chanko theo đúng bản thiết kế chốt v5 tiếng Việt (`UI-HANDOFF.md`). Màn hình bao gồm: Header lời chào, Thẻ Lịch chi tiêu tương tác theo chu kỳ neo thực tế (với nhãn thứ động, trạng thái ngày, linh vật Mèo 3D kèm bong bóng thoại, thống kê ngân sách 3 cột), Danh sách món đồ "Sẵn sàng xem lại" (mint card + nút Xem lại $\ge 48\text{dp}$), Danh sách món đồ "Đang cân nhắc" (timer đếm ngược), và Thanh điều hướng BottomBar 4 tab với nút Thêm (+) trung tâm.
+Xây dựng lại màn hình `HomeScreen` và nâng cấp điều hướng `MainNavigation` theo **Chanko Home — Product UX & Implementation Specification v1.1** (`SPEC-home.md`). Màn hình được triển khai theo hướng UI-first với deterministic fake/fixture data, hỗ trợ **Section-aware Data States** và bao gồm 7 thành phần trong vùng cuộn (`HOME-01 Header` → `HOME-02 Compact Living Room` → `HOME-03 Quick Actions` → `HOME-04 Budget Snapshot` → `HOME-05 Your Decisions` → `HOME-06 Observation (optional)` → `HOME-07 Local Draft Indicator (optional)`) cùng `HOME-08 Bottom Navigation + Global (+) Bottom Sheet`.
 
 ## Architecture Decisions
-1. **Clean Architecture & MVVM:** Presentation layer độc lập, `HomeViewModel` kết nối với `ItemRepository` (cho danh sách món đồ) và `HomeSpendingRepository` (in-memory mock provider cho chu kỳ chi tiêu và giao dịch mẫu).
-2. **Cycle Calendar Logic (Lưới lịch chu kỳ):** Tự viết bằng Compose thuần, không dùng thư viện ngoài. Thứ của cột đầu tiên trong lưới lịch được tính toán động từ ngày neo (`anchorDay`, ví dụ: ngày 15 bắt đầu Thứ Năm $\rightarrow$ cột 1 là T5).
-3. **Mascot Speech Bubble:** Asset 3D [mascot_crossed_arms.png](file:///Users/buihoa/Downloads/chanko-home-handoff/assets/mascot_crossed_arms.png) tách nền trong suốt tại `drawable-nodpi/`. Bong bóng thoại được vẽ bằng Compose UI vector và text thật để linh hoạt thay đổi nội dung theo tiến độ ngân sách.
-4. **Custom BottomBar Navigation:** Giữ nguyên 4 tab chuẩn của ứng dụng (`Trang chủ`, `Món đồ`, `Ngân sách`, `Phân tích`), tạo khoảng hở trung tâm $64-72\text{dp}$ cho nút Floating Action Button (+) kích thước $56\text{dp}$. Nút (+) cung cấp callback `onAddNewItemClick: () -> Unit`.
-5. **Accessibility & Responsive:** Mọi touch target $\ge 48\text{dp}$, font scale tới 200%, hỗ trợ co giãn mượt từ $320\text{dp}$ tới $393\text{dp}$, 100% chuỗi tiếng Việt trong `strings_home.xml`.
+1. **Clean Slate First:** Tách bước xóa toàn bộ UI/ViewModel/Model/Resource của Home v5 cũ thành một commit độc lập (`Task 0`) trước khi dựng kiến trúc v1.1.
+2. **Section-Aware State (`HomeUiState`):** Thay vì một trạng thái `Loading/Error` toàn màn hình, mỗi khu vực dữ liệu (`Budget`, `Your Decisions`, `Observation`, `Local Draft Indicator`) có trạng thái độc lập (`SectionState<T>: Loading | Content(data, isFromCache) | Error`), đảm bảo lỗi ở một section không làm sập toàn bộ Home.
+3. **Deterministic Fake Data (`HomeFakeDataSource`):** Cung cấp dữ liệu giả lập xác định (không random khi recompose, không gọi mạng) hỗ trợ đầy đủ các kịch bản: `Default`, `NewUser`, `OfflineCache`, `OverBudget`, `PartialError`.
+4. **Strict Phase Gate (`P1 → P6`):** Mỗi phase tương ứng với một lát cắt dọc (vertical slice) hoàn chỉnh, có Unit Tests + Compose Previews và dừng lại chờ người dùng nghiệm thu trước khi qua phase tiếp theo.
 
 ---
 
 ## Task List
 
-### Phase 1: Foundation (Tài nguyên & Mô hình dữ liệu)
-- [ ] **Task 1: Assets, Strings & Design Tokens Setup**
-- [ ] **Task 2: Home Domain Models & Cycle Calculation Logic**
+### Phase 0: Clean Slate Teardown
+- [x] **Task 0: Clean Slate Teardown (Xóa Home v5 cũ & dọn tài nguyên)**
 
-### Checkpoint: Foundation
-- [ ] Toàn bộ asset PNG đã copy vào `drawable-nodpi/`.
-- [ ] String tiếng Việt và Color tokens biên dịch không lỗi.
-- [ ] Unit tests cho logic chu kỳ chi tiêu (`SpendingCycleTest`) pass 100%.
+### Checkpoint: Clean Slate
+- [x] Build `./gradlew assembleDebug` và `./gradlew testDebugUnitTest` pass 100%.
 
 ---
 
-### Phase 2: State Engine & Presentation Logic
-- [ ] **Task 3: HomeUiState, HomeUiEvent, HomeViewModel & Unit Tests**
+### Phase P1: Home Foundation + Header (`HOME-01`)
+- [ ] **Task 1: Section-aware `HomeUiState`, `HomeUiEvent`, `HomeFakeDataSource` & `HomeViewModel` Foundation (P1)**
+- [ ] **Task 2: `HomeHeader` (`HOME-01`), `HomeScreen` Scroll/Insets Scaffold & P1 Previews/Tests**
 
-### Checkpoint: State Engine
-- [ ] `HomeViewModel` nạp dữ liệu từ repository, phát ra state chính xác.
-- [ ] Unit tests `HomeViewModelTest` kiểm tra date selection, today jump, budget progress, filtering pass 100%.
-
----
-
-### Phase 3: Vertical Slices UI Components
-- [ ] **Task 4: Calendar & Budget UI Components (`SpendingCalendarCard`)**
-- [ ] **Task 5: Review & Cooling Item UI Components (`ReadyReviewSection`, `CoolingOffSection`)**
-
-### Checkpoint: UI Slices
-- [ ] Các component con độc lập, có Preview rõ ràng.
-- [ ] Touch target $\ge 48\text{dp}$, không hardcode màu sắc hay chuỗi.
+### Checkpoint: P1 Complete
+- [ ] Render ổn định với section-aware foundation, `HomeHeader` hỗ trợ tên dài/tên trống/font scaling, tôn trọng system insets.
+- [ ] Có Compose Previews và Unit Tests cho P1; `./gradlew assembleDebug testDebugUnitTest` pass.
+- [ ] Dừng lại chờ người dùng review trước khi qua P2.
 
 ---
 
-### Phase 4: Screen Assembly & Navigation
-- [ ] **Task 6: Screen Assembly (`HomeScreen`), Stateful Route & Previews**
-- [ ] **Task 7: Custom BottomBar Navigation & Home Route Wiring**
+### Phase P2: Compact Living Room (`HOME-02`)
+- [ ] **Task 3: Living Room Models, Smart Dialogue (`Friendly`/`Sassy`/`Savage`) & 4 Interactive Objects (`Hourglass`, `Calendar`, `Wallet`, `Pause Jar`)**
+- [ ] **Task 4: Contextual Preview Bottom Sheets cho 4 Objects & P2 Previews/Tests**
 
-### Checkpoint: Screen & Navigation Complete
-- [ ] `HomeScreen` hiển thị đầy đủ trên `MainNavigation` tại tab Trang chủ.
-- [ ] Nút (+) ở trung tâm hoạt động đúng qua callback.
-- [ ] Build ứng dụng không phát sinh lỗi.
+### Checkpoint: P2 Complete
+- [ ] Đúng 4 objects có vùng chạm riêng $\ge 48\text{dp}$, không chồng lấn, có semantics, mở đúng Contextual Preview Bottom Sheet.
+- [ ] Dừng lại chờ người dùng review trước khi qua P3.
 
 ---
 
-### Phase 5: Quality Gate & Regression Verification
-- [ ] **Task 8: End-to-End Quality Gate & Regression Verification**
+### Phase P3: Quick Actions + Global `+` (`HOME-03`, `HOME-08`)
+- [ ] **Task 5: `QuickActionsSection` (`Quick Check`, `Save an Item`) & Global `+` Action Bottom Sheet trong `MainNavigation`**
 
-### Checkpoint: Complete & Done
-- [ ] Toàn bộ unit tests pass: `./gradlew testDebugUnitTest`.
-- [ ] Build debug thành công: `./gradlew assembleDebug`.
-- [ ] Kiểm tra không vi phạm quy tắc dự án (không chạy emulator/device, không sửa skills, mã sạch).
+### Checkpoint: P3 Complete
+- [ ] 2 direct CTAs trên Home phát đúng action; nút `+` mở Bottom Sheet gồm `Quick Check` & `Save an Item`, dismiss giữ nguyên tab/scroll.
+- [ ] Dừng lại chờ người dùng review trước khi qua P4.
+
+---
+
+### Phase P4: Budget Snapshot (`HOME-04`)
+- [ ] **Task 6: `BudgetSnapshotSection` (4 ngưỡng `Normal`/`Warning`/`Reached`/`OverBudget`, state transition warning, loại trừ non-purchased items) & P4 Tests**
+
+### Checkpoint: P4 Complete
+- [ ] Tính đúng tiến độ và ngưỡng cảnh báo, không chia cho 0, hỗ trợ cached/error state cấp section.
+- [ ] Dừng lại chờ người dùng review trước khi qua P5.
+
+---
+
+### Phase P5: Your Decisions (`HOME-05`)
+- [ ] **Task 7: `YourDecisionsSection` (Priority feed tối đa 3 items: `Ready -> Waiting -> Considering -> Saved`, `View All`, empty/loading/error state) & P5 Tests**
+
+### Checkpoint: P5 Complete
+- [ ] Thứ tự ưu tiên chính xác, không nhầm `Considering` với `Waiting`, tối đa 3 items, callback đúng item ID.
+- [ ] Dừng lại chờ người dùng review trước khi qua P6.
+
+---
+
+### Phase P6: Observation, Draft, Integration & Polish (`HOME-06`, `HOME-07`)
+- [ ] **Task 8: `ObservationSection` (`Explain`, `Dismiss`, Semantic Finding ID) & `LocalDraftIndicatorSection` (4 sync states)**
+- [ ] **Task 9: End-to-End Scenarios (`NewUser`, `OfflineCache`, `PartialError`), Accessibility/Font-Scale Previews & Full Smoke Tests**
+
+### Checkpoint: P6 Complete & Done
+- [ ] Toàn bộ tiêu chí nghiệm thu P1–P6 trong `SPEC-home.md` hoàn tất.
+- [ ] `./gradlew assembleDebug testDebugUnitTest` pass 100%.
 
 ---
 
 ## Risks and Mitigations
-
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Lưới lịch bắt đầu theo ngày neo (không phải Thứ Hai chuẩn) | High | Viết pure Kotlin algorithm tính toán offset và danh sách thứ, kiểm chứng bằng Unit Test trước khi render UI. |
-| Chia cho 0 khi ngân sách bằng 0 hoặc null | High | Hàm an toàn `safeBudgetProgress(spent, budget)` trả về 0f khi `budget <= 0`. |
-| Tràn chữ trên màn hình hẹp 320dp hoặc khi font scale 200% | Medium | Lưới lịch dùng `weight(1f)` linh hoạt, 3 cột ngân sách dùng layout reflow tự động xuống dòng khi thiếu chỗ, không ellipsis số tiền. |
-| Asset PNG bị vỡ hoặc mất độ sắc nét | Low | Đặt nguyên bản tại thư mục `drawable-nodpi/` theo hướng dẫn handoff §8. |
+| Lỗi ở một section làm toàn bộ Home chuyển sang màn hình lỗi | High | Thiết kế `SectionState<T>` riêng cho từng section (`Budget`, `Decisions`) ngay từ P1. |
+| Nút `+` làm đổi tab hoặc nhân bản Bottom Sheet khi xoay màn hình | Medium | Quản lý trạng thái hiển thị sheet bằng `rememberSaveable` / single state source trong `MainNavigation`, tách biệt hoàn toàn với `NavController.selectTab`. |
+| Thiếu PNG 3D riêng cho `Hourglass` và `Wallet` | Low | Sử dụng vector/icon 3D-styled trên nền badge `CandyColors` trong P2, tách rời khỏi logic vùng chạm và ghi rõ trong báo cáo bàn giao. |
 
 ## Open Questions
-- Không còn (Các câu hỏi về Mock Provider cho Daily Purchases, hành vi nút (+), và nhánh Git đã được người dùng phê duyệt).
+- Không còn cho P0/P1.
