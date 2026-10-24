@@ -48,14 +48,14 @@ Kế hoạch chi tiết: [`tasks/plan.md`](file:///Users/buihoa/AndroidStudioPro
 ---
 
 ## Phase 4: Cat Personality Sub-Screen Components
-- [ ] **Task 4: Xây dựng Composable cho màn hình chọn Tính cách linh thú (`PersonalityScreen`)**
+- [x] **Task 4: Xây dựng Composable cho màn hình chọn Tính cách linh thú (`PersonalityScreen`)**
   - **Acceptance:**
-    - [ ] 3 lựa chọn Radio: Thân thiện, Lém lỉnh, Thẳng thắn.
-    - [ ] Chọn radio đổi tức thì câu thoại xem trước (PreviewCard) offline.
-    - [ ] Nút Save chỉ bấm được khi có thay đổi (`isDirty`) và online.
-    - [ ] Bấm Back khi dirty hiển thị `UnsavedChangesDialog` ("Tiếp tục chỉnh sửa" / "Hủy bỏ").
+    - [x] 3 lựa chọn Radio: Thân thiện, Lém lỉnh, Thẳng thắn.
+    - [x] Chọn radio đổi tức thì câu thoại xem trước (PreviewCard) offline.
+    - [x] Nút Save chỉ bấm được khi có thay đổi (`isDirty`) và online.
+    - [x] Bấm Back khi dirty hiển thị `UnsavedChangesDialog` ("Tiếp tục chỉnh sửa" / "Hủy bỏ").
   - **Verify:**
-    - [ ] `./gradlew assembleDevDebug` thành công.
+    - [x] `./gradlew assembleDevDebug` thành công.
   - **Files:**
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/PersonalityScreen.kt`
     - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/personality/components/PersonalityComponents.kt`
