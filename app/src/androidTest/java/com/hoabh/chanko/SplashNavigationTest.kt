@@ -43,7 +43,7 @@ class SplashNavigationTest {
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
         // A restored or programmatically requested protected route cannot bypass Google.
-        compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
+        compose.runOnIdle { navigation.navigate(Screen.Main.route) }
         compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Login.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
         // Callback only triggers dummy navigation to SetupGate
@@ -54,8 +54,8 @@ class SplashNavigationTest {
         compose.onNodeWithText("Thử lại").performClick()
         compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
         compose.runOnIdle { auth.accept("other-account") }
-        compose.runOnIdle { navigation.navigate(Screen.Dashboard.route) }
-        compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Dashboard.route }
+        compose.runOnIdle { navigation.navigate(Screen.Main.route) }
+        compose.waitUntil(5000) { navigation.currentDestination?.route == Screen.Main.route }
         compose.runOnIdle { assertNull(navigation.previousBackStackEntry) }
         // Authentication alone cannot grant Home while setup status is unverified.
         compose.onNodeWithText("Chưa thể xác nhận thiết lập").assertIsDisplayed()
