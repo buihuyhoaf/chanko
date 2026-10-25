@@ -73,9 +73,10 @@ fun ChatMessageBubble(
                             lineHeight = 20.sp
                         )
 
-                        if (message.verdict != null) {
+                        val verdict = message.verdict
+                        if (verdict != null) {
                             Spacer(modifier = Modifier.height(10.dp))
-                            DecisionVerdictCard(verdict = message.verdict)
+                            DecisionVerdictCard(verdict = verdict)
                         }
                     }
                 }

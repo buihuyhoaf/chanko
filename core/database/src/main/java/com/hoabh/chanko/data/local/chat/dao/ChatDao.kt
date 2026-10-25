@@ -1,11 +1,11 @@
-package com.hoabh.chanko.data.chat.local.dao
+package com.hoabh.chanko.data.local.chat.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.hoabh.chanko.data.chat.local.entity.ChatMessageEntity
-import com.hoabh.chanko.data.chat.local.entity.ChatThreadEntity
+import com.hoabh.chanko.data.local.chat.entity.ChatMessageEntity
+import com.hoabh.chanko.data.local.chat.entity.ChatThreadEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

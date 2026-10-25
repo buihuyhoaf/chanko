@@ -1,4 +1,4 @@
-package com.hoabh.chanko.data.chat.local.entity
+package com.hoabh.chanko.data.local.chat.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
