@@ -1,0 +1,79 @@
+{
+  "version": "1.2",
+  "canonical": {
+    "file": "08_ASSETS/canonical/mascot_skeptical.png",
+    "sha256": "c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7",
+    "source": "User attachment in referenced conversation6adcba07-ac98-83ec-809a-bdb67c01c757",
+    "byte_identical_verified": true,
+    "alias": "08_ASSETS/canonical/chanko_user_approved.png"
+  },
+  "expressions": {
+    "chanko_concerned": {
+      "png": "08_ASSETS/expressions/chanko_concerned.png",
+      "webp": "08_ASSETS/expressions/chanko_concerned.webp",
+      "png_sha256": "1664b81a2c3fcc3af920f04104e018e9a2825e75c047179264a1bb687a6c59ac",
+      "webp_sha256": "f6b782136c90b1c08d3b80bdabb2cb63bf87c575c2132d425a0040d93e5b6764",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_curious": {
+      "png": "08_ASSETS/expressions/chanko_curious.png",
+      "webp": "08_ASSETS/expressions/chanko_curious.webp",
+      "png_sha256": "2861a76987f001b64aee7f1aa962bb384b1f8f17f37c3d65567ca019cd0635eb",
+      "webp_sha256": "a422e0e4ce5f5bbe8ffe132c47fd056e496c6f367f42ad09c10149013deba5e7",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_encouraging": {
+      "png": "08_ASSETS/expressions/chanko_encouraging.png",
+      "webp": "08_ASSETS/expressions/chanko_encouraging.webp",
+      "png_sha256": "9ac854134b06344f2b2e0a73fb34c0e2abe52052b4d8a7878bb23864b2afe6d6",
+      "webp_sha256": "0e5a7100dfb28d70a97e39dc3261183bb597bbbcb6f243c2d160d3a95e557edf",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_neutral": {
+      "png": "08_ASSETS/expressions/chanko_neutral.png",
+      "webp": "08_ASSETS/expressions/chanko_neutral.webp",
+      "png_sha256": "c3a468fc758a1df0d05d835433163881fa63089e6491d0a2922a2886867d953a",
+      "webp_sha256": "10342b7e70b36727459914fcd8722f045f8f28b694314ded8222cbc089c157de",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_relaxed": {
+      "png": "08_ASSETS/expressions/chanko_relaxed.png",
+      "webp": "08_ASSETS/expressions/chanko_relaxed.webp",
+      "png_sha256": "bdbaaf9d79f2587bf557ebd91bf270f067ab86dbd906bca3dac7d6b7f32688e3",
+      "webp_sha256": "7267d9dcc40f56e53b1c09133e9a171e762c1c8cc6b861f54a919bd5f5f6b71e",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_sleeping": {
+      "png": "08_ASSETS/expressions/chanko_sleeping.png",
+      "webp": "08_ASSETS/expressions/chanko_sleeping.webp",
+      "png_sha256": "9fc844b67d961a1906fef81564000735209a8d7b8ad548a6b48b90b31accb72a",
+      "webp_sha256": "7bd813e6c1b64d32c5f6772ee15f5b80fa2c087abf4dd7a88ca66f3417c85479",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_thinking": {
+      "png": "08_ASSETS/expressions/chanko_thinking.png",
+      "webp": "08_ASSETS/expressions/chanko_thinking.webp",
+      "png_sha256": "7ad5bfa01c84e796d639e1036229c888134b174992912f373ec9c507f6c8e1a2",
+      "webp_sha256": "0c21c4f230d9a3a4b83ed7d9fa9d1b81acb8f63ad94a00ef70c3d1332476f4e6",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    },
+    "chanko_welcome": {
+      "png": "08_ASSETS/expressions/chanko_welcome.png",
+      "webp": "08_ASSETS/expressions/chanko_welcome.webp",
+      "png_sha256": "3d304b0e47613a37476deec211e207e7be1ec8e58257da64010f700d39b20515",
+      "webp_sha256": "f21e997daf54e1fb1e0044d0965e8bd910c099080c55c3874eb9b9ca0cfad066",
+      "status": "UNCHANGED_V11_GENERATED_DERIVATIVE; not individually approved"
+    }
+  },
+  "expression_identity_input": "v1.1 canonical rendition; see historical log; not byte-exact source claim",
+  "screens": "07_VISUAL_REFERENCES/visual_source_registry.json",
+  "historical_log": "12_DEPENDENCIES_AND_OPEN_QUESTIONS/V11_GENERATION_LOG.json",
+  "mapping": "08_ASSETS/screen_asset_mapping.csv",
+  "new_image_generation": false,
+  "handoff_revision": "1.4",
+  "asset_creation_revision": "1.1",
+  "core_visual_approval_registry": "07_VISUAL_REFERENCES/VISUAL_BASELINE_APPROVAL.json",
+  "asset_bytes_changed_in_v13": false,
+  "asset_bytes_changed_in_v14": false,
+  "technical_approval_source": "14_APPROVALS_AND_RECOVERY/USER_TECHNICAL_APPROVAL_V14.md"
+}

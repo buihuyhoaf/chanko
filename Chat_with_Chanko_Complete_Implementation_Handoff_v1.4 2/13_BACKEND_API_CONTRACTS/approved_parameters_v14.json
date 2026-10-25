@@ -1,0 +1,55 @@
+{
+  "document_kind": "APPROVED_SPECIFICATION_PARAMETERS_NOT_DEPLOYED_CONFIG",
+  "contract_revision": "1.4",
+  "approval_source": "14_APPROVALS_AND_RECOVERY/USER_TECHNICAL_APPROVAL_V14.md",
+  "binding": {
+    "action": "BindExistingItem",
+    "same_thread": true,
+    "requires_explicit_confirmation": true,
+    "existing_item_only": true,
+    "creates_item": false,
+    "preserves_transcript_ids_text_order": true,
+    "increments_context_revision_once_per_intent": true,
+    "backfills_official_records": false
+  },
+  "cache": {
+    "freshness_ttl_seconds": 86400,
+    "freshness_expiry_effect": "MARK_STALE_AND_REVALIDATE_WHEN_ONLINE",
+    "offline_retention_age_limit_seconds": null,
+    "retained_stale_cache_offline_readable": true,
+    "age_only_purge": false,
+    "pagination_snapshot_ttl_seconds": 900,
+    "capacity_threads": 200,
+    "capacity_messages": 10000,
+    "capacity_bytes": 20971520,
+    "eviction": "CAPACITY_ONLY_LRU_PROTECT_OPEN_THREAD",
+    "invalidations": [
+      "KNOWN_DELETE_OR_OWNER_UNAVAILABLE",
+      "EXPLICIT_CLEAR",
+      "LOGOUT",
+      "ACTUAL_CAPACITY_OR_OS_DATA_REMOVAL"
+    ]
+  },
+  "operations": {
+    "retry_result_window_seconds": 86400,
+    "minimal_key_digest_retention_days": 30,
+    "one_active_ai_operation_per_thread": true,
+    "provider_deadline_seconds": 60,
+    "request_budget_seconds": 65,
+    "lease_seconds": 90,
+    "heartbeat_seconds": 15,
+    "automatic_mutation_replay": false
+  },
+  "deletion": {
+    "server_read_denial": "IMMEDIATE_AT_COMMIT",
+    "server_transcript_summary_purge_max_hours": 24,
+    "backup_rotation_max_days": 30,
+    "official_item_decision_evaluation_purchase_history": "INDEPENDENT_NO_CHAT_CASCADE_OR_CHAT_TTL",
+    "offline_device_delete_awareness": "ON_KNOWN_VALIDATION_NO_24H_OFFLINE_CUTOFF"
+  },
+  "transport": {
+    "mvp": "REST_COMPLETED_RESPONSE",
+    "optional_sse": "EXCLUDED_NOT_APPROVED"
+  },
+  "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION"
+}

@@ -1,0 +1,119 @@
+{
+  "canonical_sha256": "c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7",
+  "alias_byte_identical": true,
+  "pairs": [
+    {
+      "file": "08_ASSETS/expressions/chanko_concerned.png",
+      "size": [
+        1230,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "1664b81a2c3fcc3af920f04104e018e9a2825e75c047179264a1bb687a6c59ac",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_curious.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "2861a76987f001b64aee7f1aa962bb384b1f8f17f37c3d65567ca019cd0635eb",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_encouraging.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "9ac854134b06344f2b2e0a73fb34c0e2abe52052b4d8a7878bb23864b2afe6d6",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_neutral.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "c3a468fc758a1df0d05d835433163881fa63089e6491d0a2922a2886867d953a",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_relaxed.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "bdbaaf9d79f2587bf557ebd91bf270f067ab86dbd906bca3dac7d6b7f32688e3",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_sleeping.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "9fc844b67d961a1906fef81564000735209a8d7b8ad548a6b48b90b31accb72a",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_thinking.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "7ad5bfa01c84e796d639e1036229c888134b174992912f373ec9c507f6c8e1a2",
+      "masters_unchanged": true
+    },
+    {
+      "file": "08_ASSETS/expressions/chanko_welcome.png",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "png_webp_rgba_equal": true,
+      "sha256": "3d304b0e47613a37476deec211e207e7be1ec8e58257da64010f700d39b20515",
+      "masters_unchanged": true
+    }
+  ],
+  "new_image_generation": false
+}

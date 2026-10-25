@@ -1,0 +1,30 @@
+{
+  "method": "Deterministic HTML/CSS composition with exact existing PNG files; no regenerated mascots; browser screenshots",
+  "source": "source/",
+  "coordinate_system": "reference CSS px mapped to proposed dp at font scale 1; not Android runtime",
+  "screen_ids": [
+    "S01",
+    "S02",
+    "S03",
+    "S03_WAIT",
+    "S03_SKIP",
+    "S03_PRE_VERDICT",
+    "S04",
+    "S04_EMPTY",
+    "S05",
+    "S06",
+    "S07",
+    "S08",
+    "S09",
+    "S10",
+    "S11"
+  ],
+  "font": "../08_ASSETS/fonts/Nunito-Variable.ttf",
+  "approved_v02_parity": "NOT_APPLICABLE — v1.2 core visual baseline approved and supersedesv0.2",
+  "mapping": "../08_ASSETS/screen_asset_mapping.csv",
+  "approval_registry": "VISUAL_BASELINE_APPROVAL.json",
+  "core_visual_status": "USER_APPROVED",
+  "extra_four_substates": "SUPPORTING_REFERENCE_ONLY",
+  "behavioral_amendment_source": "../13_BACKEND_API_CONTRACTS/08_APPROVED_AMENDMENTS_V14.md",
+  "S05_behavioral_amendment": "Confirmed same-thread FREE->ITEM binding; keep approved visual PNG/HTML bytes unchanged, use updated screen spec for confirmation/copy"
+}

@@ -1,0 +1,112 @@
+{
+  "canonical_original_sha256": "c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7",
+  "alias_byte_identical": true,
+  "pairs": [
+    {
+      "name": "chanko_concerned",
+      "size": [
+        1230,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_curious",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_encouraging",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_neutral",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_relaxed",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_sleeping",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_thinking",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    },
+    {
+      "name": "chanko_welcome",
+      "size": [
+        1231,
+        1278
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "decoded_rgba_equal": true,
+      "unchanged_from_v12": true
+    }
+  ],
+  "approved_core_png_count": 11,
+  "all_core_pngs_byte_preserved": true
+}

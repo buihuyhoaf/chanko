@@ -1,0 +1,53 @@
+# TC-LIFECYCLE — archive, restore, multi-device
+
+**PROPOSED / A3; deletion/retention A1 và cache A4 vẫn độc lập.** Không tự đóng Q03/Q11 chỉ vì đã có văn bản hoàn chỉnh. Mục này cụ thể hóa phương án để phê duyệt.
+
+## State và capability đề xuất
+
+| Lifecycle | Read | Send/evaluate | Archive | Restore | Delete |
+|---|---|---|---|---|---|
+| ACTIVE | Theo owner/context | Online +item/context capability +không AI op active | Online +If-Match | Không áp dụng | Online +If-Match |
+| ARCHIVED | Theo owner, read-only | Không | Idempotent replay action đã commit; action mới recheck | Online +If-Match | Online +If-Match |
+| DELETED |404 chung, kể cả transcript/search | Không | Không | Không | Chỉ replay intent đã commit được204; request mới recheck404 |
+| UNKNOWN/offline cache | Có cache hợp lệ và nhãn stale | Không | Không | Không | Không |
+
+Lifecycle chat không sửa item archive/status, Ready marker, cooling-off hoặc official history. Restore không reset conversation messages/evaluations. Nếu item không còn khả dụng, restore chat có thể mở đọc lịch sử nhưng send/evaluate vẫn tắt theo item capabilities; không tự tạo/restore item.
+
+## Transaction archive/restore
+
+Auth/owner → validate/replay key theo03 → lock thread/active operation → If-Match/capability/lifecycle → tăng version+lifecycle_epoch → ghi lifecycle/result+invalidation metadata → commit →200 Conversation. Provider calls không nằm trong transaction. Archive thắng trước AI finalization thì operation INTERRUPTED_LIFECYCLE, không assistant/evaluation mới. Nếu AI đã commit trước thì giữ successful history rồi archive.
+
+Restore chỉ ARCHIVED→ACTIVE. Không resume provider hoặc tự gửi draft. Retry operation bị archive ngắt không được tự chạy lại sau restore; user gửi intent mới nếu muốn tiếp tục. Source transcript và context identity không clone. Archive cùng version ở hai máy: một mutation thắng; replay cùng key nhận cùng ack; key khác/version cũ409.
+
+## Cơ chế đồng bộ MVP đề xuất: refresh có kiểm soát
+
+Giữ baseline TECH-03 §4.3: refresh khi mở màn hình, foreground, user refresh và sau mutation. Không bắt buộc WebSocket, push, periodic WorkManager hoặc general outbox.
+
+Khi foreground/reconnect:
+1. Auth/session hiện hành; không render owner cũ. Hiển thị cache có timestamp nếu chưa hết TTL; Send/mutations tắt cho tới khi xác minh thread/capability.
+2. Đọc active thread GET và operation lookup của pending intent; validate tối đa100 cached thread IDs/batch qua cache-validation.200 results chỉ gồm requested IDs với lifecycle/version hoặc UNAVAILABLE, không title của resource không thuộc owner.
+3. DELETED/UNAVAILABLE: purge local transcript/summary/current draft và pending raw UI content của thread; giữ journal ID/hash cần reconcile đã redaction. Không tự restore/clone/resend.
+4. ARCHIVED: read-only, giữ draft session nếu chưa delete nhưng không tự gửi; user chủ động restore khi có capability. Server terminal result/epoch thắng UI cũ.
+5. Refresh history từ page1 với query-generation mới; discard response generation/owner cũ. Reconcile server message IDs để xóa local pending duplicate, không append theo timestamp.
+
+POST cache-validation là endpoint đọc bổ sung (không mutation): body thread_ids unique tối đa100. Response từng requested opaque ID: AVAILABLE +lifecycle/version/capabilities, hoặc UNAVAILABLE chung. Ownership kiểm tra từng ID, không lộ existence. Backend error không được diễn giải thành deleted; giữ stale/cache hoặc khóa action cho tới xác minh.
+
+## Guarantees và giới hạn được đề nghị phê duyệt
+
+Máy online foreground chỉ nhìn state sau refresh thành công; không hứa realtime giữa hai lần refresh. Máy offline không thể nhận remote delete tức thì. Cache hiển thị tối đa24h kể từ fetch hợp lệ, không gia hạn do đọc local; quá hạn yêu cầu mạng. A4 chốt tradeoff đọc offline và tính kịp thời, A1 deletion copy không hứa xóa tức thì trên máy offline/backup.
+
+Send sau remote archive/delete vẫn bị server reject khi version/lifecycle check; không dựa vào UI để bảo vệ. Dữ liệu chat không là nguồn authoritative cho item/budget. Row change count hoặc list absence trên một page không đủ để purge resource; cần explicit validation/thread read hoặc TTL. Refresh thất bại là lỗi mạng, không phải empty history.
+
+## Race matrix
+
+| Case | Kết quả proposed |
+|---|---|
+| A send, B archive | Nếu archive trước final commit, result bị fence; nếu result commit trước thì giữ rồi archive |
+| A draft, B delete | A purge khi biết deleted; offline không gửi và TTL giới hạn hiển thị |
+| A restore, B delete | Version/transaction winner; deleted không được revive bởi restore cũ |
+| A/B send khác key | Một active/thread; loser409/reload, không clock winner |
+| Response cũ tới sau account switch | Bỏ hoàn toàn theo owner+query generation; không ghi cache account mới |
+| Item version đổi khi provider chạy | CONTEXT_CHANGED, không publish nhận định như dữ liệu mới nhất |
+| Read cache sau logout/login khác | Không lộ title/preview/messages/draft/journal account trước |
+
+Tests IT04/IT09/IT11/IT12/IT15. Không có transport đồng bộ mới được coi là phê duyệt chỉ từ visual baseline.

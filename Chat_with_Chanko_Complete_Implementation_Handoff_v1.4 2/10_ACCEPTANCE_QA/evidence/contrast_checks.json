@@ -1,0 +1,342 @@
+{
+  "method": "WCAG sRGB relative luminance; unrounded comparisons; every text node conservatively requires4.5; essential shapes3.0; no gradients under text",
+  "sources": [
+    "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html",
+    "https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html",
+    "https://www.w3.org/WAI/WCAG21/Understanding/resize-text.html"
+  ],
+  "active_token_pairs": [
+    {
+      "foreground": "#151329",
+      "background": "#FFFFFF",
+      "role": "body/title/primary",
+      "ratio": 18.149543099384072,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#FAF8F5",
+      "role": "body/title/primary",
+      "ratio": 17.121305635455492,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#EEE7FF",
+      "role": "body/title/primary",
+      "ratio": 15.133083966755375,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#8965F6",
+      "role": "body/title/primary",
+      "ratio": 4.542493047385356,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#FFF2D8",
+      "role": "body/title/primary",
+      "ratio": 16.37298446707987,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#FFF3F6",
+      "role": "body/title/primary",
+      "ratio": 16.769314451042195,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#EEE8F1",
+      "role": "body/title/primary",
+      "ratio": 15.079892210817247,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#E2DCEB",
+      "role": "body/title/primary",
+      "ratio": 13.543588114925829,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#F7F3FC",
+      "role": "body/title/primary",
+      "ratio": 16.577207732969722,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#FFFFFF",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 8.599309014907915,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#FAF8F5",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 8.112126960538339,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#EEE7FF",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 7.170101454680376,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#FFF2D8",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 7.75757010287963,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#FFF3F6",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 7.945352461107766,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#EEE8F1",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 7.144899038076674,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#51485F",
+      "background": "#F7F3FC",
+      "role": "secondary/status/disabled/placeholder",
+      "ratio": 7.854331710695538,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#5030A0",
+      "background": "#FFFFFF",
+      "role": "link/essential-icon",
+      "ratio": 9.24503824852654,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#5030A0",
+      "background": "#FAF8F5",
+      "role": "link/essential-icon",
+      "ratio": 8.72127329033813,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#5030A0",
+      "background": "#EEE7FF",
+      "role": "link/essential-icon",
+      "ratio": 7.708510309307185,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#9C2341",
+      "background": "#FFFFFF",
+      "role": "destructive label/icon",
+      "ratio": 7.691385262459522,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#9C2341",
+      "background": "#FFF3F6",
+      "role": "destructive label/icon",
+      "ratio": 7.106474103729504,
+      "threshold": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "#6B5A7E",
+      "background": "#FFFFFF",
+      "role": "essential-border",
+      "ratio": 6.196705880749781,
+      "threshold": 3,
+      "pass": true
+    },
+    {
+      "foreground": "#6B5A7E",
+      "background": "#FAF8F5",
+      "role": "essential-border",
+      "ratio": 5.845640010681146,
+      "threshold": 3,
+      "pass": true
+    },
+    {
+      "foreground": "#6B5A7E",
+      "background": "#EEE7FF",
+      "role": "essential-border",
+      "ratio": 5.166811632511876,
+      "threshold": 3,
+      "pass": true
+    },
+    {
+      "foreground": "#6B5A7E",
+      "background": "#EEE8F1",
+      "role": "essential-border",
+      "ratio": 5.148650642726937,
+      "threshold": 3,
+      "pass": true
+    },
+    {
+      "foreground": "#8965F6",
+      "background": "#FAF8F5",
+      "role": "primary fill versus canvas",
+      "ratio": 3.769142947904006,
+      "threshold": 3,
+      "pass": true
+    },
+    {
+      "foreground": "#151329",
+      "background": "#8965F6",
+      "role": "send essential icon",
+      "ratio": 4.542493047385356,
+      "threshold": 3,
+      "pass": true
+    }
+  ],
+  "browser_text_pairs": [
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(250, 248, 245)",
+      "ratio": 17.121305635455492,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "S05 · Chanko visual reference v1.2"
+    },
+    {
+      "foreground": "rgb(81, 72, 95)",
+      "background": "rgb(250, 248, 245)",
+      "ratio": 8.112126960538339,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Trực tuyến · kết nối thiết bị"
+    },
+    {
+      "foreground": "rgb(81, 72, 95)",
+      "background": "rgb(238, 231, 255)",
+      "ratio": 7.170101454680376,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Bản mẫu · Phản hồi dựng sẵn"
+    },
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 18.149543099384072,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Hủy"
+    },
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(238, 231, 255)",
+      "ratio": 15.133083966755377,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Bạn"
+    },
+    {
+      "foreground": "rgb(80, 48, 160)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 9.24503824852654,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Lưu trữ"
+    },
+    {
+      "foreground": "rgb(81, 72, 95)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 8.599309014907913,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Chỉ dữ liệu mẫu. Không tạo món đồ hay chuyển lịch sử chat ngầm."
+    },
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(137, 101, 246)",
+      "ratio": 4.542493047385356,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Chọn món đồ"
+    },
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(255, 242, 216)",
+      "ratio": 16.37298446707987,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Chỉ đọc dữ liệu đã lưu. Gửi tin cần internet."
+    },
+    {
+      "foreground": "rgb(81, 72, 95)",
+      "background": "rgb(238, 232, 241)",
+      "ratio": 7.144899038076674,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Nhắn Chanko…"
+    },
+    {
+      "foreground": "rgb(21, 19, 41)",
+      "background": "rgb(255, 243, 246)",
+      "ratio": 16.769314451042195,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Bản nháp giữ trong màn hình này. Kiểm tra trước khi thử lại."
+    },
+    {
+      "foreground": "rgb(156, 35, 65)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 7.69138526245952,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Xóa chat"
+    },
+    {
+      "foreground": "rgb(156, 35, 65)",
+      "background": "rgb(255, 243, 246)",
+      "ratio": 7.106474103729502,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Xóa chat"
+    },
+    {
+      "foreground": "rgb(80, 48, 160)",
+      "background": "rgb(238, 231, 255)",
+      "ratio": 7.708510309307186,
+      "threshold": 4.5,
+      "pass": true,
+      "sample": "Tất cả"
+    }
+  ],
+  "failed_pairs": [],
+  "native_runtime_tested": false
+}

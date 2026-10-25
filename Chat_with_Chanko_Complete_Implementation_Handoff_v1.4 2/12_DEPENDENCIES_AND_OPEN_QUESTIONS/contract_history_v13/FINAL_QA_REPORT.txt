@@ -1,0 +1,74 @@
+# FINAL_QA_REPORT — Chat with Chanko Complete Handoff v1.3
+
+Ngày 25/10/2026 · Asia/Ho_Chi_Minh. Bản đầy đủ để bàn giao Android coding agent, tiếp nối ZIP v1.2. Không viết implementation code, không tạo PR hoặc sửa nguồn SPEC/TECH trên Drive.
+
+## Kết luận theo ba lớp
+
+| Lớp | Kết luận | Ý nghĩa |
+|---|---|---|
+| Documentation & Asset Completeness | **COMPLETE FOR HANDOFF — READY FOR UI IMPLEMENTATION WITH FAKE REPOSITORIES** | Có đầy đủ UX/screens/assets/component/navigation/state/Android/API proposals/AC/QA/coding prompt. Coding agent có thể bắt đầu UI khi được giao nhiệm vụ implementation riêng |
+| Technical Contract Approval | **PENDING A1–A5** | Phương án đã được soạn đầy đủ, có alternatives/recommendations; không tự phê duyệt. R07 chưa đóng ở lớp approval/production |
+| Runtime Acceptance | **NOT RUN — AFTER IMPLEMENTATION** | Android/TalkBack/IME/backend/race tests thực hiện sau khi có implementation; không dùng việc chưa chạy làm lý do tài liệu chưa đầy đủ |
+
+Không tuyên bố production đã sẵn sàng, không gọi nguồn 34 quyết định đã phục hồi khi chưa đọc được. Hai việc đó được quản lý riêng thay vì gộp thành “handoff stuck”.
+
+## Visual baseline đã chốt
+
+User trực tiếp phê duyệt **11 core visual references của v1.2** là baseline chính thức, thay v0.2. Đã ghi [approval source](14_APPROVALS_AND_RECOVERY/USER_VISUAL_APPROVAL.md) và [11 exact hashes](07_VISUAL_REFERENCES/VISUAL_BASELINE_APPROVAL.json). Không tìm source v0.2 nữa và không coi thiếu parity v0.2 là vấn đề mở.
+
+11 PNG, source HTML/CSS và asset inputs giữ nguyên byte của v1.2. Header/verdict Neutral, BUY white card không celebration, các pose dùng đúng manifest.4 PNG pre-verdict/WAIT/SKIP/history-empty vẫn là supporting references, không tự suy được approval riêng từ câu phê duyệt 11 ảnh chính.
+
+## Decision baseline: nội dung sử dụng được và bằng chứng lịch sử
+
+Đã rà soát file/register/source/history trong workspace, đọc chat handoff và các turns truy xuất được, tìm Drive bằng ID và chủ đề, đọc lại SPEC/TECH-02/03. Nguồn hiện đọc được có quy tắc nghiệp vụ thật nhưng không chứa body/option gắn riêng 34 ID. Chat “Thiết kế tính năng chat” trả một số turns mới nhất với assistant references; chat reconcile vượt giới hạn đọc kể cả khi yêu cầu một turn. Không xem giới hạn truy xuất là bằng chứng nguồn không tồn tại.
+
+Đã tạo [16 nhóm REC rules có dẫn nguồn](01_PRODUCT_UX/RECOVERED_RULES_SYNTHESIS.md) và [traceability thực thi](01_PRODUCT_UX/recovered_rule_traceability.csv) bao phủ app shell, context, Quick Check, verdict/history, offline, REST, retry, Room, mascot/personality, item boundaries và giá chuẩn. Đây là **bản tổng hợp có nguồn**, không nguyên văn 34 quyết định và không được gán số CHAT/GAP/FINAL theo suy đoán.
+
+[Register](01_PRODUCT_UX/decision_baseline.csv) có đủ CHAT-01–20, GAP-01–08, FINAL-01–06, giữ approval đã xác nhận và **34 PARTIAL, 0 VERIFIED**. [Danh sách chính xác từng ID cần bổ sung](14_APPROVALS_AND_RECOVERY/MISSING_DECISION_EVIDENCE.md) ghi body/option/source/approval context còn thiếu. Chỉ cần một export/bảng lịch sử có các cột đó; không yêu cầu user quyết định lại 34 lần hoặc duyệt lại toàn bộ UX. Namespace GAP MyItems không được trộn với GAP Chat.
+
+Archival recovery tiếp tục có đầu vào/đường xử lý rõ; không chặn bàn giao UI dựa trên rules đã đọc được. Khi nguyên bản xuất hiện, đối chiếu từng ID, chỉ nâng VERIFIED đúng dòng đủ bằng chứng và ghi divergence. Không sửa baseline âm thầm.
+
+## Technical proposals đã hoàn chỉnh để phê duyệt
+
+[Thư mục Backend/API Integration Contracts](13_BACKEND_API_CONTRACTS/00_INDEX_AND_STATUS.md) có 8 tài liệu:
+
+- Free/Item context, schema/read-model proposals, API catalog, request/response fields, headers/capabilities/errors và compatibility với ITEM hiện tại.
+- R07 deletion/official history, scope dữ liệu giữ/xóa, logical delete, purge/backup, minimal tombstone/FK shell, independent history readers, replay redaction và race với active operation.
+- Operation state machine/identity/lookup, explicit retry cùng parent intent, idempotency windows, one-active/thread, version/lifecycle fencing, crash/lease/context changes và error recovery.
+- Archive/restore/multi-device, read-only/capability matrix, refresh ordering, cache validation và race matrix; không hứa realtime hoặc auto restore.
+- Cursor snapshot membership/order, expiry/filter/owner binding, total/count semantics; Room TTL/capacity/account isolation/session draft/pending identity journal, không outbox.
+- Đối chiếu từng đề xuất với TECH-02/03 và business rules; các phụ lục có hiệu lực thắng ví dụ cũ.
+- Optional SSE/stream replay/interruption proposal để dùng nếu có ADR override trong tương lai. **MVP tiếp tục REST không streaming theo baseline hiện tại; không cần phê duyệt lại REST**, SSE tắt và không chặn MVP.
+
+SPEC/TECH fetched ngày 25/10/2026 khớp snapshot sau normalize BOM/newlines/trim. [Metadata](12_DEPENDENCIES_AND_OPEN_QUESTIONS/evidence_v13/source_metadata.json) và [comparison](12_DEPENDENCIES_AND_OPEN_QUESTIONS/evidence_v13/source_comparison.json) phân biệt readable export với binary source. Không thay source schema/contract gốc để làm proposal trông như đã approved.
+
+## Những gì cần nhóm quyết định
+
+[Approval packet A1–A5](14_APPROVALS_AND_RECOVERY/APPROVAL_REQUESTS.md) trình bày phương án A khuyến nghị, B thay thế, tradeoff, owner-role và tài liệu chi tiết. [Register](14_APPROVALS_AND_RECOVERY/approval_register.json) vẫn PENDING cho cả 5 nhóm.
+
+| ID | Đề xuất A khuyến nghị | Lựa chọn thay thế B |
+|---|---|---|
+| A1 | Xóa khỏi truy cập ngay; purge transcript/summaries trong 24h, backup tối đa 30 ngày; giữ official history; không restore deleted | Giữ raw deleted chat 30 ngày cho khôi phục, tăng scope/retention |
+| A2 | FREE thật không fake item; context bất biến, chọn item mở/reuse thread item riêng | Chỉ ITEM thật trong MVP, FREE fixture/phase sau |
+| A3 | Một AI operation active/thread, stable keys +lookup/retry, epoch/version race guards, archive/restore explicit và foreground refresh | Mở rộng queue/concurrent turns/background behavior, cần thêm thiết kế/infra |
+| A4 | Snapshot paging 15 phút; chat cache 24h có hạn mức, draft session-only, owner isolation/no outbox | Cache lâu dài và realtime push, tăng scope/privacy/infra |
+| A5 | Quick reply không đè draft/auto send; giữ draft theo session; predefined static companion reactions tại surface được phép | Xin xác nhận thay draft, thêm confirmation UI; retention của draft vẫn do A4 |
+
+Các con số retention/window/cache là proposal, không giá trị đã được TECH phê duyệt. Nhóm có thể phê duyệt A1-A đến A5-A hoặc chỉ rõ nhóm/giá trị muốn đổi. Không cần approve lại 11 visuals, canonical, font hoặc toàn bộ UX. Một source nguyên văn cho 34 ID là yêu cầu bổ sung bằng chứng lịch sử, không quyết định UX mới.
+
+## Asset và file QA
+
+Canonical gốc SHA-256: `c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7`; alias giữ byte-identical.8 PNG/WebP pairs có alpha thật 0–255, WebP lossless VP8L và decoded RGBA bằng PNG. Tất cả master binaries được giữ nguyên v1.2, không sinh hoặc chỉnh mascot mới. Nunito/OFL/metadata/control icons/decorations và screen-slot mapping đầy đủ.
+
+Reference QA v1.2 gồm 60 views (15 references ×2 widths ×2 font scales), contrast/target/layout evidence được kế thừa vì source/render inputs không đổi. Các kiểm tra này không được đổi nhãn thành Android runtime đã pass. Native sizing/focus/IME/font/contrast/decode behavior sẽ được kiểm theo kế hoạch runtime sau implementation.
+
+[Verification summary](00_README/verification.json), [asset checks](10_ACCEPTANCE_QA/evidence/asset_checks.json), [baseline preservation](10_ACCEPTANCE_QA/evidence/baseline_preservation.json), [link checks](10_ACCEPTANCE_QA/evidence/link_checks.json), [checksums](00_README/checksums.json) ghi kết quả thực tế. Full ZIP giữ toàn bộ nội dung cần bàn giao, không phải diff-only; checksum coverage trừ chính file checksums. Final packaging kiểm CRC, duplicate/unsafe paths, mọi entry hash và nested historical ZIP; archive SHA-256 trong sidecar cạnh ZIP để không tự tham chiếu.
+
+Local Markdown/HTML/CSS/resource links được kiểm target tồn tại; external URLs/old plain-text paths được phân biệt với active package dependencies, không nhận là mọi quyền truy cập cloud đã được kiểm. Nguồn SPEC/TECH/DS/MyItems và business-source snapshots được giữ nguyên; derived docs chỉ cập nhật current approval/proposal authority. Không viết app code hoặc tạo PR.
+
+## Hướng bàn giao tiếp theo
+
+1. Nhóm phản hồi A1–A5 theo phương án/giá trị muốn chọn; chỉ cập nhật approval register khi nhận được phê duyệt thật.
+2. Giao [Coding Agent Prompt](11_CODING_AGENT_PROMPT/CODING_AGENT_PROMPT.md) để bắt đầu UI fake theo 11 baseline chính thức và source rules, không chờ archival recovery.
+3. Backend/API owners chuyển approved proposals thành accepted contract revision trong nhiệm vụ riêng; không bật production theo proposal chưa duyệt.
+4. Chạy [AC01–29](10_ACCEPTANCE_QA/AC01_29.md), [IT01–17 và UI-P01–05](10_ACCEPTANCE_QA/INTEGRATION_ACCEPTANCE.md) sau implementation. Khi có source 34 ID thì đối chiếu theo ledger, không tự rewrite UX.

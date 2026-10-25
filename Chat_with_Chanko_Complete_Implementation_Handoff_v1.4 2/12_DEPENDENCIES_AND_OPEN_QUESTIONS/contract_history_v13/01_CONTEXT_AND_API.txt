@@ -1,0 +1,62 @@
+# TC-CONTEXT — Free Chat, Item Chat và API
+
+**PROPOSED, approval A2; operation/lifecycle details phụ thuộc A1/A3/A4.** Baseline TECH-02 §4.14 gắn conversation với item; TECH-03 §2.6 tạo conversation bằng item_id. Vì vậy FREE thật và global history cần extension được duyệt; tuyệt đối không tạo ShoppingItem giả. Tên/path/trường mới dưới đây là đề xuất, không API đã tồn tại.
+
+## Context và vòng đời
+
+- `context_kind=ITEM`: `item_id` bắt buộc, owner-scoped. `context_kind=FREE`: item_id phải null/không có. Server kiểm tra cặp giá trị, không suy item từ tên hoặc nội dung chat.
+- Context bất biến sau tạo. Free→chọn item mở context item riêng; không gán lại messages/evaluation của free. Không tạo official evaluation trong FREE; evaluate trả409 ITEM_CONTEXT_REQUIRED.
+- Free mới chỉ tạo thread khi người dùng gửi lần đầu; Empty không sinh hàng loạt thread rỗng. Item entry: GET list theo item lấy active gần nhất, mở lại nếu có; nếu không có, tạo khi user bắt đầu gửi. Không tự restore archived. Tạo thread mới phải là intent explicit qua lối Cuộc trò chuyện mới/entry, không từ lỗi404.
+- `lifecycle=ACTIVE/ARCHIVED/DELETED` là proposal riêng cho chat, không thay enum item hoặc 11 UX states. Archive/restore chat không đổi item. Item unavailable/read-only thì capability tương ứng tắt theo chính sách item đã duyệt; không tự đưa item về trạng thái có thể chat/evaluate.
+- Đánh giá item chỉ qua structured output đã validate và server orchestrator. Server có thể lưu message/evaluation; AI prose không ghi official user DecisionRecord, purchase, budget hoặc cooling-off.
+
+## Data dictionary đề xuất, không DDL
+
+| Read model | Trường và ràng buộc |
+|---|---|
+| Conversation | id opaque, owner từ session không writable, context_kind, item_id theo rule trên, lifecycle, version dương, lifecycle_epoch, created_at/updated_at UTC, capabilities, contract_revision |
+| Message | id, conversation_id, server sequence_no tăng/unique, role USER/ASSISTANT whitelist, text, created_at, operation_id, delivery state; sequence có thể có gap sau redaction, không lấy offset làm ID |
+| Evaluation | immutable id, shopping_item_id bắt buộc, conversation_id nullable, verdict BUY/WAIT/SKIP, rationale/reasons, context/item version, evaluated_at, structured snapshot tối thiểu/engine metadata; không tạo trong FREE |
+| ConversationSummary | id, context kind/item ID, title từ input được phép hoặc tên trung tính, preview được owner cho đọc, updated_at, lifecycle/version; DELETED không trả title/preview |
+| Operation | owner, server operation_id, client_operation_id, scope/key hash, payload hash, lifecycle epoch, snapshot versions, attempt, state và resource IDs; chi tiết03 |
+
+TECH-02 catalog17 bảng chưa phải migration. Đề xuất nullable item FK + context check; thêm lifecycle/tombstone/operation metadata theo thực tế schema sau review. Không sửa snapshot TECH để giả các cột này đã được chấp thuận.
+
+## API catalog
+
+Mọi path dưới base `/api/v1`; authenticated, owner lấy từ session. Dùng envelope TECH-03. Các extension có nhãn P; các path B là surface được TECH mô tả, không chứng minh đã deploy.
+
+| Method/path | B/P | Request / response |
+|---|---|---|
+| POST /ai/conversations | B ITEM, P FREE/reuse detail | Body context_kind +item_id phù hợp, Idempotency-Key, X-Client-Operation-Id.201 Conversation. Body legacy chỉ item_id được map ITEM để tương thích, không ngầm FREE |
+| GET /ai/conversations/{id} | B, P lifecycle/capabilities | Conversation +ETag/version; deleted/other-owner đều404 chung |
+| GET /ai/conversations?item_id=... | B | Danh sách theo item, pagination chuẩn |
+| GET /ai/conversations?context_kind=...&lifecycle=...&q=...&cursor=... | P global/filter | Owner scoped; q tìm title/preview được phép, không product discovery; page snapshot theo05 |
+| GET /ai/conversations/{id}/messages | B, P cursor detail | Trang message, order/sequence theo05, không trả deleted transcript |
+| POST /ai/conversations/{id}/messages | B, P operation headers | Body text; If-Match, Idempotency-Key, X-Client-Operation-Id.200 sau kết quả đã commit; timeout/error không phải xác nhận chưa commit |
+| POST /ai/conversations/{id}/evaluate | B, P headers/detail | request_early_verdict boolean; ITEM/capability/version hợp lệ.200 immutable Evaluation; không ghi user decision/purchase |
+| GET /shopping-items/{item_id}/evaluations | B | Lịch sử evaluation độc lập conversation; giữ đọc được sau delete |
+| GET /ai/evaluations/{evaluation_id} | B | Owner/item history authority, không yêu cầu chat còn sống |
+| GET /shopping-items/{item_id}/decision-records | P path cụ thể | Independent official user decision history, created_at+id. Domain read service hiện có có thể adapter path khác sau review; không đọc bằng transcript JOIN |
+| POST /ai/conversations/{id}/archive | P | If-Match +key+client operation header;200 Conversation ARCHIVED |
+| POST /ai/conversations/{id}/restore | P | ARCHIVED→ACTIVE có quyền;200; không restore DELETED/item |
+| DELETE /ai/conversations/{id} | P | If-Match +key+client operation header;204 sau logical-delete commit. Không JSON trong204; kiểm trạng thái qua operation lookup |
+| GET /ai/operations/by-client-id/{client_operation_id} | P | OperationView known before first response;404 là chưa tìm thấy, không chứng minh request cũ không bao giờ tới server |
+| GET /ai/operations/{operation_id} | P | Lookup cùng owner, không lộ transcript sau delete |
+| POST /ai/operations/{operation_id}/retry | P | Resume cùng intent thất bại retriable, command-key riêng bảo vệ retry action; parent key không đổi;03 giải thích |
+| POST /ai/conversations/cache-validation | P read-only | Tối đa100 thread IDs; trả current lifecycle/version hoặc UNAVAILABLE cho từng ID. Không business writes, không cần mutation idempotency key |
+| GET /ai/capabilities | P | Contract revision, enabled features, server_time, operation/cursor/cache limits; không tự bật tính năng do app version |
+
+## Mutation headers, validation và errors
+
+If-Match dùng version thread, không item version giả; evaluate snapshot đọc item version server. Với POST tạo thread chưa có If-Match. Idempotency-Key và X-Client-Operation-Id là UUID ổn định cho cùng intent. Message chỉ text, không owner/role/verdict writable. Proposed limit4000 Unicode codepoints; whitespace-only422, dài quá422 giữ input, không tự cắt. Giới hạn là proposal cần A3, không quy tắc SPEC đã duyệt.
+
+401→auth flow; owner mismatch/deleted404 không leak;403 capability forbidden;409 VERSION_CONFLICT/ITEM_CONTEXT_REQUIRED/OPERATION_IN_PROGRESS/CONTEXT_CHANGED;422 validation;428 thiếu version;429 Retry-After;503/504 unavailable/unknown có OperationView khi biết.400 CURSOR_INVALID/CURSOR_EXPIRED cho cursor, không tự chuyển thành account empty. Mã mới ở đây là P; unified envelope giữ TECH-03 §6.3. Chi tiết retry và replay thứ tự kiểm tra trong03.
+
+## Item domain boundary
+
+Các lối Xem món đồ/Trao đổi thêm chỉ điều hướng. Chỉ flow Item Detail với user confirmation mới gọi purchase/skip/cooling-off action. Giá chuẩn estimated_unit_price, actual_unit_price, quantity INTEGER≥1 và tiền VND nguyên dạng chuỗi ở API theo appendix cuối TECH. Không khôi phục tên giá cũ từ ví dụ trước appendix. Ready/Postponed/archive item C01/C02 không được chat tự resolve; xử lý capability thiếu bằng disable/read-only, không suy chính sách mới.
+
+## First-send/create và entry races
+
+“Tạo khi gửi lần đầu” là thời điểm user intent tạo thread, không giả hai request create+send hiện có là một transaction. Create key gắn entry intent và giữ qua retry; zero-message shell chưa được admit message không hiện như cuộc trò chuyện có nội dung. Create response mất thì lookup/replay cùng key để lấy lại ID, không tạo thread khác. Hai thiết bị có hai explicit entry intents có thể tạo hai thread item hợp lệ; không giả UNIQUE một active conversation/item vì TECH cho item nhiều conversations. Reuse chọn active gần nhất theo updated_at+ID, không gộp message giữa hai IDs. Cần backend công bố behavior này trong accepted revision sau A2.

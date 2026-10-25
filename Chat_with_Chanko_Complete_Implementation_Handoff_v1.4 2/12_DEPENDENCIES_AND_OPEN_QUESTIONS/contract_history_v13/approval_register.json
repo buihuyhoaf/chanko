@@ -1,0 +1,62 @@
+[
+  {
+    "approval_id": "A1",
+    "proposal_revision": "1.3",
+    "recommended_option": "A",
+    "status": "PENDING_APPROVAL",
+    "scope": "R07 deletion/retention/official history",
+    "owner_roles": "Product,Data,Backend",
+    "approval_message_id": null,
+    "approved_at": null,
+    "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION",
+    "legacy_34_verification_effect": "NONE"
+  },
+  {
+    "approval_id": "A2",
+    "proposal_revision": "1.3",
+    "recommended_option": "A",
+    "status": "PENDING_APPROVAL",
+    "scope": "Free/Item context/schema/reuse",
+    "owner_roles": "Product,Backend,Android",
+    "approval_message_id": null,
+    "approved_at": null,
+    "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION",
+    "legacy_34_verification_effect": "NONE"
+  },
+  {
+    "approval_id": "A3",
+    "proposal_revision": "1.3",
+    "recommended_option": "A",
+    "status": "PENDING_APPROVAL",
+    "scope": "Operations/retry/concurrency/lifecycle/sync",
+    "owner_roles": "Backend,Data,Android",
+    "approval_message_id": null,
+    "approved_at": null,
+    "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION",
+    "legacy_34_verification_effect": "NONE"
+  },
+  {
+    "approval_id": "A4",
+    "proposal_revision": "1.3",
+    "recommended_option": "A",
+    "status": "PENDING_APPROVAL",
+    "scope": "Pagination/cache/session chat draft",
+    "owner_roles": "Backend,Android,Data",
+    "approval_message_id": null,
+    "approved_at": null,
+    "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION",
+    "legacy_34_verification_effect": "NONE"
+  },
+  {
+    "approval_id": "A5",
+    "proposal_revision": "1.3",
+    "recommended_option": "A",
+    "status": "PENDING_APPROVAL",
+    "scope": "Quick reply/draft/reaction presentation defaults",
+    "owner_roles": "Product,Design,Android",
+    "approval_message_id": null,
+    "approved_at": null,
+    "runtime_acceptance": "NOT_RUN_AFTER_IMPLEMENTATION",
+    "legacy_34_verification_effect": "NONE"
+  }
+]

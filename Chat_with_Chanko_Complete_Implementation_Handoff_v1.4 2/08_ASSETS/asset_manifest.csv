@@ -1,0 +1,37 @@
+file,format,width_px,height_px,alpha_range,status,usage,sha256
+08_ASSETS/canonical/chanko_user_approved.png,png,1231,1278,"(0, 255)",CANONICAL_BYTE_IDENTICAL_ALIAS,Identity reference only,c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7
+08_ASSETS/canonical/mascot_skeptical.png,png,1231,1278,"(0, 255)",USER_APPROVED_ORIGINAL_BYTES,Identity reference only,c4b0de06a1175464607e80372f9615060b89892a16b58e8e4f57087c74e947d7
+08_ASSETS/decorations/cream_background.svg,svg,390,844,vector,REFERENCE_DECORATION,Optional; no reward around BUY,11d4df839c8ac04df6b7fba59f40f976199a8be20264890f27583d323838d645
+08_ASSETS/decorations/lavender_sphere.svg,svg,144,128,vector,REFERENCE_DECORATION,Optional; no reward around BUY,0c57c257adae0d08564c8d53a2986750dbdf804a313d8803bdc4e8c05637d7c4
+08_ASSETS/decorations/rounded_bubble.svg,svg,144,128,vector,REFERENCE_DECORATION,Optional; no reward around BUY,eed8ab72bee32d791c07dda429002a3d64f4e8ef10d912242e1281802da3b065
+08_ASSETS/decorations/rounded_bubble.xml,xml,144,128,vector,REFERENCE_DECORATION,Optional; no reward around BUY,eed05b62d0930f02cb624cae6b4284529bf881f68406a65737bcca25ffc5ec62
+08_ASSETS/expressions/chanko_concerned.png,png,1230,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,1664b81a2c3fcc3af920f04104e018e9a2825e75c047179264a1bb687a6c59ac
+08_ASSETS/expressions/chanko_concerned.webp,webp,1230,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,f6b782136c90b1c08d3b80bdabb2cb63bf87c575c2132d425a0040d93e5b6764
+08_ASSETS/expressions/chanko_curious.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,2861a76987f001b64aee7f1aa962bb384b1f8f17f37c3d65567ca019cd0635eb
+08_ASSETS/expressions/chanko_curious.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,a422e0e4ce5f5bbe8ffe132c47fd056e496c6f367f42ad09c10149013deba5e7
+08_ASSETS/expressions/chanko_encouraging.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,9ac854134b06344f2b2e0a73fb34c0e2abe52052b4d8a7878bb23864b2afe6d6
+08_ASSETS/expressions/chanko_encouraging.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,0e5a7100dfb28d70a97e39dc3261183bb597bbbcb6f243c2d160d3a95e557edf
+08_ASSETS/expressions/chanko_neutral.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,c3a468fc758a1df0d05d835433163881fa63089e6491d0a2922a2886867d953a
+08_ASSETS/expressions/chanko_neutral.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,10342b7e70b36727459914fcd8722f045f8f28b694314ded8222cbc089c157de
+08_ASSETS/expressions/chanko_relaxed.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,bdbaaf9d79f2587bf557ebd91bf270f067ab86dbd906bca3dac7d6b7f32688e3
+08_ASSETS/expressions/chanko_relaxed.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,7267d9dcc40f56e53b1c09133e9a171e762c1c8cc6b861f54a919bd5f5f6b71e
+08_ASSETS/expressions/chanko_sleeping.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,9fc844b67d961a1906fef81564000735209a8d7b8ad548a6b48b90b31accb72a
+08_ASSETS/expressions/chanko_sleeping.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,7bd813e6c1b64d32c5f6772ee15f5b80fa2c087abf4dd7a88ca66f3417c85479
+08_ASSETS/expressions/chanko_thinking.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,7ad5bfa01c84e796d639e1036229c888134b174992912f373ec9c507f6c8e1a2
+08_ASSETS/expressions/chanko_thinking.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,0c21c4f230d9a3a4b83ed7d9fa9d1b81acb8f63ad94a00ef70c3d1332476f4e6
+08_ASSETS/expressions/chanko_welcome.png,png,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,3d304b0e47613a37476deec211e207e7be1ec8e58257da64010f700d39b20515
+08_ASSETS/expressions/chanko_welcome.webp,webp,1231,1278,"(0, 255)",UNCHANGED_V11_GENERATED_DERIVATIVE,See screen_asset_mapping.csv; no implicit business action,f21e997daf54e1fb1e0044d0965e8bd910c099080c55c3874eb9b9ca0cfad066
+08_ASSETS/fonts/Nunito-Variable.ttf,ttf,,,n/a,OFL_FONT_ORIGINAL_BINARY,"Nunito normal, weights400–800",bb55a5ca5c2042335b3991af27c4d0705d0ef41cac6164ac737fd8f2a1e85207
+08_ASSETS/icons/archive.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,93b7c8fe962d635fb62764c47ff91c2e32d7796b9f9bb370d8e210abdcc85a50
+08_ASSETS/icons/back.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,a10c643d63c57b752c1fc4fe5696ce6bc5f439bdb174e868739d997eafee36ef
+08_ASSETS/icons/chat.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,884f1fb3e1a269c202d90512d84dde07569067ec659e38b1da0fe4922f5f182d
+08_ASSETS/icons/close.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,9c4bfda04d12bd78976149e1fb49d0f8776b5f756476e52b5c674287c3d4ee4f
+08_ASSETS/icons/history.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,ac8f39b87f989241b76e1a9fd62a87efc315aeffcf5d145530670c04a97d0ef2
+08_ASSETS/icons/item.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,74614f439ab885ec1543b7c1aa0d4615b98b6436d4eba980842f4f1f063f940c
+08_ASSETS/icons/more.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,a739e825ac0ef59ebce08613b9381c48b89575517394c9107c8d22b92e68b559
+08_ASSETS/icons/plus.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,94c506b70c445d10e082e0e0a4c5603d7a65f6747c71a82000a641cfa6c1a78d
+08_ASSETS/icons/reflect.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,024d98ddbc5620476982e614266c06b3562633499d9b748c6c2a39933c00d947
+08_ASSETS/icons/send.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,60729798faa9f2f926e1da6478b4d655a882945de9e2ab29a29ba51af2e92d22
+08_ASSETS/icons/trash.svg,svg,24,24,vector,V12_ORIGINAL_CONTROL_ICON,Original reference control icon; see icons/README.md,c6947acdc134d21b483d4d47b62d37f92bfa0cf323c8eba718f415ca0da780b9
+08_ASSETS/fonts/OFL.txt,txt,,,n/a,UPSTREAM_FONT_LICENSE_METADATA,Font provenance and redistribution license,580df76c95a1ec5ab878ceb25bb3d85c6a076804e9c970c8c6972aea775fdf65
+08_ASSETS/fonts/METADATA.pb,pb,,,n/a,UPSTREAM_FONT_LICENSE_METADATA,Font provenance and redistribution license,3e20743c7ddab54c6ac57d79a6be522d4bae795223855ce90a1b13c4132f0754

@@ -1,0 +1,38 @@
+{
+  "revision": "1.4",
+  "required_documents_present": [
+    "00_README/README.md",
+    "01_PRODUCT_UX/UX_SPECIFICATION.md",
+    "02_SCREEN_SPECS/INDEX.md",
+    "03_NAVIGATION/NAVIGATION.md",
+    "04_COMPONENTS/LOGICAL_CONTRACTS.md",
+    "05_STATE_MATRIX/UI_STATE_MATRIX.md",
+    "05_STATE_MATRIX/TRANSITIONS.md",
+    "09_ANDROID_IMPLEMENTATION/INTEGRATION_GUIDE.md",
+    "10_ACCEPTANCE_QA/AMENDMENT_ACCEPTANCE_V14.md",
+    "11_CODING_AGENT_PROMPT/CODING_AGENT_PROMPT.md",
+    "13_BACKEND_API_CONTRACTS/08_APPROVED_AMENDMENTS_V14.md",
+    "13_BACKEND_API_CONTRACTS/approved_parameters_v14.json",
+    "14_APPROVALS_AND_RECOVERY/USER_TECHNICAL_APPROVAL_V14.md",
+    "14_APPROVALS_AND_RECOVERY/DECISION_CONFLICT_REVIEW_V14.md",
+    "FINAL_QA_REPORT.md"
+  ],
+  "core_specs": 11,
+  "contract_documents": 9,
+  "approval_statuses": {
+    "A1": "APPROVED",
+    "A2": "APPROVED_WITH_AMENDMENT",
+    "A3": "APPROVED",
+    "A4": "APPROVED_WITH_AMENDMENT",
+    "A5": "APPROVED"
+  },
+  "approval_groups_pending": [],
+  "legacy_partial": 34,
+  "legacy_verified": 0,
+  "legacy_id_full_no_conflict_claim": false,
+  "protected_files_unchanged": 86,
+  "new_code_files": [],
+  "changed_code_files": [],
+  "runtime_tests": "NOT_RUN_AFTER_IMPLEMENTATION",
+  "R07": "CONTRACT_APPROVAL_CLOSED_RUNTIME_ACCEPTANCE_REQUIRED"
+}

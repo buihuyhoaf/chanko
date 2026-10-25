@@ -1,0 +1,2 @@
+# Actual decorative resources
+SVG và XML là file vector thật, newly authored simple reference resources using existing brand colors. Không mascot, không ảnh placeholder giả final; trạng thái REFERENCE / chưa có visual acceptance. XML là drawable asset do user yêu cầu, không logic/code Android. Không dùng sphere/bubble như reward quanh BUY. cream_background là màu nền source DS đã có; không tự claim toàn bộ composition mới Approved. Source decoration files do nhiệm vụ này tạo, có thể dùng cho dự án; source documents/candidate mascot không kế thừa quyền/approval đó.

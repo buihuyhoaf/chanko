@@ -1,0 +1,111 @@
+{
+  "sources": [
+    {
+      "screen": "S01",
+      "source": "07_VISUAL_REFERENCES/source/S01.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "de8c2d41daf2ccbc7fa2c80600a2670fb5ae59630d7c1b03a18b84112ab04f7d"
+    },
+    {
+      "screen": "S02",
+      "source": "07_VISUAL_REFERENCES/source/S02.html",
+      "match": true,
+      "placements": 3,
+      "source_sha256": "698fa2b683fc25ea4d94d2e8a7eb9b30adcae9a5c64f3ef8ddff74fd29151af1"
+    },
+    {
+      "screen": "S03",
+      "source": "07_VISUAL_REFERENCES/source/S03.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "3b13b12cbeb52a060eede1fff3892cd8f9e1c92bee45187121ba53d2e2af89a2"
+    },
+    {
+      "screen": "S03_PRE_VERDICT",
+      "source": "07_VISUAL_REFERENCES/source/S03_PRE_VERDICT.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "4b81c29855d2b489caf9021a34cea1a5a5b73fb60710df743031153cf4cdbe37"
+    },
+    {
+      "screen": "S03_SKIP",
+      "source": "07_VISUAL_REFERENCES/source/S03_SKIP.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "510a310f8f55a1ebcd4e6f66471397632aab2b2289852c9f5b9c67acb02c750a"
+    },
+    {
+      "screen": "S03_WAIT",
+      "source": "07_VISUAL_REFERENCES/source/S03_WAIT.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "3b4c1b806484f276be9d21919602048f69c3e15bed0d508b26e9320f07a7968d"
+    },
+    {
+      "screen": "S04",
+      "source": "07_VISUAL_REFERENCES/source/S04.html",
+      "match": true,
+      "placements": 1,
+      "source_sha256": "e9790583e7d2f1422e4b6140a7012469861ed87f5ee11802ac435d849c9d628e"
+    },
+    {
+      "screen": "S04_EMPTY",
+      "source": "07_VISUAL_REFERENCES/source/S04_EMPTY.html",
+      "match": true,
+      "placements": 2,
+      "source_sha256": "7e05238fb4e550ff8f63ef69b2f979e5f19707118b83a00b51b0417e66455019"
+    },
+    {
+      "screen": "S05",
+      "source": "07_VISUAL_REFERENCES/source/S05.html",
+      "match": true,
+      "placements": 1,
+      "source_sha256": "a941f60b6f1ec30fbd58db85f74f122ccdd1560585b72e03c9f0d0ce60cc7d60"
+    },
+    {
+      "screen": "S06",
+      "source": "07_VISUAL_REFERENCES/source/S06.html",
+      "match": true,
+      "placements": 3,
+      "source_sha256": "3188bf0ef89faf7b0f826e7a92f9eae83084dca1dd2a28168f3715fb8538ad4b"
+    },
+    {
+      "screen": "S07",
+      "source": "07_VISUAL_REFERENCES/source/S07.html",
+      "match": true,
+      "placements": 3,
+      "source_sha256": "111e613b48badbfba42dfe61fa0c190a9f1d93fd354a5c3d2bd68e527f6f82f8"
+    },
+    {
+      "screen": "S08",
+      "source": "07_VISUAL_REFERENCES/source/S08.html",
+      "match": true,
+      "placements": 3,
+      "source_sha256": "edfe45fc8d11a165f48dd7ab82ded255d6e3ba0f8f680dde7b8cb8c76a20bbe9"
+    },
+    {
+      "screen": "S09",
+      "source": "07_VISUAL_REFERENCES/source/S09.html",
+      "match": true,
+      "placements": 1,
+      "source_sha256": "1e45386db8e6b1e7780043cc3b6b3a0870d6c5a3a47b5a6f2f9c63fcdc2a2475"
+    },
+    {
+      "screen": "S10",
+      "source": "07_VISUAL_REFERENCES/source/S10.html",
+      "match": true,
+      "placements": 1,
+      "source_sha256": "05f63ad818d9480e62e951616c6d57e88bd5ddbac6a33eb8944cd4a4e828178f"
+    },
+    {
+      "screen": "S11",
+      "source": "07_VISUAL_REFERENCES/source/S11.html",
+      "match": true,
+      "placements": 3,
+      "source_sha256": "45df649d855ac52dfe2e99aab74a77162f0ffe5107a36538b3ce61b27db19f7d"
+    }
+  ],
+  "manifest_hashes_match": true,
+  "no_other_mascot_source": true
+}

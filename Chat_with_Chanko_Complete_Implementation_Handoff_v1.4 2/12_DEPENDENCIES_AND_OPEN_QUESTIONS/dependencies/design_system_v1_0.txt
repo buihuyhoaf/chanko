@@ -1,0 +1,866 @@
+Should I Buy It
+UI UX Design System và Visual Guidelines v1.0
+Tài liệu chuẩn thiết kế và hướng dẫn triển khai Android
+Ngày phát hành 18/10/2026 • Ngôn ngữ tiếng Việt • Nền tảng Kotlin và Jetpack Compose
+1 Tóm tắt điều hành
+Should I Buy It? giúp người dùng suy nghĩ trước khi mua và giảm mua sắm bốc đồng. Hệ thống đã duyệt là Candy Pop 3D với cá tính Playful, Colorful, Premium; mèo trắng 3D clay là nhân vật trung tâm. Material Design 3 cung cấp nền tảng tương tác, Nunito là font duy nhất, Purple #8965F6 là màu thương hiệu chính. UI chủ yếu là component 2D sạch, dùng chiều sâu 3D có chọn lọc.
+MVP sử dụng Light Mode; kiến trúc sẵn sàng cho Dark Mode. Thiết kế phải bảo đảm WCAG 2.2 AA, hỗ trợ TalkBack, font scaling và reduced motion. Trạng thái nghiệp vụ chính thức do server xác nhận; offline chỉ đọc cache và tạo/chỉnh sửa manual drafts.
+Tài liệu này dùng chung cho thiết kế màn hình, Google Stitch, thư viện component Compose và kiểm thử UI. Design System không thay thế thiết kế chi tiết từng màn hình, Functional Specification hoặc Technical Architecture. Việc xuất hiện một component trong thư viện không tự tạo thêm tính năng MVP.
+1.1 Quy ước trạng thái
+Các tên token dạng camelCase trong tài liệu là quy ước triển khai Reference; trạng thái của giá trị được ghi riêng. Một quyết định Approved có thể có chi tiết triển khai còn Pending Verification. Điều này không hạ cấp quyết định đã duyệt.
+1.2 Nguồn và thứ tự xử lý
+Nguồn S1: bản bổ sung chính thức UI-01–UI-09 do người dùng cung cấp ngày 18/10/2026. Đây là nguồn xác nhận đầy đủ các thông số thiết kế trong tài liệu.
+Nguồn S2: hội thoại “Tư vấn thiết kế UI UX”, ID 6ad43701-7044-83ec-86e4-d1177569176d, đặc biệt REVIEW-01–04. Các nguyên tắc rà soát được giữ trong hướng dẫn áp dụng.
+Nguồn S3: Google Drive “1. Functional Specification — v1.1”, cập nhật 17/10/2026, gồm SPEC-01–09, INPUT-01–04, ADR-09, AUTH-05 và phụ lục chốt nghiệp vụ có hiệu lực. Đã đọc và đối chiếu trong lần biên soạn này.
+Đường dẫn S3: https://docs.google.com/document/d/1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go/edit
+Khi S1 và S3 có khác biệt, ghi riêng trong mục 17; không tự sửa một nguồn theo nguồn còn lại. Phụ lục S3 tuyên bố thay thế mô tả nghiệp vụ cũ trái ngược trong chính Functional Specification. Những đoạn “Next phase” lịch sử không vô hiệu hóa các bổ sung đã duyệt sau đó.
+1.3 Mục lục sử dụng
+Các mục 2–3 xác định nguyên tắc và nhận diện; 4–9 quy định tokens và assets; 10 quy định component và layout; 11–12 quy định theme và accessibility; 13–14 quy định phạm vi sản phẩm và Compose; 15 là bảng tra nhanh; 16 là sổ quyết định; 17 là các điểm cần xác minh.
+2 Nguyên tắc thiết kế
+Approved • UI-01, UI-09 và SPEC-01–09.
+Ưu tiên suy nghĩ có chủ đích. Cooling-off nhấn mạnh thời gian cân nhắc; Ready for Review mời người dùng xem lại nhu cầu. Purchase được xác nhận trung tính. Skip Purchase được ghi nhận tích cực vừa phải. Không dùng “Buy it now!”, “You deserve it!” hoặc animation ăn mừng khi mua.
+Giữ quyền tự quyết. Người dùng có thể mua trái verdict, mua không qua AI, bỏ qua hoặc điều chỉnh Cooling-off theo các quyền trong Functional Specification. Không dùng màu, bố cục hay lời mèo để gây xấu hổ hoặc ép nghe lời AI.
+Hiển thị sự thật. Phân biệt AI Verdict, Item Status, Cooling-off State, Purchase Transaction và trạng thái kết nối. BUY không có nghĩa đã mua; countdown về 0 không có nghĩa server đã đổi trạng thái; draft không có nghĩa đã lưu chính thức.
+Giữ một trọng tâm thị giác mạnh nhất trong vùng nhìn. Primary dành cho hero hoặc hành động chính; Secondary cho thông tin hỗ trợ; Tertiary cho metadata. Trên Home, Mascot Hero là trọng tâm. Không để nhiều gradient, shadow và animation cạnh tranh cùng lúc.
+Ưu tiên nội dung tài chính rõ ràng. Giá và ngân sách phải đọc được, không cắt số hoặc dùng hiệu ứng nhảy số liên tục. Màu chỉ hỗ trợ; nhãn, icon và ngữ nghĩa phải truyền đạt được thông tin khi không phân biệt màu.
+3 Nhận diện thị giác
+Approved • UI-01.
+Không biến toàn bộ màn hình thành ảnh raster hoặc mô phỏng 3D. Data-heavy components như ngân sách, lịch sử và Insights cần ít hiệu ứng. Các vật trang trí không được giống nút nếu không tương tác. Không thêm họa tiết liên tục chỉ để lấp khoảng trắng.
+4 Hệ thống màu
+4.1 Màu nền tảng
+Approved • UI-02. Tên token là Reference.
+Card dùng White và contextual pastels. HEX của các pastel container bổ sung chưa được duyệt; không tự suy ra một bộ tonal palette rồi gắn nhãn Approved.
+4.2 Tỷ lệ và gradient
+Approved • UI-02. Tỷ lệ 40% Neutral / 35% Brand / 25% Accent là guideline phân bố thị giác; không phải phép đo bắt buộc theo pixel trên từng màn hình. UI-09 vẫn yêu cầu một trọng tâm thị giác và ưu tiên khả năng đọc.
+Góc, hướng và vị trí stops chưa được chốt; là Reference khi dựng màn hình. Kiểm tra tương phản tại vùng thấp nhất bên dưới chữ. Không đặt nội dung tài chính quan trọng trực tiếp lên gradient nếu chưa đạt yêu cầu.
+4.3 Màu semantic
+Approved • UI-02. Đây là màu tín hiệu; không mặc định là màu chữ hoặc màu nền đầy đủ của component.
+Purchased và Success không đồng nghĩa. Một thông báo “Đã ghi nhận giao dịch” có thể báo thành công thao tác, còn trạng thái Purchased vẫn có biểu đạt trung tính và không ăn mừng.
+Phân biệt Brand / Semantic / Neutral trong code. Hệ phân cấp Brand → Functional → Neutral của UI-02 dùng để tổ chức vai trò và điểm nhấn, không cho phép màu thương hiệu che mất lỗi hoặc cảnh báo thiết yếu.
+4.4 Foreground và tương phản
+Approved • UI-09: cần các cặp semantic như onPrimary, onWarning, onCoolingOff; không chọn chữ trắng theo cảm tính. Pending Verification: HEX chính thức của textPrimary, textSecondary, outline, disabled và toàn bộ on-colors chưa có trong S1.
+Reference để kiểm tra: chữ #211E2B trên Primary #8965F6 có tỷ lệ khoảng 4,09:1, chưa đủ cho chữ thường; chữ #15131D trên Primary khoảng 4,60:1, có thể là ứng viên. Hai màu chữ này chưa phải Light Mode tokens Approved. Không đưa vào sản phẩm chỉ vì ví dụ được nêu ở đây; xác nhận cặp dùng thực tế và trạng thái pressed/focus trước.
+Giữ nguyên màu thương hiệu đã duyệt. Nếu một cặp màu không đạt, điều chỉnh foreground, container hoặc cách dùng; ghi nhận thay đổi cần thiết thay vì âm thầm đổi HEX Approved. Không dùng token Error làm chữ nhỏ trên nền trắng khi chưa kiểm tra tương phản.
+4.5 Ngưỡng ngân sách
+Functional Specification quy định số chi, remaining và % sử dụng nhưng không chốt ba ngưỡng màu trên. Đây là khoảng trống đối chiếu, chưa phải mâu thuẫn trực tiếp. Không tự thêm ngưỡng chặn mua. Cách hiển thị khi budget bằng 0, thiếu budget hoặc tỷ lệ không xác định cần được xác minh; không chia cho 0 hay hiển thị NaN.
+5 Typography
+Approved • UI-03. Nunito ONLY áp dụng cho toàn bộ text UI, gồm số tiền, countdown và labels. Tên styles dưới đây bảo toàn tên nguồn; mapping Compose dùng chữ đầu thường.
+5.1 Bộ 13 styles
+Không tự thêm DisplaySmall hoặc HeadlineSmall thành styles đã phê duyệt. Material 3 có các slot ngoài bộ 13; mapping fallback của những slot đó phải được quản lý tập trung và ghi Reference. Letter spacing chưa được chốt, không sao chép mặc định Material mà gọi là token Approved.
+5.2 Typography tài chính
+Không suy ra Countdown dùng HeadlineMedium vì weight khác nhau. Có thể tạo styles semantic ngoài 13 styles nền; line height và letter spacing bổ sung là Reference đến khi được chốt.
+Dùng định dạng tiền theo locale, ví dụ 7.490.000 ₫. Dùng tabular figures khi bộ font hỗ trợ, kiểm tra tài nguyên Nunito thực tế; không giả định mọi file font đều có tính năng này. Tránh ALL CAPS trên nút.
+Giá trị giá là VND nguyên theo phụ lục S3. Không hiển thị phần thập phân không tồn tại; giữ phân biệt đơn giá dự kiến, đơn giá thực tế, số lượng và tổng. Chữ dùng sp; card/form/nút được phép tăng chiều cao khi font scale tăng. Số tiền, thông báo lỗi và nội dung quan trọng phải xuống dòng hoặc đổi bố cục thay vì bị ellipsis.
+6 Shapes và elevation
+6.1 Shape tokens
+Approved • UI-04. Tên token là Reference.
+Không tạo biến thể component mới chỉ vì muốn khác radius ở một màn hình. Shape của Outlined/Text/Destructive Button chưa chốt riêng; không mặc định rằng tất cả đều dùng radius của Primary.
+6.2 Elevation và chất liệu
+Bóng đổ mềm. Opacity, blur, màu shadow và mapping từng component chưa được chốt; không ghi chúng là tokens Approved. Shadow elevation và tonal elevation của Material 3 là hai cơ chế khác nhau; kiểm tra tint thực tế để card không lệch palette.
+Ba biến thể card Approved: Standard White Card, Colorful Pastel Card, Gradient Hero Card. Border tối giản nhưng focus Purple và error phải nhận biết được. “Minimal borders” không loại bỏ yêu cầu tương phản 3:1 cho ranh giới điều khiển thiết yếu.
+Primary Button có cảm giác nhấn vật lý nhẹ. Tránh shadow nặng trên bảng số liệu và những lớp lồng nhau gây nhiễu. Không dùng elevation làm phương tiện duy nhất để truyền đạt selected hoặc error.
+7 Mascot Design System
+Approved • UI-05 và các ranh giới sản phẩm trong SPEC-07.
+Mèo trắng 3D clay, thân tròn mềm, mắt đen tròn đơn giản, tỷ lệ nhất quán, vật liệu clay cao cấp và ánh sáng mềm. Cá tính: Curious, Caring, Playful, Thoughtful, Non-judgmental. Không thay hình dáng tùy màn hình hoặc đổi mascot khi đổi personality.
+7.1 Tám trạng thái trình bày
+SPEC-07 có chín emotion nghiệp vụ: Idle, Happy, Curious, Thinking, Suspicious, Surprised, Smug, Supportive, Sleepy. Hai danh sách không phải cùng một enum. Pending Verification: bảng ánh xạ đầy đủ giữa emotion nghiệp vụ, tám UI states, asset và animation. Không xóa emotion của SPEC-07 hoặc tự tạo enum API từ tám tên UI.
+Reference cho cơ chế adapter: emotion được whitelist, chuyển sang asset đã có; giá trị không hỗ trợ dùng Neutral tĩnh, giữ lời thoại phù hợp. Đây là fallback kỹ thuật đề xuất, không phải thay đổi emotion nghiệp vụ. Không dùng Happy để ăn mừng Purchase.
+7.2 Kích thước và vị trí
+S1 chốt ba placement levels Hero / Supporting / Decorative; mapping theo dòng ngoài các ví dụ là Reference. Không ép mascot vào form, danh sách dài hay màn hình Insights. Khi font lớn hoặc không gian hẹp, thu nhỏ/ẩn phần trang trí để ưu tiên nội dung và vùng chạm.
+7.3 Asset và tương tác
+Approved: dùng 3D pre-render nền trong suốt; dùng Lottie/Rive có chọn lọc khi phù hợp; không có real-time 3D engine trong MVP. Asset phải giữ proportions, ánh sáng và chất liệu nhất quán. Kiểm tra viền alpha trên nền cream và pastel; dung lượng và độ phân giải xuất cụ thể chưa chốt.
+SPEC-07 Interactive Mascot Option B gồm chạm đầu/bụng, chạm nhiều lần, chạm lúc rảnh; phản ứng bằng animation và câu thoại chuẩn bị sẵn, không cần gọi LLM mỗi tap. Không thêm xoay, kéo thả, unlock hoặc đồ chơi của Option C.
+Personality Friendly / Sassy mặc định / Savage chỉ đổi giọng và cường độ biểu cảm, không đổi logic verdict. Không xúc phạm, shaming, chế giễu thu nhập hoặc suy đoán bệnh lý. Không dùng câu thoại từ dữ liệu bịa đặt.
+Reference bàn giao asset: ghi state/emotion, variant tĩnh hoặc động, background alpha, kích thước nguồn, anchor/crop, phiên bản và quyền sử dụng. Chọn một fallback tĩnh cho reduced motion và lỗi tải. Mascot tương tác cần nhãn hành động và điều khiển tiếp cận; mascot trang trí không được TalkBack đọc dư thừa.
+8 Iconography và illustrations
+Approved • UI-06.
+Container 40dp vẫn cần vùng tương tác 48dp, không được coi kích thước hình là kích thước hit area. Không trộn Material Symbols Rounded với một bộ nét khác. Chưa chốt glyph cụ thể cho từng tab hoặc action; lựa chọn glyph là Reference trong thiết kế màn hình.
+Illustration dùng Premium Soft Clay 3D. Decorative elements Approved gồm 3D Stars, Rounded Bubbles, Soft Sparkles, Floating Spheres, Rounded Abstract Shapes; dùng có chọn lọc, không che nội dung hay giống lời thúc đẩy mua.
+Ảnh sản phẩm do người dùng cung cấp hoặc nhập từ link vẫn cần phản ánh đúng sản phẩm. MVP không dùng AI image recognition. Illustration không chứa text quan trọng được raster hóa; nhãn, số và hướng dẫn phải là text UI có semantics.
+9 Motion và interaction
+Approved • UI-07: Soft, Bouncy, Responsive. Motion theo mục đích component; thông tin tài chính dùng chuyển động tối thiểu.
+9.1 Duration tokens
+Các giá trị dưới đây là Reference được nêu rõ trong quyết định, không phải thời lượng bắt buộc.
+Không có stiffness, damping ratio, easing curve hoặc displacement của card được chốt. Chọn và đo trên thiết bị thực, quản lý tập trung; không biến một preset thư viện thành Approved.
+9.2 Hành vi theo component
+Haptic có chọn lọc và nhẹ. MVP không có âm thanh UI mặc định; SPEC-07 cho phép sound effect tùy chọn, không đồng nghĩa phải thêm hệ thống âm thanh vào mọi component. Không yêu cầu AI voice trong MVP.
+Tôn trọng reduced motion: tắt animation trang trí, thay bằng ảnh tĩnh hoặc chuyển trực tiếp; nội dung và kết quả phải giữ nguyên. Animation không chặn tap hoặc kéo dài loading giả. Mục tiêu mượt 60 FPS khi khả thi là mục tiêu hiệu năng, không phải bảo đảm mọi thiết bị đạt cùng kết quả.
+Chỉ hiển thị Success sau khi thao tác liên quan thành công. Lưu draft cục bộ thành công phải ghi “Đã lưu bản nháp trên thiết bị”, không dùng thông điệp tạo item trên server thành công.
+10 Components và layout
+10.1 Spacing và cấu trúc màn hình
+Approved • UI-08.
+20dp là token riêng đã duyệt dù không thuộc chuỗi spacing cơ sở. Không ép mọi khoảng cách phải là bội số 8. Padding card theo từng biến thể chưa có giá trị riêng được chốt.
+10.2 Navigation và adaptive layout
+Approved: bốn tab theo thứ tự Home / My Items / Budget / Insights. Hành động Add Item không được tự biến thành tab thứ năm. Các route và chi tiết back stack là Reference triển khai, không phải chức năng mới.
+Mobile-first; form điện thoại là một cột đáp ứng. Support edge-to-edge và system insets; CTA và nội dung không bị thanh hệ thống hoặc bàn phím che. Breakpoints dp cụ thể chưa chốt trong S1; dùng window size/adaptive guidance của dự án và ghi Reference, không suy từ model thiết bị.
+Reference hành vi điều hướng: giữ ngữ cảnh tab, xử lý Back và phục hồi trạng thái phù hợp; route nhận ID, ViewModel/domain quyết định dữ liệu và quyền action. Selected tab cần cả icon/label và semantics, không chỉ đổi màu.
+10.3 Buttons và form
+56dp là chiều cao mặc định của Primary; accessibility cho phép mở rộng để không cắt chữ. Với thao tác đang gửi, giữ feedback pending rõ và tránh gửi trùng; không báo thành công trước xác nhận. Default, pressed, focused, disabled, loading và error cần được thiết kế khi phù hợp; opacity/HEX cụ thể của chúng chưa chốt.
+Giữ dữ liệu nhập khi lỗi mạng. Error có text hỗ trợ và semantics, không chỉ viền đỏ. Phân biệt tên và giá bắt buộc với ảnh/danh mục/ghi chú tùy chọn theo SPEC-08. Link import phải có preview, chỉnh sửa và xác nhận, fallback manual giữ link; Share Intent dùng cùng luồng.
+10.4 Reusable cards
+Tên component Approved • UI-08. Nội dung tối thiểu và hành vi trong bảng là hướng dẫn Reference được ràng buộc bởi S3.
+Product card, status chip, price text, progress, snackbar và dialog có thể được đóng gói thành primitives Reference để dùng lại. Việc tạo primitives không thêm nghiệp vụ hoặc thay danh sách component đã duyệt.
+10.5 Trạng thái UI
+Approved • UI-09; không bắt buộc mọi màn hình có mọi state nếu không phù hợp.
+Reference microcopy: “Đang xem dữ liệu đã lưu trên thiết bị”; “Cần kết nối mạng để ghi nhận giao dịch”; “Đã đến thời điểm xem lại. Kết nối mạng để cập nhật trạng thái.” Đây là mẫu lời Việt, chưa phải bộ copy Approved cuối cùng.
+11 Light first và dark ready
+Approved • UI-02, UI-09. MVP chỉ Light Mode. Không hiển thị lựa chọn Dark chưa hoạt động. Semantic tokens tách khỏi component; MaterialTheme cho phép bổ sung scheme sau này.
+Midnight Candy là hướng Dark tương lai; nền tối ngả tím, không dùng đen tuyệt đối làm nền chủ đạo. Giữ mèo trắng, điều chỉnh ánh sáng/bóng hoặc rim light khi cần, không đảo màu asset hoặc đổi mèo đen.
+11.1 Palette Dark tham khảo
+Toàn bộ bảng là Reference theo REVIEW-02, chưa phải Dark tokens cuối cùng.
+Khi phát hành Dark Mode mới hỗ trợ System / Light / Dark và lưu lựa chọn bằng DataStore theo REVIEW-02. Cần kiểm tra tương phản, elevation, state colors, ảnh alpha và toàn bộ component; việc đặt sẵn cấu trúc theme không có nghĩa Dark đã hoàn tất hoặc thuộc MVP.
+12 Accessibility
+Approved • REVIEW-03, WCAG 2.2 AA. Đây là tiêu chí thiết kế và kiểm thử, không phải tuyên bố sản phẩm đã được chứng nhận đạt chuẩn.
+Giá, remaining âm, tên item dài, lỗi dài và nút dài cần kiểm tra ở 200%. Card và form được tăng chiều cao. Purchase và Skip Purchase phải tách rõ nhãn, vị trí và vùng chạm để giảm nhầm; không cần dùng hiệu ứng phóng đại để phân biệt.
+12.1 TalkBack và semantics
+Reference Compose: tận dụng semantics có sẵn của Material components; dùng stateDescription, Role và progressBarRangeInfo khi phù hợp. Tránh đọc trùng label và contentDescription. Đừng merge cả card khiến action con không thể focus. Focus theo thứ tự đọc tự nhiên; dialog trả focus về vị trí hợp lý sau đóng.
+Với mascot tương tác, cung cấp action có nhãn hiểu được và vùng chạm đủ lớn; không yêu cầu người dùng chỉ nhận biết bằng animation. Xác nhận thao tác phá hủy không thể hoàn tác; giữ input khi request lỗi. Không dùng màu đỏ duy nhất cho validation.
+13 Product và architecture alignment
+13.1 Những khái niệm phải tách biệt
+Approved • SPEC-01–05 và UI-09.
+Mua không qua AI và Buy Again thủ công được phép trong SPEC-03–04. Frequently Purchased là chỉ dấu lịch sử, không đề xuất mua lại. Ngưỡng ví dụ ≥3 giao dịch trong S3 là Reference, không phải quy tắc cứng mới.
+13.2 Budget và purchase
+Một ngân sách mua sắm tổng thể theo chu kỳ tháng. Ngày neo 1–31 cố định sau setup; tháng thiếu ngày dùng ngày cuối nhưng giữ neo gốc. Không rollover. Thay budget amount có hiệu lực ngay cho chu kỳ hiện tại; chu kỳ đã đóng giữ snapshot ngân sách lịch sử.
+PAY_NOW được tạo mặc định khi đăng ký thành công; việc tạo phương thức không tạo khoản chi. Credit và Pay Now cùng tính chi tiêu theo ngày mua thực tế. Thẻ chỉ có nhãn tên để theo dõi thói quen; không có dư nợ, hạn mức, sao kê, lịch trả, lãi, bank sync hoặc repayment reminders.
+Giá dự kiến dùng estimated_unit_price; đơn giá thực dùng actual_unit_price; quantity là số nguyên ≥1, mặc định 1. Backend tính tổng bằng đơn giá thực nhân số lượng; Android chỉ preview. Phân biệt rõ “giá dự kiến” và “giá mua thực tế” trên form.
+Tạo Purchase mới chuyển item sang Purchased. Sửa/xóa giao dịch nhập sai tính lại ngân sách theo chu kỳ; xóa giao dịch cuối không tự đổi status item. UI phải tải lại trạng thái xác nhận thay vì suy từ số giao dịch. Refund đầy đủ/một phần không thuộc MVP.
+13.3 Cooling-off
+Cooling-off tự nguyện, chỉ bắt đầu khi user xác nhận; không quá một phiên Active mỗi item. Người dùng có thể mua, skip, hủy hoặc chỉnh thời gian theo S3, không bị phạt. Presets 24h/3/7/14 ngày là tham khảo, không phải công thức cố định theo giá.
+Theo phụ lục S3, server chuyển Active sang Completed khi hết hạn và item Waiting sang Considering. Không tự mua/skip. Need More Time sau Completed tạo phiên Active mới, giữ phiên cũ Completed; extend/shorten chỉ áp dụng phiên Active.
+Mua khi Active tạo Purchase, kết thúc phiên thành Resolved và item Purchased. Skip khi Active thành Resolved/Skipped, không tạo Purchase. Hủy Active thành Cancelled/Considering. Chuyển Waiting sang Wishlist hoặc Considering hủy phiên Active; sang Skipped giải quyết phiên. Waiting chỉ được vào qua bắt đầu Cooling-off.
+Countdown offline chỉ dựa deadline đã biết; không tự ghi các chuyển trạng thái này. ReadyForReviewCard khi offline không mở action cần server như thể đã online. Hết hạn không tự đổi verdict WAIT thành BUY. Chỉ tối đa một thông báo nhắc khi được phép theo SPEC-05.
+13.4 Insights đúng phạm vi MVP
+Approved • SPEC-06, đối chiếu trực tiếp S3. Các ví dụ rút gọn tại ALIGN-04 không thay thế toàn bộ scope sau đây.
+Story Recap dành cho mỗi chu kỳ đã kết thúc, cho xem recap cũ; Friendly/Sassy/Savage chỉ đổi giọng. Theo phụ lục cuối S3, recap được tính lại từ lịch sử khi xem, kể cả sau sửa/xóa Purchase; không lưu snapshot hoặc nội dung recap cố định. Cat’s Final Words có thể thay đổi theo số liệu. Không nhầm quy tắc này với snapshot ngân sách chu kỳ đã đóng, vốn vẫn phải giữ.
+Analytical engine tính số liệu có cấu trúc; AI chỉ diễn đạt/giải thích từ số liệu thật. Giá trị món đã skip không phải “tiền tiết kiệm chắc chắn”. Không có Impulse Control Score, điểm sức khỏe tài chính, AI dự đoán hành vi, gợi ý sản phẩm hoặc suy đoán bệnh lý.
+Pending Verification: denominator, cửa sổ thời gian, timezone, điều kiện “chu kỳ hợp lệ”, cách tính average waiting và dữ liệu offline có sẵn cho từng metric cần hợp đồng analytics. Các điểm này không loại bỏ nội dung Insights đã Approved và không được giải quyết bằng dữ liệu giả.
+13.5 Online và offline
+Approved • ADR-09, SPEC-09, UI-09.
+Các mutation cần mạng gồm tạo/sửa/xóa item, đổi trạng thái, ghi/sửa/xóa purchase, thay ngân sách/payment và điều khiển Cooling-off. Room là read cache; draft có lifecycle riêng. Không có full offline-first outbox cho mọi mutation.
+AI conversation/evaluation và link import cần online. Nhận Share Intent không làm import hoạt động offline. Manual draft vẫn dùng được; không được hiển thị import thành công giả.
+14 Hướng dẫn triển khai Android
+Approved • UI-09: Kotlin, Jetpack Compose, Material 3, MVVM, Clean Architecture, Hilt, Coroutines, StateFlow. Hướng dẫn API và cấu trúc dưới đây là Reference; không thay Technical Architecture và không chốt phiên bản dependency.
+14.1 Theme và tokens
+Đặt ColorScheme, Typography và Shapes ở tầng theme; các semantic màu mở rộng, spacing, motion, mascot size và shape đặc thù có thể cung cấp qua CompositionLocal. Component lấy token theo vai trò, không viết HEX rải rác. Tên đối tượng AppColors/AppSpacing trong triển khai là quy ước, không phải interface đã chốt.
+Gán rõ đủ 13 TextStyle Nunito. Material 3 có 15 slot typography phổ biến; hai slot displaySmall và headlineSmall ngoài bộ Approved phải được map fallback có chủ đích hoặc không dùng. Không để mặc định font hệ thống lọt vào UI. Những shape hero/card/button đặc thù cần tokens riêng ngoài các slot Shapes chuẩn để giữ đúng radius.
+Không tự bật dynamic color làm thay đổi palette thương hiệu. Nếu nhóm muốn hỗ trợ sau này, cần quyết định riêng; hiện palette Approved là nguồn dùng cho giao diện. DarkColorScheme tương lai không được làm app tự chuyển Dark trong MVP.
+14.2 State và ranh giới nghiệp vụ
+ViewModel cung cấp StateFlow<UiState>; UI quan sát state theo lifecycle và phát callback hành động. Repository/domain xử lý truy cập dữ liệu, điều kiện mạng và kết quả nghiệp vụ. Hilt cung cấp dependencies theo Technical Architecture; không đặt rule ngân sách trong Composable hoặc Navigation.
+Reference UiState cần biểu diễn đủ loading/error/content, dữ liệu cache, draft, pending mutation và xác nhận server để UI không trộn nguồn dữ liệu. Dùng lifecycle-aware collection, lưu/phục hồi input phù hợp; không coi remember là cơ chế lưu draft bền vững.
+Thời gian đếm ngược được suy từ deadline, không dùng số tick làm trạng thái nghiệp vụ. UI không ghi Completed khi timer về 0; refresh server quyết định. Tách callback “ghi nhận mua” khỏi callback xem verdict; LLM text không được tự chạy mutation.
+14.3 Component contract
+Reference mỗi component có content, state, callbacks và Modifier; tránh truyền cả ViewModel vào card dùng chung. Không đặt network call trong composable body. Các trạng thái disabled/loading/offline phải có thông điệp đủ để người dùng hiểu lý do.
+Dùng Material Button, OutlinedTextField, NavigationBar/NavigationRail, Dialog và BottomSheet làm nền khi phù hợp; wrapper áp dụng tokens Approved. Không đánh đổi semantics hoặc hit target để có hiệu ứng 3D. Bảo toàn ripple/feedback phù hợp và focus indication.
+Dùng chuỗi bản địa hóa, formatter locale và giá trị tiền nguyên; tránh chuyển tiền qua Float/Double gây sai số. UI hiển thị preview total nhưng lấy kết quả backend làm dữ liệu chính thức. Nội dung nhập ảnh phải được giữ bền vững cho draft, không chỉ lưu URI tạm có thể mất quyền.
+14.4 Kiểm thử và bàn giao
+Reference quy trình kiểm thử: preview/catalog component theo state, font scale và độ rộng; kiểm tra TalkBack trên thiết bị; đo tương phản từng cặp và vùng gradient; kiểm tra hit area và insets; đo animation trên thiết bị mục tiêu. Design tokens Approved là giá trị kỳ vọng, không phải ảnh chụp mặc định Material.
+Các tình huống nghiệm thu bắt buộc theo ranh giới đã duyệt gồm: mất mạng khi gửi request không báo thành công giả; draft và ảnh còn sau mở lại app; reconnect không tự gửi draft; timer về 0 offline không đổi business state; Pay Now/Credit cùng tính ngân sách; xóa Purchase không tự đổi status; recap phản ánh lịch sử đã sửa; 200% font không cắt tiền.
+Checklist bàn giao màn hình Reference: ghi route/ngữ cảnh, component tái sử dụng, state áp dụng, tokens, dữ liệu nguồn, action cần mạng, semantics, reduced-motion fallback và các Pending Verification còn liên quan. Không yêu cầu phê duyệt lại tokens Approved để bàn giao.
+14.5 Tài liệu kỹ thuật tham chiếu
+Android Developers, Custom design systems in Compose: https://developer.android.com/develop/ui/compose/designsystems/custom
+Android Developers, Anatomy of a theme in Compose: https://developer.android.com/develop/ui/compose/designsystems/anatomy
+Android Developers, Accessibility API defaults: https://developer.android.com/develop/ui/compose/accessibility/api-defaults
+Các nguồn kỹ thuật này hỗ trợ cách triển khai theme và semantics; không phải nguồn phê duyệt thông số riêng của Should I Buy It?. Kiểm tra API theo dependency thực tế trước khi tích hợp.
+15 Design tokens reference
+Bảng tra nhanh này trỏ về bảng đầy đủ; không tạo bộ token thứ hai. Tên/path token là Reference, còn giá trị và trạng thái theo nguồn đã ghi.
+Không dùng bảng này để bỏ qua yêu cầu tương phản. Có HEX Approved không có nghĩa mọi tổ hợp foreground/background đều dùng được.
+16 Sổ quyết định đã duyệt
+Nguồn chính S1; UI-09 có thêm chi tiết S2; các ràng buộc nghiệp vụ theo S3. Tài liệu tổng hợp các quyết định đã duyệt, không tạo một vòng phê duyệt mới.
+16.1 Kết quả đối chiếu Functional Specification
+Không phát hiện mâu thuẫn trực tiếp buộc phải thay palette, typography, spacing, shape hoặc navigation đã Approved. Hai khác biệt cần xử lý rõ là hệ tên mascot và hợp đồng ngưỡng; chúng không cho phép tự sửa nguồn.
+17 Pending Verification và các vấn đề mở
+Những mục này là chi tiết còn cần xác minh; không hạ cấp UI-01–UI-09 và không mở thêm tính năng MVP.
+Hướng dẫn triển khai Reference và microcopy có thể tinh chỉnh trong thiết kế màn hình; nếu thay một token Approved hoặc thay scope, phải ghi change record riêng. Không tự áp dụng Dark Mode, debt management, refunds, rollover, product discovery, price tracking, AI Vision, auto-buy hoặc gợi ý mua lại.
+Bản v1.0 này là tài liệu chuẩn để sử dụng về sau. Khi xử lý một Pending Verification, cập nhật mục liên quan và sổ thay đổi; giữ lịch sử token và lý do để đội thiết kế, Android và backend dùng cùng một nguồn.
+Nhãn
+Ý nghĩa
+Cách sử dụng
+Approved
+Quyết định được người dùng xác nhận trong bản bổ sung UI-01–UI-09 hoặc Functional Specification v1.1
+Giữ nguyên giá trị và ranh giới đã duyệt
+Reference
+Giá trị minh họa, khuyến nghị triển khai hoặc tên token do tài liệu quy ước
+Có thể tinh chỉnh; không trình bày là phê duyệt mới
+Pending Verification
+Điểm cần đối chiếu hoặc hợp đồng chưa được nguồn xác định đầy đủ
+Không tự chốt nghiệp vụ hoặc âm thầm thay nguồn
+Thành phần
+Quy định
+Phong cách
+Candy Pop 3D
+Cá tính thương hiệu
+Playful, Colorful, Premium
+Nền tảng UI
+Material Design 3; component 2D sạch là chủ yếu
+Chiều sâu
+Tactile 3D tinh tế, có chọn lọc
+Mascot
+Mèo trắng 3D clay, mắt đen tròn tối giản
+Font
+Chỉ Nunito
+Cách dùng hình ảnh
+Mascot và illustration có khối mềm; chữ và điều khiển vẫn là UI thật
+Token quy ước
+Màu
+Vai trò
+brandPrimary
+#8965F6
+Vibrant Purple; nhận diện, điểm nhấn chính
+brandSecondary
+#FF85B3
+Bubblegum Pink; hỗ trợ thương hiệu
+accentYellow
+#FFD75E
+Sunshine Yellow
+accentMint
+#78DCC3
+Fresh Mint
+accentBlue
+#8DCDF8
+Sky Blue
+accentOrange
+#FFAA61
+Tangerine Orange
+background
+#FAF8F5
+Warm Cream; nền Light Mode
+surface
+White
+Card trắng; biểu diễn kỹ thuật #FFFFFF
+Gradient
+Stops đã duyệt
+Phạm vi
+Primary
+#8965F6 → #BA85F5 → #FFB4CF
+Brand hero hoặc điểm nhấn chính có chọn lọc
+Warm Candy
+#FFAA61 → #FFD75E
+Minh họa hoặc nền ngữ cảnh phù hợp
+Cool Breeze
+#8DCDF8 → #78DCC3
+Minh họa hoặc nền ngữ cảnh phù hợp
+Token quy ước
+HEX
+Ý nghĩa
+coolingOff
+#8DCDF8
+Đang có ngữ cảnh Cooling-off
+readyForReview
+#FFD75E
+Đến lúc xem lại; không phải verdict BUY
+purchased
+#6888C9
+Trạng thái đã mua, trung tính
+skipped
+#78DCC3
+Đã bỏ qua
+postponed
+#FFAA61
+Tín hiệu trình bày hoãn; không thêm Item Status
+budgetWarning
+#E9A23B
+Cảnh báo ngân sách
+overBudget
+#E56B73
+Vượt ngân sách
+error
+#D94B57
+Lỗi
+success
+#269C78
+Thao tác hoàn tất thành công
+Trạng thái thiết kế
+Ngưỡng UI-02
+Trạng thái đối chiếu
+Normal
+<80%
+Approved trong thiết kế; Pending Verification với hợp đồng nghiệp vụ
+Warning
+80–100%
+Bao gồm đúng 80% và đúng 100%; cần xác nhận hợp đồng
+Over Budget
+>100%
+Approved trong thiết kế; cần xác nhận hợp đồng
+Style
+Size sp
+Line height sp
+Weight
+Vai trò gợi ý Reference
+DisplayLarge
+36
+44
+ExtraBold 800
+Headline hero ngắn
+DisplayMedium
+32
+40
+ExtraBold 800
+Hero phụ
+HeadlineLarge
+28
+36
+ExtraBold 800
+Tiêu đề lớn
+HeadlineMedium
+24
+32
+Bold 700
+Tiêu đề section nổi bật
+TitleLarge
+20
+28
+Bold 700
+Tiêu đề card hoặc màn hình
+TitleMedium
+17
+24
+Bold 700
+Tiêu đề nhóm
+TitleSmall
+15
+22
+SemiBold 600
+Tiêu đề nhỏ
+BodyLarge
+16
+24
+Regular 400
+Nội dung đọc chính
+BodyMedium
+14
+20
+Regular 400
+Mô tả hỗ trợ
+BodySmall
+12
+16
+Medium 500
+Metadata
+LabelLarge
+16
+24
+Bold 700
+Nhãn nút chính
+LabelMedium
+14
+20
+SemiBold 600
+Nhãn điều khiển
+LabelSmall
+12
+16
+Bold 700
+Nhãn nhỏ
+Vai trò
+Size sp
+Weight Approved
+Line height
+Budget Summary
+28
+ExtraBold 800
+Chưa chốt
+Product Price
+20
+Bold 700
+Chưa chốt
+Remaining Budget
+18
+Bold 700
+Chưa chốt
+Small Amount
+14
+SemiBold 600
+Chưa chốt
+Countdown
+24
+ExtraBold 800
+Chưa chốt
+Token
+Thành phần
+Radius dp
+hero
+Hero Card
+32
+card
+Standard Card
+24
+cardSmall
+Small Card
+20
+buttonPrimary
+Primary Button
+20
+buttonSecondary
+Secondary Button
+16
+input
+Text Field
+16
+chip
+Chips
+Fully rounded
+dialog
+Dialog
+28
+sheet
+Bottom Sheet
+28 ở góc trên
+thumbnail
+Product Thumbnail
+16
+Token
+Giá trị Approved
+Cách phân bổ Reference
+elevationLevel1
+2dp
+Card hỗ trợ
+elevationLevel2
+6dp
+Thành phần nổi bật
+elevationLevel3
+8dp
+Lớp cần phân tách rõ
+Trạng thái UI Approved
+Ngữ cảnh sử dụng Reference
+Welcome
+Chào người dùng
+Thinking
+Đang xử lý hoặc cân nhắc
+Sleeping
+Cooling-off hoặc nghỉ, khi phù hợp
+Curious
+Mời người dùng suy nghĩ
+Concerned
+Cảnh báo quan tâm, không trách móc
+Relaxed
+Trạng thái bình tĩnh
+Encouraging
+Ghi nhận việc cân nhắc hoặc tiếp tục chờ
+Neutral
+Xác nhận trung tính, gồm ghi nhận mua
+Ngữ cảnh
+Kích thước Approved dp
+Level
+Home Hero
+180–240
+Hero
+Onboarding
+220–280
+Hero
+Empty State
+140–180
+Decorative hoặc Supporting theo nội dung
+Decision Screen
+120–160
+Supporting
+Dialog
+72–110
+Supporting
+Small Decoration
+48–72
+Decorative
+Thuộc tính
+Quy định
+Icon family
+Material Symbols Rounded
+Optical weight
+400
+Fill
+0 mặc định; 1 khi selected nếu phù hợp
+Small
+20dp
+Default
+24dp
+Large
+32dp
+Icon container
+40–48dp; radius 12–16dp; nền pastel
+Touch target
+Tối thiểu 48 × 48dp
+Token Reference
+Duration ms
+Ứng dụng gợi ý Reference
+instant
+100
+Phản hồi nhỏ
+fast
+150
+Đổi trạng thái điều khiển
+normal
+250
+Chuyển nội dung ngắn
+slow
+350
+Xuất hiện lớp hoặc card
+emphasis
+450
+Điểm nhấn có chọn lọc
+Component
+Hành vi Approved
+Primary Button
+Pressed scale 0,96; giảm shadow; spring release
+Primary Button translation
+Khoảng 2dp xuống dưới; giá trị xấp xỉ Reference
+Secondary Button
+Standard press theo REVIEW-01
+Card
+Fade + subtle translate
+Navigation
+Nguyên tắc motion Material 3
+Dialog
+Fade + Scale
+Bottom Sheet
+Vertical Slide
+Mascot
+Contextual animation; idle nhẹ, tránh loop phân tán
+Financial Data
+Chuyển động tối thiểu; ưu tiên số rõ ràng
+Token quy ước
+Giá trị dp
+Vai trò gợi ý Reference
+space1
+4
+Khoảng hẹp trong nhóm
+space2
+8
+Icon và label
+space3
+12
+Nội dung phụ
+space4
+16
+Khoảng trong component
+space6
+24
+Nhịp section
+space8
+32
+Tách nhóm lớn
+space12
+48
+Khoảng lớn có chọn lọc
+screenPaddingHorizontal
+20
+Padding ngang mặc định
+sectionSpacing
+24
+Khoảng cách giữa section
+Loại không gian
+Bố cục Approved
+Compact
+Một cột và Bottom Navigation
+Medium
+Có thể dùng hai cột
+Expanded
+Navigation Rail và multi-column
+Thành phần
+Quy định Approved
+Hướng dẫn Reference
+Primary
+Cao 56dp; radius 20dp; tactile nhẹ
+Một hành động chính rõ ràng trong nhóm
+Secondary
+Radius 16dp
+Hành động hỗ trợ
+Outlined
+Một biến thể được duyệt
+Hành động phụ cần ranh giới
+Text
+Một biến thể được duyệt
+Hành động ít nhấn mạnh
+Destructive
+Một biến thể được duyệt
+Có nhãn rõ, xác nhận nếu không thể hoàn tác
+Các nút khác
+Touch target tối thiểu 48dp
+Không ép chiều cao cố định khi chữ lớn
+Form
+Material 3 Outlined Text Fields
+Label luôn rõ, lỗi ngay tại field khi phù hợp
+Component
+Nội dung và hành vi
+MascotHeroCard
+Mascot, lời thoại phù hợp ngữ cảnh, hành động hiện có; không biến Home thành feed mua sắm
+CoolingOffItemCard
+Tên item, thời gian còn lại, nhãn trạng thái; action theo quyền nghiệp vụ và kết nối
+ReadyForReviewCard
+Mời xem lại nhu cầu; offline chỉ nêu đến hạn cục bộ và cần kết nối
+BudgetSummaryCard
+Chu kỳ, budget, spent, remaining, % khi hợp lệ; Pay Now/Credit cùng tác động
+RealityCheckCard
+Thông tin khách quan, lý do dựa dữ liệu thật; không hù dọa hoặc tự chấm điểm
+DecisionHistoryCard
+Verdict lịch sử riêng với quyết định thực và trạng thái item
+InsightSummaryCard
+Chỉ metric có trong SPEC-06; nêu chu kỳ và tình trạng dữ liệu
+State
+Hành vi
+Loading
+Skeleton hoặc progress; giữ vùng nội dung ổn định khi có thể
+Empty
+Hướng dẫn có ý nghĩa và mascot/illustration nếu phù hợp; không bịa dữ liệu
+Error
+Thông báo dễ hiểu, Retry nếu thao tác có thể thử lại
+Offline
+Đọc cache khi có; phân biệt draft; giải thích action cần Internet
+Success
+Chỉ sau xác nhận đúng tầng; feedback không cản trở
+Partial Data
+Giữ phần dùng được, nêu phần chưa tải hoặc chưa đầy đủ
+Vai trò
+HEX Reference
+Background
+#15131D
+Surface
+#211E2B
+Elevated Surface
+#2C2739
+Primary
+#B6A0FF
+Secondary
+#FFAACB
+Text Primary
+#F5F2FA
+Text Secondary
+#B8B2C5
+Hạng mục
+Tiêu chí nghiệm thu
+Chữ thông thường
+Tương phản tối thiểu 4,5:1
+Chữ lớn
+Tương phản tối thiểu 3:1; xác định theo tiêu chí WCAG, không coi mọi title là chữ lớn
+Icon chức năng và UI thiết yếu
+Tối thiểu 3:1 với vùng liền kề khi áp dụng
+Gradient
+Đo tại vùng tương phản thấp nhất dưới text/icon
+Touch target
+Tối thiểu 48 × 48dp, kể cả icon nhỏ hơn
+Font scale
+Kiểm tra 100%, 150%, 200%; không khóa scale
+Color
+Có label/icon/shape hỗ trợ; không dùng màu đơn độc
+Reduced motion
+Có trạng thái tĩnh tương đương; không nhấp nháy mạnh
+Thành phần
+Hành vi Approved
+Mascot trang trí
+Không đọc
+Icon Button
+Có mô tả hành động rõ
+Product Card
+Đọc tên, giá và trạng thái
+Countdown
+Đọc thời gian khi focus; không phát live mỗi giây
+Budget Progress
+Đọc số tiền và tỷ lệ; nói rõ nếu vượt
+Error
+Có thông báo phù hợp và nội dung lỗi
+Selected Tab
+Thông báo đã chọn
+Khái niệm
+Giá trị hoặc quy tắc
+AI Verdict
+BUY / WAIT / SKIP; là nhận định, không phải transaction
+Item Status
+Wishlist / Considering / Waiting / Purchased / Skipped
+Cooling-off State
+Active / Completed / Cancelled / Resolved
+Ready for Review
+Nhãn trình bày; không phải Item Status thứ sáu
+Postponed
+Tín hiệu màu; không bổ sung status nghiệp vụ
+Purchase
+Giao dịch đã xác nhận; một item có thể có nhiều giao dịch
+Offline Draft
+Bản nháp cục bộ; chưa phải ShoppingItem hoặc Purchase
+Nhóm
+Nội dung đã duyệt
+Quy tắc UI
+Spending Overview
+Spent, remaining, % sử dụng, số giao dịch theo chu kỳ, trend giữa chu kỳ hợp lệ
+Hiển thị chu kỳ; không bịa trend khi thiếu dữ liệu
+Payment breakdown
+Pay Now/Credit, card usage từ lịch sử
+Không suy thành dư nợ hoặc hạn mức
+Decisions
+Item count, transactions, status, verdict so với actual decision
+Ghi rõ đơn vị đếm; nghe lời mèo không phải thước đo thành công
+Cooling-off
+Số phiên/kết quả, chờ trung bình, thay đổi ý định sau Not Anymore
+Không suy tương quan thành nguyên nhân
+Shopping Patterns
+Tần suất mua, Frequently Purchased, danh mục khi có dữ liệu
+Chỉ lịch sử; không khuyến nghị mua lại
+Monthly Story Recap
+Your Spending / Your Decisions / Your Cooling-off Journey / Cat’s Final Words
+Recap dạng story, không interactive chat
+Tình huống
+Được phép
+Feedback và ranh giới
+Online
+Đọc mới, gửi action server, AI và link import
+Pending đến khi server xác nhận
+Offline có cache
+Xem item, lịch sử mua và ngân sách đã tải
+Dữ liệu có thể cũ; không báo là mới nhất
+Offline manual draft
+Tạo, sửa, lưu bản nháp thủ công
+Lưu cục bộ; chưa chính thức, không trừ ngân sách
+Draft có ảnh
+Lưu ảnh bền vững trong vùng ứng dụng quản lý
+Mở lại được sau đóng/mở app
+Offline action nghiệp vụ
+Không thực hiện mutation chính thức
+Giải thích cần Internet; giữ dữ liệu nhập
+Offline countdown
+Hiển thị dựa deadline server đã biết
+Không tự đổi state chính thức
+Có mạng lại
+Refresh và đối chiếu server; user xem lại và xác nhận gửi draft
+Không tự upload/replay draft
+Nhóm
+Giá trị và quy tắc
+Trạng thái
+color.brand
+Purple #8965F6; Pink #FF85B3
+Approved UI-02
+color.accents
+#FFD75E / #78DCC3 / #8DCDF8 / #FFAA61
+Approved UI-02
+color.background
+#FAF8F5; card White và contextual pastels
+Approved; pastel HEX bổ sung chưa chốt
+color.gradients
+Ba gradient ở mục 4.2
+Stops Approved; góc/vị trí Reference
+color.semantic
+Chín màu ở mục 4.3
+Approved UI-02
+color.onColors
+onPrimary/onWarning/onCoolingOff và foreground khác
+Cần semantic pairing; HEX Pending Verification
+type.base
+13 styles Nunito ở mục 5.1
+Approved UI-03
+type.financial
+28/800; 20/700; 18/700; 14/600; 24/800
+Approved; line height chưa chốt
+shape
+Hero32, Card24, Small20, Primary20, Secondary16, Input16, Dialog28
+Approved UI-04
+shape.other
+Sheet top28, Thumbnail16, Chips fully rounded
+Approved UI-04
+space
+4/8/12/16/24/32/48dp; screen20; section24
+Approved UI-08
+elevation
+2/6/8dp, soft shadows
+Approved; blur/opacity/mapping Reference
+motion.duration
+100/150/250/350/450ms
+Reference UI-07
+motion.press
+Scale0,96; shadow giảm; spring release
+Approved; translation khoảng2dp Reference
+size.button
+Primary56dp; touch target ≥48dp
+Approved UI-08/09
+size.icon
+20/24/32dp; weight400; fill0/1
+Approved UI-06
+size.mascot
+Theo sáu ngữ cảnh ở mục 7.2
+Approved UI-05
+dark.palette
+Midnight Candy ở mục 11.1
+Reference; chưa phát hành MVP
+budget.thresholds
+<80 / 80–100 / >100%
+Approved UI; Pending Verification hợp đồng nghiệp vụ
+ID
+Quyết định Approved
+Vị trí tra cứu
+UI-01
+Candy Pop 3D; Playful/Colorful/Premium; Material3 và selective depth
+2–3
+UI-02
+Palette, gradients, semantic colors, distribution, light-first
+4, 11, 15
+UI-03
+Nunito ONLY, 13 styles, tài chính và locale
+5
+UI-04
+Radius, elevation 2/6/8dp, card variants, border/focus
+6
+UI-05
+Mèo trắng clay; 8 UI states; sizes; asset pre-render; no real-time3D
+7
+UI-06
+Material Symbols Rounded; sizes/weight/fill; clay illustration
+8
+UI-07
+Soft/Bouncy/Responsive; press behavior; no default UI sound
+9
+UI-08
+Spacing, 4 tabs, buttons/cards/forms, adaptive/insets
+10
+UI-09 REVIEW-01
+3 cấp thị giác; semantic tokens; mascot/motion theo vai trò
+2, 4, 6–10
+UI-09 REVIEW-02
+Light-only MVP; Midnight Candy future; không lộ setting chưa hoạt động
+11
+UI-09 REVIEW-03
+WCAG2.2AA; 48dp; scale200%; TalkBack/reduced motion
+12
+UI-09 REVIEW-04
+Mindful shopping; online/cache/draft; Budget/payment; architecture
+13–14
+Nội dung
+Kết quả
+Triết lý mindful shopping
+Khớp SPEC-01 và non-goals
+Insights
+Đã đưa đủ SPEC-06, gồm Story Recap; không giới hạn ở ví dụ đếm item
+Recap
+Dùng phụ lục cuối: tính lại khi xem, không recap snapshot
+Budget và Credit
+Khớp SPEC-02/04 và phụ lục; không quản lý nợ
+Offline
+Khớp ADR-09/SPEC-09; draft chỉ gửi khi user xác nhận online
+Input/import
+Khớp SPEC-08; preview, xác nhận, manual fallback; không AI Vision
+Cooling-off
+Theo phụ lục S3: Completed/Considering do server; Need More Time tạo phiên mới
+Mascot states
+Khác vocabulary 8 UI states và 9 business emotions; cần mapping rõ
+Threshold ngân sách
+S1 đã duyệt; S3 chưa xác định ngưỡng, cần xác minh contract
+ID
+Điểm cần xác minh
+Ranh giới áp dụng hiện tại
+PV-01
+HEX của on-colors, text/outline/disabled và pastel containers; kiểm tra contrast toàn bộ states
+Giữ palette Approved; không mặc định chữ trắng
+PV-02
+Hợp đồng ngân sách dùng ngưỡng <80/80–100/>100; xử lý budget0 hoặc thiếu dữ liệu
+Giữ ngưỡng UI đã duyệt trong spec thiết kế; không tự thêm business restriction
+PV-03
+Mapping 9 SPEC-07 emotions với 8 UI states và assets/reactions
+Giữ cả hai danh sách; adapter riêng, không thay enum nghiệp vụ
+PV-04
+Line height tài chính, letter spacing, tabular figures trong file Nunito
+Giữ size/weight Approved; không tự đổi font
+PV-05
+Material3 fallback cho displaySmall/headlineSmall; shape variants ngoài danh sách
+Chỉ 13 base styles Approved; fallback ghi Reference
+PV-06
+Analytics definitions, mẫu số, timezone, chu kỳ hợp lệ, available cache
+Scope Insights giữ nguyên; không bịa số/insight
+PV-07
+Asset dimensions/export budget, animation parameters, shadow details, adaptive breakpoints
+Giá trị mới là Reference; không real-time3D MVP
+PV-08
+Readback lỗi hoặc timeout khi server có thể đã nhận request; cơ chế chống gửi trùng theo TECH
+UI giữ trạng thái chưa xác định và refresh; không báo thất bại/thành công giả

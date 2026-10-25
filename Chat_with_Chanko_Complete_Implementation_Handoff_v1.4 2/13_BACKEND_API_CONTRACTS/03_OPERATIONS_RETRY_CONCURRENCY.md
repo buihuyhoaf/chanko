@@ -1,0 +1,75 @@
+# TC-OPS — retry, idempotency, concurrency, interruption
+
+**APPROVED A3-A, effective revision1.4.** Kế thừa owner/version/durable idempotency của TECH-02 §4.16/§9 và TECH-03 §4/§5/§6. Lookup, retry action, state names, windows và limits dưới đây là extensions được user approve ở A3; implementation/deployment chưa được chứng minh. REST completed-response vẫn baseline.
+
+## Identity, hash và state machine
+
+Một intent có client_operation_id và Idempotency-Key tạo một lần, payload bất biến. Server cấp operation_id và unique(owner, operation_scope, key), unique(owner, client_operation_id). Scope là method +route template +target resource. Hash từ JSON canonical của payload đã validate +target/context/admission version; không tự normalize text theo locale. Same-key khác payload/context/version→409 IDEMPOTENCY_CONFLICT, không rerun. Parent key không được thay vì timeout hoặc reconnect.
+
+| State server | Ý nghĩa | Client được làm gì |
+|---|---|---|
+| PENDING / RUNNING | Đã nhận hoặc đang gọi provider, chưa biết terminal result | Đọc transcript đã có; GET status, Send/evaluate mới bị khóa trong thread |
+| RETRYABLE_FAILURE | Attempt đã xác nhận thất bại, không có assistant/evaluation thành công | User explicit Retry action theo endpoint dưới, không tạo user bubble mới |
+| SUCCEEDED | Message/evaluation commit và resource IDs bền vững | Upsert theo ID, không thêm terminal thứ hai |
+| FAILED_FINAL | Validation/context/capability hoặc lỗi không retry được | Sửa input/refetch; intent mới chỉ sau user action mới rõ ràng |
+| INTERRUPTED_LIFECYCLE | Archive/delete thắng trước finalization | Không retry trên archived/deleted; restore không tự chạy lại |
+
+UNKNOWN_OUTCOME là client state khi mất response; không tự suy là FAILED_FINAL. Thất bại provider không tạo verdict giả. Một intent có thể có nhiều attempt được serialize, tối đa một successful finalization và một user message, một assistant completed message, một evaluation nếu applicable. Conversation/messages/evaluation có unique operation linkage để enforce; không dùng text/timestamp làm dedup.
+
+## Admission → provider → finalization
+
+1. Auth/owner và validate header shape. Idempotency replay lookup **trước so current version**; existing-thread row locks theo thứ tự thống nhất thread→operation/command→short item validation, unique constraint bảo vệ new admission để replay đã commit không fail bởi version do chính intent tăng. Replay vẫn qua current access/redaction; không trả raw response của chat đã xóa.
+2. Với intent mới, transaction ngắn check If-Match/capability/lifecycle, bảo đảm một AI operation active/thread, ghi operation +user message một lần và server sequence, capture lifecycle_epoch/item/context versions; tăng thread version. Evaluate dùng payload action, không tạo user decision.
+3. Commit; gọi provider ngoài transaction/DB lock. Approved provider deadline60s, request budget65s, operation lease90s, heartbeat15s, lease có attempt/fencing token. Không tự thêm platform queue hoặc giữ transaction dài.
+4. Final transaction owner/thread/epoch/active/capability check lại. Context/item version đổi→FAILED_FINAL CONTEXT_CHANGED, giữ user message đã nhận, không assistant/evaluation từ context cũ; user refetch và lựa chọn lại. Chính sách này chọn nhánh reject của baseline stale-or-reevaluate, đã approved A3.
+5. Commit assistant/evaluation hợp lệ +operation SUCCEEDED +sequence/version/idempotency result atomically. Chỉ trả200 sau commit. Nếu DB rollback thì không có successful result nửa chừng.
+6. Crash/lease hết: GET status hoặc maintenance recovery reconcile durable resource refs trước. Nếu đã commit thì SUCCEEDED; nếu chưa commit và lease hết thì RETRYABLE_FAILURE/INTERRUPTED theo lifecycle. Fencing token ngăn worker cũ commit sau khi lease/attempt bị thay. Không gọi provider lại chỉ do một GET/reconnect.
+
+## Retry chính xác
+
+- Transport timeout: ưu tiên GET `/ai/operations/by-client-id/{id}`; lookup theo operation_id khi đã biết. GET404 chỉ là chưa quan sát thấy, không chứng minh request cũ không tới sau đó. Không cấp key mới để gửi lại cùng intent.
+- Replay original POST với same parent key/payload trả canonical state/result của operation, không tự sinh attempt provider mới. Server đang RUNNING trả409 OPERATION_IN_PROGRESS, retryable true và Retry-After; lookup200 cung cấp state. Provider504 có thể trả operation IDs; client vẫn lookup trước kết luận.
+- Với RETRYABLE_FAILURE, **user** nhấn Retry gọi POST `/ai/operations/{id}/retry` với original parent intent key/reference giữ nguyên, expected operation version, và một retry-command idempotency key riêng ổn định cho cùng lần nhấn. Key command không phải new-message intent key. Loss response command thì replay cùng command key; duplicate taps chỉ admit một attempt. Version/lifecycle/context đã đổi→409, không retry mù.
+- Retry attempt không append user message; giữ resource identity và nâng attempt_no bằng CAS. Retryable provider failure trước đó không tính là successful terminal. FAILED_FINAL/INTERRUPTED/SUCCEEDED không được resume để tạo thêm success.
+- 429 tuân Retry-After; Approved GET network retry tối đa3 lần 1/2/4s+jitter, cap10s. Status polling foreground1/2/4/8/10s trong60s rồi hiển thị “Chưa có kết quả, kiểm tra lại”; không spinner vô hạn, không auto POST. Đây là approved contract defaults, không guarantees về latency AI.
+
+## Windows đã approve
+
+| Tham số | Giá trị approved / hành vi |
+|---|---|
+| Full safe result +supported retry window |24h từ admission server; trả server_time/retry_until trong OperationView |
+| Key digest/minimal operation tombstone |30 ngày, không raw text; chặn duplicate sau full-response expiry bằng IDEMPOTENCY_EXPIRED, không rerun |
+| Active operation |Không xóa key đang RUNNING; lease recovery trước retention cleanup |
+| Deleted chat |Raw reply/body bị redaction ngay theo A1 dù window còn; trạng thái/ID có thể giữ |
+| Client mất deadline/identity hoặc window hết |Không auto replay. Lookup/history kiểm tra; cho user chủ động yêu cầu một đánh giá mới sau khi hiểu kết quả cũ không thể xác định. Không biến uncertainty thành “thất bại chắc chắn” |
+
+Không hứa exactly-once với provider billing hoặc network delivery. Bảo đảm business persistence tối đa một successful result/intent bằng database constraints/transaction. Sau30 ngày không có replay guarantee cho key đã quên; client không được tái sử dụng key cũ ngoài supported window. Nếu client clock không đáng tin hoặc process death mất server deadline thì disable automatic retry và reconcile, không suy window từ clock mới.
+
+## Concurrency và ordering
+
+- Một RUNNING/PENDING AI operation/thread. Hai intent khác key cùng expected version: một admission thắng, request còn lại409 VERSION_CONFLICT/OPERATION_IN_PROGRESS, không gọi provider lần hai. Client không tự chọn câu được ưu tiên bằng clock.
+- Cùng key đồng thời cùng payload: một operation và một provider attempt admitted. Same key khác payload409. Không kiểm tồn tại ngoài transaction rồi ghi race.
+- Các thread khác nhau có thể chạy độc lập, quota theo user; evaluate cùng item vẫn dùng item version snapshot, history immutable, không last-write-wins xóa evaluation cũ.
+- Message sequence_no do server cấp, unique(thread,sequence); render upsert stable IDs. Local pending ID map sang server ID qua operation, không tạo bubble mới theo retry/reconnect.
+- Archive/delete lock cùng thread và tăng lifecycle_epoch. Commit order +epoch quyết định output, không timestamp client. Global lock order thread→operation/command→short item validation/AI result; purchase/item domains dùng convention repo được review để tránh deadlock. Không lock item trong lúc gọi provider.
+- Không đọc/ghi item status, purchase, budget, official user DecisionRecord để “hoàn tất” AI operation. Structured EvaluationRecord persistence là điều được phép, không user decision.
+
+## OperationView tối thiểu
+
+operation_id, client_operation_id, operation_kind, conversation_id nếu còn được hiển thị, state, attempt_no, operation_version, created_at/server_time/retry_until, result_resource_ids, safe_error_code, can_retry/reason, contract_revision. Raw response text chỉ khi owner có quyền conversation hiện tại; delete/redaction thắng replay. Cross-owner operation404. No secret/provider raw errors trong payload/log.
+
+Tests: IT07–IT10/IT13–IT16. Các approved values được đưa vào capabilities/config revision1.4; đây là Chat addendum user approve, không claim các extension từng có trong TECH gốc hoặc đã deploy.
+
+## Approved RetryCommand DTO (không phải code triển khai)
+
+POST /ai/operations/{parent_operation_id}/retry dùng Idempotency-Key của retry-command, giữ nguyên parent_intent_key trong payload/reference; expected_operation_version bắt buộc. Retry-command có client command ID riêng để dedup action, nhưng **parent AI operation_id, parent intent key, user_message_id và payload gốc không đổi**. Chỉ khi command admission thắng CAS mới tăng attempt_no, không tạo AI intent thứ hai. Duplicate/lost command response replay cùng command key trả cùng command ack/canonical parent state. Shape/header mới đã approved A3, không diễn giải thành “timeout thì đổi message key”.
+
+Retry-command kiểm expected_operation_version và current thread If-Match của command; parent admission If-Match/hash không bị sửa. Thread version tăng bởi chính admission/failure của operation không tự được coi là context mới; server lưu last operation-owned thread version và yêu cầu không có intervening turn/context/lifecycle change. Item/context snapshot vẫn phải khớp. Nếu đã có turn khác hoặc snapshot khác, trả CONTEXT_CHANGED thay vì tự retry một câu ở context mới. Đây là approved A3 contract, giữ parent identity/one-user-message invariant.
+
+## BindExistingItem và captured context revision — A2 amendment
+
+Binding dùng cùng durable idempotency/lookup/version cơ chế, operation_kind=BIND_ITEM, không provider call. Chỉ admit khi thread ACTIVE FREE và không PENDING/RUNNING/UnknownOutcome chưa reconcile; lock thread và item validation, atomic version/context_revision/result commit. Retry cùng bind intent phải giữ key/payload/item version/confirmation; same key khác payload409, hai bind intents khác key cùng thread version chỉ một commit. Không duplicate thread/transcript hoặc automatic item create.
+
+Idempotency lookup dùng **recorded admission context/hash** khi replay, không lấy current ITEM context để tính lại hash của request FREE/BIND cũ. Header/payload của intent gốc không thay đổi; replay trước current version check, current read/redaction vẫn áp dụng. Old successful FREE operation replay là historic result revision0, không new provider/evaluation; RETRYABLE_FAILURE rev0 không được resume sau bind rev1. Retry-command lúc này trả409 CONTEXT_CHANGED.
+
+Provider finalization/lease recovery so captured context_revision cùng lifecycle_epoch/fencing token; output sai epoch/context không commit. GET OperationView gồm context_revision_at_admission và result/current context metadata khi được phép. Cả owner+thread identity giữ qua bind; không đổi message/evaluation IDs chỉ vì context projection đổi. Chi tiết normative08, acceptance AM14-01–07.
