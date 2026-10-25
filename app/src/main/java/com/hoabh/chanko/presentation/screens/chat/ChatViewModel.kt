@@ -27,6 +27,8 @@ data class ChatUiState(
     val emotion: MascotEmotion = MascotEmotion.NEUTRAL,
     val showItemPicker: Boolean = false,
     val showDeleteDialog: Boolean = false,
+    val showHistorySheet: Boolean = false,
+    val showOptionsSheet: Boolean = false,
     val error: String? = null
 )
 
@@ -41,6 +43,8 @@ class ChatViewModel @Inject constructor(
     private val _isSending = MutableStateFlow(false)
     private val _showItemPicker = MutableStateFlow(false)
     private val _showDeleteDialog = MutableStateFlow(false)
+    private val _showHistorySheet = MutableStateFlow(false)
+    private val _showOptionsSheet = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val activeThreads: StateFlow<List<ChatThread>> = chatRepository.getActiveThreads()
@@ -49,21 +53,31 @@ class ChatViewModel @Inject constructor(
     val archivedThreads: StateFlow<List<ChatThread>> = chatRepository.getArchivedThreads()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private val currentThreadFlow = _currentThreadId.combine(activeThreads) { id, list ->
+    private val currentThreadFlow = _currentThreadId.combine(
+        combine(activeThreads, archivedThreads) { active, archived -> active + archived }
+    ) { id, list ->
         list.find { it.id == id }
     }
 
     private val messagesFlow = MutableStateFlow<List<ChatMessage>>(emptyList())
 
-    // Gom nhóm trạng thái phụ để combine không vượt quá 5 flows
+    // Gom nhóm trạng thái dialog / sheet
     private data class DialogState(
         val showItemPicker: Boolean,
         val showDeleteDialog: Boolean,
+        val showHistorySheet: Boolean,
+        val showOptionsSheet: Boolean,
         val error: String?
     )
 
-    private val dialogStateFlow = combine(_showItemPicker, _showDeleteDialog, _error) { picker, dialog, err ->
-        DialogState(picker, dialog, err)
+    private val dialogStateFlow = combine(
+        _showItemPicker,
+        _showDeleteDialog,
+        _showHistorySheet,
+        _showOptionsSheet,
+        _error
+    ) { picker, dialog, history, options, err ->
+        DialogState(picker, dialog, history, options, err)
     }
 
     val uiState: StateFlow<ChatUiState> = combine(
@@ -73,11 +87,15 @@ class ChatViewModel @Inject constructor(
         _isSending,
         dialogStateFlow
     ) { thread, messages, text, sending, dialogs ->
-        val currentEmotion = messages.lastOrNull { it.sender == MessageSender.CHANKO }?.emotion
-            ?: when (thread?.mode) {
-                ThreadMode.ITEM -> MascotEmotion.THINKING
-                else -> MascotEmotion.CURIOUS
-            }
+        val currentEmotion = if (thread?.isArchived == true) {
+            MascotEmotion.SLEEPING
+        } else {
+            messages.lastOrNull { it.sender == MessageSender.CHANKO }?.emotion
+                ?: when (thread?.mode) {
+                    ThreadMode.ITEM -> MascotEmotion.THINKING
+                    else -> MascotEmotion.CURIOUS
+                }
+        }
 
         ChatUiState(
             thread = thread,
@@ -88,6 +106,8 @@ class ChatViewModel @Inject constructor(
             emotion = currentEmotion,
             showItemPicker = dialogs.showItemPicker,
             showDeleteDialog = dialogs.showDeleteDialog,
+            showHistorySheet = dialogs.showHistorySheet,
+            showOptionsSheet = dialogs.showOptionsSheet,
             error = dialogs.error
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ChatUiState())
@@ -146,26 +166,43 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun openItemPicker() {
-        _showItemPicker.value = true
-    }
-
-    fun closeItemPicker() {
-        _showItemPicker.value = false
-    }
+    fun openItemPicker() { _showItemPicker.value = true }
+    fun closeItemPicker() { _showItemPicker.value = false }
 
     fun openDeleteDialog() {
+        _showOptionsSheet.value = false
         _showDeleteDialog.value = true
     }
+    fun closeDeleteDialog() { _showDeleteDialog.value = false }
 
-    fun closeDeleteDialog() {
-        _showDeleteDialog.value = false
+    fun openHistorySheet() { _showHistorySheet.value = true }
+    fun closeHistorySheet() { _showHistorySheet.value = false }
+
+    fun openOptionsSheet() { _showOptionsSheet.value = true }
+    fun closeOptionsSheet() { _showOptionsSheet.value = false }
+
+    fun archiveCurrentThread() {
+        _showOptionsSheet.value = false
+        viewModelScope.launch {
+            chatRepository.archiveThread(_currentThreadId.value)
+        }
+    }
+
+    fun restoreCurrentThread() {
+        _showOptionsSheet.value = false
+        viewModelScope.launch {
+            chatRepository.restoreThread(_currentThreadId.value)
+        }
     }
 
     fun confirmDelete(onDeleted: () -> Unit) {
         _showDeleteDialog.value = false
         viewModelScope.launch {
             chatRepository.deleteThread(_currentThreadId.value)
+            val nextThread = activeThreads.value.firstOrNull { it.id != _currentThreadId.value }
+            if (nextThread != null) {
+                selectThread(nextThread.id)
+            }
             onDeleted()
         }
     }
