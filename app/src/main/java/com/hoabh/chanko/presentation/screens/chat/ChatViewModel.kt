@@ -24,6 +24,7 @@ data class ChatUiState(
     val inputText: String = "",
     val isLoading: Boolean = false,
     val isSending: Boolean = false,
+    val isOffline: Boolean = false,
     val emotion: MascotEmotion = MascotEmotion.NEUTRAL,
     val showItemPicker: Boolean = false,
     val showDeleteDialog: Boolean = false,
@@ -89,6 +90,10 @@ class ChatViewModel @Inject constructor(
     ) { thread, messages, text, sending, dialogs ->
         val currentEmotion = if (thread?.isArchived == true) {
             MascotEmotion.SLEEPING
+        } else if (sending) {
+            MascotEmotion.THINKING
+        } else if (dialogs.error != null) {
+            MascotEmotion.CONCERNED
         } else {
             messages.lastOrNull { it.sender == MessageSender.CHANKO }?.emotion
                 ?: when (thread?.mode) {
@@ -103,6 +108,7 @@ class ChatViewModel @Inject constructor(
             inputText = text,
             isLoading = false,
             isSending = sending,
+            isOffline = false,
             emotion = currentEmotion,
             showItemPicker = dialogs.showItemPicker,
             showDeleteDialog = dialogs.showDeleteDialog,
@@ -164,6 +170,17 @@ class ChatViewModel @Inject constructor(
             chatRepository.requestVerdict(_currentThreadId.value)
             _isLoading.value = false
         }
+    }
+
+    fun retryLastAction() {
+        _error.value = null
+        if (_inputText.value.isNotBlank()) {
+            sendMessage()
+        }
+    }
+
+    fun dismissError() {
+        _error.value = null
     }
 
     fun openItemPicker() { _showItemPicker.value = true }

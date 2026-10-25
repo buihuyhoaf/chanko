@@ -148,6 +148,21 @@ fun ChatScreen(
                 emotion = uiState.emotion
             )
 
+            // S06 Offline Banner
+            if (uiState.isOffline) {
+                Spacer(modifier = Modifier.height(8.dp))
+                com.hoabh.chanko.presentation.screens.chat.components.ChatOfflineBanner()
+            }
+
+            // S08 Error Banner
+            if (uiState.error != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                com.hoabh.chanko.presentation.screens.chat.components.ChatErrorBanner(
+                    errorMessage = uiState.error ?: "Đã có lỗi xảy ra",
+                    onRetryClicked = { viewModel.retryLastAction() }
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // S01 Empty Hero nếu chưa có tin nhắn nào
@@ -168,6 +183,14 @@ fun ChatScreen(
                     items(uiState.messages, key = { it.id }) { msg ->
                         ChatMessageBubble(message = msg)
                         Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // S07 Thinking / Loading Status khi bot đang phản hồi
+                    if (uiState.isSending) {
+                        item(key = "thinking_indicator") {
+                            com.hoabh.chanko.presentation.screens.chat.components.ChatThinkingIndicator()
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
                     }
                 }
             }
