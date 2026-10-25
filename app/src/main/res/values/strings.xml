@@ -45,6 +45,10 @@
     <string name="tab_insights">Phân tích</string>
     <string name="tab_not_implemented">%1$s — Chưa triển khai</string>
 
+    <!-- Chat Strings -->
+    <string name="chat_title">Trò chuyện</string>
+    <string name="chat_history_menu">Lịch sử trò chuyện</string>
+
     <!-- My Items Strings -->
     <string name="my_items_title">Món đồ</string>
     <string name="my_items_archived_menu">Đã lưu trữ</string>

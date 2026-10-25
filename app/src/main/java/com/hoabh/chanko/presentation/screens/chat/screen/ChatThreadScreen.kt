@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.chat.model.ThreadMode
 import com.hoabh.chanko.presentation.screens.chat.components.ArchivedBanner
 import com.hoabh.chanko.presentation.screens.chat.components.ChatComposerBar
@@ -103,7 +105,7 @@ fun ChatThreadScreen(
                 }
 
                 Text(
-                    text = uiState.thread?.title ?: "Chat with Chanko",
+                    text = uiState.thread?.title ?: stringResource(R.string.chat_title),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = CandyColors.textPrimary,
