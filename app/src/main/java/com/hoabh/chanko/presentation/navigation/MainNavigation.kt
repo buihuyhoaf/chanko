@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material3.FloatingActionButton
@@ -124,7 +125,14 @@ fun MainNavigation(
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
                         onProfileClick = onNavigateToProfile,
-                        onChatClick = onNavigateToChat
+                        onChatClick = { controller.selectTab(TopLevelDestination.Chat) }
+                    )
+                }
+                composable(TopLevelDestination.Chat.route) {
+                    val chatViewModel: com.hoabh.chanko.presentation.screens.chat.ChatViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                    com.hoabh.chanko.presentation.screens.chat.ChatScreen(
+                        viewModel = chatViewModel,
+                        onNavigateBack = { controller.selectTab(TopLevelDestination.Home) }
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {
@@ -210,24 +218,24 @@ fun ChankoBottomBar(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Tab 2: Món đồ
+                // Tab 2: Chat
                 ChankoNavItem(
-                    destination = TopLevelDestination.MyItems,
-                    icon = Icons.AutoMirrored.Rounded.List,
-                    isSelected = currentRoute == TopLevelDestination.MyItems.route,
-                    onClick = { onTabSelected(TopLevelDestination.MyItems) },
+                    destination = TopLevelDestination.Chat,
+                    icon = Icons.Rounded.ChatBubbleOutline,
+                    isSelected = currentRoute == TopLevelDestination.Chat.route,
+                    onClick = { onTabSelected(TopLevelDestination.Chat) },
                     modifier = Modifier.weight(1f)
                 )
 
                 // Central Gap for floating (+) button
                 Spacer(modifier = Modifier.width(68.dp))
 
-                // Tab 3: Ngân sách
+                // Tab 3: Món đồ
                 ChankoNavItem(
-                    destination = TopLevelDestination.Budget,
-                    icon = Icons.Rounded.AccountBalanceWallet,
-                    isSelected = currentRoute == TopLevelDestination.Budget.route,
-                    onClick = { onTabSelected(TopLevelDestination.Budget) },
+                    destination = TopLevelDestination.MyItems,
+                    icon = Icons.AutoMirrored.Rounded.List,
+                    isSelected = currentRoute == TopLevelDestination.MyItems.route,
+                    onClick = { onTabSelected(TopLevelDestination.MyItems) },
                     modifier = Modifier.weight(1f)
                 )
 

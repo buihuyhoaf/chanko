@@ -10,6 +10,7 @@ enum class TopLevelDestination(
     @get:StringRes val labelRes: Int
 ) {
     Home("home", "Trang chủ", R.string.tab_home),
+    Chat("chat_tab", "Chat", R.string.tab_chat),
     MyItems("my_items", "Món đồ", R.string.tab_my_items),
     Budget("budget", "Ngân sách", R.string.tab_budget),
     Insights("insights", "Phân tích", R.string.tab_insights);

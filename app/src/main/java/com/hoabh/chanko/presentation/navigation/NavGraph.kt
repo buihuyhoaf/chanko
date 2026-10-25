@@ -19,7 +19,9 @@ import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
 import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(
@@ -137,7 +139,12 @@ fun NavGraph(
         }
 
         composable(
-            route = Screen.ItemDetail.route
+            route = Screen.ItemDetail.route,
+            arguments = listOf(
+                navArgument("itemId") {
+                    type = NavType.IntType
+                }
+            )
         ) {
             ItemDetailRoute(
                 onNavigateBack = { navController.popBackStack() },
