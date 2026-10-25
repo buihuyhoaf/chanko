@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -93,6 +94,15 @@ fun ChatScreen(
                     color = CandyColors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
+
+                // Nút tạo cuộc trò chuyện mới (S01 Empty)
+                IconButton(onClick = { viewModel.startNewChat() }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Cuộc trò chuyện mới",
+                        tint = CandyColors.brandPurple
+                    )
+                }
 
                 // Nút mở Lịch sử trò chuyện (S04)
                 IconButton(onClick = { viewModel.openHistorySheet() }) {

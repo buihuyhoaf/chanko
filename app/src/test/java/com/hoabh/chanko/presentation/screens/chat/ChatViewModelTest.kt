@@ -39,7 +39,20 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun initialState_loadsActiveThreadsAndMessages() = runTest {
+    fun initialState_isS01Empty() = runTest {
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        // Theo Spec S01: Mặc định chưa chọn thread nào, danh sách tin nhắn trống
+        org.junit.Assert.assertNull(state.thread)
+        assertTrue(state.messages.isEmpty())
+    }
+
+    @Test
+    fun selectThread_loadsThreadAndMessages() = runTest {
+        advanceUntilIdle()
+
+        viewModel.selectThread("thread_free_1")
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
@@ -50,7 +63,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun sendMessage_addsUserAndBotMessages() = runTest {
+    fun sendMessage_fromEmpty_createsNewThreadAndMessages() = runTest {
         advanceUntilIdle()
 
         viewModel.onTextChanged("Tôi có nên mua tai nghe này không?")
@@ -58,6 +71,7 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
+        assertNotNull(state.thread)
         val lastUserMessage = state.messages.find { it.text == "Tôi có nên mua tai nghe này không?" }
         assertNotNull(lastUserMessage)
 
@@ -68,6 +82,9 @@ class ChatViewModelTest {
 
     @Test
     fun bindItem_switchesToItemMode_onSameThread() = runTest {
+        advanceUntilIdle()
+
+        viewModel.selectThread("thread_free_1")
         advanceUntilIdle()
 
         val originalThreadId = viewModel.uiState.value.thread?.id
@@ -88,6 +105,9 @@ class ChatViewModelTest {
 
     @Test
     fun confirmDelete_removesThread() = runTest {
+        advanceUntilIdle()
+
+        viewModel.selectThread("thread_free_1")
         advanceUntilIdle()
 
         var deletedCalled = false

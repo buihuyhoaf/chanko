@@ -38,7 +38,8 @@ class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository
 ) : ViewModel() {
 
-    private val _currentThreadId = MutableStateFlow<String>("thread_free_1")
+    // null biểu thị trạng thái S01 (Empty Screen) khi vừa mở hoặc bắt đầu đoạn chat mới
+    private val _currentThreadId = MutableStateFlow<String?>(null)
     private val _inputText = MutableStateFlow("")
     private val _isLoading = MutableStateFlow(false)
     private val _isSending = MutableStateFlow(false)
@@ -57,7 +58,7 @@ class ChatViewModel @Inject constructor(
     private val currentThreadFlow = _currentThreadId.combine(
         combine(activeThreads, archivedThreads) { active, archived -> active + archived }
     ) { id, list ->
-        list.find { it.id == id }
+        if (id == null) null else list.find { it.id == id }
     }
 
     private val messagesFlow = MutableStateFlow<List<ChatMessage>>(emptyList())
@@ -119,7 +120,14 @@ class ChatViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ChatUiState())
 
     init {
-        loadThread(_currentThreadId.value)
+        // Mặc định khởi đầu ở S01 Empty, không load thread nào
+        messagesFlow.value = emptyList()
+    }
+
+    fun startNewChat() {
+        _currentThreadId.value = null
+        messagesFlow.value = emptyList()
+        _error.value = null
     }
 
     fun selectThread(threadId: String) {
@@ -146,10 +154,19 @@ class ChatViewModel @Inject constructor(
         _inputText.value = ""
         _isSending.value = true
 
+        val targetThreadId = _currentThreadId.value ?: ""
+
         viewModelScope.launch {
-            val result = chatRepository.sendMessage(_currentThreadId.value, text)
+            val result = chatRepository.sendMessage(targetThreadId, text)
             _isSending.value = false
-            if (result.isFailure) {
+            if (result.isSuccess) {
+                val sentMsg = result.getOrNull()
+                if (sentMsg != null && _currentThreadId.value == null) {
+                    // Chuyển từ S01 Empty sang thread mới tạo (S02)
+                    _currentThreadId.value = sentMsg.threadId
+                    loadThread(sentMsg.threadId)
+                }
+            } else {
                 _error.value = "Không thể gửi tin nhắn"
             }
         }
@@ -157,17 +174,19 @@ class ChatViewModel @Inject constructor(
 
     fun bindItem(itemId: String, itemName: String, itemPriceVnd: Long) {
         _showItemPicker.value = false
+        val currentId = _currentThreadId.value ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            chatRepository.bindExistingItem(_currentThreadId.value, itemId, itemName, itemPriceVnd)
+            chatRepository.bindExistingItem(currentId, itemId, itemName, itemPriceVnd)
             _isLoading.value = false
         }
     }
 
     fun requestVerdict() {
+        val currentId = _currentThreadId.value ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            chatRepository.requestVerdict(_currentThreadId.value)
+            chatRepository.requestVerdict(currentId)
             _isLoading.value = false
         }
     }
@@ -199,27 +218,28 @@ class ChatViewModel @Inject constructor(
     fun closeOptionsSheet() { _showOptionsSheet.value = false }
 
     fun archiveCurrentThread() {
+        val currentId = _currentThreadId.value ?: return
         _showOptionsSheet.value = false
         viewModelScope.launch {
-            chatRepository.archiveThread(_currentThreadId.value)
+            chatRepository.archiveThread(currentId)
         }
     }
 
     fun restoreCurrentThread() {
+        val currentId = _currentThreadId.value ?: return
         _showOptionsSheet.value = false
         viewModelScope.launch {
-            chatRepository.restoreThread(_currentThreadId.value)
+            chatRepository.restoreThread(currentId)
         }
     }
 
     fun confirmDelete(onDeleted: () -> Unit) {
+        val currentId = _currentThreadId.value ?: return
         _showDeleteDialog.value = false
         viewModelScope.launch {
-            chatRepository.deleteThread(_currentThreadId.value)
-            val nextThread = activeThreads.value.firstOrNull { it.id != _currentThreadId.value }
-            if (nextThread != null) {
-                selectThread(nextThread.id)
-            }
+            chatRepository.deleteThread(currentId)
+            _currentThreadId.value = null
+            messagesFlow.value = emptyList()
             onDeleted()
         }
     }
