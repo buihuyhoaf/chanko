@@ -15,4 +15,7 @@ sealed class Screen(val route: String) {
     data object Profile : Screen("profile")
     data object Personality : Screen("personality")
     data object Chat : Screen("chat")
+    data object ChatThread : Screen("chat_thread/{threadId}") {
+        fun createRoute(threadId: String): String = "chat_thread/$threadId"
+    }
 }

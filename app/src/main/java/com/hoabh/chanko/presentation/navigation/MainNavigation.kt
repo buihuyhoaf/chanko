@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Home
@@ -59,6 +58,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatEmptyScreen
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatScreen
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
@@ -69,14 +71,16 @@ fun NavGraphBuilder.mainDestination(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
-    onNavigateToArchived: () -> Unit = {}
+    onNavigateToArchived: () -> Unit = {},
+    onNavigateToChatThread: (String) -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
             onNavigateToProfile = onNavigateToProfile,
             onNavigateToChat = onNavigateToChat,
             onNavigateToItemDetail = onNavigateToItemDetail,
-            onNavigateToArchived = onNavigateToArchived
+            onNavigateToArchived = onNavigateToArchived,
+            onNavigateToChatThread = onNavigateToChatThread
         )
     }
 }
@@ -97,7 +101,8 @@ fun MainNavigation(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
-    onNavigateToArchived: () -> Unit = {}
+    onNavigateToArchived: () -> Unit = {},
+    onNavigateToChatThread: (String) -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -128,9 +133,10 @@ fun MainNavigation(
                     )
                 }
                 composable(TopLevelDestination.Chat.route) {
-                    val chatViewModel: com.hoabh.chanko.presentation.screens.chat.ChatViewModel = androidx.hilt.navigation.compose.hiltViewModel()
-                    com.hoabh.chanko.presentation.screens.chat.ChatScreen(
+                    val chatViewModel: ChatViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                    ChatEmptyScreen(
                         viewModel = chatViewModel,
+                        onNavigateToThread = onNavigateToChatThread,
                         onNavigateBack = { controller.selectTab(TopLevelDestination.Home) }
                     )
                 }

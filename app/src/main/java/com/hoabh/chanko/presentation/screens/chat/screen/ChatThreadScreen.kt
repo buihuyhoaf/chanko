@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat
+package com.hoabh.chanko.presentation.screens.chat.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,11 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,20 +44,37 @@ import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.domain.chat.model.ThreadMode
 import com.hoabh.chanko.presentation.screens.chat.components.ArchivedBanner
 import com.hoabh.chanko.presentation.screens.chat.components.ChatComposerBar
-import com.hoabh.chanko.presentation.screens.chat.components.ChatEmptyHero
+import com.hoabh.chanko.presentation.screens.chat.components.ChatErrorBanner
 import com.hoabh.chanko.presentation.screens.chat.components.ChatHistorySheet
 import com.hoabh.chanko.presentation.screens.chat.components.ChatMascotHeader
 import com.hoabh.chanko.presentation.screens.chat.components.ChatMessageBubble
+import com.hoabh.chanko.presentation.screens.chat.components.ChatOfflineBanner
+import com.hoabh.chanko.presentation.screens.chat.components.ChatThinkingIndicator
 import com.hoabh.chanko.presentation.screens.chat.components.ThreadOptionsSheet
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 import com.hoabh.chanko.ui.theme.CandyColors
 
+/**
+ * S02–S11 — Chat Thread Screen
+ * Màn hình chi tiết cuộc trò chuyện (Thread conversation).
+ * Hiển thị toàn bộ lịch sử tin nhắn, phản biện của Chanko, thẻ thẩm định Verdict Card,
+ * và các tùy chọn chuyển đổi chế độ / lưu trữ / xóa.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(
+fun ChatThreadScreen(
+    threadId: String,
     viewModel: ChatViewModel,
     onNavigateBack: () -> Unit,
+    onNavigateToNewChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(threadId) {
+        if (threadId.isNotBlank()) {
+            viewModel.selectThread(threadId)
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val activeThreads by viewModel.activeThreads.collectAsState()
     val archivedThreads by viewModel.archivedThreads.collectAsState()
@@ -95,8 +110,8 @@ fun ChatScreen(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Nút tạo cuộc trò chuyện mới (S01 Empty)
-                IconButton(onClick = { viewModel.startNewChat() }) {
+                // Nút tạo cuộc trò chuyện mới (về S01 Empty)
+                IconButton(onClick = onNavigateToNewChat) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Cuộc trò chuyện mới",
@@ -128,7 +143,7 @@ fun ChatScreen(
                 ChatComposerBar(
                     text = uiState.inputText,
                     onTextChanged = viewModel::onTextChanged,
-                    onSendClicked = viewModel::sendMessage,
+                    onSendClicked = { viewModel.sendMessage() },
                     onPickItemClicked = viewModel::openItemPicker,
                     isEnabled = !uiState.isSending,
                     isItemBound = uiState.thread?.mode == ThreadMode.ITEM
@@ -161,13 +176,13 @@ fun ChatScreen(
             // S06 Offline Banner
             if (uiState.isOffline) {
                 Spacer(modifier = Modifier.height(8.dp))
-                com.hoabh.chanko.presentation.screens.chat.components.ChatOfflineBanner()
+                ChatOfflineBanner()
             }
 
             // S08 Error Banner
             if (uiState.error != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                com.hoabh.chanko.presentation.screens.chat.components.ChatErrorBanner(
+                ChatErrorBanner(
                     errorMessage = uiState.error ?: "Đã có lỗi xảy ra",
                     onRetryClicked = { viewModel.retryLastAction() }
                 )
@@ -175,32 +190,21 @@ fun ChatScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // S01 Empty Hero nếu chưa có tin nhắn nào
-            if (uiState.messages.isEmpty()) {
-                ChatEmptyHero(
-                    onPromptClick = { prompt ->
-                        viewModel.onTextChanged(prompt)
-                        viewModel.sendMessage()
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    items(uiState.messages, key = { it.id }) { msg ->
-                        ChatMessageBubble(message = msg)
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                items(uiState.messages, key = { it.id }) { msg ->
+                    ChatMessageBubble(message = msg)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
-                    // S07 Thinking / Loading Status khi bot đang phản hồi
-                    if (uiState.isSending) {
-                        item(key = "thinking_indicator") {
-                            com.hoabh.chanko.presentation.screens.chat.components.ChatThinkingIndicator()
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
+                // S07 Thinking / Loading Status khi bot đang phản hồi
+                if (uiState.isSending) {
+                    item(key = "thinking_indicator") {
+                        ChatThinkingIndicator()
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
@@ -237,46 +241,26 @@ fun ChatScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .padding(vertical = 6.dp)
+                            .clip(RoundedCornerShape(14.dp))
                             .background(CandyColors.background)
-                            .border(1.dp, CandyColors.divider, RoundedCornerShape(12.dp))
-                            .clickable {
-                                viewModel.bindItem(id, name, price)
-                            }
+                            .border(1.dp, CandyColors.divider, RoundedCornerShape(14.dp))
+                            .clickable { viewModel.bindItem(id, name, price) }
                             .padding(14.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = name,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = CandyColors.textPrimary
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "${price}đ",
-                                    fontSize = 12.sp,
-                                    color = CandyColors.brandPurple,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(CandyColors.primarySoft)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = "Thẩm định",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = CandyColors.brandPurple
-                                )
-                            }
+                        Column {
+                            Text(
+                                text = name,
+                                fontWeight = FontWeight.Bold,
+                                color = CandyColors.textPrimary
+                            )
+                            Text(
+                                text = "%,d ₫".format(price),
+                                fontSize = 12.sp,
+                                color = CandyColors.mutedInk
+                            )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -288,13 +272,16 @@ fun ChatScreen(
             activeThreads = activeThreads,
             archivedThreads = archivedThreads,
             currentThreadId = uiState.thread?.id,
-            onSelectThread = { threadId -> viewModel.selectThread(threadId) },
+            onSelectThread = { selectedThreadId ->
+                viewModel.closeHistorySheet()
+                viewModel.selectThread(selectedThreadId)
+            },
             onDismiss = { viewModel.closeHistorySheet() },
             sheetState = historySheetState
         )
     }
 
-    // S09 — Thread Options BottomSheet (Archive / Delete)
+    // S09 — Thread Options BottomSheet
     if (uiState.showOptionsSheet) {
         ThreadOptionsSheet(
             isArchived = isArchived,
@@ -306,37 +293,45 @@ fun ChatScreen(
         )
     }
 
-    // S10 — Delete Confirmation Dialog (R07 Deletion Retention Rule)
+    // S10 — Confirm Delete Dialog
     if (uiState.showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.closeDeleteDialog() },
             title = {
                 Text(
-                    text = "Xóa đoạn hội thoại?",
+                    text = "Xoá cuộc trò chuyện?",
                     fontWeight = FontWeight.Bold,
                     color = CandyColors.textPrimary
                 )
             },
             text = {
                 Text(
-                    text = "Đoạn chat này sẽ bị xóa khỏi lịch sử. Lưu ý: Các quyết định tài chính chính thức gắn với món đồ (nếu có) vẫn được bảo toàn nguyên vẹn.",
-                    color = CandyColors.mutedInk,
-                    fontSize = 14.sp
+                    text = "Lịch sử trò chuyện này sẽ bị xoá vĩnh viễn. Quyết định thẩm định (nếu có) trên món đồ của bạn vẫn được giữ nguyên an toàn.",
+                    fontSize = 14.sp,
+                    color = CandyColors.mutedInk
                 )
             },
             confirmButton = {
                 Button(
-                    onClick = { viewModel.confirmDelete(onDeleted = onNavigateBack) },
-                    colors = ButtonDefaults.buttonColors(containerColor = CandyColors.error)
+                    onClick = {
+                        viewModel.confirmDelete {
+                            onNavigateBack()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CandyColors.error
+                    )
                 ) {
-                    Text("Xóa", color = Color.White)
+                    Text("Xoá vĩnh viễn", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.closeDeleteDialog() }) {
                     Text("Hủy", color = CandyColors.textPrimary)
                 }
-            }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(20.dp)
         )
     }
 }

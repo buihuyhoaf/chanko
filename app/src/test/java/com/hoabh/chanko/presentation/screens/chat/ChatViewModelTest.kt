@@ -3,6 +3,7 @@ package com.hoabh.chanko.presentation.screens.chat
 import com.hoabh.chanko.data.chat.remote.FakeChatDataSource
 import com.hoabh.chanko.data.chat.repository.ChatRepositoryImpl
 import com.hoabh.chanko.domain.chat.model.ThreadMode
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -78,6 +79,22 @@ class ChatViewModelTest {
         val lastBotMessage = state.messages.lastOrNull()
         assertNotNull(lastBotMessage)
         assertEquals(com.hoabh.chanko.domain.chat.model.MessageSender.CHANKO, lastBotMessage?.sender)
+    }
+
+    @Test
+    fun sendPrompt_createsNewThread_andTriggersCallback() = runTest {
+        advanceUntilIdle()
+
+        var createdThreadId: String? = null
+        viewModel.sendPrompt("Tôi vừa thấy một món đồ rất thích...") { threadId ->
+            createdThreadId = threadId
+        }
+        advanceUntilIdle()
+
+        assertNotNull(createdThreadId)
+        val state = viewModel.uiState.value
+        assertEquals(createdThreadId, state.thread?.id)
+        assertTrue(state.messages.any { it.text == "Tôi vừa thấy một món đồ rất thích..." })
     }
 
     @Test

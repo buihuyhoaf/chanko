@@ -22,6 +22,10 @@ import com.hoabh.chanko.presentation.screens.splash.splashDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatEmptyScreen
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatScreen
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatThreadScreen
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(
@@ -122,6 +126,11 @@ fun NavGraph(
                 navController.navigate(Screen.ArchivedItems.route) {
                     launchSingleTop = true
                 }
+            },
+            onNavigateToChatThread = { threadId ->
+                navController.navigate(Screen.ChatThread.createRoute(threadId)) {
+                    launchSingleTop = true
+                }
             }
         )
 
@@ -188,10 +197,33 @@ fun NavGraph(
         }
 
         composable(Screen.Chat.route) {
-            val chatViewModel: com.hoabh.chanko.presentation.screens.chat.ChatViewModel = hiltViewModel()
-            com.hoabh.chanko.presentation.screens.chat.ChatScreen(
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            ChatEmptyScreen(
                 viewModel = chatViewModel,
+                onNavigateToThread = { threadId ->
+                    navController.navigate(Screen.ChatThread.createRoute(threadId)) {
+                        launchSingleTop = true
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.ChatThread.route,
+            arguments = listOf(
+                navArgument("threadId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val threadId = backStackEntry.arguments?.getString("threadId") ?: ""
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            ChatThreadScreen(
+                threadId = threadId,
+                viewModel = chatViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToNewChat = {
+                    navController.popBackStack(Screen.Chat.route, false)
+                }
             )
         }
     }
