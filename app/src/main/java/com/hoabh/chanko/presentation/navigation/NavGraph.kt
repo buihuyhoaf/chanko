@@ -106,6 +106,11 @@ fun NavGraph(
                     launchSingleTop = true
                 }
             },
+            onNavigateToChat = {
+                navController.navigate(Screen.Chat.route) {
+                    launchSingleTop = true
+                }
+            },
             onNavigateToItemDetail = { itemId ->
                 navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
                     launchSingleTop = true
@@ -171,6 +176,14 @@ fun NavGraph(
 
         composable(Screen.Personality.route) {
             PersonalityRoute(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Chat.route) {
+            val chatViewModel: com.hoabh.chanko.presentation.screens.chat.ChatViewModel = hiltViewModel()
+            com.hoabh.chanko.presentation.screens.chat.ChatScreen(
+                viewModel = chatViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
