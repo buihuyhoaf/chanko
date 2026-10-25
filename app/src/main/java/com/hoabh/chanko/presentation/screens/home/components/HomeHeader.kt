@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.HelpOutline
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,7 +47,6 @@ private val HeaderControlVisualSize = 40.dp
 fun HomeHeader(
     header: HeaderUiModel,
     onProfileClick: () -> Unit,
-    onChatClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     canOpenProfile: Boolean = true
 ) {
@@ -102,36 +97,6 @@ fun HomeHeader(
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
             // Profile Avatar Button in Purple Circle (Touch target >= 48dp)
-            // Chat with Chanko CTA
-            Box(
-                modifier = Modifier
-                    .size(CandySize.touchTarget)
-                    .clip(CircleShape)
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = "Chat với Chanko",
-                        onClick = onChatClick
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(HeaderControlVisualSize)
-                        .clip(CircleShape)
-                        .background(CandyColors.backgroundLavender),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.ChatBubbleOutline,
-                        contentDescription = "Chat",
-                        tint = CandyColors.brandPurple,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(CandySpace.xs))
-
             if (canOpenProfile) {
                 val profileCd = stringResource(R.string.home_cd_profile)
                 Box(

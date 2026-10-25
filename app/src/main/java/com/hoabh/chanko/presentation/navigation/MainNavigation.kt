@@ -124,8 +124,7 @@ fun MainNavigation(
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
-                        onProfileClick = onNavigateToProfile,
-                        onChatClick = { controller.selectTab(TopLevelDestination.Chat) }
+                        onProfileClick = onNavigateToProfile
                     )
                 }
                 composable(TopLevelDestination.Chat.route) {
