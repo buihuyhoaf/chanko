@@ -12,6 +12,7 @@ data class ChatUiState(
     val inputText: String = "",
     val isLoading: Boolean = false,
     val isSending: Boolean = false,
+    val isChankoTyping: Boolean = false,
     val isOffline: Boolean = false,
     val emotion: MascotEmotion = MascotEmotion.NEUTRAL,
     val showItemPicker: Boolean = false,

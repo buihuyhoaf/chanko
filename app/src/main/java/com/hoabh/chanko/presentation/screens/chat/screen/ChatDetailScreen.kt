@@ -55,7 +55,7 @@ import com.hoabh.chanko.presentation.screens.chat.components.ChatComposerBar
 import com.hoabh.chanko.presentation.screens.chat.components.ChatErrorBanner
 import com.hoabh.chanko.presentation.screens.chat.components.ChatMessageBubble
 import com.hoabh.chanko.presentation.screens.chat.components.ChatOfflineBanner
-import com.hoabh.chanko.presentation.screens.chat.components.ChatThinkingIndicator
+import com.hoabh.chanko.presentation.screens.chat.components.ChankoTypingBubble
 import com.hoabh.chanko.presentation.screens.chat.components.DeleteConfirmationDialog
 import com.hoabh.chanko.presentation.screens.chat.components.RenameThreadDialog
 import com.hoabh.chanko.presentation.screens.chat.components.SameThreadItemPickerSheet
@@ -95,10 +95,11 @@ fun ChatDetailScreen(
     val optionsSheetState = rememberModalBottomSheetState()
     val itemPickerSheetState = rememberModalBottomSheetState()
 
-    // Tự động cuộn xuống tin nhắn mới nhất
-    LaunchedEffect(uiState.messages.size) {
-        if (uiState.messages.isNotEmpty()) {
-            listState.animateScrollToItem(uiState.messages.size - 1)
+    // Tự động cuộn xuống tin nhắn mới nhất hoặc khi Chanko đang gõ
+    LaunchedEffect(uiState.messages.size, uiState.isChankoTyping) {
+        val totalCount = uiState.messages.size + if (uiState.isChankoTyping) 1 else 0
+        if (totalCount > 0) {
+            listState.animateScrollToItem(totalCount - 1)
         }
     }
 
@@ -229,9 +230,9 @@ fun ChatDetailScreen(
                     )
                 }
 
-                if (uiState.isSending) {
-                    item {
-                        ChatThinkingIndicator()
+                if (uiState.isChankoTyping) {
+                    item(key = "chanko_typing_bubble") {
+                        ChankoTypingBubble()
                     }
                 }
             }

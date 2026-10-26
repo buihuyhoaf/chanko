@@ -192,16 +192,26 @@ class ChatViewModel @Inject constructor(
         val draftItemName = currentState.draftItemName
         val draftItemPrice = currentState.draftItemPrice
 
+        val optimisticUserMsg = ChatMessage(
+            id = "draft_user_msg_${System.currentTimeMillis()}",
+            threadId = targetThreadId,
+            sender = MessageSender.USER,
+            text = text,
+            timestamp = System.currentTimeMillis()
+        )
+
         updateChatState {
             it.copy(
                 inputText = "",
-                isSending = true
+                isSending = true,
+                isChankoTyping = true,
+                messages = if (isDraft) it.messages + optimisticUserMsg else it.messages
             )
         }
 
         viewModelScope.launch {
             val result = chatRepository.sendMessage(targetThreadId, text)
-            updateChatState { it.copy(isSending = false) }
+            updateChatState { it.copy(isSending = false, isChankoTyping = false) }
             if (result.isSuccess) {
                 val sentMsg = result.getOrNull()
                 if (sentMsg != null) {

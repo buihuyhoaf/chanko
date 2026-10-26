@@ -113,6 +113,30 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun sendMessage_triggersChankoTyping_thenReceivesResponse() = runTest {
+        viewModel.initThread("thread_free_1")
+        advanceUntilIdle()
+
+        viewModel.onTextChanged("Chanko có đang nghe không?")
+        viewModel.sendMessage()
+
+        // Ngay khi gọi sendMessage: isSending = true, isChankoTyping = true, inputText bị xóa trắng
+        val typingState = viewModel.uiState.value
+        assertEquals("", typingState.inputText)
+        assertTrue(typingState.isSending)
+        assertTrue(typingState.isChankoTyping)
+
+        // Chạy qua thời gian trễ typing 1.5s (advanceUntilIdle)
+        advanceUntilIdle()
+
+        // Sau khi hoàn tất: isSending = false, isChankoTyping = false, nhận được phản hồi của Chanko
+        val finalState = viewModel.uiState.value
+        assertFalse(finalState.isSending)
+        assertFalse(finalState.isChankoTyping)
+        assertTrue(finalState.messages.any { it.text.contains("Chanko đã nghe: \"Chanko có đang nghe không?\"") })
+    }
+
+    @Test
     fun sendMessage_inDraftItemMode_createsThreadAndBindsItem() = runTest {
         viewModel.initThread(
             threadId = null,

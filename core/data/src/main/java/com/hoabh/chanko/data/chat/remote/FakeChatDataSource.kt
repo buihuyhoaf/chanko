@@ -7,6 +7,7 @@ import com.hoabh.chanko.domain.chat.model.ItemContextStatus
 import com.hoabh.chanko.domain.chat.model.MascotEmotion
 import com.hoabh.chanko.domain.chat.model.MessageSender
 import com.hoabh.chanko.domain.chat.model.ThreadMode
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -246,20 +247,29 @@ class FakeChatDataSource {
         val existingMsgs = _messages.value[effectiveThreadId]?.toMutableList() ?: mutableListOf()
         existingMsgs.add(userMsg)
 
+        // Phát hành tin nhắn người dùng ngay lập tức để UI cập nhật timeline
+        val intermediateMsgMap = _messages.value.toMutableMap()
+        intermediateMsgMap[effectiveThreadId] = existingMsgs
+        _messages.value = intermediateMsgMap
+
+        // Giả lập thời gian Chanko suy nghĩ và soạn câu trả lời (1.5s typing delay)
+        delay(1500L)
+
         // Phản hồi giả lập từ Chanko
         val botMsg = ChatMessage(
             id = "msg_${UUID.randomUUID().toString().take(8)}",
             threadId = effectiveThreadId,
             sender = MessageSender.CHANKO,
             text = "Chanko đã nghe: \"$text\". Bình tĩnh nào, cân nhắc kỹ túi tiền xem có đáng không nhé!",
-            timestamp = System.currentTimeMillis() + 500,
+            timestamp = System.currentTimeMillis(),
             emotion = MascotEmotion.CURIOUS
         )
-        existingMsgs.add(botMsg)
+        val updatedMsgs = _messages.value[effectiveThreadId]?.toMutableList() ?: mutableListOf()
+        updatedMsgs.add(botMsg)
 
-        val newMsgMap = _messages.value.toMutableMap()
-        newMsgMap[effectiveThreadId] = existingMsgs
-        _messages.value = newMsgMap
+        val finalMsgMap = _messages.value.toMutableMap()
+        finalMsgMap[effectiveThreadId] = updatedMsgs
+        _messages.value = finalMsgMap
 
         // Update thread updatedAt and previewText
         _threads.value = _threads.value.map {
