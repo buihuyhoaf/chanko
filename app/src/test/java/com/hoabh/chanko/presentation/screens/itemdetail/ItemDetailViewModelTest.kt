@@ -104,6 +104,28 @@ class ItemDetailViewModelTest {
         assertEquals(0L, state.remainingMillis)
     }
 
+    @Test
+    fun init_withStringItemId_loadsItemSuccessfully() = runTest(testDispatcher) {
+        val now = System.currentTimeMillis()
+        val item = CooldownItem(
+            id = 42,
+            name = "Màn hình cong 34 inch",
+            price = 12_000_000L,
+            addedTimestamp = now,
+            cooldownDurationMillis = 7 * 86_400_000L,
+            reason = "Thích",
+            status = ItemStatus.COOLING_DOWN
+        )
+        fakeRepository.setItem(item)
+
+        val savedStateHandle = SavedStateHandle(mapOf("itemId" to "42"))
+        viewModel = ItemDetailViewModel(fakeRepository, fakePurchaseRepository, savedStateHandle)
+        runCurrent()
+
+        assertEquals(42, viewModel.uiState.value.id)
+        assertEquals("Màn hình cong 34 inch", viewModel.uiState.value.name)
+    }
+
     private class FakePurchaseRepository : PurchaseRepository {
         override fun getPurchasesByItemId(itemId: Int): Flow<List<PurchaseTransaction>> =
             MutableStateFlow(emptyList())

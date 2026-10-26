@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.itemdetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,8 @@ import com.hoabh.chanko.ui.theme.CandySpace
 fun ItemDetailRoute(
     viewModel: ItemDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
-    onOpenTransactionDetail: (String) -> Unit = {}
+    onOpenTransactionDetail: (String) -> Unit = {},
+    onNavigateToChat: ((itemId: String, itemName: String, itemPrice: Long) -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -74,7 +76,8 @@ fun ItemDetailRoute(
     ItemDetailScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        onBackClick = onNavigateBack
+        onBackClick = onNavigateBack,
+        onChatWithChanko = onNavigateToChat
     )
 }
 
@@ -90,7 +93,8 @@ fun ItemDetailScreen(
     uiState: ItemDetailUiState,
     onEvent: (ItemDetailUiEvent) -> Unit,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChatWithChanko: ((itemId: String, itemName: String, itemPrice: Long) -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -221,7 +225,24 @@ fun ItemDetailScreen(
                 // 4. Speech Bubble Section
                 if (uiState.speechBubbleText.isNotBlank()) {
                     item(key = "speech_bubble") {
-                        ChankoSpeechBubble(speechText = uiState.speechBubbleText)
+                        val bubbleModifier = if (onChatWithChanko != null) {
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable {
+                                    onChatWithChanko(
+                                        uiState.id.toString(),
+                                        uiState.name,
+                                        uiState.rawPrice
+                                    )
+                                }
+                        } else {
+                            Modifier.fillMaxWidth()
+                        }
+                        ChankoSpeechBubble(
+                            speechText = uiState.speechBubbleText,
+                            modifier = bubbleModifier
+                        )
                     }
                 }
 
@@ -269,7 +290,17 @@ fun ItemDetailScreen(
                 onRecordPurchase = { onEvent(ItemDetailUiEvent.RequestRecordPurchase) },
                 onSkipWaiting = { onEvent(ItemDetailUiEvent.RequestSkipWaiting) },
                 onArchive = { onEvent(ItemDetailUiEvent.RequestArchiveItem) },
-                onDismiss = { onEvent(ItemDetailUiEvent.DismissMoreOptions) }
+                onDismiss = { onEvent(ItemDetailUiEvent.DismissMoreOptions) },
+                onChatWithChanko = if (onChatWithChanko != null) {
+                    {
+                        onEvent(ItemDetailUiEvent.DismissMoreOptions)
+                        onChatWithChanko(
+                            uiState.id.toString(),
+                            uiState.name,
+                            uiState.rawPrice
+                        )
+                    }
+                } else null
             )
         }
 

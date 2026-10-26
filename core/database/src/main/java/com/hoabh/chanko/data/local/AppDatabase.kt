@@ -3,6 +3,9 @@ package com.hoabh.chanko.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.hoabh.chanko.data.local.chat.dao.ChatDao
+import com.hoabh.chanko.data.local.chat.entity.ChatMessageEntity
+import com.hoabh.chanko.data.local.chat.entity.ChatThreadEntity
 import com.hoabh.chanko.data.local.converter.Converters
 import com.hoabh.chanko.data.local.dao.ItemDao
 import com.hoabh.chanko.data.local.dao.PurchaseDao
@@ -14,7 +17,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         CooldownItemEntity::class,
-        PurchaseTransactionEntity::class
+        PurchaseTransactionEntity::class,
+        ChatThreadEntity::class,
+        ChatMessageEntity::class
     ],
     version = 3,
     exportSchema = false
@@ -23,6 +28,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
     abstract fun purchaseDao(): PurchaseDao
+    abstract fun chatDao(): ChatDao
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {

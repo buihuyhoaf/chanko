@@ -66,14 +66,18 @@ import com.hoabh.chanko.ui.theme.CandyColors
 
 fun NavGraphBuilder.mainDestination(
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
-    onNavigateToArchived: () -> Unit = {}
+    onNavigateToArchived: () -> Unit = {},
+    onNavigateToChatThread: (String) -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
             onNavigateToProfile = onNavigateToProfile,
+            onNavigateToChat = onNavigateToChat,
             onNavigateToItemDetail = onNavigateToItemDetail,
-            onNavigateToArchived = onNavigateToArchived
+            onNavigateToArchived = onNavigateToArchived,
+            onNavigateToChatThread = onNavigateToChatThread
         )
     }
 }
@@ -92,8 +96,10 @@ fun MainNavigation(
     controller: NavHostController = rememberNavController(),
     onAddNewItemClick: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
-    onNavigateToArchived: () -> Unit = {}
+    onNavigateToArchived: () -> Unit = {},
+    onNavigateToChatThread: (String) -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -120,7 +126,8 @@ fun MainNavigation(
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
-                        onProfileClick = onNavigateToProfile
+                        onProfileClick = onNavigateToProfile,
+                        onChatClick = onNavigateToChat
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {

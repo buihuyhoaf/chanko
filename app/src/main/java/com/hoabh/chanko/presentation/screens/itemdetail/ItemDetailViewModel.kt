@@ -33,7 +33,13 @@ class ItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val itemId: Int = checkNotNull(savedStateHandle.get<Int>("itemId") ?: savedStateHandle.get<String>("itemId")?.toIntOrNull())
+    private val itemId: Int = checkNotNull(
+        when (val raw = savedStateHandle.get<Any>("itemId")) {
+            is Int -> raw
+            is String -> raw.toIntOrNull()
+            else -> null
+        }
+    ) { "itemId must be provided as an Int or numeric String in SavedStateHandle" }
 
     private val _uiState = MutableStateFlow(ItemDetailUiState())
     val uiState: StateFlow<ItemDetailUiState> = _uiState.asStateFlow()

@@ -19,7 +19,15 @@ import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
 import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatDetailScreen
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
+import com.hoabh.chanko.presentation.screens.chat.screen.NewChatScreen
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatViewModel
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(
@@ -106,6 +114,11 @@ fun NavGraph(
                     launchSingleTop = true
                 }
             },
+            onNavigateToChat = {
+                navController.navigate(Screen.Chat.route) {
+                    launchSingleTop = true
+                }
+            },
             onNavigateToItemDetail = { itemId ->
                 navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
                     launchSingleTop = true
@@ -113,6 +126,11 @@ fun NavGraph(
             },
             onNavigateToArchived = {
                 navController.navigate(Screen.ArchivedItems.route) {
+                    launchSingleTop = true
+                }
+            },
+            onNavigateToChatThread = { threadId ->
+                navController.navigate(Screen.ChatThread.createRoute(threadId)) {
                     launchSingleTop = true
                 }
             }
@@ -132,12 +150,29 @@ fun NavGraph(
         }
 
         composable(
-            route = Screen.ItemDetail.route
+            route = Screen.ItemDetail.route,
+            arguments = listOf(
+                navArgument("itemId") {
+                    type = NavType.IntType
+                }
+            )
         ) {
             ItemDetailRoute(
                 onNavigateBack = { navController.popBackStack() },
                 onOpenTransactionDetail = { purchaseId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(purchaseId)) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToChat = { itemId, itemName, itemPrice ->
+                    navController.navigate(
+                        Screen.ChatDetail.createRoute(
+                            contextMode = "ITEM",
+                            itemId = itemId,
+                            itemName = itemName,
+                            itemPrice = itemPrice
+                        )
+                    ) {
                         launchSingleTop = true
                     }
                 }
@@ -172,6 +207,145 @@ fun NavGraph(
         composable(Screen.Personality.route) {
             PersonalityRoute(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Screen 1: CL — Chat List Screen
+        composable(Screen.Chat.route) {
+            val listViewModel: ChatListViewModel = hiltViewModel()
+            ChatListScreen(
+                viewModel = listViewModel,
+                onNavigateToDetail = { threadId ->
+                    navController.navigate(Screen.ChatDetail.createRoute(threadId = threadId)) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToNewChat = {
+                    navController.navigate(Screen.NewChat.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToItemDetail = { itemId ->
+                    val id = itemId.toIntOrNull()
+                    if (id != null) {
+                        navController.navigate(Screen.ItemDetail.createRoute(id)) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+        }
+
+        // Screen 2: NC — New Chat Screen
+        composable(Screen.NewChat.route) {
+            val newChatViewModel: NewChatViewModel = hiltViewModel()
+            NewChatScreen(
+                viewModel = newChatViewModel,
+                onNavigateToChatDetail = { contextMode, itemId, itemName, itemPrice ->
+                    navController.navigate(
+                        Screen.ChatDetail.createRoute(
+                            contextMode = contextMode,
+                            itemId = itemId,
+                            itemName = itemName,
+                            itemPrice = itemPrice
+                        )
+                    ) {
+                        popUpTo(Screen.NewChat.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMyItems = {
+                    navController.popBackStack()
+                },
+                onClose = { navController.popBackStack() }
+            )
+        }
+
+        // Screen 3: CD — Chat Detail Screen
+        composable(
+            route = Screen.ChatDetail.route,
+            arguments = listOf(
+                navArgument("threadId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("contextMode") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("itemId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("itemName") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("itemPrice") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val threadId = backStackEntry.arguments?.getString("threadId")
+            val contextMode = backStackEntry.arguments?.getString("contextMode")
+            val itemId = backStackEntry.arguments?.getString("itemId")
+            val rawItemName = backStackEntry.arguments?.getString("itemName")
+            val itemName = if (!rawItemName.isNullOrBlank()) {
+                try {
+                    java.net.URLDecoder.decode(rawItemName, "UTF-8")
+                } catch (e: Exception) {
+                    rawItemName
+                }
+            } else null
+            val itemPrice = backStackEntry.arguments?.getString("itemPrice")?.toLongOrNull()
+
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            ChatDetailScreen(
+                threadId = threadId,
+                viewModel = chatViewModel,
+                contextMode = contextMode,
+                itemId = itemId,
+                itemName = itemName,
+                itemPrice = itemPrice,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToItemDetail = { idStr ->
+                    val id = idStr.toIntOrNull()
+                    if (id != null) {
+                        navController.navigate(Screen.ItemDetail.createRoute(id)) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+        }
+
+        // Legacy / Backward compatibility route for ChatThread
+        composable(
+            route = Screen.ChatThread.route,
+            arguments = listOf(
+                navArgument("threadId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val threadId = backStackEntry.arguments?.getString("threadId") ?: ""
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            ChatDetailScreen(
+                threadId = threadId,
+                viewModel = chatViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToItemDetail = { idStr ->
+                    val id = idStr.toIntOrNull()
+                    if (id != null) {
+                        navController.navigate(Screen.ItemDetail.createRoute(id)) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
             )
         }
     }
