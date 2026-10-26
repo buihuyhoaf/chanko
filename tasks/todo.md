@@ -39,21 +39,21 @@
 ## Phase 3: Screen 1 — CL (Chat List Screen)
 
 ### Task 5: Build ChatListScreen UI
-- [ ] Xây dựng Header "Chat với Chanko" (title 24sp bold) + Subtitle + nút More
-- [ ] Xây dựng Hero Card với Chanko mascot 148dp contain
-- [ ] Xây dựng Search bar ("Tìm cuộc trò chuyện") và Filter chips ("Tất cả", "Đang cân nhắc", "Chờ xem lại", "Đã mua")
-- [ ] Xây dựng danh sách Thread cards (thumbnail 56dp, title 17sp, preview 14sp, time, tag)
-- [ ] Xây dựng Fixed Footer CTA `+ Đoạn chat mới` (56dp height, bo góc 20dp)
-- [ ] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại CL
-- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] Xây dựng Header "Chat với Chanko" (title 24sp bold) + Subtitle + nút More
+- [x] Xây dựng Hero Card với Chanko mascot 148dp contain
+- [x] Xây dựng Search bar ("Tìm cuộc trò chuyện") và Filter chips ("Tất cả", "Đang cân nhắc", "Chờ xem lại", "Đã mua")
+- [x] Xây dựng danh sách Thread cards (thumbnail 56dp, title 17sp, preview 14sp, time, tag)
+- [x] Xây dựng Fixed Footer CTA `+ Đoạn chat mới` (56dp height, bo góc 20dp)
+- [x] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại CL
+- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
 
 ### Task 6: Build ChatListViewModel
-- [ ] Quản lý state danh sách threads, tìm kiếm, lọc chip, rename/archive/delete thread
-- [ ] Viết unit tests cho `ChatListViewModel`
-- [ ] Verification: `./gradlew :app:testDevDebugUnitTest` pass
+- [x] Quản lý state danh sách threads, tìm kiếm, lọc chip, rename/archive/delete thread
+- [x] Viết unit tests cho `ChatListViewModel`
+- [x] Verification: `./gradlew :app:testDevDebugUnitTest` pass
 
 ### Checkpoint 3: Chat List Verify
-- [ ] Màn hình CL và ViewModel hoạt động ổn định, 100% test pass
+- [x] Màn hình CL và ViewModel hoạt động ổn định, 100% test pass
 
 ---
 
