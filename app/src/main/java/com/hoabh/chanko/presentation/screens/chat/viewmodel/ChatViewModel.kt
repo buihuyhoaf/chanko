@@ -12,9 +12,6 @@ import com.hoabh.chanko.presentation.screens.chat.ChatUiEffect
 import com.hoabh.chanko.presentation.screens.chat.ChatUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,12 +19,6 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository
 ) : BaseViewModel<ChatUiState, ChatUiEffect>(ChatUiState()) {
-
-    val activeThreads: StateFlow<List<ChatThread>> = chatRepository.getActiveThreads()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val archivedThreads: StateFlow<List<ChatThread>> = chatRepository.getArchivedThreads()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private var observeThreadJob: Job? = null
     private var observeMessagesJob: Job? = null
@@ -67,6 +58,20 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun getQuickReplies(isItemMode: Boolean): List<String> = if (isItemMode) {
+        listOf(
+            "Món này có thực sự cần thiết không?",
+            "Có lựa chọn nào rẻ hơn không?",
+            "Nếu đợi thêm 30 ngày thì sao?"
+        )
+    } else {
+        listOf(
+            "Làm sao để kiềm chế mua sắm bốc đồng?",
+            "Quy tắc 72 giờ là gì?",
+            "Cách phân biệt muốn và cần?"
+        )
+    }
+
     fun initThread(
         threadId: String?,
         contextMode: String? = null,
@@ -77,44 +82,26 @@ class ChatViewModel @Inject constructor(
         if (!threadId.isNullOrBlank() && threadId != "new") {
             selectThread(threadId)
         } else {
-            // Khởi tạo draft state (chưa gửi)
             observeThreadJob?.cancel()
             observeMessagesJob?.cancel()
 
             val mode = contextMode ?: "FREE"
-            val quickReplies = if (mode == "ITEM") {
-                listOf(
-                    "Món này có thực sự cần thiết không?",
-                    "Có lựa chọn nào rẻ hơn không?",
-                    "Nếu đợi thêm 30 ngày thì sao?"
-                )
+            val isItemMode = mode == "ITEM"
+
+            val welcomeText = if (isItemMode && !itemName.isNullOrBlank()) {
+                "Chào bạn! Mình thấy bạn đang cân nhắc \"$itemName\". Hãy cùng Chanko phân tích xem món này có thực sự cần thiết không nhé!"
             } else {
-                listOf(
-                    "Làm sao để kiềm chế mua sắm bốc đồng?",
-                    "Quy tắc 72 giờ là gì?",
-                    "Cách phân biệt muốn và cần?"
-                )
+                "Chào bạn, mình là Chanko! Hãy chia sẻ với mình những băn khoăn về chi tiêu của bạn nhé."
             }
 
-            val welcomeMessage = if (mode == "ITEM" && !itemName.isNullOrBlank()) {
-                ChatMessage(
-                    id = "draft_welcome",
-                    threadId = "",
-                    sender = MessageSender.CHANKO,
-                    text = "Chào bạn! Mình thấy bạn đang cân nhắc \"$itemName\". Hãy cùng Chanko phân tích xem món này có thực sự cần thiết không nhé!",
-                    timestamp = System.currentTimeMillis(),
-                    emotion = MascotEmotion.CURIOUS
-                )
-            } else {
-                ChatMessage(
-                    id = "draft_welcome",
-                    threadId = "",
-                    sender = MessageSender.CHANKO,
-                    text = "Chào bạn, mình là Chanko! Hãy chia sẻ với mình những băn khoăn về chi tiêu của bạn nhé.",
-                    timestamp = System.currentTimeMillis(),
-                    emotion = MascotEmotion.CURIOUS
-                )
-            }
+            val welcomeMessage = ChatMessage(
+                id = "draft_welcome",
+                threadId = "",
+                sender = MessageSender.CHANKO,
+                text = welcomeText,
+                timestamp = System.currentTimeMillis(),
+                emotion = MascotEmotion.CURIOUS
+            )
 
             updateChatState {
                 it.copy(
@@ -124,15 +111,11 @@ class ChatViewModel @Inject constructor(
                     draftItemId = itemId,
                     draftItemName = itemName,
                     draftItemPrice = itemPrice,
-                    quickReplies = quickReplies,
+                    quickReplies = getQuickReplies(isItemMode),
                     error = null
                 )
             }
         }
-    }
-
-    fun startNewChat() {
-        initThread(null, "FREE")
     }
 
     fun selectThread(threadId: String) {
@@ -142,22 +125,9 @@ class ChatViewModel @Inject constructor(
         observeThreadJob = viewModelScope.launch {
             chatRepository.getThreadById(threadId).collect { thread ->
                 updateChatState { state ->
-                    val quickReplies = if (thread?.mode == ThreadMode.ITEM) {
-                        listOf(
-                            "Món này có thực sự cần thiết không?",
-                            "Có lựa chọn nào rẻ hơn không?",
-                            "Nếu đợi thêm 30 ngày thì sao?"
-                        )
-                    } else {
-                        listOf(
-                            "Làm sao để kiềm chế mua sắm bốc đồng?",
-                            "Quy tắc 72 giờ là gì?",
-                            "Cách phân biệt muốn và cần?"
-                        )
-                    }
                     state.copy(
                         thread = thread,
-                        quickReplies = quickReplies
+                        quickReplies = getQuickReplies(thread?.mode == ThreadMode.ITEM)
                     )
                 }
             }
@@ -174,9 +144,6 @@ class ChatViewModel @Inject constructor(
         updateChatState { it.copy(inputText = newText) }
     }
 
-    /**
-     * Hợp đồng Quick Replies: Chạm vào chip chỉ điền nội dung vào ô composer, không tự động gửi.
-     */
     fun fillComposer(quickReplyText: String) {
         onTextChanged(quickReplyText)
     }
@@ -217,12 +184,11 @@ class ChatViewModel @Inject constructor(
                 if (sentMsg != null) {
                     if (isDraft) {
                         val newThreadId = sentMsg.threadId
-                        // Nếu là draft mode ITEM: liên kết ngay món đồ vào thread vừa tạo
                         if (draftMode == "ITEM" && !draftItemId.isNullOrBlank()) {
                             chatRepository.bindExistingItem(
                                 newThreadId,
                                 draftItemId,
-                                draftItemName ?: "",
+                                draftItemName.orEmpty(),
                                 draftItemPrice ?: 0L
                             )
                         }
@@ -234,11 +200,6 @@ class ChatViewModel @Inject constructor(
                 updateChatState { it.copy(error = "Không thể gửi tin nhắn") }
             }
         }
-    }
-
-    fun sendPrompt(prompt: String, onThreadCreated: ((String) -> Unit)? = null) {
-        onTextChanged(prompt)
-        sendMessage(onThreadCreated)
     }
 
     fun bindItem(itemId: String, itemName: String, itemPriceVnd: Long) {
@@ -259,24 +220,11 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun requestVerdict() {
-        val currentId = currentState.thread?.id ?: return
-        updateChatState { it.copy(isLoading = true) }
-        viewModelScope.launch {
-            chatRepository.requestVerdict(currentId)
-            updateChatState { it.copy(isLoading = false) }
-        }
-    }
-
     fun retryLastAction() {
         updateChatState { it.copy(error = null) }
         if (currentState.inputText.isNotBlank()) {
             sendMessage()
         }
-    }
-
-    fun dismissError() {
-        updateChatState { it.copy(error = null) }
     }
 
     fun openItemPicker() { updateChatState { it.copy(showItemPicker = true) } }
@@ -287,25 +235,17 @@ class ChatViewModel @Inject constructor(
     }
     fun closeRenameDialog() { updateChatState { it.copy(showRenameDialog = false) } }
 
-    fun openArchiveDialog() {
-        updateChatState { it.copy(showOptionsSheet = false, showArchiveDialog = true) }
-    }
-    fun closeArchiveDialog() { updateChatState { it.copy(showArchiveDialog = false) } }
-
     fun openDeleteDialog() {
         updateChatState { it.copy(showOptionsSheet = false, showDeleteDialog = true) }
     }
     fun closeDeleteDialog() { updateChatState { it.copy(showDeleteDialog = false) } }
-
-    fun openHistorySheet() { updateChatState { it.copy(showHistorySheet = true) } }
-    fun closeHistorySheet() { updateChatState { it.copy(showHistorySheet = false) } }
 
     fun openOptionsSheet() { updateChatState { it.copy(showOptionsSheet = true) } }
     fun closeOptionsSheet() { updateChatState { it.copy(showOptionsSheet = false) } }
 
     fun archiveCurrentThread() {
         val currentId = currentState.thread?.id ?: return
-        updateChatState { it.copy(showArchiveDialog = false, showOptionsSheet = false) }
+        updateChatState { it.copy(showOptionsSheet = false) }
         viewModelScope.launch {
             chatRepository.archiveThread(currentId)
         }
