@@ -21,18 +21,18 @@
 ## Phase 2: Shared UI Components (Candy Pop 3D / Neutral BUY)
 
 ### Task 3: Refactor DecisionCard & ChatMessageBubble
-- [ ] Refactor `DecisionCard`: áp dụng Neutral BUY (nền `#F0E9FF`, chữ tối, mascot Neutral, nút "Xem món đồ", bỏ xanh lá và sparkles)
-- [ ] Refactor `ChatMessageBubble`: User bubble (chữ tối trên lavender `#F0E9FF`), Chanko bubble (avatar 32dp + bong bóng trắng)
-- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] Refactor `DecisionCard`: áp dụng Neutral BUY (nền `#F0E9FF`, chữ tối, mascot Neutral, nút "Xem món đồ", bỏ xanh lá và sparkles)
+- [x] Refactor `ChatMessageBubble`: User bubble (chữ tối trên lavender `#F0E9FF`), Chanko bubble (avatar 32dp + bong bóng trắng)
+- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
 
 ### Task 4: Build Dialogs & Sheets (Rename, Archive, Delete, Bind)
-- [ ] Xây dựng `RenameThreadDialog` (tiêu đề, text field, nút Hủy/Lưu)
-- [ ] Xây dựng `ArchiveConfirmationDialog` và `DeleteConfirmationDialog`
-- [ ] Xây dựng `SameThreadItemPickerSheet` cho CD (tìm kiếm món đồ, xác nhận liên kết cùng thread)
-- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] Xây dựng `RenameThreadDialog` (tiêu đề, text field, nút Hủy/Lưu)
+- [x] Xây dựng `ArchiveConfirmationDialog` và `DeleteConfirmationDialog`
+- [x] Xây dựng `SameThreadItemPickerSheet` cho CD (tìm kiếm món đồ, xác nhận liên kết cùng thread)
+- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
 
 ### Checkpoint 2: Components Verify
-- [ ] Các thành phần UI dùng chung hoàn thiện và biên dịch thành công
+- [x] Các thành phần UI dùng chung hoàn thiện và biên dịch thành công
 
 ---
 
