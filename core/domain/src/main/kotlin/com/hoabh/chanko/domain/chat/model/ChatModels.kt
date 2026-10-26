@@ -18,6 +18,26 @@ enum class ThreadMode {
 }
 
 /**
+ * Trạng thái của món đồ gắn với cuộc trò chuyện (phục vụ bộ lọc CL).
+ */
+enum class ItemContextStatus {
+    CONSIDERING, // Đang cân nhắc
+    READY,       // Chờ xem lại
+    PURCHASED    // Đã mua
+}
+
+/**
+ * Bộ lọc danh sách cuộc trò chuyện tại màn CL.
+ */
+enum class ThreadFilter {
+    ALL,          // Tất cả
+    CONSIDERING,  // Đang cân nhắc
+    READY,        // Chờ xem lại
+    PURCHASED,    // Đã mua
+    ARCHIVED      // Đã lưu trữ
+}
+
+/**
  * 8 biểu cảm chính thức của Mascot Chanko theo approved whitelist.
  */
 enum class MascotEmotion {
@@ -73,6 +93,8 @@ data class ChatThread(
     val linkedItemId: String? = null,
     val linkedItemName: String? = null,
     val linkedItemPriceVnd: Long? = null,
+    val previewText: String? = null,
+    val itemStatus: ItemContextStatus? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val isArchived: Boolean = false,

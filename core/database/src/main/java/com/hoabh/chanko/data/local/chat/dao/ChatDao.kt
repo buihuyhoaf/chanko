@@ -35,6 +35,9 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessages(messages: List<ChatMessageEntity>)
 
+    @Query("UPDATE chat_threads SET title = :newTitle, updatedAt = :updatedAt WHERE id = :threadId")
+    suspend fun renameThread(threadId: String, newTitle: String, updatedAt: Long = System.currentTimeMillis())
+
     @Query("DELETE FROM chat_threads WHERE id = :threadId")
     suspend fun deleteThread(threadId: String)
 

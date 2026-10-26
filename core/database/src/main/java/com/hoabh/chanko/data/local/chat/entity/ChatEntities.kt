@@ -3,6 +3,7 @@ package com.hoabh.chanko.data.local.chat.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.hoabh.chanko.domain.chat.model.ChatThread
+import com.hoabh.chanko.domain.chat.model.ItemContextStatus
 import com.hoabh.chanko.domain.chat.model.ThreadMode
 
 @Entity(tableName = "chat_threads")
@@ -13,6 +14,8 @@ data class ChatThreadEntity(
     val linkedItemId: String?,
     val linkedItemName: String?,
     val linkedItemPriceVnd: Long?,
+    val previewText: String? = null,
+    val itemStatus: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val isArchived: Boolean,
@@ -26,6 +29,8 @@ data class ChatThreadEntity(
         linkedItemId = linkedItemId,
         linkedItemName = linkedItemName,
         linkedItemPriceVnd = linkedItemPriceVnd,
+        previewText = previewText,
+        itemStatus = itemStatus?.let { runCatching { ItemContextStatus.valueOf(it) }.getOrNull() },
         createdAt = createdAt,
         updatedAt = updatedAt,
         isArchived = isArchived,
@@ -41,6 +46,8 @@ data class ChatThreadEntity(
                 linkedItemId = domain.linkedItemId,
                 linkedItemName = domain.linkedItemName,
                 linkedItemPriceVnd = domain.linkedItemPriceVnd,
+                previewText = domain.previewText,
+                itemStatus = domain.itemStatus?.name,
                 createdAt = domain.createdAt,
                 updatedAt = domain.updatedAt,
                 isArchived = domain.isArchived,

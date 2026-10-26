@@ -1,0 +1,14 @@
+﻿pair,foreground,background,ratio,threshold,result
+body/surface,#241B35,#FFFFFF,16.365,4.5,PASS
+body/background,#241B35,#FAF8F5,15.438,4.5,PASS
+secondary/surface,#544866,#FFFFFF,8.414,4.5,PASS
+secondary/lavender,#544866,#F0E9FF,7.134,4.5,PASS
+onBrand/gradientStart,#171020,#8965F6,4.645,4.5,PASS
+onBrand/gradientMiddle,#171020,#BA85F5,6.86,4.5,PASS
+onBrand/gradientEnd,#171020,#FFB4CF,11.209,4.5,PASS
+userBubble,#241B35,#E7DEFF,12.695,4.5,PASS
+errorText,#A32232,#FFF0F2,6.708,4.5,PASS
+outline/surface,#7D6C99,#FFFFFF,4.691,3,PASS
+focus/surface,#5B3BB5,#FFFFFF,7.671,3,PASS
+focus/cream,#5B3BB5,#FAF8F5,7.236,3,PASS
+REJECTED white/brand,#FFFFFF,#8965F6,3.996,4.5,REJECTED_PAIR_NOT_USED

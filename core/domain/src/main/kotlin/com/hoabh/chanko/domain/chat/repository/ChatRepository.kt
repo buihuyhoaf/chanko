@@ -60,6 +60,11 @@ interface ChatRepository {
     suspend fun restoreThread(threadId: String): Result<Unit>
 
     /**
+     * Đổi tên cuộc trò chuyện (CHAT-UX-REV-01 Rename UX).
+     */
+    suspend fun renameThread(threadId: String, newTitle: String): Result<Unit>
+
+    /**
      * Xóa phiên trò chuyện (R07 Deletion).
      * Xóa hội thoại nhưng giữ nguyên các Official Decision Records gắn với Shopping Item.
      */

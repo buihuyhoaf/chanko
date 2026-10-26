@@ -65,6 +65,12 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun renameThread(threadId: String, newTitle: String): Result<Unit> {
+        return runCatching {
+            fakeDataSource.renameThread(threadId, newTitle)
+        }
+    }
+
     override suspend fun deleteThread(threadId: String): Result<Unit> {
         return runCatching {
             fakeDataSource.deleteThread(threadId)

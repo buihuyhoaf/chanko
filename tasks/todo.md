@@ -1,31 +1,112 @@
-# Task List: Chat with Chanko (Android Frontend First)
+# Task List: Chat with Chanko (CHAT-UX-REV-01)
 
-## Giai đoạn 1: Assets & Design Tokens
-- [x] **Task 1.1**: Import các biểu cảm Mascot (8 poses) từ `08_ASSETS/expressions/` vào `app/src/main/res/drawable-nodpi/`.
-- [x] **Task 1.2**: Import icons và font Nunito từ `08_ASSETS/icons/` và `fonts/` vào `app/src/main/res/`.
-- [x] **Task 1.3**: Bổ sung Color Tokens & Typography cho Chat trong `app/src/main/java/com/hoabh/chanko/ui/theme/`.
+## Phase 1: Domain & Data Layer Updates (Foundation)
 
-## Giai đoạn 2: Domain Layer
-- [x] **Task 2.1**: Tạo domain models: `ChatThread`, `ChatMessage`, `DecisionVerdict`, `MascotEmotion`, `ThreadMode` trong `domain/chat/model/`.
-- [x] **Task 2.2**: Tạo interface `ChatRepository` và các models kết quả trong `domain/chat/repository/`.
+### Task 1: Update Domain Models & ChatRepository Interface
+- [x] Cập nhật model `ChatThread`: thêm `updatedAt`, `previewText`, `linkedItemId`, `linkedItemName`, `status`
+- [x] Bổ sung hàm `renameThread(threadId: String, newTitle: String): Result<Unit>` vào interface `ChatRepository`
+- [x] Verification: `./gradlew :core:domain:compileKotlin` pass
 
-## Giai đoạn 3: Data & Fake Fixtures
-- [x] **Task 3.1**: Tạo `FakeChatDataSource` mô phỏng đầy đủ 11 màn hình S01–S11.
-- [x] **Task 3.2**: Thiết lập Room Entity và DAO cho Chat (`ChatRoomDatabase`, `ChatDao`).
-- [x] **Task 3.3**: Cài đặt `ChatRepositoryImpl` với cơ chế ưu tiên đọc cache Room khi offline.
+### Task 2: Update Room Database, DAO & Fake Repository
+- [x] Cập nhật `ChatThreadEntity` & `ChatDao` hỗ trợ lưu `previewText`, cập nhật tiêu đề (`renameThread`)
+- [x] Cập nhật `FakeChatDataSource` và `ChatRepositoryImpl` với dữ liệu threads mẫu đa dạng kiểu Messenger
+- [x] Verification: `./gradlew :core:database:compileDebugKotlin :core:data:compileDebugKotlin` pass
 
-## Giai đoạn 4: Reusable UI Components
-- [x] **Task 4.1**: Xây dựng `ChatMascotHeader` (hiển thị biểu cảm Chanko theo ngữ cảnh).
-- [x] **Task 4.2**: Xây dựng `ChatMessageBubble` (bong bóng chat Candy Pop 3D).
-- [x] **Task 4.3**: Xây dựng `ChatComposerBar` và `PrototypeBadge`.
-- [x] **Task 4.4**: Xây dựng `DecisionVerdictCard` (BUY / WAIT / SKIP card).
+### Checkpoint 1: Foundation Verify
+- [x] Toàn bộ code domain và data layer biên dịch sạch sẽ
+- [x] `./gradlew :core:data:testDebugUnitTest` pass 100%
 
-## Giai đoạn 5: Screens & Navigation
-- [x] **Task 5.1**: Xây dựng `ChatViewModel` (quản lý 11 UI states, draft tin nhắn, retry).
-- [x] **Task 5.2**: Xây dựng `ChatScreen` (tổng hợp Header, Message List, Composer, Verdict).
-- [x] **Task 5.3**: Xây dựng `ItemPickerSheet` (S05) và `DeleteConfirmationDialog` (S10).
-- [x] **Task 5.4**: Đấu nối Navigation từ Home Header CTA vào `ChatScreen` (giữ nguyên 4 tabs chuẩn).
+---
 
-## Giai đoạn 6: Kiểm thử & Hoàn thiện
-- [x] **Task 6.1**: Viết Unit tests cho `ChatViewModel` và `ChatRepositoryImpl`.
-- [x] **Task 6.2**: Biên dịch `./gradlew :app:assembleDevDebug` và chạy unit tests verify thành công 100%.
+## Phase 2: Shared UI Components (Candy Pop 3D / Neutral BUY)
+
+### Task 3: Refactor DecisionCard & ChatMessageBubble
+- [ ] Refactor `DecisionCard`: áp dụng Neutral BUY (nền `#F0E9FF`, chữ tối, mascot Neutral, nút "Xem món đồ", bỏ xanh lá và sparkles)
+- [ ] Refactor `ChatMessageBubble`: User bubble (chữ tối trên lavender `#F0E9FF`), Chanko bubble (avatar 32dp + bong bóng trắng)
+- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+
+### Task 4: Build Dialogs & Sheets (Rename, Archive, Delete, Bind)
+- [ ] Xây dựng `RenameThreadDialog` (tiêu đề, text field, nút Hủy/Lưu)
+- [ ] Xây dựng `ArchiveConfirmationDialog` và `DeleteConfirmationDialog`
+- [ ] Xây dựng `SameThreadItemPickerSheet` cho CD (tìm kiếm món đồ, xác nhận liên kết cùng thread)
+- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+
+### Checkpoint 2: Components Verify
+- [ ] Các thành phần UI dùng chung hoàn thiện và biên dịch thành công
+
+---
+
+## Phase 3: Screen 1 — CL (Chat List Screen)
+
+### Task 5: Build ChatListScreen UI
+- [ ] Xây dựng Header "Chat với Chanko" (title 24sp bold) + Subtitle + nút More
+- [ ] Xây dựng Hero Card với Chanko mascot 148dp contain
+- [ ] Xây dựng Search bar ("Tìm cuộc trò chuyện") và Filter chips ("Tất cả", "Đang cân nhắc", "Chờ xem lại", "Đã mua")
+- [ ] Xây dựng danh sách Thread cards (thumbnail 56dp, title 17sp, preview 14sp, time, tag)
+- [ ] Xây dựng Fixed Footer CTA `+ Đoạn chat mới` (56dp height, bo góc 20dp)
+- [ ] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại CL
+- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+
+### Task 6: Build ChatListViewModel
+- [ ] Quản lý state danh sách threads, tìm kiếm, lọc chip, rename/archive/delete thread
+- [ ] Viết unit tests cho `ChatListViewModel`
+- [ ] Verification: `./gradlew :app:testDevDebugUnitTest` pass
+
+### Checkpoint 3: Chat List Verify
+- [ ] Màn hình CL và ViewModel hoạt động ổn định, 100% test pass
+
+---
+
+## Phase 4: Screen 2 — NC (New Chat Screen / Sheet)
+
+### Task 7: Build NewChatScreen UI & Logic
+- [ ] Xây dựng Header: Title "Đoạn chat mới", Subtitle "Chọn cách bắt đầu", nút Close
+- [ ] Xây dựng 2 Thẻ chọn chế độ: "Trò chuyện tự do" và "Về một món đồ"
+- [ ] Xây dựng Inline Item Picker khi chọn thẻ 2 (tìm kiếm + danh sách chọn 1 món)
+- [ ] Xây dựng Fixed Footer CTA "Bắt đầu trò chuyện" / "Trò chuyện về [tên món đồ]"
+- [ ] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại NC
+- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+
+### Checkpoint 4: New Chat Verify
+- [ ] Màn hình NC hoàn thiện, hỗ trợ chọn mode và mở CD ở trạng thái chưa gửi
+
+---
+
+## Phase 5: Screen 3 — CD (Chat Detail Screen)
+
+### Task 8: Refactor ChatDetailScreen UI
+- [ ] Xây dựng App Bar: nút Back, avatar/tiêu đề, nút More thread
+- [ ] Xây dựng Provenance bar (khi đã bind món đồ)
+- [ ] Xây dựng Message Timeline (bong bóng User/Chanko, Neutral Decision Card, thinking indicator)
+- [ ] Xây dựng Quick Replies chips (khi chạm chỉ điền vào composer `FillComposer`, không tự gửi)
+- [ ] Xây dựng Composer Bar (gắn trên bàn phím, nút Gửi, nút `+` liên kết món đồ ở mode FREE)
+- [ ] Xử lý trạng thái Offline banner và Archived banner
+- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+
+### Task 9: Refactor ChatDetailViewModel
+- [ ] Hỗ trợ trạng thái chưa gửi (unsent state), tạo thread khi gửi tin đầu tiên, gửi tin tiếp theo
+- [ ] Hỗ trợ liên kết món đồ cùng thread (same-thread item bind)
+- [ ] Viết unit tests cho `ChatDetailViewModel`
+- [ ] Verification: `./gradlew :app:testDevDebugUnitTest` pass
+
+### Checkpoint 5: Chat Detail Verify
+- [ ] Màn hình CD và ViewModel hoạt động chuẩn xác, 100% test pass
+
+---
+
+## Phase 6: Shell Navigation & System Integration
+
+### Task 10: Restore 4-Tab BottomBar & Add Home CTA
+- [ ] Phục hồi `TopLevelDestination` và `ChankoBottomBar` về đúng 4 Tabs (`Trang chủ`, `Món đồ`, `Ngân sách`, `Phân tích`)
+- [ ] Thêm nút CTA Chat trên màn hình `HomeScreen` để mở `ChatListScreen`
+- [ ] Verification: Bottom navigation hiển thị 4 tabs chuẩn
+
+### Task 11: Connect End-to-End Navigation Graph
+- [ ] Cấu hình điều hướng: `Home` -> `CL` -> `CD`, `CL` -> `NC` -> `CD`, `ItemDetail` -> `CD`
+- [ ] Xử lý Back stack: Back từ CD về đúng màn nguồn (CL hoặc Item Detail), phục hồi query/scroll tại CL
+- [ ] Verification: `./gradlew :app:assembleDevDebug :app:testDevDebugUnitTest` pass 100%
+
+### Checkpoint 6: Final Verification
+- [ ] Toàn bộ ứng dụng build thành công không lỗi
+- [ ] Toàn bộ unit tests vượt qua 100%
+- [ ] Git commit sạch sẽ trên branch `feature/chat-with-chanko-ui`

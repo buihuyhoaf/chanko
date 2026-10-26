@@ -1,0 +1,28 @@
+﻿screen_or_state,component,relative_asset_path,rule
+CL,hero/empty,canonical/chanko_neutral_512.webp,Neutral static identity; contain140–180dp; fallback text
+CD,avatar,canonical/chanko_neutral_128.webp,32dp decorative avatar; sender text accessible
+CD,DecisionCard BUY/WAIT/SKIP,canonical/chanko_neutral_256.webp,72dp Neutral static; never happy/celebratory
+CL,hero background,decorations/candy_stage.svg,Gradient decoration; no semantics
+NC,Free mode,decorations/free_chat_badge.svg,48dp visual; accessible mode text outside
+CL/CD/NC,all text,fonts/Nunito-Variable.ttf,Native text and dynamic font scale; preserve OFL
+CL/NC,CL/NC search,icons/search.svg; icons/search_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CL,CL filter,icons/tune.svg; icons/tune_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CD,CD Back,icons/arrow_back.svg; icons/arrow_back_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CL/CD,CL/CD options,icons/more_horiz.svg; icons/more_horiz_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CL,CL New Chat;CD FREE link item when supported,icons/add.svg; icons/add_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CD,CD Send,icons/send.svg; icons/send_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CL,CL FREE/NC FREE,icons/chat_bubble.svg; icons/chat_bubble_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+CL/CD/NC,CL/CD/NC dummy product or ITEM mode,icons/inventory_2.svg; icons/inventory_2_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+options,options Archive,icons/archive.svg; icons/archive_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+options,options Restore,icons/unarchive.svg; icons/unarchive_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+options,options Delete,icons/delete.svg; icons/delete_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+options,options Rename,icons/edit.svg; icons/edit_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+NC/dialog,NC/dialog close,icons/close.svg; icons/close_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+offline,offline banner,icons/wifi_off.svg; icons/wifi_off_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+RetryRead/CheckStatus,RetryRead/CheckStatus where valid,icons/refresh.svg; icons/refresh_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+error,error banner,icons/error.svg; icons/error_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+existing,existing shell Home,icons/home.svg; icons/home_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+existing,existing shell Budget,icons/account_balance_wallet.svg; icons/account_balance_wallet_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+existing,existing shell Insights,icons/insights.svg; icons/insights_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+selected,selected control (not green BUY celebration),icons/check.svg; icons/check_72.png,24dp glyph in48dp target; tint semantic foreground; label action
+filter/expand,filter/expand control,icons/expand_more.svg; icons/expand_more_72.png,24dp glyph in48dp target; tint semantic foreground; label action
