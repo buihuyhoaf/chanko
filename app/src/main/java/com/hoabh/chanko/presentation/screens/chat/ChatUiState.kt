@@ -15,10 +15,20 @@ data class ChatUiState(
     val isOffline: Boolean = false,
     val emotion: MascotEmotion = MascotEmotion.NEUTRAL,
     val showItemPicker: Boolean = false,
+    val showRenameDialog: Boolean = false,
+    val showArchiveDialog: Boolean = false,
     val showDeleteDialog: Boolean = false,
     val showHistorySheet: Boolean = false,
     val showOptionsSheet: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val draftMode: String = "FREE",
+    val draftItemId: String? = null,
+    val draftItemName: String? = null,
+    val draftItemPrice: Long? = null,
+    val quickReplies: List<String> = emptyList()
 )
 
-sealed interface ChatUiEffect
+sealed interface ChatUiEffect {
+    data class NavigateToItemDetail(val itemId: String) : ChatUiEffect
+    data object NavigateBack : ChatUiEffect
+}

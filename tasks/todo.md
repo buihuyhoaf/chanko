@@ -76,22 +76,23 @@
 ## Phase 5: Screen 3 — CD (Chat Detail Screen)
 
 ### Task 8: Refactor ChatDetailScreen UI
-- [ ] Xây dựng App Bar: nút Back, avatar/tiêu đề, nút More thread
-- [ ] Xây dựng Provenance bar (khi đã bind món đồ)
-- [ ] Xây dựng Message Timeline (bong bóng User/Chanko, Neutral Decision Card, thinking indicator)
-- [ ] Xây dựng Quick Replies chips (khi chạm chỉ điền vào composer `FillComposer`, không tự gửi)
-- [ ] Xây dựng Composer Bar (gắn trên bàn phím, nút Gửi, nút `+` liên kết món đồ ở mode FREE)
-- [ ] Xử lý trạng thái Offline banner và Archived banner
-- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] Xây dựng App Bar: nút Back, avatar/tiêu đề, nút More thread, link sang Item Detail
+- [x] Xây dựng Provenance bar (khi đã bind món đồ)
+- [x] Xây dựng Message Timeline (bong bóng User/Chanko, Neutral Decision Card, thinking indicator)
+- [x] Xây dựng Quick Replies chips (khi chạm chỉ điền vào composer `FillComposer`, không tự gửi)
+- [x] Xây dựng Composer Bar (gắn trên bàn phím, nút Gửi, nút `+` liên kết món đồ ở mode FREE)
+- [x] Xử lý trạng thái Offline banner và Archived banner
+- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
 
 ### Task 9: Refactor ChatDetailViewModel
-- [ ] Hỗ trợ trạng thái chưa gửi (unsent state), tạo thread khi gửi tin đầu tiên, gửi tin tiếp theo
-- [ ] Hỗ trợ liên kết món đồ cùng thread (same-thread item bind)
-- [ ] Viết unit tests cho `ChatDetailViewModel`
-- [ ] Verification: `./gradlew :app:testDevDebugUnitTest` pass
+- [x] Hỗ trợ trạng thái chưa gửi (unsent state), tạo thread khi gửi tin đầu tiên, liên kết item ngay sau khi tạo
+- [x] Hỗ trợ đổi tên thread (`renameThread`)
+- [x] Hỗ trợ liên kết món đồ cùng thread (same-thread item bind)
+- [x] Viết unit tests cho `ChatViewModel` (100% pass)
+- [x] Verification: `./gradlew :app:testDevDebugUnitTest` pass
 
 ### Checkpoint 5: Chat Detail Verify
-- [ ] Màn hình CD và ViewModel hoạt động chuẩn xác, 100% test pass
+- [x] Màn hình CD và ViewModel hoạt động chuẩn xác, 100% test pass
 
 ---
 

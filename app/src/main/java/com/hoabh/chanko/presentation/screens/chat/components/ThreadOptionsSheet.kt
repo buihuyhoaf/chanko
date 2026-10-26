@@ -20,6 +20,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +54,9 @@ fun ThreadOptionsSheet(
     onDeleteClicked: () -> Unit,
     onDismiss: () -> Unit,
     sheetState: SheetState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRenameClicked: (() -> Unit)? = null,
+    onViewItemClicked: (() -> Unit)? = null
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -73,6 +77,92 @@ fun ThreadOptionsSheet(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Tùy chọn: Đổi tên (Rename)
+            if (onRenameClicked != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onRenameClicked() }
+                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(CandyColors.backgroundLavender),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Edit,
+                            contentDescription = "Đổi tên",
+                            tint = CandyColors.brandPurple,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column {
+                        Text(
+                            text = "Đổi tên cuộc trò chuyện",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = CandyColors.textPrimary
+                        )
+                        Text(
+                            text = "Đặt lại tiêu đề dễ nhớ cho đoạn chat",
+                            fontSize = 12.sp,
+                            color = CandyColors.mutedInk
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Tùy chọn: Xem chi tiết món đồ (nếu có)
+            if (onViewItemClicked != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onViewItemClicked() }
+                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(CandyColors.backgroundLavender),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
+                            contentDescription = "Xem món đồ",
+                            tint = CandyColors.brandPurple,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column {
+                        Text(
+                            text = "Xem chi tiết món đồ",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = CandyColors.textPrimary
+                        )
+                        Text(
+                            text = "Mở thông tin chi tiết và tiến trình hạ nhiệt",
+                            fontSize = 12.sp,
+                            color = CandyColors.mutedInk
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             if (!isArchived) {
                 // Tùy chọn: Lưu trữ (Archive)

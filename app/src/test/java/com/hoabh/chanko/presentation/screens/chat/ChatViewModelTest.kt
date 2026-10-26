@@ -13,7 +13,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -44,8 +46,7 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        // Theo Spec S01: Mặc định chưa chọn thread nào, danh sách tin nhắn trống
-        org.junit.Assert.assertNull(state.thread)
+        assertNull(state.thread)
         assertTrue(state.messages.isEmpty())
     }
 
@@ -64,37 +65,84 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun sendMessage_fromEmpty_createsNewThreadAndMessages() = runTest {
+    fun initThread_withExistingThread_loadsMessagesAndQuickReplies() = runTest {
+        viewModel.initThread("thread_item_keyboard")
         advanceUntilIdle()
 
-        viewModel.onTextChanged("Tôi có nên mua tai nghe này không?")
+        val state = viewModel.uiState.value
+        assertNotNull(state.thread)
+        assertEquals("thread_item_keyboard", state.thread?.id)
+        assertEquals(ThreadMode.ITEM, state.thread?.mode)
+        assertTrue(state.messages.isNotEmpty())
+        assertTrue(state.quickReplies.isNotEmpty())
+    }
+
+    @Test
+    fun initThread_withDraftItem_setsItemContextAndWelcome() = runTest {
+        viewModel.initThread(
+            threadId = null,
+            contextMode = "ITEM",
+            itemId = "item_123",
+            itemName = "Bàn phím cơ",
+            itemPrice = 2_500_000L
+        )
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("ITEM", state.draftMode)
+        assertEquals("item_123", state.draftItemId)
+        assertEquals("Bàn phím cơ", state.draftItemName)
+        assertEquals(1, state.messages.size)
+        assertTrue(state.messages[0].text.contains("Bàn phím cơ"))
+        assertTrue(state.quickReplies.contains("Món này có thực sự cần thiết không?"))
+    }
+
+    @Test
+    fun fillComposer_updatesInputTextOnly_doesNotSend() = runTest {
+        viewModel.initThread("thread_free_1")
+        advanceUntilIdle()
+
+        val initialMessageCount = viewModel.uiState.value.messages.size
+
+        viewModel.fillComposer("Quy tắc 72 giờ là gì?")
+        val state = viewModel.uiState.value
+
+        assertEquals("Quy tắc 72 giờ là gì?", state.inputText)
+        assertEquals(initialMessageCount, state.messages.size)
+        assertFalse(state.isSending)
+    }
+
+    @Test
+    fun sendMessage_inDraftItemMode_createsThreadAndBindsItem() = runTest {
+        viewModel.initThread(
+            threadId = null,
+            contextMode = "ITEM",
+            itemId = "item_999",
+            itemName = "Tai nghe",
+            itemPrice = 1_500_000L
+        )
+        advanceUntilIdle()
+
+        viewModel.onTextChanged("Chanko ơi có nên mua tai nghe này không?")
         viewModel.sendMessage()
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertNotNull(state.thread)
-        val lastUserMessage = state.messages.find { it.text == "Tôi có nên mua tai nghe này không?" }
-        assertNotNull(lastUserMessage)
-
-        val lastBotMessage = state.messages.lastOrNull()
-        assertNotNull(lastBotMessage)
-        assertEquals(com.hoabh.chanko.domain.chat.model.MessageSender.CHANKO, lastBotMessage?.sender)
+        assertEquals(ThreadMode.ITEM, state.thread?.mode)
+        assertEquals("item_999", state.thread?.linkedItemId)
     }
 
     @Test
-    fun sendPrompt_createsNewThread_andTriggersCallback() = runTest {
+    fun renameThread_updatesThreadTitle() = runTest {
+        viewModel.initThread("thread_free_1")
         advanceUntilIdle()
 
-        var createdThreadId: String? = null
-        viewModel.sendPrompt("Tôi vừa thấy một món đồ rất thích...") { threadId ->
-            createdThreadId = threadId
-        }
+        viewModel.renameThread("Tâm sự tài chính cuối tháng")
         advanceUntilIdle()
 
-        assertNotNull(createdThreadId)
         val state = viewModel.uiState.value
-        assertEquals(createdThreadId, state.thread?.id)
-        assertTrue(state.messages.any { it.text == "Tôi vừa thấy một món đồ rất thích..." })
+        assertEquals("Tâm sự tài chính cuối tháng", state.thread?.title)
     }
 
     @Test
@@ -105,6 +153,7 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         val originalThreadId = viewModel.uiState.value.thread?.id
+        val oldMessageCount = viewModel.uiState.value.messages.size
 
         viewModel.bindItem(
             itemId = "item_watch_01",
@@ -118,6 +167,25 @@ class ChatViewModelTest {
         assertEquals(ThreadMode.ITEM, state.thread?.mode)
         assertEquals("Đồng hồ thông minh", state.thread?.linkedItemName)
         assertEquals(5_000_000L, state.thread?.linkedItemPriceVnd)
+        assertTrue(state.messages.size >= oldMessageCount)
+    }
+
+    @Test
+    fun archiveAndRestoreThread_togglesArchivedState() = runTest {
+        viewModel.initThread("thread_item_keyboard")
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.thread?.isArchived == true)
+
+        viewModel.archiveCurrentThread()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.thread?.isArchived == true)
+
+        viewModel.restoreCurrentThread()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.thread?.isArchived == true)
     }
 
     @Test
