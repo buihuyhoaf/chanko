@@ -60,15 +60,16 @@
 ## Phase 4: Screen 2 — NC (New Chat Screen / Sheet)
 
 ### Task 7: Build NewChatScreen UI & Logic
-- [ ] Xây dựng Header: Title "Đoạn chat mới", Subtitle "Chọn cách bắt đầu", nút Close
-- [ ] Xây dựng 2 Thẻ chọn chế độ: "Trò chuyện tự do" và "Về một món đồ"
-- [ ] Xây dựng Inline Item Picker khi chọn thẻ 2 (tìm kiếm + danh sách chọn 1 món)
-- [ ] Xây dựng Fixed Footer CTA "Bắt đầu trò chuyện" / "Trò chuyện về [tên món đồ]"
-- [ ] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại NC
-- [ ] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] Xây dựng Header: Title "Đoạn chat mới", Subtitle "Chọn cách bắt đầu", nút Close
+- [x] Xây dựng 2 Thẻ chọn chế độ: "Trò chuyện tự do" và "Về một món đồ"
+- [x] Xây dựng Inline Item Picker khi chọn thẻ 2 (tìm kiếm + danh sách chọn 1 món)
+- [x] Xây dựng Fixed Footer CTA "Bắt đầu trò chuyện" / "Trò chuyện về [tên món đồ]"
+- [x] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại NC
+- [x] Viết unit tests cho `NewChatViewModel` (100% pass)
+- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
 
 ### Checkpoint 4: New Chat Verify
-- [ ] Màn hình NC hoàn thiện, hỗ trợ chọn mode và mở CD ở trạng thái chưa gửi
+- [x] Màn hình NC hoàn thiện, hỗ trợ chọn mode và mở CD ở trạng thái chưa gửi
 
 ---
 
