@@ -99,16 +99,16 @@
 ## Phase 6: Shell Navigation & System Integration
 
 ### Task 10: Restore 4-Tab BottomBar & Add Home CTA
-- [ ] Phục hồi `TopLevelDestination` và `ChankoBottomBar` về đúng 4 Tabs (`Trang chủ`, `Món đồ`, `Ngân sách`, `Phân tích`)
-- [ ] Thêm nút CTA Chat trên màn hình `HomeScreen` để mở `ChatListScreen`
-- [ ] Verification: Bottom navigation hiển thị 4 tabs chuẩn
+- [x] Phục hồi `TopLevelDestination` và `ChankoBottomBar` về đúng 4 Tabs (`Trang chủ`, `Món đồ`, `Ngân sách`, `Phân tích`)
+- [x] Thêm nút CTA Chat trên màn hình `HomeScreen` để mở `ChatListScreen`
+- [x] Verification: Bottom navigation hiển thị 4 tabs chuẩn
 
 ### Task 11: Connect End-to-End Navigation Graph
-- [ ] Cấu hình điều hướng: `Home` -> `CL` -> `CD`, `CL` -> `NC` -> `CD`, `ItemDetail` -> `CD`
-- [ ] Xử lý Back stack: Back từ CD về đúng màn nguồn (CL hoặc Item Detail), phục hồi query/scroll tại CL
-- [ ] Verification: `./gradlew :app:assembleDevDebug :app:testDevDebugUnitTest` pass 100%
+- [x] Cấu hình điều hướng: `Home` -> `CL` -> `CD`, `CL` -> `NC` -> `CD`, `ItemDetail` -> `CD`
+- [x] Xử lý Back stack: Back từ CD về đúng màn nguồn (CL hoặc Item Detail), phục hồi query/scroll tại CL
+- [x] Verification: `./gradlew :app:assembleDevDebug :app:testDevDebugUnitTest` pass 100%
 
 ### Checkpoint 6: Final Verification
-- [ ] Toàn bộ ứng dụng build thành công không lỗi
-- [ ] Toàn bộ unit tests vượt qua 100%
-- [ ] Git commit sạch sẽ trên branch `feature/chat-with-chanko-ui`
+- [x] Toàn bộ ứng dụng build thành công không lỗi (`:app:assembleDevDebug` exit code 0)
+- [x] Toàn bộ unit tests vượt qua 100% (`testDevDebugUnitTest` 84 tasks UP-TO-DATE/passed)
+- [x] Git commit sạch sẽ trên branch `feature/chat-with-chanko-ui`

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Archive
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.Replay
@@ -53,7 +54,8 @@ fun ItemMoreOptionsBottomSheet(
     onSkipWaiting: () -> Unit,
     onArchive: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChatWithChanko: (() -> Unit)? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -80,6 +82,15 @@ fun ItemMoreOptionsBottomSheet(
             )
 
             Spacer(modifier = Modifier.height(CandySpace.md))
+
+            // Cân nhắc cùng Chanko (Chat with Chanko about this item)
+            if (onChatWithChanko != null) {
+                MoreOptionRow(
+                    icon = Icons.Rounded.AutoAwesome,
+                    label = "Cân nhắc cùng Chanko",
+                    onClick = onChatWithChanko
+                )
+            }
 
             // Direct Mark as Purchased / Buy Again
             val isPurchased = displayStatus == ItemDisplayStatus.Purchased

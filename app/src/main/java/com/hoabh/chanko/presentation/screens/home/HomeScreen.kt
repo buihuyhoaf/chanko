@@ -44,6 +44,7 @@ fun HomeRoute(
     modifier: Modifier = Modifier,
     onAddNewItemClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
+    onChatClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +65,7 @@ fun HomeRoute(
     HomeScreen(
         state = state,
         onEvent = viewModel::onEvent,
+        onChatClick = onChatClick,
         modifier = modifier
     )
 }
@@ -83,7 +85,8 @@ fun HomeRoute(
 fun HomeScreen(
     state: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChatClick: () -> Unit = {}
 ) {
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
@@ -115,7 +118,8 @@ fun HomeScreen(
                 HomeHeader(
                     header = state.header,
                     onProfileClick = { onEvent(HomeUiEvent.ProfileClick) },
-                    canOpenProfile = state.capabilities.canOpenProfile
+                    canOpenProfile = state.capabilities.canOpenProfile,
+                    onChatClick = onChatClick
                 )
             }
 
