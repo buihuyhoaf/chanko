@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ChatListUiState(
-    val threads: List<ChatThread> = emptyList(),
+    val activeThreads: List<ChatThread> = emptyList(),
+    val archivedThreads: List<ChatThread> = emptyList(),
     val searchQuery: String = "",
     val selectedFilter: ThreadFilter = ThreadFilter.ALL,
     val showArchived: Boolean = false,
@@ -25,6 +26,9 @@ data class ChatListUiState(
     val threadForArchive: ChatThread? = null,
     val threadForDelete: ChatThread? = null
 ) {
+    val threads: List<ChatThread>
+        get() = if (showArchived) archivedThreads else activeThreads
+
     val filteredThreads: List<ChatThread>
         get() {
             var list = threads
@@ -73,8 +77,11 @@ class ChatListViewModel @Inject constructor(
                 Pair(active, archived)
             }.collect { (active, archived) ->
                 updateState { state ->
-                    val currentList = if (state.showArchived) archived else active
-                    state.copy(threads = currentList, isLoading = false)
+                    state.copy(
+                        activeThreads = active,
+                        archivedThreads = archived,
+                        isLoading = false
+                    )
                 }
             }
         }
@@ -92,7 +99,6 @@ class ChatListViewModel @Inject constructor(
                 it.copy(selectedFilter = filter, showArchived = false)
             }
         }
-        observeThreads()
     }
 
     fun toggleShowArchived(showArchived: Boolean) {
@@ -102,7 +108,6 @@ class ChatListViewModel @Inject constructor(
                 selectedFilter = if (showArchived) ThreadFilter.ARCHIVED else ThreadFilter.ALL
             )
         }
-        observeThreads()
     }
 
     // Modal Actions

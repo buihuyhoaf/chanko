@@ -1,18 +1,11 @@
 package com.hoabh.chanko.presentation.screens.chat.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -61,13 +54,7 @@ sealed interface NewChatUiEffect {
 @HiltViewModel
 class NewChatViewModel @Inject constructor(
     private val itemRepository: ItemRepository
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(NewChatUiState(isLoading = true))
-    val uiState: StateFlow<NewChatUiState> = _uiState.asStateFlow()
-
-    private val _effect = MutableSharedFlow<NewChatUiEffect>()
-    val effect: SharedFlow<NewChatUiEffect> = _effect.asSharedFlow()
+) : BaseViewModel<NewChatUiState, NewChatUiEffect>(NewChatUiState(isLoading = true)) {
 
     init {
         loadItems()
@@ -77,10 +64,10 @@ class NewChatViewModel @Inject constructor(
         viewModelScope.launch {
             itemRepository.getActiveItems()
                 .catch { e ->
-                    _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+                    updateState { it.copy(isLoading = false, errorMessage = e.message) }
                 }
                 .collect { items ->
-                    _uiState.update { state ->
+                    updateState { state ->
                         val filtered = filterItems(items, state.searchQuery)
                         state.copy(
                             items = items,
@@ -93,11 +80,11 @@ class NewChatViewModel @Inject constructor(
     }
 
     fun selectMode(mode: NewChatMode) {
-        _uiState.update { it.copy(selectedMode = mode) }
+        updateState { it.copy(selectedMode = mode) }
     }
 
     fun updateSearchQuery(query: String) {
-        _uiState.update { state ->
+        updateState { state ->
             state.copy(
                 searchQuery = query,
                 filteredItems = filterItems(state.items, query)
@@ -106,47 +93,39 @@ class NewChatViewModel @Inject constructor(
     }
 
     fun selectItem(item: CooldownItem) {
-        _uiState.update { it.copy(selectedItem = item) }
+        updateState { it.copy(selectedItem = item) }
     }
 
     fun startChat() {
-        val state = _uiState.value
+        val state = currentState
         when (state.selectedMode) {
             NewChatMode.FREE -> {
-                viewModelScope.launch {
-                    _effect.emit(
-                        NewChatUiEffect.NavigateToChatDetail(
-                            contextMode = "FREE"
-                        )
+                sendEffect(
+                    NewChatUiEffect.NavigateToChatDetail(
+                        contextMode = "FREE"
                     )
-                }
+                )
             }
             NewChatMode.ITEM -> {
                 val item = state.selectedItem ?: return
-                viewModelScope.launch {
-                    _effect.emit(
-                        NewChatUiEffect.NavigateToChatDetail(
-                            contextMode = "ITEM",
-                            itemId = item.id.toString(),
-                            itemName = item.name,
-                            itemPrice = item.price
-                        )
+                sendEffect(
+                    NewChatUiEffect.NavigateToChatDetail(
+                        contextMode = "ITEM",
+                        itemId = item.id.toString(),
+                        itemName = item.name,
+                        itemPrice = item.price
                     )
-                }
+                )
             }
         }
     }
 
     fun onNavigateToMyItems() {
-        viewModelScope.launch {
-            _effect.emit(NewChatUiEffect.NavigateToMyItems)
-        }
+        sendEffect(NewChatUiEffect.NavigateToMyItems)
     }
 
     fun onClose() {
-        viewModelScope.launch {
-            _effect.emit(NewChatUiEffect.Close)
-        }
+        sendEffect(NewChatUiEffect.Close)
     }
 
     private fun filterItems(items: List<CooldownItem>, query: String): List<CooldownItem> {
