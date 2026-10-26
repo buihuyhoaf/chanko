@@ -1,8 +1,0 @@
-# Decision Card / Quick Reply contracts
-UI domain logical contract, không DTO/schema được duyệt.
-
-Decision card requires validated BUY/WAIT/SKIP, stable evaluation ID, item ID, reasons/rationale, evaluatedAt, contextVersion when supported, stale marker. Invalid/partial schema: no card/default BUY. Persist evaluation through server orchestrator, not card click. Existing history immutable. State1 pending, state2 completed valid, state3 stale, state4 error are logical presentation variants, not new database status. Primary Xem món đồ only navigation; Discuss more keeps context. No Add-to-MyItems implicit duplicate, no direct Purchase shortcut mutation, no money counted from price estimate. Exact supplied Neutral is required;11 core visual baselinev1.2 approved, use actual PNG/WebP, not a cropped screenshot.
-
-Quick replies come from validated fixture/server response, stable option identity if provided, plain text label, accessible semantics. Default R action FillComposer; user Send separately. Fill cannot silently override dirty text; A5 approved: keep dirty draft unchanged with inline explanation; no implicit replacement or new sheet. Do not auto purchase/skip/wait, attach item, execute URL or raw LLM instruction. Loading/disabled state labeled, keyboard navigation/focus supported. Max count/text length follows actual contract; do not invent limits as Approved.
-
-Early verdict control belongs item Quick Check before full verdict; RequestEarlyVerdict identity/version/key through repository, same key same intent. TECH03 evaluate example request_early_verdict=true is mapping reference, no new endpoint. Free Chat cannot use dummy item to fabricate official evaluation.
