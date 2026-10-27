@@ -16,9 +16,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.MoreVert
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -133,10 +132,9 @@ fun ItemDetailScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = CandyColors.textPrimary
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_02,
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
                 Text(
@@ -148,10 +146,9 @@ fun ItemDetailScreen(
                     color = CandyColors.textPrimary
                 )
                 IconButton(onClick = { onEvent(ItemDetailUiEvent.OpenMoreOptions) }) {
-                    Icon(
-                        imageVector = Icons.Rounded.MoreVert,
-                        contentDescription = stringResource(R.string.item_detail_more_options),
-                        tint = CandyColors.textPrimary
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_10,
+                        contentDescription = stringResource(R.string.item_detail_more_options)
                     )
                 }
             }

@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,10 +98,9 @@ fun FilterSortBottomSheet(
                     color = CandyColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = stringResource(R.string.my_items_filter_close),
-                        tint = CandyColors.textSecondary
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_03,
+                        contentDescription = stringResource(R.string.my_items_filter_close)
                     )
                 }
             }

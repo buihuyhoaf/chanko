@@ -12,15 +12,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Archive
-import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.FastForward
-import androidx.compose.material.icons.rounded.Replay
-import androidx.compose.material.icons.rounded.ShoppingCart
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -31,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -86,7 +79,7 @@ fun ItemMoreOptionsBottomSheet(
             // Cân nhắc cùng Chanko (Chat with Chanko about this item)
             if (onChatWithChanko != null) {
                 MoreOptionRow(
-                    icon = Icons.Rounded.AutoAwesome,
+                    icon = ChankoIconId.SYS_01,
                     label = "Cân nhắc cùng Chanko",
                     onClick = onChatWithChanko
                 )
@@ -95,7 +88,7 @@ fun ItemMoreOptionsBottomSheet(
             // Direct Mark as Purchased / Buy Again
             val isPurchased = displayStatus == ItemDisplayStatus.Purchased
             MoreOptionRow(
-                icon = if (isPurchased) Icons.Rounded.Replay else Icons.Rounded.ShoppingCart,
+                icon = if (isPurchased) ChankoIconId.ACT_11 else ChankoIconId.ITM_09,
                 label = if (isPurchased) stringResource(R.string.item_detail_more_buy_again) else stringResource(R.string.item_detail_more_record_purchase),
                 onClick = onRecordPurchase
             )
@@ -103,7 +96,7 @@ fun ItemMoreOptionsBottomSheet(
             // Skip Waiting (chỉ khi đang hạ nhiệt)
             if (displayStatus == ItemDisplayStatus.CoolingOff) {
                 MoreOptionRow(
-                    icon = Icons.Rounded.FastForward,
+                    icon = ChankoIconId.ITM_11,
                     label = stringResource(R.string.item_detail_more_skip_waiting),
                     onClick = onSkipWaiting
                 )
@@ -111,7 +104,7 @@ fun ItemMoreOptionsBottomSheet(
 
             // Archive Item
             MoreOptionRow(
-                icon = Icons.Rounded.Archive,
+                icon = ChankoIconId.ITM_06,
                 label = stringResource(R.string.item_detail_more_archive),
                 onClick = onArchive
             )
@@ -123,7 +116,7 @@ fun ItemMoreOptionsBottomSheet(
 
 @Composable
 private fun MoreOptionRow(
-    icon: ImageVector,
+    icon: ChankoIconId,
     label: String,
     onClick: () -> Unit
 ) {
@@ -147,10 +140,10 @@ private fun MoreOptionRow(
                     .background(CandyColors.primarySoft)
                     .padding(8.dp)
             ) {
-                Icon(
-                    imageVector = icon,
+                ChankoIcon(
+                    id = icon,
                     contentDescription = null,
-                    tint = CandyColors.primaryInk
+                    size = 20.dp
                 )
             }
             Spacer(modifier = Modifier.width(CandySpace.md))

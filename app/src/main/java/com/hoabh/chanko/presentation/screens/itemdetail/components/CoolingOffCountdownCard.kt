@@ -11,9 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.HourglassEmpty
-import androidx.compose.material3.Icon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -64,11 +63,10 @@ fun CoolingOffCountdownCard(
                     .background(accentColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.HourglassEmpty,
+                ChankoIcon(
+                    id = if (isReady) ChankoIconId.ITM_05 else ChankoIconId.ITM_04,
                     contentDescription = null,
-                    tint = accentColor,
-                    modifier = Modifier.size(24.dp)
+                    size = 24.dp
                 )
             }
 

@@ -22,14 +22,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.HelpOutline
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.BookmarkAdd
-import androidx.compose.material.icons.rounded.Close
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -175,9 +171,8 @@ private fun GlobalQuickActionSheetContent(
         GlobalSheetActionTile(
             title = stringResource(R.string.home_quick_check_title),
             description = stringResource(R.string.home_global_sheet_quick_check_desc),
-            icon = Icons.AutoMirrored.Rounded.HelpOutline,
+            icon = ChankoIconId.ITM_01,
             iconTileBg = CandyColors.primarySoft,
-            iconTint = CandyColors.brandPurple,
             tileBg = CandyColors.saveItemSurface,
             tileBorder = CandyColors.saveItemBorder,
             onClick = onQuickCheckClick
@@ -187,9 +182,8 @@ private fun GlobalQuickActionSheetContent(
         GlobalSheetActionTile(
             title = stringResource(R.string.home_save_item_title),
             description = stringResource(R.string.home_global_sheet_save_item_desc),
-            icon = Icons.Rounded.BookmarkAdd,
+            icon = ChankoIconId.ITM_02,
             iconTileBg = CandyColors.globalSheetSaveIconTileBg,
-            iconTint = CandyColors.globalSheetSaveIconInk,
             tileBg = CandyColors.homeCardSurface,
             tileBorder = CandyColors.homeCardBorder,
             onClick = onSaveItemClick
@@ -201,9 +195,8 @@ private fun GlobalQuickActionSheetContent(
 private fun GlobalSheetActionTile(
     title: String,
     description: String,
-    icon: ImageVector,
+    icon: ChankoIconId,
     iconTileBg: Color,
-    iconTint: Color,
     tileBg: Color,
     tileBorder: Color,
     onClick: () -> Unit
@@ -234,11 +227,10 @@ private fun GlobalSheetActionTile(
                     .background(iconTileBg),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
+                ChankoIcon(
+                    id = icon,
                     contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(22.dp)
+                    size = 22.dp
                 )
             }
 
@@ -266,11 +258,10 @@ private fun GlobalSheetActionTile(
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            ChankoIcon(
+                id = ChankoIconId.ACT_18,
                 contentDescription = null,
-                tint = CandyColors.textSecondary,
-                modifier = Modifier.size(20.dp)
+                size = 20.dp
             )
         }
     }
@@ -421,11 +412,10 @@ private fun SheetHeaderRow(
                     .background(CandyColors.decisionSavedRowBg),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Close,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_03,
                     contentDescription = closeCd,
-                    tint = CandyColors.textSecondary,
-                    modifier = Modifier.size(18.dp)
+                    size = 18.dp
                 )
             }
         }

@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.EditNote
-import androidx.compose.material3.Icon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -98,11 +96,10 @@ fun DraftResumeCard(
                     .background(CandyColors.primarySoft),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.EditNote,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_05,
                     contentDescription = null,
-                    tint = CandyColors.brandPurple,
-                    modifier = Modifier.size(DraftIconSize)
+                    size = DraftIconSize
                 )
             }
 
@@ -170,11 +167,10 @@ fun DraftResumeCard(
                             ),
                             color = CandyColors.primaryInk
                         )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_18,
                             contentDescription = null,
-                            tint = CandyColors.primaryInk,
-                            modifier = Modifier.size(16.dp)
+                            size = 16.dp
                         )
                     }
                 }

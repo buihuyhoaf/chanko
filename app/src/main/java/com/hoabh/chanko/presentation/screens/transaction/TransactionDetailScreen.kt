@@ -18,10 +18,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Edit
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -130,10 +128,9 @@ fun TransactionDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = CandyColors.textPrimary
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_02,
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
                 Text(
@@ -248,7 +245,7 @@ fun TransactionDetailScreen(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                            ChankoIcon(id = ChankoIconId.ACT_05, contentDescription = null, size = 18.dp)
                             Spacer(Modifier.width(6.dp))
                             Text(stringResource(R.string.transaction_detail_edit_action))
                         }
@@ -262,7 +259,7 @@ fun TransactionDetailScreen(
                                 contentColor = CandyColors.error
                             )
                         ) {
-                            Icon(Icons.Rounded.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                            ChankoIcon(id = ChankoIconId.ACT_06, contentDescription = null, size = 18.dp)
                             Spacer(Modifier.width(6.dp))
                             Text(stringResource(R.string.transaction_detail_delete_action))
                         }

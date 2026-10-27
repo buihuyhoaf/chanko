@@ -19,10 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Replay
-import androidx.compose.material.icons.rounded.Search
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -108,10 +106,9 @@ fun ArchivedItemsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = CandyColors.textPrimary
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_02,
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
                 Text(
@@ -136,7 +133,7 @@ fun ArchivedItemsScreen(
                     )
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Search, contentDescription = null, tint = CandyColors.textSecondary)
+                    ChankoIcon(id = ChankoIconId.ACT_07, contentDescription = null, size = 20.dp)
                 },
                 shape = RoundedCornerShape(20.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -276,10 +273,10 @@ private fun ArchivedItemRow(
                     contentColor = CandyColors.primaryInk
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Replay,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_11,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    size = 16.dp
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(

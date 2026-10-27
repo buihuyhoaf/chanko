@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Security
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
@@ -117,13 +115,13 @@ fun ProfileScreen(
                 SettingsSection(title = stringResource(R.string.profile_section_information)) {
                     InformationRow(
                         title = stringResource(R.string.profile_row_privacy),
-                        icon = Icons.Rounded.Security,
+                        icon = ChankoIconId.SYS_09,
                         onClick = { onEvent(ProfileUiEvent.OnPrivacyPolicyClicked) }
                     )
                     HorizontalDivider(color = CandyColors.divider.copy(alpha = 0.5f))
                     InformationRow(
                         title = stringResource(R.string.profile_row_about),
-                        icon = Icons.Rounded.Info,
+                        icon = ChankoIconId.SYS_15,
                         onClick = { onEvent(ProfileUiEvent.OnAboutClicked) },
                         trailingText = stringResource(R.string.profile_app_version, state.appVersion)
                     )

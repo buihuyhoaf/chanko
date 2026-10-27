@@ -18,12 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -41,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -59,6 +52,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
@@ -224,7 +219,7 @@ fun ChankoBottomBar(
                 // Tab 1: Trang chủ
                 ChankoNavItem(
                     destination = TopLevelDestination.Home,
-                    icon = Icons.Rounded.Home,
+                    icon = ChankoIconId.NAV_01,
                     isSelected = currentRoute == TopLevelDestination.Home.route,
                     onClick = { onTabSelected(TopLevelDestination.Home) },
                     modifier = Modifier.weight(1f)
@@ -233,7 +228,7 @@ fun ChankoBottomBar(
                 // Tab 2: Món đồ
                 ChankoNavItem(
                     destination = TopLevelDestination.MyItems,
-                    icon = Icons.AutoMirrored.Rounded.List,
+                    icon = ChankoIconId.NAV_02,
                     isSelected = currentRoute == TopLevelDestination.MyItems.route,
                     onClick = { onTabSelected(TopLevelDestination.MyItems) },
                     modifier = Modifier.weight(1f)
@@ -245,7 +240,7 @@ fun ChankoBottomBar(
                 // Tab 3: Trò chuyện
                 ChankoNavItem(
                     destination = TopLevelDestination.Chat,
-                    icon = Icons.Rounded.ChatBubbleOutline,
+                    icon = ChankoIconId.SYS_01,
                     isSelected = currentRoute == TopLevelDestination.Chat.route,
                     onClick = { onTabSelected(TopLevelDestination.Chat) },
                     modifier = Modifier.weight(1f)
@@ -254,7 +249,7 @@ fun ChankoBottomBar(
                 // Tab 4: Phân tích
                 ChankoNavItem(
                     destination = TopLevelDestination.Insights,
-                    icon = Icons.Rounded.Insights,
+                    icon = ChankoIconId.NAV_04,
                     isSelected = currentRoute == TopLevelDestination.Insights.route,
                     onClick = { onTabSelected(TopLevelDestination.Insights) },
                     modifier = Modifier.weight(1f)
@@ -276,10 +271,10 @@ fun ChankoBottomBar(
                 .size(56.dp)
                 .semantics { contentDescription = addCd }
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
+            ChankoIcon(
+                id = ChankoIconId.ACT_01,
                 contentDescription = null,
-                modifier = Modifier.size(28.dp)
+                size = 28.dp
             )
         }
     }
@@ -288,7 +283,7 @@ fun ChankoBottomBar(
 @Composable
 private fun ChankoNavItem(
     destination: TopLevelDestination,
-    icon: ImageVector,
+    icon: ChankoIconId,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -324,11 +319,11 @@ private fun ChankoNavItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
+                ChankoIcon(
+                    id = icon,
                     contentDescription = null,
-                    tint = if (isSelected) CandyColors.primaryInk else CandyColors.textSecondary,
-                    modifier = Modifier.size(22.dp)
+                    selected = isSelected,
+                    size = 22.dp
                 )
             }
 

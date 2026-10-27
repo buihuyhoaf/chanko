@@ -25,12 +25,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.ShoppingBag
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -149,11 +145,10 @@ fun NewChatContent(
                                 .background(CandyColors.backgroundLavender),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Rounded.AutoAwesome,
+                            ChankoIcon(
+                                id = ChankoIconId.SYS_01,
                                 contentDescription = null,
-                                tint = CandyColors.brandPurple,
-                                modifier = Modifier.size(26.dp)
+                                size = 26.dp
                             )
                         }
                     },
@@ -173,11 +168,10 @@ fun NewChatContent(
                                 .background(Color(0xFFFFECE5)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ShoppingBag,
+                            ChankoIcon(
+                                id = ChankoIconId.ITM_03,
                                 contentDescription = null,
-                                tint = Color(0xFFF97316),
-                                modifier = Modifier.size(26.dp)
+                                size = 26.dp
                             )
                         }
                     },
@@ -230,10 +224,9 @@ private fun NewChatHeader(
             onClick = onClose,
             modifier = Modifier.size(48.dp)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Close,
-                contentDescription = "Đóng",
-                tint = CandyColors.textPrimary
+            ChankoIcon(
+                id = ChankoIconId.ACT_03,
+                contentDescription = "Đóng"
             )
         }
 
@@ -340,11 +333,10 @@ private fun InlineItemPickerSection(
             onValueChange = onSearchQueryChange,
             placeholder = { Text("Tìm món đồ...", fontSize = 14.sp, color = CandyColors.mutedInk) },
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Search,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_07,
                     contentDescription = null,
-                    tint = CandyColors.mutedInk,
-                    modifier = Modifier.size(20.dp)
+                    size = 20.dp
                 )
             },
             singleLine = true,
@@ -403,11 +395,10 @@ private fun InlineItemPickerSection(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                            ChankoIcon(
+                                id = ChankoIconId.ACT_18,
                                 contentDescription = null,
-                                tint = CandyColors.brandPurple,
-                                modifier = Modifier.size(16.dp)
+                                size = 16.dp
                             )
                         }
                     }
@@ -440,11 +431,10 @@ private fun InlineItemPickerSection(
                                 .background(CandyColors.backgroundLavender),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ShoppingBag,
+                            ChankoIcon(
+                                id = ChankoIconId.ITM_03,
                                 contentDescription = null,
-                                tint = CandyColors.brandPurple,
-                                modifier = Modifier.size(22.dp)
+                                size = 22.dp
                             )
                         }
 

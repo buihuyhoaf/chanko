@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,10 +59,10 @@ fun ChatComposerBar(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_01,
                     contentDescription = "Gắn món đồ",
-                    tint = CandyColors.brandPurple
+                    size = 20.dp
                 )
             }
             Spacer(modifier = Modifier.width(CandySpace.sm))
@@ -116,11 +114,11 @@ fun ChatComposerBar(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Send,
+            ChankoIcon(
+                id = ChankoIconId.SYS_02,
                 contentDescription = "Gửi",
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
+                enabled = isSendActive,
+                size = 18.dp
             )
         }
     }

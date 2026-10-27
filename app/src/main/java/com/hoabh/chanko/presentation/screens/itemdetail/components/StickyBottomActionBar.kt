@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.MoreHoriz
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -92,10 +92,10 @@ fun StickyBottomActionBar(
                     modifier = Modifier.padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.MoreHoriz,
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_10,
                         contentDescription = stringResource(R.string.item_detail_more_options),
-                        tint = CandyColors.textPrimary
+                        size = 24.dp
                     )
                 }
             }

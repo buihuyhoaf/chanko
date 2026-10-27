@@ -27,18 +27,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.OpenInNew
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Archive
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.OpenInNew
-import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Search
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -149,10 +139,9 @@ fun ChatListScreen(
 
                 Box {
                     IconButton(onClick = { isHeaderMenuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Rounded.MoreVert,
-                            contentDescription = "Tùy chọn danh sách",
-                            tint = CandyColors.textPrimary
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_10,
+                            contentDescription = "Tùy chọn danh sách"
                         )
                     }
                     DropdownMenu(
@@ -237,19 +226,19 @@ fun ChatListScreen(
                         onValueChange = viewModel::onSearchQueryChanged,
                         placeholder = { Text("Tìm cuộc trò chuyện…", fontSize = 14.sp) },
                         leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Search,
+                            ChankoIcon(
+                                id = ChankoIconId.ACT_07,
                                 contentDescription = "Tìm kiếm",
-                                tint = CandyColors.mutedInk
+                                size = 20.dp
                             )
                         },
                         trailingIcon = {
                             if (uiState.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Clear,
+                                    ChankoIcon(
+                                        id = ChankoIconId.ACT_03,
                                         contentDescription = "Xóa",
-                                        tint = CandyColors.mutedInk
+                                        size = 18.dp
                                     )
                                 }
                             }
@@ -355,11 +344,10 @@ fun ChatListScreen(
         ExtendedFloatingActionButton(
             onClick = onNavigateToNewChat,
             icon = {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_01,
                     contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(22.dp)
+                    size = 22.dp
                 )
             },
             text = {
@@ -412,7 +400,7 @@ fun ChatListScreen(
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Rounded.Edit, contentDescription = null, tint = CandyColors.brandPurple)
+                    ChankoIcon(id = ChankoIconId.ACT_05, contentDescription = null, size = 20.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Đổi tên cuộc trò chuyện", fontSize = 15.sp, color = CandyColors.textPrimary)
                 }
@@ -426,9 +414,9 @@ fun ChatListScreen(
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val icon = if (threadForOptions.isArchived) Icons.Rounded.Refresh else Icons.Rounded.Archive
+                    val icon = if (threadForOptions.isArchived) ChankoIconId.ACT_11 else ChankoIconId.ITM_06
                     val label = if (threadForOptions.isArchived) "Khôi phục cuộc trò chuyện" else "Lưu trữ cuộc trò chuyện"
-                    Icon(icon, contentDescription = null, tint = CandyColors.brandPurple)
+                    ChankoIcon(id = icon, contentDescription = null, size = 20.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(label, fontSize = 15.sp, color = CandyColors.textPrimary)
                 }
@@ -447,7 +435,7 @@ fun ChatListScreen(
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.AutoMirrored.Rounded.OpenInNew, contentDescription = null, tint = CandyColors.brandPurple)
+                        ChankoIcon(id = ChankoIconId.ACT_14, contentDescription = null, size = 20.dp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Xem chi tiết món đồ", fontSize = 15.sp, color = CandyColors.textPrimary)
                     }
@@ -462,7 +450,7 @@ fun ChatListScreen(
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Rounded.Delete, contentDescription = null, tint = CandyColors.error)
+                    ChankoIcon(id = ChankoIconId.ACT_06, contentDescription = null, size = 20.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Xóa cuộc trò chuyện", fontSize = 15.sp, color = CandyColors.error)
                 }
@@ -537,11 +525,10 @@ fun ChatThreadRow(
                         modifier = Modifier.size(40.dp)
                     )
                 } else {
-                    Icon(
-                        imageVector = Icons.Rounded.ChatBubbleOutline,
+                    ChankoIcon(
+                        id = ChankoIconId.SYS_01,
                         contentDescription = "Free Chat",
-                        tint = CandyColors.brandPurple,
-                        modifier = Modifier.size(28.dp)
+                        size = 28.dp
                     )
                 }
             }
@@ -616,10 +603,9 @@ fun ChatThreadRow(
                 onClick = onOptionsClick,
                 modifier = Modifier.size(36.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.MoreVert,
-                    contentDescription = "Tùy chọn",
-                    tint = CandyColors.mutedInk
+                ChankoIcon(
+                    id = ChankoIconId.ACT_10,
+                    contentDescription = "Tùy chọn"
                 )
             }
         }
