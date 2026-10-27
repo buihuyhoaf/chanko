@@ -18,17 +18,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.CandySpace
 
 @Composable
 fun ChatComposerBar(
@@ -44,7 +45,7 @@ fun ChatComposerBar(
         modifier = modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (!isItemBound) {
@@ -53,7 +54,11 @@ fun ChatComposerBar(
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(CandyColors.backgroundLavender)
-                    .clickable(onClick = onPickItemClicked),
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = "Gắn món đồ",
+                        onClick = onPickItemClicked
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -62,7 +67,7 @@ fun ChatComposerBar(
                     tint = CandyColors.brandPurple
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(CandySpace.sm))
         }
 
         Box(
@@ -72,7 +77,7 @@ fun ChatComposerBar(
                 .clip(RoundedCornerShape(22.dp))
                 .background(CandyColors.background)
                 .border(1.dp, CandyColors.divider, RoundedCornerShape(22.dp))
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = CandySpace.lg),
             contentAlignment = Alignment.CenterStart
         ) {
             if (text.isEmpty()) {
@@ -95,15 +100,21 @@ fun ChatComposerBar(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(CandySpace.sm))
 
-        IconButton(
-            onClick = onSendClicked,
-            enabled = isEnabled && text.isNotBlank(),
+        val isSendActive = isEnabled && text.isNotBlank()
+        Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(if (text.isNotBlank()) CandyColors.brandPurple else CandyColors.divider)
+                .background(if (isSendActive) CandyColors.brandPurple else CandyColors.divider)
+                .clickable(
+                    enabled = isSendActive,
+                    role = Role.Button,
+                    onClickLabel = "Gửi tin nhắn",
+                    onClick = onSendClicked
+                ),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,

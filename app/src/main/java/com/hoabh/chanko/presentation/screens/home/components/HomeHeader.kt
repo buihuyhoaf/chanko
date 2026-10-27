@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,7 +41,6 @@ private val HeaderControlVisualSize = 40.dp
  * HOME-01 — Header (v2 Image-Aligned):
  * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng tinh tế (`"Chào buổi sáng, Hoa ☀️"`).
  * - Phụ đề ấm áp (`"Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜"`).
- * - Nút Chat với Chanko (`CandyColors.backgroundLavender`) vùng chạm >= 48dp.
  * - Nút Avatar tròn tím (`CandyColors.brandPurple`) có vùng chạm độc lập >= 48dp.
  */
 @Composable
@@ -52,8 +48,7 @@ fun HomeHeader(
     header: HeaderUiModel,
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
-    canOpenProfile: Boolean = true,
-    onChatClick: (() -> Unit)? = null
+    canOpenProfile: Boolean = true
 ) {
     val greetingText = header.customGreeting ?: resolveGreetingText(header)
     val greetingEmoji = when (header.greetingPeriod) {
@@ -100,38 +95,6 @@ fun HomeHeader(
             }
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            // Chat with Chanko CTA Button
-            if (onChatClick != null) {
-                Box(
-                    modifier = Modifier
-                        .size(CandySize.touchTarget)
-                        .clip(CircleShape)
-                        .clickable(
-                            role = Role.Button,
-                            onClickLabel = "Chat với Chanko",
-                            onClick = onChatClick
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(HeaderControlVisualSize)
-                            .clip(CircleShape)
-                            .background(CandyColors.backgroundLavender),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ChatBubbleOutline,
-                            contentDescription = "Chat với Chanko",
-                            tint = CandyColors.brandPurple,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(CandySpace.xs))
-            }
 
             // Profile Avatar Button in Purple Circle (Touch target >= 48dp)
             if (canOpenProfile) {

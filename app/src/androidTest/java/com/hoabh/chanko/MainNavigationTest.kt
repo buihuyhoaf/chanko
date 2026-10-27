@@ -39,11 +39,9 @@ class MainNavigationTest {
         val restoration = StateRestorationTester(compose)
         restoration.setContent { ChankoTheme { MainNavigation() } }
         compose.onNodeWithText("My Items").performClick()
-        compose.onNodeWithText("Budget").performClick()
+        compose.onNodeWithText(TopLevelDestination.Chat.label).performClick()
         restoration.emulateSavedInstanceStateRestore()
-        compose.onNodeWithText("Budget").assertIsSelected()
-        compose.onNodeWithText("Budget — Chưa triển khai").assertIsDisplayed()
+        compose.onNodeWithText(TopLevelDestination.Chat.label).assertIsSelected()
         compose.onNodeWithText("My Items").performClick().assertIsSelected()
-        compose.onNodeWithText("My Items — Chưa triển khai").assertIsDisplayed()
     }
 }

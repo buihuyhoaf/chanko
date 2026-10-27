@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -36,11 +39,10 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -99,10 +101,16 @@ fun ChatListScreen(
     onNavigateToDetail: (threadId: String) -> Unit,
     onNavigateToNewChat: () -> Unit,
     onNavigateToItemDetail: (itemId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentBottomPadding: Dp = 0.dp
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var isHeaderMenuExpanded by remember { mutableStateOf(false) }
+    val effectiveBottomPadding = if (contentBottomPadding > 0.dp) {
+        contentBottomPadding
+    } else {
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    }
 
     Box(
         modifier = modifier
@@ -177,7 +185,7 @@ fun ChatListScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 96.dp) // Tránh bị nút CTA che
+                contentPadding = PaddingValues(bottom = effectiveBottomPadding + 80.dp) // Tránh bị nút FAB che khi cuộn xuống cuối
             ) {
                 // Hero Banner
                 item(key = "hero_banner") {
@@ -343,46 +351,32 @@ fun ChatListScreen(
             }
         }
 
-        // 3. Fixed Footer CTA "+ Đoạn chat mới" ở đáy an toàn
-        Surface(
+        // 3. Floating Action Button "+ Đoạn chat mới" nổi phía trên Bottom Bar
+        ExtendedFloatingActionButton(
+            onClick = onNavigateToNewChat,
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            },
+            text = {
+                Text(
+                    text = "Đoạn chat mới",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            },
+            containerColor = CandyColors.brandPurple,
+            contentColor = Color.White,
+            shape = RoundedCornerShape(20.dp),
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
-            color = Color.White.copy(alpha = 0.95f),
-            shadowElevation = 8.dp
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = CandySpace.lg, vertical = 14.dp)
-            ) {
-                Button(
-                    onClick = onNavigateToNewChat,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CandyColors.brandPurple
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Đoạn chat mới",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-        }
+                .align(Alignment.BottomEnd)
+                .padding(end = CandySpace.lg, bottom = effectiveBottomPadding + CandySpace.md)
+        )
     }
 
     // Modal BottomSheet: Tùy chọn trên từng Thread Row
