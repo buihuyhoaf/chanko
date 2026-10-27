@@ -20,8 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material3.FloatingActionButton
@@ -57,7 +57,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
+import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
@@ -69,7 +72,8 @@ fun NavGraphBuilder.mainDestination(
     onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
-    onNavigateToChatThread: (String) -> Unit = {}
+    onNavigateToChatThread: (String) -> Unit = {},
+    onNavigateToNewChat: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
@@ -77,7 +81,8 @@ fun NavGraphBuilder.mainDestination(
             onNavigateToChat = onNavigateToChat,
             onNavigateToItemDetail = onNavigateToItemDetail,
             onNavigateToArchived = onNavigateToArchived,
-            onNavigateToChatThread = onNavigateToChatThread
+            onNavigateToChatThread = onNavigateToChatThread,
+            onNavigateToNewChat = onNavigateToNewChat
         )
     }
 }
@@ -99,7 +104,8 @@ fun MainNavigation(
     onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
-    onNavigateToChatThread: (String) -> Unit = {}
+    onNavigateToChatThread: (String) -> Unit = {},
+    onNavigateToNewChat: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -126,8 +132,7 @@ fun MainNavigation(
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
-                        onProfileClick = onNavigateToProfile,
-                        onChatClick = onNavigateToChat
+                        onProfileClick = onNavigateToProfile
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {
@@ -136,17 +141,26 @@ fun MainNavigation(
                         onNavigateToArchived = onNavigateToArchived
                     )
                 }
-                listOf(
-                    TopLevelDestination.Budget,
-                    TopLevelDestination.Insights
-                ).forEach { tab ->
-                    composable(tab.route) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.tab_not_implemented, stringResource(tab.labelRes)),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                composable(TopLevelDestination.Chat.route) {
+                    val listViewModel: ChatListViewModel = hiltViewModel()
+                    ChatListScreen(
+                        viewModel = listViewModel,
+                        onNavigateToDetail = onNavigateToChatThread,
+                        onNavigateToNewChat = onNavigateToNewChat,
+                        onNavigateToItemDetail = { itemId ->
+                            val id = itemId.toIntOrNull()
+                            if (id != null) {
+                                onNavigateToItemDetail(id)
+                            }
                         }
+                    )
+                }
+                composable(TopLevelDestination.Insights.route) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.tab_not_implemented, stringResource(TopLevelDestination.Insights.labelRes)),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
@@ -225,12 +239,12 @@ fun ChankoBottomBar(
                 // Central Gap for floating (+) button
                 Spacer(modifier = Modifier.width(68.dp))
 
-                // Tab 3: Ngân sách
+                // Tab 3: Trò chuyện
                 ChankoNavItem(
-                    destination = TopLevelDestination.Budget,
-                    icon = Icons.Rounded.AccountBalanceWallet,
-                    isSelected = currentRoute == TopLevelDestination.Budget.route,
-                    onClick = { onTabSelected(TopLevelDestination.Budget) },
+                    destination = TopLevelDestination.Chat,
+                    icon = Icons.Rounded.ChatBubbleOutline,
+                    isSelected = currentRoute == TopLevelDestination.Chat.route,
+                    onClick = { onTabSelected(TopLevelDestination.Chat) },
                     modifier = Modifier.weight(1f)
                 )
 

@@ -11,6 +11,6 @@ enum class TopLevelDestination(
 ) {
     Home("home", "Trang chủ", R.string.tab_home),
     MyItems("my_items", "Món đồ", R.string.tab_my_items),
-    Budget("budget", "Ngân sách", R.string.tab_budget),
+    Chat("chat", "Trò chuyện", R.string.tab_chat),
     Insights("insights", "Phân tích", R.string.tab_insights);
 }

@@ -133,6 +133,11 @@ fun NavGraph(
                 navController.navigate(Screen.ChatThread.createRoute(threadId)) {
                     launchSingleTop = true
                 }
+            },
+            onNavigateToNewChat = {
+                navController.navigate(Screen.NewChat.route) {
+                    launchSingleTop = true
+                }
             }
         )
 
