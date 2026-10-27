@@ -123,7 +123,9 @@ fun MainNavigation(
                     onAddNewItemClick = { isGlobalQuickActionSheetOpen = true }
                 )
             }
-        ) { _ ->
+        ) { innerPadding ->
+            val bottomPadding = innerPadding.calculateBottomPadding()
+
             NavHost(
                 navController = controller,
                 startDestination = TopLevelDestination.Home.route,
@@ -152,7 +154,8 @@ fun MainNavigation(
                             if (id != null) {
                                 onNavigateToItemDetail(id)
                             }
-                        }
+                        },
+                        contentBottomPadding = bottomPadding
                     )
                 }
                 composable(TopLevelDestination.Insights.route) {

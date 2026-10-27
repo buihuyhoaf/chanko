@@ -18,6 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -97,10 +101,16 @@ fun ChatListScreen(
     onNavigateToDetail: (threadId: String) -> Unit,
     onNavigateToNewChat: () -> Unit,
     onNavigateToItemDetail: (itemId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentBottomPadding: Dp = 0.dp
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var isHeaderMenuExpanded by remember { mutableStateOf(false) }
+    val effectiveBottomPadding = if (contentBottomPadding > 0.dp) {
+        contentBottomPadding
+    } else {
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    }
 
     Box(
         modifier = modifier
@@ -175,7 +185,7 @@ fun ChatListScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 80.dp) // Tránh bị nút FAB che khi cuộn xuống cuối
+                contentPadding = PaddingValues(bottom = effectiveBottomPadding + 80.dp) // Tránh bị nút FAB che khi cuộn xuống cuối
             ) {
                 // Hero Banner
                 item(key = "hero_banner") {
@@ -365,7 +375,7 @@ fun ChatListScreen(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = CandySpace.lg, bottom = CandySpace.lg)
+                .padding(end = CandySpace.lg, bottom = effectiveBottomPadding + CandySpace.md)
         )
     }
 
