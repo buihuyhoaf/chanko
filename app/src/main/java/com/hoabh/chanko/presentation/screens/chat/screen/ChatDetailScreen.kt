@@ -62,6 +62,8 @@ import com.hoabh.chanko.presentation.screens.chat.components.SameThreadItemPicke
 import com.hoabh.chanko.presentation.screens.chat.components.ThreadOptionsSheet
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.CandyElevation
+import com.hoabh.chanko.ui.theme.CandySpace
 
 /**
  * Màn hình CD — Chat Detail (Chi tiết cuộc trò chuyện)
@@ -138,36 +140,42 @@ fun ChatDetailScreen(
             )
         },
         bottomBar = {
-            Column(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .imePadding()
+                    .imePadding(),
+                color = Color.White,
+                shadowElevation = CandyElevation.low
             ) {
-                // Quick Replies row (chỉ hiện khi chưa archive và có gợi ý)
-                if (!isArchived && uiState.quickReplies.isNotEmpty()) {
-                    QuickRepliesRow(
-                        quickReplies = uiState.quickReplies,
-                        onReplyClick = viewModel::fillComposer
-                    )
-                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                ) {
+                    // Quick Replies row (chỉ hiện khi chưa archive và có gợi ý)
+                    if (!isArchived && uiState.quickReplies.isNotEmpty()) {
+                        QuickRepliesRow(
+                            quickReplies = uiState.quickReplies,
+                            onReplyClick = viewModel::fillComposer
+                        )
+                    }
 
-                // Composer Bar (hoặc ArchivedBanner)
-                if (!isArchived) {
-                    ChatComposerBar(
-                        text = uiState.inputText,
-                        onTextChanged = viewModel::onTextChanged,
-                        onSendClicked = { viewModel.sendMessage() },
-                        onPickItemClicked = viewModel::openItemPicker,
-                        isEnabled = !uiState.isSending,
-                        isItemBound = isItemMode
-                    )
-                } else {
-                    ArchivedBanner(
-                        onRestoreClicked = { viewModel.restoreCurrentThread() },
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .padding(12.dp)
-                    )
+                    // Composer Bar (hoặc ArchivedBanner)
+                    if (!isArchived) {
+                        ChatComposerBar(
+                            text = uiState.inputText,
+                            onTextChanged = viewModel::onTextChanged,
+                            onSendClicked = { viewModel.sendMessage() },
+                            onPickItemClicked = viewModel::openItemPicker,
+                            isEnabled = !uiState.isSending,
+                            isItemBound = isItemMode
+                        )
+                    } else {
+                        ArchivedBanner(
+                            onRestoreClicked = { viewModel.restoreCurrentThread() },
+                            modifier = Modifier.padding(CandySpace.md)
+                        )
+                    }
                 }
             }
         },
@@ -419,7 +427,7 @@ private fun QuickRepliesRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = CandySpace.lg, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(quickReplies) { reply ->
