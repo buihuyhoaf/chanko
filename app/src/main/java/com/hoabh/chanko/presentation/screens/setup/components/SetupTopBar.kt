@@ -10,9 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.Icon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,10 +46,9 @@ internal fun SetupTopBar(
                 enabled = !busy,
                 modifier = Modifier.size(48.dp),
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = Ink,
+                ChankoIcon(
+                    id = ChankoIconId.ACT_02,
+                    contentDescription = stringResource(R.string.back)
                 )
             }
         }

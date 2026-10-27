@@ -15,15 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Pets
-import androidx.compose.material.icons.rounded.Security
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -76,10 +69,9 @@ fun ProfileTopBar(
             onClick = onBack,
             modifier = Modifier.size(CandySize.touchTarget)
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = stringResource(R.string.profile_action_back),
-                tint = CandyColors.textPrimary
+            ChankoIcon(
+                id = ChankoIconId.ACT_02,
+                contentDescription = stringResource(R.string.profile_action_back)
             )
         }
 
@@ -124,11 +116,10 @@ fun AccountIdentityCard(
                     .background(CandyColors.primarySoft),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Person,
+                ChankoIcon(
+                    id = ChankoIconId.SYS_03,
                     contentDescription = null,
-                    tint = CandyColors.primaryInk,
-                    modifier = Modifier.size(32.dp)
+                    size = 32.dp
                 )
             }
 
@@ -148,11 +139,10 @@ fun AccountIdentityCard(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Rounded.CheckCircle,
+                    ChankoIcon(
+                        id = ChankoIconId.SYS_18,
                         contentDescription = null,
-                        tint = CandyColors.success,
-                        modifier = Modifier.size(14.dp)
+                        size = 14.dp
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -227,11 +217,10 @@ fun PersonalityRow(
             .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Rounded.Pets,
+        ChankoIcon(
+            id = ChankoIconId.SYS_01,
             contentDescription = null,
-            tint = CandyColors.brandPurple,
-            modifier = Modifier.size(24.dp)
+            size = 24.dp
         )
 
         Spacer(modifier = Modifier.width(CandySpace.md))
@@ -255,11 +244,10 @@ fun PersonalityRow(
 
         Spacer(modifier = Modifier.width(CandySpace.xs))
 
-        Icon(
-            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+        ChankoIcon(
+            id = ChankoIconId.ACT_18,
             contentDescription = null,
-            tint = CandyColors.textSecondary,
-            modifier = Modifier.size(20.dp)
+            size = 20.dp
         )
     }
 }
@@ -280,11 +268,10 @@ fun ReadyForReviewRow(
             .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Rounded.Notifications,
+        ChankoIcon(
+            id = ChankoIconId.SYS_05,
             contentDescription = null,
-            tint = CandyColors.brandPurple,
-            modifier = Modifier.size(24.dp)
+            size = 24.dp
         )
 
         Spacer(modifier = Modifier.width(CandySpace.md))
@@ -377,7 +364,7 @@ fun GoogleAccountCard(
 @Composable
 fun InformationRow(
     title: String,
-    icon: ImageVector,
+    icon: ChankoIconId,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingText: String? = null
@@ -390,11 +377,10 @@ fun InformationRow(
             .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
+        ChankoIcon(
+            id = icon,
             contentDescription = null,
-            tint = CandyColors.textSecondary,
-            modifier = Modifier.size(22.dp)
+            size = 22.dp
         )
 
         Spacer(modifier = Modifier.width(CandySpace.md))
@@ -417,11 +403,10 @@ fun InformationRow(
                 color = CandyColors.textSecondary
             )
         } else {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            ChankoIcon(
+                id = ChankoIconId.ACT_18,
                 contentDescription = null,
-                tint = CandyColors.textSecondary,
-                modifier = Modifier.size(20.dp)
+                size = 20.dp
             )
         }
     }

@@ -19,9 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.icons.rounded.NorthEast
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -245,11 +244,10 @@ private fun SnapshotHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.CalendarToday,
+                ChankoIcon(
+                    id = ChankoIconId.BUD_05,
                     contentDescription = null,
-                    tint = CandyColors.budgetSnapshotSecondaryText,
-                    modifier = Modifier.size(CalendarIconSize)
+                    size = CalendarIconSize
                 )
                 Text(
                     text = cycleDateText,
@@ -292,11 +290,10 @@ private fun SnapshotHeader(
                         ),
                         color = CandyColors.budgetSnapshotAmount
                     )
-                    Icon(
-                        imageVector = Icons.Rounded.NorthEast,
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_14,
                         contentDescription = null,
-                        tint = CandyColors.budgetSnapshotAmount,
-                        modifier = Modifier.size(DetailsIconSize)
+                        size = DetailsIconSize
                     )
                 }
             }

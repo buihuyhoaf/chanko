@@ -2,8 +2,8 @@ package com.hoabh.chanko.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,8 +29,8 @@ fun ItemPage(
 ) {
     Scaffold(modifier = modifier, topBar = { TopAppBar(title = { Text(title) }, navigationIcon = {
         IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            ChankoIcon(
+                id = ChankoIconId.ACT_02,
                 contentDescription = stringResource(R.string.back)
             )
         }

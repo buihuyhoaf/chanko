@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Lightbulb
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +27,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.ObservationUi
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
@@ -78,7 +76,7 @@ fun ObservationCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                // Yellow Bulb in Lavender Tile
+                // Information / Context Tile
                 Box(
                     modifier = Modifier
                         .size(BulbTileSize)
@@ -86,11 +84,10 @@ fun ObservationCard(
                         .background(CandyColors.observationIconTileBg),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Lightbulb,
+                    ChankoIcon(
+                        id = ChankoIconId.SYS_15,
                         contentDescription = null,
-                        tint = CandyColors.observationBulbYellow,
-                        modifier = Modifier.size(BulbIconSize)
+                        size = BulbIconSize
                     )
                 }
 
@@ -138,11 +135,10 @@ fun ObservationCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_03,
                         contentDescription = dismissCd,
-                        tint = CandyColors.textSecondary,
-                        modifier = Modifier.size(DismissIconSize)
+                        size = DismissIconSize
                     )
                 }
             }

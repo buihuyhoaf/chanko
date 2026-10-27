@@ -1,114 +1,105 @@
-# Task List: Chat with Chanko (CHAT-UX-REV-01)
+# Task List: Chanko All 74 Icons System Migration
 
-## Phase 1: Domain & Data Layer Updates (Foundation)
+## Phase 1: Foundation (Assets & Design System Tokens)
 
-### Task 1: Update Domain Models & ChatRepository Interface
-- [x] Cập nhật model `ChatThread`: thêm `updatedAt`, `previewText`, `linkedItemId`, `linkedItemName`, `status`
-- [x] Bổ sung hàm `renameThread(threadId: String, newTitle: String): Result<Unit>` vào interface `ChatRepository`
-- [x] Verification: `./gradlew :core:domain:compileKotlin` pass
+- [x] **Task 1: Import 2D Vector Drawables & 3D WebP Assets**
+  - **Acceptance**:
+    - 198 file XML vector của 66 icon 2D có mặt tại `app/src/main/res/drawable/`.
+    - `chanko_icon_colors.xml` có mặt tại `app/src/main/res/values/`.
+    - 8 file 3D WebP (`chanko_c01_quick_check.webp` .. `chanko_c08_chanko_chat.webp`) có mặt tại `app/src/main/res/drawable-nodpi/`.
+  - **Verify**: `./gradlew assembleDevDebug` (Resource compilation test).
+  - **Files**:
+    - `app/src/main/res/drawable/chanko_*.xml`
+    - `app/src/main/res/values/chanko_icon_colors.xml`
+    - `app/src/main/res/drawable-nodpi/chanko_c0*.webp`
 
-### Task 2: Update Room Database, DAO & Fake Repository
-- [x] Cập nhật `ChatThreadEntity` & `ChatDao` hỗ trợ lưu `previewText`, cập nhật tiêu đề (`renameThread`)
-- [x] Cập nhật `FakeChatDataSource` và `ChatRepositoryImpl` với dữ liệu threads mẫu đa dạng kiểu Messenger
-- [x] Verification: `./gradlew :core:database:compileDebugKotlin :core:data:compileDebugKotlin` pass
+- [x] **Task 2: Implement Design System Icon Tokens & Wrappers**
+  - **Acceptance**:
+    - Tạo `com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId` (enum 66 IDs ánh xạ chính xác đến 3 drawable variant `normal`, `selected`, `disabled`).
+    - Tạo `com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon` (Composable bọc Icon 24dp, `tint = Color.Unspecified`).
+    - Tạo `com.hoabh.chanko.presentation.designsystem.icon.ChankoSignatureImage` (Composable bọc Image cho 8 artwork 3D C01..C08).
+  - **Verify**: `./gradlew assembleDevDebug` biên dịch thành công package mới.
+  - **Files**:
+    - `app/src/main/java/com/hoabh/chanko/presentation/designsystem/icon/ChankoIconId.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/designsystem/icon/ChankoIcon.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/designsystem/icon/ChankoSignatureImage.kt`
 
-### Checkpoint 1: Foundation Verify
-- [x] Toàn bộ code domain và data layer biên dịch sạch sẽ
-- [x] `./gradlew :core:data:testDebugUnitTest` pass 100%
-
----
-
-## Phase 2: Shared UI Components (Candy Pop 3D / Neutral BUY)
-
-### Task 3: Refactor DecisionCard & ChatMessageBubble
-- [x] Refactor `DecisionCard`: áp dụng Neutral BUY (nền `#F0E9FF`, chữ tối, mascot Neutral, nút "Xem món đồ", bỏ xanh lá và sparkles)
-- [x] Refactor `ChatMessageBubble`: User bubble (chữ tối trên lavender `#F0E9FF`), Chanko bubble (avatar 32dp + bong bóng trắng)
-- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
-
-### Task 4: Build Dialogs & Sheets (Rename, Archive, Delete, Bind)
-- [x] Xây dựng `RenameThreadDialog` (tiêu đề, text field, nút Hủy/Lưu)
-- [x] Xây dựng `ArchiveConfirmationDialog` và `DeleteConfirmationDialog`
-- [x] Xây dựng `SameThreadItemPickerSheet` cho CD (tìm kiếm món đồ, xác nhận liên kết cùng thread)
-- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
-
-### Checkpoint 2: Components Verify
-- [x] Các thành phần UI dùng chung hoàn thiện và biên dịch thành công
+- [x] **Checkpoint 1: Foundation Verify**
+  - [x] `./gradlew assembleDevDebug` PASS
+  - [x] R-class nhận diện đầy đủ 198 vector và 8 WebP assets
 
 ---
 
-## Phase 3: Screen 1 — CL (Chat List Screen)
+## Phase 2: Navigation & Core Shell Migration
 
-### Task 5: Build ChatListScreen UI
-- [x] Xây dựng Header "Chat với Chanko" (title 24sp bold) + Subtitle + nút More
-- [x] Xây dựng Hero Card với Chanko mascot 148dp contain
-- [x] Xây dựng Search bar ("Tìm cuộc trò chuyện") và Filter chips ("Tất cả", "Đang cân nhắc", "Chờ xem lại", "Đã mua")
-- [x] Xây dựng danh sách Thread cards (thumbnail 56dp, title 17sp, preview 14sp, time, tag)
-- [x] Xây dựng Fixed Footer CTA `+ Đoạn chat mới` (56dp height, bo góc 20dp)
-- [x] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại CL
-- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] **Task 3: Migrate Bottom Navigation & Global Actions**
+  - **Acceptance**:
+    - `MainNavigation.kt`: Chuyển 4 tabs (`Home`, `My Items`, `Budget`, `Insights`) sang dùng `ChankoIcon(id = ChankoIconId.NAV_01 .. NAV_04, selected = ...)`.
+    - Nút Floating Action (+) trung tâm dùng `ChankoIconId.ACT_01`.
+  - **Verify**: `./gradlew assembleDevDebug`.
+  - **Files**:
+    - `app/src/main/java/com/hoabh/chanko/presentation/navigation/MainNavigation.kt`
 
-### Task 6: Build ChatListViewModel
-- [x] Quản lý state danh sách threads, tìm kiếm, lọc chip, rename/archive/delete thread
-- [x] Viết unit tests cho `ChatListViewModel`
-- [x] Verification: `./gradlew :app:testDevDebugUnitTest` pass
-
-### Checkpoint 3: Chat List Verify
-- [x] Màn hình CL và ViewModel hoạt động ổn định, 100% test pass
+- [x] **Checkpoint 2: Shell Verify**
+  - [x] BottomBar dùng icon Candy Duotone chuẩn xác, trạng thái selected/unselected hoạt động mượt mà.
 
 ---
 
-## Phase 4: Screen 2 — NC (New Chat Screen / Sheet)
+## Phase 3: Screen Slices Migration
 
-### Task 7: Build NewChatScreen UI & Logic
-- [x] Xây dựng Header: Title "Đoạn chat mới", Subtitle "Chọn cách bắt đầu", nút Close
-- [x] Xây dựng 2 Thẻ chọn chế độ: "Trò chuyện tự do" và "Về một món đồ"
-- [x] Xây dựng Inline Item Picker khi chọn thẻ 2 (tìm kiếm + danh sách chọn 1 món)
-- [x] Xây dựng Fixed Footer CTA "Bắt đầu trò chuyện" / "Trò chuyện về [tên món đồ]"
-- [x] Đảm bảo KHÔNG có ô gõ tin nhắn (composer) tại NC
-- [x] Viết unit tests cho `NewChatViewModel` (100% pass)
-- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] **Task 4: Migrate Home Screen Components & 3D Signature Integration**
+  - **Acceptance**:
+    - `HomeScreen.kt`, `QuickActionsRow.kt`, `ObservationCard.kt`, `YourDecisionsSection.kt`, `DraftResumeCard.kt`, `HomeSheetHost.kt` được thay thế toàn bộ Material Icons bằng `ChankoIconId`.
+    - Tích hợp 3D Signature C01 (Quick Check), C02 (Cooling-off), C04 (Pause Jar) vào các card tương ứng trên Home.
+  - **Verify**: `./gradlew assembleDevDebug`.
+  - **Files**:
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/QuickActionsRow.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/ObservationCard.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/YourDecisionsSection.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/DraftResumeCard.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/HomeSheetHost.kt`
 
-### Checkpoint 4: New Chat Verify
-- [x] Màn hình NC hoàn thiện, hỗ trợ chọn mode và mở CD ở trạng thái chưa gửi
+- [x] **Task 5: Migrate Item Detail & Action Bar Components**
+  - **Acceptance**:
+    - `ItemDetailScreen.kt`, `StickyBottomActionBar.kt`, `ItemMoreOptionsBottomSheet.kt`, `CoolingOffCountdownCard.kt`, `ExpandableDetailsSection.kt`, `DecisionJourneySection.kt` được di dời sang `ChankoIconId` (Back -> `ACT_02`, More -> `ACT_10`, Archive -> `ACT_06` / `ITM_06`, v.v.).
+  - **Verify**: `./gradlew assembleDevDebug`.
+  - **Files**:
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/ItemDetailScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/components/*.kt`
+
+- [x] **Task 6: Migrate Add Item, Decision, Vault, Profile & Shared UI**
+  - **Acceptance**:
+    - `AddItemScreen.kt`, `DecisionScreen.kt` (Verdict BUY/WAIT/SKIP dùng `ITM_09`, `ITM_10`, `ITM_11`).
+    - `VaultScreen.kt`, `TransactionDetailScreen.kt` (Ví ngân sách, xóa, sửa, lọc).
+    - `ProfileScreen.kt`, `ProfileComponents.kt` (Bảo mật, thông tin, cài đặt).
+    - `ArchivedItemsScreen.kt`, `ItemUi.kt`.
+  - **Verify**: `./gradlew assembleDevDebug`.
+  - **Files**:
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/additem/AddItemScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/decision/DecisionScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/vault/VaultScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/transaction/TransactionDetailScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/ProfileScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/profile/components/ProfileComponents.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/screens/archived/ArchivedItemsScreen.kt`
+    - `app/src/main/java/com/hoabh/chanko/presentation/components/ItemUi.kt`
+
+- [x] **Checkpoint 3: All Screens Converted**
+  - [x] Không còn bất kỳ màn hình nào import `androidx.compose.material.icons.*`.
 
 ---
 
-## Phase 5: Screen 3 — CD (Chat Detail Screen)
+## Phase 4: Dependency Pruning & Final Clean Verification
 
-### Task 8: Refactor ChatDetailScreen UI
-- [x] Xây dựng App Bar: nút Back, avatar/tiêu đề, nút More thread, link sang Item Detail
-- [x] Xây dựng Provenance bar (khi đã bind món đồ)
-- [x] Xây dựng Message Timeline (bong bóng User/Chanko, Neutral Decision Card, thinking indicator)
-- [x] Xây dựng Quick Replies chips (khi chạm chỉ điền vào composer `FillComposer`, không tự gửi)
-- [x] Xây dựng Composer Bar (gắn trên bàn phím, nút Gửi, nút `+` liên kết món đồ ở mode FREE)
-- [x] Xử lý trạng thái Offline banner và Archived banner
-- [x] Verification: `./gradlew :app:compileDevDebugKotlin` pass
+- [x] **Task 7: Remove `material-icons-extended` Dependency & Clean Codebase**
+  - **Acceptance**:
+    - Xoá dòng `implementation(libs.androidx.compose.material.icons.extended)` khỏi `app/build.gradle.kts`.
+    - Dọn dẹp tất cả các import thừa liên quan đến Material Icons.
+  - **Verify**:
+    - `./gradlew assembleDevDebug` thành công rực rỡ mà không có cảnh báo thiếu icon.
+    - `./gradlew testDevDebugUnitTest` PASS 100%.
+  - **Files**:
+    - `app/build.gradle.kts`
 
-### Task 9: Refactor ChatDetailViewModel
-- [x] Hỗ trợ trạng thái chưa gửi (unsent state), tạo thread khi gửi tin đầu tiên, liên kết item ngay sau khi tạo
-- [x] Hỗ trợ đổi tên thread (`renameThread`)
-- [x] Hỗ trợ liên kết món đồ cùng thread (same-thread item bind)
-- [x] Viết unit tests cho `ChatViewModel` (100% pass)
-- [x] Verification: `./gradlew :app:testDevDebugUnitTest` pass
-
-### Checkpoint 5: Chat Detail Verify
-- [x] Màn hình CD và ViewModel hoạt động chuẩn xác, 100% test pass
-
----
-
-## Phase 6: Shell Navigation & System Integration
-
-### Task 10: Restore 4-Tab BottomBar & Add Home CTA
-- [x] Phục hồi `TopLevelDestination` và `ChankoBottomBar` về đúng 4 Tabs (`Trang chủ`, `Món đồ`, `Ngân sách`, `Phân tích`)
-- [x] Thêm nút CTA Chat trên màn hình `HomeScreen` để mở `ChatListScreen`
-- [x] Verification: Bottom navigation hiển thị 4 tabs chuẩn
-
-### Task 11: Connect End-to-End Navigation Graph
-- [x] Cấu hình điều hướng: `Home` -> `CL` -> `CD`, `CL` -> `NC` -> `CD`, `ItemDetail` -> `CD`
-- [x] Xử lý Back stack: Back từ CD về đúng màn nguồn (CL hoặc Item Detail), phục hồi query/scroll tại CL
-- [x] Verification: `./gradlew :app:assembleDevDebug :app:testDevDebugUnitTest` pass 100%
-
-### Checkpoint 6: Final Verification
-- [x] Toàn bộ ứng dụng build thành công không lỗi (`:app:assembleDevDebug` exit code 0)
-- [x] Toàn bộ unit tests vượt qua 100% (`testDevDebugUnitTest` 84 tasks UP-TO-DATE/passed)
-- [x] Git commit sạch sẽ trên branch `feature/chat-with-chanko-ui`
+- [x] **Checkpoint 4: Final Sign-off**
+  - [x] Toàn bộ test và build hoàn tất sạch sẽ.

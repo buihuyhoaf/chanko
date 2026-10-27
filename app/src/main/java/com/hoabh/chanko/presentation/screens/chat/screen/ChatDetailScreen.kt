@@ -24,12 +24,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.ShoppingBag
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -321,10 +317,9 @@ private fun ChatDetailTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onNavigateBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Quay lại",
-                    tint = CandyColors.textPrimary
+                ChankoIcon(
+                    id = ChankoIconId.ACT_02,
+                    contentDescription = "Quay lại"
                 )
             }
 
@@ -336,11 +331,10 @@ private fun ChatDetailTopBar(
                     .background(CandyColors.backgroundLavender),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = if (isItemMode) Icons.Rounded.ShoppingBag else Icons.Rounded.AutoAwesome,
+                ChankoIcon(
+                    id = if (isItemMode) ChankoIconId.ITM_03 else ChankoIconId.SYS_01,
                     contentDescription = null,
-                    tint = CandyColors.brandPurple,
-                    modifier = Modifier.size(22.dp)
+                    size = 22.dp
                 )
             }
 
@@ -370,10 +364,9 @@ private fun ChatDetailTopBar(
 
             if (hasThread) {
                 IconButton(onClick = onMoreClick) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Tùy chọn",
-                        tint = CandyColors.mutedInk
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_10,
+                        contentDescription = "Tùy chọn"
                     )
                 }
             }
@@ -396,11 +389,10 @@ private fun ProvenanceBar(
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Rounded.Link,
+        ChankoIcon(
+            id = ChankoIconId.ACT_15,
             contentDescription = null,
-            tint = CandyColors.brandPurple,
-            modifier = Modifier.size(16.dp)
+            size = 16.dp
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(

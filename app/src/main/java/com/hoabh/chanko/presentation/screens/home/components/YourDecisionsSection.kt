@@ -17,16 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.BookmarkBorder
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.ShoppingBag
-import androidx.compose.material.icons.rounded.Visibility
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,7 +64,7 @@ data class AttentionItemStatusStyle(
     val background: Color,
     val border: Color,
     val accent: Color,
-    val icon: ImageVector
+    val icon: ChankoIconId
 )
 
 fun resolveAttentionItemStyle(status: DecisionStatus): AttentionItemStatusStyle = when (status) {
@@ -80,25 +72,25 @@ fun resolveAttentionItemStyle(status: DecisionStatus): AttentionItemStatusStyle 
         background = CandyColors.attentionTileReadyBg,
         border = CandyColors.attentionTileReadyBorder,
         accent = CandyColors.attentionTileReadyAccent,
-        icon = Icons.Rounded.CheckCircle
+        icon = ChankoIconId.ITM_05
     )
     DecisionStatus.Waiting -> AttentionItemStatusStyle(
         background = CandyColors.attentionTileWaitingBg,
         border = CandyColors.attentionTileWaitingBorder,
         accent = CandyColors.attentionTileWaitingAccent,
-        icon = Icons.Rounded.Schedule
+        icon = ChankoIconId.ITM_04
     )
     DecisionStatus.Considering -> AttentionItemStatusStyle(
         background = CandyColors.attentionTileConsideringBg,
         border = CandyColors.attentionTileConsideringBorder,
         accent = CandyColors.attentionTileConsideringAccent,
-        icon = Icons.Rounded.Visibility
+        icon = ChankoIconId.ITM_12
     )
     DecisionStatus.Saved -> AttentionItemStatusStyle(
         background = CandyColors.attentionTileSavedBg,
         border = CandyColors.attentionTileSavedBorder,
         accent = CandyColors.attentionTileSavedAccent,
-        icon = Icons.Rounded.BookmarkBorder
+        icon = ChankoIconId.ITM_13
     )
 }
 
@@ -211,11 +203,10 @@ private fun AttentionItemsHeader(
                     .background(CandyColors.primarySoft),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.AutoAwesome,
+                ChankoIcon(
+                    id = ChankoIconId.ITM_01,
                     contentDescription = null,
-                    tint = CandyColors.brandPurple,
-                    modifier = Modifier.size(18.dp)
+                    size = 18.dp
                 )
             }
 
@@ -327,11 +318,10 @@ fun HomeAttentionItemTile(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    Icon(
-                        imageVector = Icons.Rounded.ShoppingBag,
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_03,
                         contentDescription = null,
-                        tint = style.accent.copy(alpha = 0.7f),
-                        modifier = Modifier.size(32.dp)
+                        size = 32.dp
                     )
                 }
             }
@@ -369,11 +359,10 @@ fun HomeAttentionItemTile(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Icon(
-                        imageVector = style.icon,
+                    ChankoIcon(
+                        id = style.icon,
                         contentDescription = null,
-                        tint = style.accent,
-                        modifier = Modifier.size(StatusIconSize)
+                        size = StatusIconSize
                     )
                     Text(
                         text = displayStatusText,
@@ -391,11 +380,10 @@ fun HomeAttentionItemTile(
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
             // Chevron
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            ChankoIcon(
+                id = ChankoIconId.ACT_18,
                 contentDescription = null,
-                tint = style.accent.copy(alpha = 0.85f),
-                modifier = Modifier.size(ChevronIconSize)
+                size = ChevronIconSize
             )
         }
     }

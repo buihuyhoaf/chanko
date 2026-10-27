@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -257,10 +257,10 @@ fun SameThreadItemPickerSheet(
                     onValueChange = { searchQuery = it },
                     placeholder = { Text("Tìm kiếm món đồ...") },
                     leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Search,
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_07,
                             contentDescription = "Tìm kiếm",
-                            tint = CandyColors.mutedInk
+                            size = 20.dp
                         )
                     },
                     shape = RoundedCornerShape(16.dp),

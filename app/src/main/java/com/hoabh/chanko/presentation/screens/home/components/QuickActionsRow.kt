@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.HelpOutline
-import androidx.compose.material.icons.rounded.BookmarkAdd
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -36,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandyShape
@@ -131,7 +128,7 @@ private fun QuickCheckActionCard(
     QuickActionCard(
         title = stringResource(R.string.home_action_ask_title),
         subtitle = stringResource(R.string.home_action_ask_subtitle),
-        icon = Icons.AutoMirrored.Rounded.HelpOutline,
+        icon = ChankoIconId.ITM_01,
         backgroundColor = CandyColors.quickActionAskBg,
         borderColor = CandyColors.quickActionAskBorder,
         contentColor = CandyColors.quickActionAskText,
@@ -148,7 +145,7 @@ private fun SaveAnItemActionCard(
     QuickActionCard(
         title = stringResource(R.string.home_action_save_title),
         subtitle = stringResource(R.string.home_action_save_subtitle),
-        icon = Icons.Rounded.BookmarkAdd,
+        icon = ChankoIconId.ITM_02,
         backgroundColor = CandyColors.quickActionSaveBg,
         borderColor = CandyColors.quickActionSaveBorder,
         contentColor = CandyColors.quickActionSaveText,
@@ -161,7 +158,7 @@ private fun SaveAnItemActionCard(
 private fun QuickActionCard(
     title: String,
     subtitle: String,
-    icon: ImageVector,
+    icon: ChankoIconId,
     backgroundColor: Color,
     borderColor: Color,
     contentColor: Color,
@@ -188,11 +185,10 @@ private fun QuickActionCard(
                 .padding(CandySpace.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
+            ChankoIcon(
+                id = icon,
                 contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(QuickActionIconSize)
+                size = QuickActionIconSize
             )
 
             Spacer(modifier = Modifier.width(CandySpace.sm))

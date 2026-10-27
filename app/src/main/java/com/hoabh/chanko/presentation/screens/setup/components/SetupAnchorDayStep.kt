@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ExpandMore
-import androidx.compose.material3.Icon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -95,10 +94,10 @@ internal fun SetupAnchorDayStep(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyLarge,
             )
-            Icon(
-                imageVector = Icons.Rounded.ExpandMore,
+            ChankoIcon(
+                id = ChankoIconId.ACT_19,
                 contentDescription = null,
-                tint = Ink,
+                size = 24.dp
             )
         }
         if (dayError) {

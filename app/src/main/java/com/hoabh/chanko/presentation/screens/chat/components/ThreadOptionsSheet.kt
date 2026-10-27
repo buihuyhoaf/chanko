@@ -15,13 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.automirrored.rounded.OpenInNew
-import androidx.compose.material.icons.rounded.Edit
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -95,11 +90,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.backgroundLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Edit,
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_05,
                             contentDescription = "Đổi tên",
-                            tint = CandyColors.brandPurple,
-                            modifier = Modifier.size(20.dp)
+                            size = 20.dp
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -138,11 +132,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.backgroundLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_14,
                             contentDescription = "Xem món đồ",
-                            tint = CandyColors.brandPurple,
-                            modifier = Modifier.size(20.dp)
+                            size = 20.dp
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -181,11 +174,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.backgroundLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Archive,
+                        ChankoIcon(
+                            id = ChankoIconId.ITM_06,
                             contentDescription = "Lưu trữ",
-                            tint = CandyColors.brandPurple,
-                            modifier = Modifier.size(20.dp)
+                            size = 20.dp
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -220,11 +212,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.readySurface),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_11,
                             contentDescription = "Khôi phục",
-                            tint = CandyColors.readyAction,
-                            modifier = Modifier.size(20.dp)
+                            size = 20.dp
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -262,11 +253,10 @@ fun ThreadOptionsSheet(
                         .background(CandyColors.speechSurface),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_06,
                         contentDescription = "Xóa",
-                        tint = CandyColors.error,
-                        modifier = Modifier.size(20.dp)
+                        size = 20.dp
                     )
                 }
                 Spacer(modifier = Modifier.width(14.dp))

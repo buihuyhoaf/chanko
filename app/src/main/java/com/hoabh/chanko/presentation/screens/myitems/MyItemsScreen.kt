@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Search
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -126,10 +124,9 @@ fun MyItemsScreen(
 
                 Box {
                     IconButton(onClick = { isMenuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Rounded.MoreVert,
-                            contentDescription = stringResource(R.string.my_items_archived_menu),
-                            tint = CandyColors.textPrimary
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_10,
+                            contentDescription = stringResource(R.string.my_items_archived_menu)
                         )
                     }
                     DropdownMenu(
@@ -196,10 +193,10 @@ fun MyItemsScreen(
                                 )
                             },
                             leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Search,
+                                ChankoIcon(
+                                    id = ChankoIconId.ACT_07,
                                     contentDescription = null,
-                                    tint = CandyColors.textSecondary
+                                    size = 20.dp
                                 )
                             },
                             shape = RoundedCornerShape(20.dp),
@@ -227,10 +224,10 @@ fun MyItemsScreen(
                                 modifier = Modifier.padding(14.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.FilterList,
+                                ChankoIcon(
+                                    id = ChankoIconId.ACT_08,
                                     contentDescription = stringResource(R.string.my_items_filter_button),
-                                    tint = if (uiState.primaryFilter != PrimaryFilter.ALL) CandyColors.primary else CandyColors.textPrimary
+                                    size = 20.dp
                                 )
                             }
                         }
