@@ -46,14 +46,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
+import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
+import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
@@ -68,7 +72,8 @@ fun NavGraphBuilder.mainDestination(
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
     onNavigateToChatThread: (String) -> Unit = {},
-    onNavigateToNewChat: () -> Unit = {}
+    onNavigateToNewChat: () -> Unit = {},
+    onNavigateToBudgetDetails: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
@@ -77,12 +82,17 @@ fun NavGraphBuilder.mainDestination(
             onNavigateToItemDetail = onNavigateToItemDetail,
             onNavigateToArchived = onNavigateToArchived,
             onNavigateToChatThread = onNavigateToChatThread,
-            onNavigateToNewChat = onNavigateToNewChat
+            onNavigateToNewChat = onNavigateToNewChat,
+            onNavigateToBudgetDetails = onNavigateToBudgetDetails
         )
     }
 }
 
 internal fun NavHostController.selectTab(destination: TopLevelDestination) {
+    if (destination == TopLevelDestination.Home && currentDestination?.route == Screen.BudgetDetails.route) {
+        popBackStack(TopLevelDestination.Home.route, inclusive = false)
+        return
+    }
     navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
@@ -100,7 +110,8 @@ fun MainNavigation(
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
     onNavigateToChatThread: (String) -> Unit = {},
-    onNavigateToNewChat: () -> Unit = {}
+    onNavigateToNewChat: () -> Unit = {},
+    onNavigateToBudgetDetails: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -129,7 +140,43 @@ fun MainNavigation(
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
-                        onProfileClick = onNavigateToProfile
+                        onProfileClick = onNavigateToProfile,
+                        onBudgetDetailsClick = {
+                            controller.navigate(Screen.BudgetDetails.route) {
+                                launchSingleTop = true
+                            }
+                            onNavigateToBudgetDetails()
+                        }
+                    )
+                }
+                composable(Screen.BudgetDetails.route) {
+                    BudgetRoute(
+                        onBackClick = { controller.popBackStack() },
+                        onNavigateToItemDetail = onNavigateToItemDetail
+                    )
+                }
+                composable(
+                    route = Screen.WalletSettings.route,
+                    arguments = listOf(
+                        navArgument("expandHistory") {
+                            type = NavType.BoolType
+                            defaultValue = false
+                        }
+                    )
+                ) { backStackEntry ->
+                    val expandHistory = backStackEntry.arguments?.getBoolean("expandHistory") ?: false
+                    val parentEntry = androidx.compose.runtime.remember(backStackEntry) {
+                        try {
+                            controller.getBackStackEntry(Screen.BudgetDetails.route)
+                        } catch (e: Exception) {
+                            backStackEntry
+                        }
+                    }
+                    val budgetViewModel: BudgetViewModel = hiltViewModel(parentEntry)
+                    BudgetRoute(
+                        onBackClick = { controller.popBackStack() },
+                        expandHistory = expandHistory,
+                        viewModel = budgetViewModel
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {

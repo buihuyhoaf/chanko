@@ -16,6 +16,11 @@ sealed class Screen(val route: String) {
     data object ArchivedItems : Screen("archived_items")
     data object Profile : Screen("profile")
     data object Personality : Screen("personality")
+    data object BudgetDetails : Screen("budget_details")
+    data object WalletSettings : Screen("wallet_settings?expandHistory={expandHistory}") {
+        fun createRoute(expandHistory: Boolean = false): String =
+            "wallet_settings?expandHistory=$expandHistory"
+    }
 
     // CHAT-UX-REV-01 Navigation Routes
     data object Chat : Screen("chat") // Screen 1: CL (Chat List)
