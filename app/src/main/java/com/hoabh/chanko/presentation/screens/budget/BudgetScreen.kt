@@ -51,8 +51,8 @@ import com.hoabh.chanko.ui.theme.Nunito
 fun BudgetScreen(
     state: BudgetUiState,
     onEvent: (BudgetUiEvent) -> Unit,
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -64,9 +64,8 @@ fun BudgetScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            // 1. Top App Bar (đồng bộ kiểu dáng thanh tiêu đề Món đồ)
+            // 1. Top App Bar (đồng bộ 100% kiểu dáng thanh tiêu đề Món đồ)
             BudgetTopAppBar(
-                onBackClick = onBackClick,
                 onWalletSettingsClick = { onEvent(BudgetUiEvent.OpenWalletSettings) }
             )
 
@@ -101,7 +100,8 @@ fun BudgetScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .verticalScroll(scrollState)
-                                .padding(CandySpace.md),
+                                .padding(horizontal = CandySpace.lg)
+                                .padding(top = CandySpace.xs, bottom = 96.dp),
                             verticalArrangement = Arrangement.spacedBy(CandySpace.md)
                         ) {
                             // 1. Cycle Selector Header
@@ -160,7 +160,6 @@ fun BudgetScreen(
 
 @Composable
 private fun BudgetTopAppBar(
-    onBackClick: () -> Unit,
     onWalletSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -169,44 +168,23 @@ private fun BudgetTopAppBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = CandySpace.sm, end = CandySpace.lg, top = CandySpace.xs, bottom = CandySpace.xs),
+            .padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-        ) {
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .size(44.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = "Quay lại"
-                    }
-            ) {
-                ChankoIcon(
-                    id = ChankoIconId.ACT_02,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Text(
-                text = stringResource(R.string.budget_title),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                ),
-                color = CandyColors.textPrimary
-            )
-        }
+        Text(
+            text = stringResource(R.string.budget_title),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp
+            ),
+            color = CandyColors.textPrimary
+        )
 
         IconButton(
             onClick = onWalletSettingsClick,
             modifier = Modifier
-                .size(44.dp)
+                .size(40.dp)
                 .semantics {
                     role = Role.Button
                     contentDescription = settingsActionDesc
