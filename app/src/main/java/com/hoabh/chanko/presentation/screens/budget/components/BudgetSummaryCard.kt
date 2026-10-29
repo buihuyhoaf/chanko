@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandySpace
@@ -49,7 +52,8 @@ fun BudgetSummaryCard(
     onEditBudgetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isOver = snapshot.isOverBudget
+    val isUnset = snapshot.budgetMinor <= 0L
+    val isOver = !isUnset && snapshot.isOverBudget
     val remainingColor = if (isOver) CandyColors.overBudget else CandyColors.budgetSnapshotAmount
     val progressBarFillColor = if (isOver) CandyColors.overBudget else CandyColors.budgetSnapshotProgressFill
 
@@ -58,15 +62,22 @@ fun BudgetSummaryCard(
         label = "BudgetProgressAnimation"
     )
 
+    val unsetLabel = stringResource(R.string.budget_state_zero_limit)
+
     val a11ySummary = buildString {
-        append("Ngân sách: ${snapshot.budgetFormatted}. ")
-        append("Đã chi: ${snapshot.spentFormatted}. ")
-        if (isOver) {
-            append("Vượt ngân sách: ${snapshot.overFormatted}. ")
+        if (isUnset) {
+            append("$unsetLabel. ")
+            append("Đã chi: ${MoneyVnd.spoken(snapshot.spentMinor)}.")
         } else {
-            append("Còn lại: ${snapshot.remainingFormatted}. ")
+            append("Ngân sách: ${MoneyVnd.spoken(snapshot.budgetMinor)}. ")
+            append("Đã chi: ${MoneyVnd.spoken(snapshot.spentMinor)}. ")
+            if (isOver) {
+                append("Vượt ngân sách: ${MoneyVnd.spoken(snapshot.overMinor)}. ")
+            } else {
+                append("Còn lại: ${MoneyVnd.spoken(snapshot.remainingMinor)}. ")
+            }
+            append("Tỷ lệ: ${snapshot.percentageInt} phần trăm.")
         }
-        append("Tỷ lệ: ${snapshot.percentageInt} phần trăm.")
     }
 
     Surface(
@@ -85,7 +96,7 @@ fun BudgetSummaryCard(
                 .padding(CandySpace.lg),
             verticalArrangement = Arrangement.spacedBy(CandySpace.md)
         ) {
-            // Row 1: Header + Sửa ngân sách button
+            // Row 1: Header + Sửa ngân sách button (>= 48dp touch target)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,44 +114,58 @@ fun BudgetSummaryCard(
                     shape = CircleShape,
                     color = if (canWrite) CandyColors.brandPurple else CandyColors.progressTrack,
                     modifier = Modifier
-                        .heightIn(min = 36.dp)
+                        .heightIn(min = 48.dp)
                         .semantics {
                             role = Role.Button
                             contentDescription = "Sửa ngân sách"
                         }
                         .clickable(enabled = canWrite, role = Role.Button, onClick = onEditBudgetClick)
                 ) {
-                    Text(
-                        text = stringResource(R.string.budget_summary_edit_btn),
-                        fontFamily = Nunito,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (canWrite) Color.White else CandyColors.textSecondary,
-                        modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs)
-                    )
+                    Box(
+                        modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.budget_summary_edit_btn),
+                            fontFamily = Nunito,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (canWrite) Color.White else CandyColors.textSecondary
+                        )
+                    }
                 }
             }
 
-            // Row 2: Con số chính (Còn lại / Vượt ngân sách)
+            // Row 2: Con số chính (Còn lại / Vượt ngân sách / Chưa thiết lập ngân sách)
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = if (isOver) {
-                        stringResource(R.string.budget_summary_label_over)
-                    } else {
-                        stringResource(R.string.budget_summary_label_remaining)
-                    },
-                    fontFamily = Nunito,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isOver) CandyColors.overBudget else CandyColors.textSecondary
-                )
-                Text(
-                    text = if (isOver) snapshot.overFormatted else snapshot.remainingFormatted,
-                    fontFamily = Nunito,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = remainingColor
-                )
+                if (isUnset) {
+                    Text(
+                        text = unsetLabel,
+                        fontFamily = Nunito,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = CandyColors.textSecondary
+                    )
+                } else {
+                    Text(
+                        text = if (isOver) {
+                            stringResource(R.string.budget_summary_label_over)
+                        } else {
+                            stringResource(R.string.budget_summary_label_remaining)
+                        },
+                        fontFamily = Nunito,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isOver) CandyColors.overBudget else CandyColors.textSecondary
+                    )
+                    Text(
+                        text = if (isOver) snapshot.overFormatted else snapshot.remainingFormatted,
+                        fontFamily = Nunito,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = remainingColor
+                    )
+                }
             }
 
             // Row 3: Progress Bar Capsule + Tỷ lệ %
@@ -151,6 +176,9 @@ fun BudgetSummaryCard(
                         .height(ProgressBarHeight)
                         .clip(CircleShape)
                         .background(CandyColors.budgetSnapshotProgressTrack)
+                        .semantics {
+                            progressBarRangeInfo = ProgressBarRangeInfo(snapshot.visualProgress, 0f..1f)
+                        }
                 ) {
                     Box(
                         modifier = Modifier
@@ -202,7 +230,7 @@ fun BudgetSummaryCard(
                     color = CandyColors.textSecondary
                 )
                 Text(
-                    text = snapshot.budgetFormatted,
+                    text = if (isUnset) unsetLabel else snapshot.budgetFormatted,
                     fontFamily = Nunito,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,

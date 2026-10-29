@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -22,15 +26,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -49,41 +56,169 @@ fun EditBudgetSheet(
     currentLimit: Long,
     currentSpent: Long,
     cycleRange: String,
+    draftText: String? = null,
+    onDraftChange: ((String) -> Unit)? = null,
     canWrite: Boolean,
+    disabledReason: String? = null,
     isSubmitting: Boolean,
+    inlineError: String? = null,
+    hasConflict: Boolean = false,
+    onReloadConflict: () -> Unit = {},
     onSave: (Long) -> Unit,
     onCancel: (Boolean) -> Unit,
+    onClose: (Boolean) -> Unit = onCancel,
     modifier: Modifier = Modifier
 ) {
     val initialText = if (currentLimit > 0L) MoneyVnd.formatWithoutSymbol(currentLimit) else ""
-    var rawInput by remember { mutableStateOf(initialText) }
+    var localDraft by rememberSaveable(currentLimit) { mutableStateOf(initialText) }
+    val rawInput = draftText ?: localDraft
 
+    var hadFocus by rememberSaveable { mutableStateOf(false) }
+    var hasBlurred by rememberSaveable { mutableStateOf(false) }
+
+    val trimmed = rawInput.trim()
     val parsedAmount = MoneyVnd.parse(rawInput)
-    val isValid = parsedAmount != null && parsedAmount in 1L..MoneyVnd.MAX_BUDGET_AMOUNT
-    val isDirty = rawInput.trim() != initialText.trim()
-    val canSubmit = isValid && isDirty && canWrite && !isSubmitting
+    val isValid = parsedAmount != null && MoneyVnd.isValidBudget(parsedAmount)
+    val isDirty = (parsedAmount ?: -1L) != currentLimit && trimmed != initialText.trim()
+    val canSubmit = isValid && (parsedAmount != currentLimit) && canWrite && !isSubmitting && !hasConflict
+
+    val fieldError: String? = when {
+        trimmed.isEmpty() && hasBlurred -> stringResource(R.string.budget_edit_error_empty)
+        trimmed.isNotEmpty() && parsedAmount == null -> {
+            val digitsOnly = trimmed.replace(".", "").replace(",", "").replace(" ", "")
+            if (digitsOnly.isNotEmpty() && digitsOnly.all { it.isDigit() } && digitsOnly.length > 12) {
+                stringResource(R.string.budget_edit_error_overflow)
+            } else {
+                stringResource(R.string.budget_edit_error_invalid)
+            }
+        }
+        parsedAmount != null && parsedAmount <= 0L -> stringResource(R.string.budget_edit_error_invalid)
+        parsedAmount != null && parsedAmount > MoneyVnd.MAX_BUDGET_AMOUNT -> stringResource(R.string.budget_edit_error_overflow)
+        else -> null
+    }
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .imePadding()
+            .verticalScroll(scrollState)
             .padding(CandySpace.md),
         verticalArrangement = Arrangement.spacedBy(CandySpace.md)
     ) {
-        // Title & Range Subtitle
-        Column {
+        // Header: Title + Range Subtitle + Close Button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.budget_edit_title),
+                    fontFamily = Nunito,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CandyColors.textPrimary
+                )
+                Text(
+                    text = stringResource(R.string.budget_edit_cycle_range, cycleRange),
+                    fontFamily = Nunito,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = CandyColors.textSecondary
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .widthIn(min = 48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(enabled = !isSubmitting, role = Role.Button) {
+                        onClose(isDirty)
+                    }
+                    .padding(horizontal = CandySpace.xs),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.budget_btn_close),
+                    fontFamily = Nunito,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (!isSubmitting) CandyColors.brandPurple else CandyColors.textSecondary
+                )
+            }
+        }
+
+        // Disabled Reason Banner (Offline / Past Cycle)
+        if (!canWrite && !disabledReason.isNullOrBlank()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(CandyColors.budgetWarningBadgeBg)
+                    .padding(horizontal = CandySpace.md, vertical = CandySpace.sm)
+            ) {
+                Text(
+                    text = disabledReason,
+                    fontFamily = Nunito,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = CandyColors.budgetWarningBadgeInk
+                )
+            }
+        }
+
+        // Conflict Banner with "Tải lại" button (C04 / AC09)
+        if (hasConflict) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(CandyColors.budgetWarningBadgeBg)
+                    .padding(horizontal = CandySpace.md, vertical = CandySpace.sm),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = inlineError ?: stringResource(R.string.budget_edit_conflict),
+                    fontFamily = Nunito,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CandyColors.overBudget,
+                    modifier = Modifier.weight(1f)
+                )
+                Surface(
+                    shape = CircleShape,
+                    color = CandyColors.brandPurple,
+                    modifier = Modifier
+                        .padding(start = CandySpace.sm)
+                        .heightIn(min = 48.dp)
+                        .semantics { role = Role.Button }
+                        .clickable(enabled = !isSubmitting, role = Role.Button, onClick = onReloadConflict)
+                ) {
+                    Box(
+                        modifier = Modifier.padding(horizontal = CandySpace.md),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.budget_edit_conflict_reload),
+                            fontFamily = Nunito,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        } else if (!inlineError.isNullOrBlank()) {
             Text(
-                text = stringResource(R.string.budget_edit_title),
-                fontFamily = Nunito,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = CandyColors.textPrimary
-            )
-            Text(
-                text = stringResource(R.string.budget_edit_cycle_range, cycleRange),
+                text = inlineError,
                 fontFamily = Nunito,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = CandyColors.textSecondary
+                fontWeight = FontWeight.SemiBold,
+                color = CandyColors.overBudget
             )
         }
 
@@ -91,17 +226,39 @@ fun EditBudgetSheet(
         OutlinedTextField(
             value = rawInput,
             onValueChange = { newValue ->
-                rawInput = newValue
+                localDraft = newValue
+                onDraftChange?.invoke(newValue)
             },
+            enabled = canWrite && !isSubmitting,
             label = { Text(stringResource(R.string.budget_edit_field_label), fontFamily = Nunito) },
             singleLine = true,
+            isError = fieldError != null,
+            supportingText = if (fieldError != null) {
+                {
+                    Text(
+                        text = fieldError,
+                        fontFamily = Nunito,
+                        fontSize = 11.sp,
+                        color = CandyColors.overBudget
+                    )
+                }
+            } else null,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = CandyColors.brandPurple,
                 unfocusedBorderColor = CandyColors.divider,
+                errorBorderColor = CandyColors.overBudget,
                 focusedLabelColor = CandyColors.brandPurple
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        hadFocus = true
+                    } else if (hadFocus) {
+                        hasBlurred = true
+                    }
+                }
         )
 
         // Live Preview Section
@@ -115,11 +272,23 @@ fun EditBudgetSheet(
 
             val animatedProgress by animateFloatAsState(targetValue = visualProgress, label = "EditPreviewProgress")
 
+            val previewSpoken = buildString {
+                append("Ngân sách mới: ${MoneyVnd.spoken(newLimit)}. ")
+                append("Đã chi: ${MoneyVnd.spoken(currentSpent)}. ")
+                if (isOver) {
+                    append("Vượt ngân sách sau thay đổi: ${MoneyVnd.spoken(remainingOrOver)}. ")
+                } else {
+                    append("Còn lại sau thay đổi: ${MoneyVnd.spoken(remainingOrOver)}. ")
+                }
+                append("Tỷ lệ: $percentageInt phần trăm.")
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
                     .background(CandyColors.primarySoft)
+                    .semantics { contentDescription = previewSpoken }
                     .padding(CandySpace.md),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
             ) {
@@ -134,6 +303,7 @@ fun EditBudgetSheet(
                     )
                 }
 
+                // Ngân sách mới
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -153,6 +323,27 @@ fun EditBudgetSheet(
                     )
                 }
 
+                // Đã chi
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(R.string.budget_edit_preview_spent),
+                        fontFamily = Nunito,
+                        fontSize = 13.sp,
+                        color = CandyColors.textSecondary
+                    )
+                    Text(
+                        text = MoneyVnd.format(currentSpent),
+                        fontFamily = Nunito,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = CandyColors.textPrimary
+                    )
+                }
+
+                // Còn lại / Vượt ngân sách sau thay đổi
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -176,21 +367,39 @@ fun EditBudgetSheet(
                     )
                 }
 
-                // Progress Bar
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(CircleShape)
-                        .background(CandyColors.budgetSnapshotProgressTrack)
-                ) {
+                // Progress Bar + Percentage
+                Column(verticalArrangement = Arrangement.spacedBy(CandySpace.xs)) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(animatedProgress)
-                            .fillMaxHeight()
+                            .fillMaxWidth()
+                            .height(8.dp)
                             .clip(CircleShape)
-                            .background(if (isOver) CandyColors.overBudget else CandyColors.brandPurple)
-                    )
+                            .background(CandyColors.budgetSnapshotProgressTrack)
+                            .semantics {
+                                progressBarRangeInfo = ProgressBarRangeInfo(visualProgress, 0f..1f)
+                            }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(animatedProgress)
+                                .fillMaxHeight()
+                                .clip(CircleShape)
+                                .background(if (isOver) CandyColors.overBudget else CandyColors.brandPurple)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            text = "${percentageInt}%",
+                            fontFamily = Nunito,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isOver) CandyColors.overBudget else CandyColors.brandPurple
+                        )
+                    }
                 }
             }
         } else {
@@ -204,11 +413,11 @@ fun EditBudgetSheet(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.budget_edit_preview_invalid),
+                    text = fieldError ?: stringResource(R.string.budget_edit_preview_invalid),
                     fontFamily = Nunito,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = CandyColors.textSecondary
+                    color = if (fieldError != null) CandyColors.overBudget else CandyColors.textSecondary
                 )
             }
         }
@@ -227,7 +436,7 @@ fun EditBudgetSheet(
                     .weight(1f)
                     .heightIn(min = 48.dp)
                     .semantics { role = Role.Button }
-                    .clickable(role = Role.Button) { onCancel(isDirty) }
+                    .clickable(enabled = !isSubmitting, role = Role.Button) { onCancel(isDirty) }
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -235,7 +444,7 @@ fun EditBudgetSheet(
                         fontFamily = Nunito,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CandyColors.textPrimary
+                        color = if (!isSubmitting) CandyColors.textPrimary else CandyColors.textSecondary
                     )
                 }
             }

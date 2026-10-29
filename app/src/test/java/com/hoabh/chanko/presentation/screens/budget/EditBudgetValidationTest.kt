@@ -3,7 +3,6 @@ package com.hoabh.chanko.presentation.screens.budget
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,6 +16,17 @@ class EditBudgetValidationTest {
         assertEquals(5_000_000L, MoneyVnd.parse("5.000.000"))
         assertEquals(1L, MoneyVnd.parse("1"))
         assertEquals(999_999_999_999L, MoneyVnd.parse("999.999.999.999"))
+        assertTrue(MoneyVnd.isValidBudget(1L))
+        assertTrue(MoneyVnd.isValidBudget(999_999_999_999L))
+        assertFalse(MoneyVnd.isValidBudget(0L))
+        assertFalse(MoneyVnd.isValidBudget(1_000_000_000_000L))
+    }
+
+    @Test
+    fun `spoken formats VND with dong instead of symbol d for TalkBack`() {
+        assertEquals("5.000.000 đồng", MoneyVnd.spoken(5_000_000L))
+        assertEquals("0 đồng", MoneyVnd.spoken(0L))
+        assertFalse(MoneyVnd.spoken(1_250_000L).endsWith("đ"))
     }
 
     @Test

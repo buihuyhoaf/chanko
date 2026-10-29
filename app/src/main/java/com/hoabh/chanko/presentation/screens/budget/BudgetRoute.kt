@@ -36,10 +36,7 @@ fun BudgetRoute(
     CollectEffect(effectFlow = viewModel.effect) { effect ->
         when (effect) {
             is BudgetUiEffect.NavigateToSharedItemDetail -> {
-                val id = effect.itemId.toIntOrNull()
-                if (id != null) {
-                    onNavigateToItemDetail(id)
-                }
+                onNavigateToItemDetail(effect.routeId)
             }
             is BudgetUiEffect.ShowSnackbar -> {
                 scope.launch {
@@ -49,12 +46,24 @@ fun BudgetRoute(
         }
     }
 
-    // Intercept back press when sheet is open
+    // Intercept back press when sheet or dialog is open
     BackHandler {
-        if (state.currentSheet != null) {
-            viewModel.onEvent(BudgetUiEvent.BackPressedInSheet(isDirty = false))
-        } else {
-            onBackClick()
+        when {
+            state.isSubmitting -> {
+                // Khóa đóng khi đang lưu (pending lock)
+            }
+            state.isDiscardDialogOpen -> {
+                viewModel.onEvent(BudgetUiEvent.CancelDiscardChanges)
+            }
+            state.cardToDelete != null -> {
+                viewModel.onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog)
+            }
+            state.currentSheet != null -> {
+                viewModel.onEvent(BudgetUiEvent.RequestCloseCurrentSheet)
+            }
+            else -> {
+                onBackClick()
+            }
         }
     }
 
@@ -80,6 +89,10 @@ fun BudgetRoute(
         state.cardToDelete?.let { card ->
             DeleteCardConfirmDialog(
                 card = card,
+                canWrite = state.canWrite,
+                isSubmitting = state.isSubmitting,
+                disabledReason = state.writeDisabledReason,
+                errorMessage = state.deleteCardInlineError,
                 onConfirm = { viewModel.onEvent(BudgetUiEvent.ConfirmDeleteCreditCard) },
                 onDismiss = { viewModel.onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog) }
             )

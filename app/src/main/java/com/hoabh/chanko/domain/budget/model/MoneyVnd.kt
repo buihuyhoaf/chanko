@@ -59,6 +59,19 @@ data class MoneyVnd(val amount: Long) : Comparable<MoneyVnd> {
         }
 
         /**
+         * Chuỗi đọc cho TalkBack: không dùng ký hiệu "đ" (dễ bị đọc sai thành chữ "đê").
+         * Ví dụ: 5000000 -> "5.000.000 đồng", -500000 -> "âm 500.000 đồng".
+         */
+        fun spoken(amount: Long): String {
+            val abs = if (amount < 0) -amount else amount
+            val prefix = if (amount < 0) "âm " else ""
+            return "$prefix${formatWithoutSymbol(abs)} đồng"
+        }
+
+        /** Kiểm tra hạn mức hợp lệ cho command/repository. */
+        fun isValidBudget(amount: Long): Boolean = amount in MIN_BUDGET_AMOUNT..MAX_BUDGET_AMOUNT
+
+        /**
          * Parse chuỗi ký tự người dùng nhập thành số nguyên VND.
          * Chấp nhận chuỗi số thuần túy ("5000000") hoặc có dấu chấm phân cách nhóm nghìn hợp lệ ("5.000.000").
          * Chặn số âm, số thập phân (dùng dấu phẩy hoặc chấm không đủ 3 số), ký tự lạ hoặc vượt hạn mức.

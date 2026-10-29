@@ -14,10 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
@@ -61,8 +64,11 @@ fun BudgetPaymentBreakdown(
                 verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
             ) {
                 methods.forEach { method ->
+                    val a11yDesc = "${method.name}, ${MoneyVnd.spoken(method.spentMinor)}"
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics(mergeDescendants = true) { contentDescription = a11yDesc },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

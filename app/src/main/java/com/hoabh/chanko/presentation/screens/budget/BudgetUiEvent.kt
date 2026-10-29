@@ -16,6 +16,11 @@ sealed interface BudgetUiEvent {
     // Cycle selection
     data class SelectCycle(val cycleId: String) : BudgetUiEvent
 
+    // Draft updates
+    data class UpdateEditBudgetDraft(val text: String) : BudgetUiEvent
+    data class UpdateAddCardDraft(val text: String) : BudgetUiEvent
+    data class UpdateRenameCardDraft(val text: String) : BudgetUiEvent
+
     // Mutations
     data class SubmitBudgetLimit(val newLimitMinor: Long) : BudgetUiEvent
     data class SubmitAddCreditCard(val name: String) : BudgetUiEvent
@@ -30,7 +35,8 @@ sealed interface BudgetUiEvent {
 
     // Sheet Host Backstack & Dirty Handling
     data object DismissSheet : BudgetUiEvent
-    data class BackPressedInSheet(val isDirty: Boolean) : BudgetUiEvent
+    data object RequestCloseCurrentSheet : BudgetUiEvent
+    data class BackPressedInSheet(val isDirty: Boolean = false) : BudgetUiEvent
     data object ConfirmDiscardChanges : BudgetUiEvent
     data object CancelDiscardChanges : BudgetUiEvent
 

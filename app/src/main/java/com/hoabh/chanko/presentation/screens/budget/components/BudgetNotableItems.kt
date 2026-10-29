@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
@@ -73,7 +74,7 @@ fun BudgetNotableItems(
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
                 items.take(3).forEach { item ->
-                    val a11yDesc = "${item.name}, ${item.priceFormatted}"
+                    val a11yDesc = "${item.name}, ${MoneyVnd.spoken(item.priceMinor)}"
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

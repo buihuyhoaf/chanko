@@ -141,9 +141,7 @@ fun NavGraph(
                 }
             },
             onNavigateToBudgetDetails = {
-                navController.navigate(Screen.BudgetDetails.route) {
-                    launchSingleTop = true
-                }
+                // Màn hình Ngân sách đã được tích hợp trực tiếp trong MainNavigation để giữ Bottom Navigation
             }
         )
 

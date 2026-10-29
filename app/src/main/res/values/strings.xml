@@ -177,6 +177,7 @@
     <string name="budget_cycle_current_tag">Hiện tại</string>
     <string name="budget_cycle_past_tag">Đã kết thúc</string>
     <string name="budget_cycle_empty">Chưa có chu kỳ để hiển thị</string>
+    <string name="budget_cycle_offline_uncached">Chưa có dữ liệu ngoại tuyến</string>
 
     <!-- C03 Wallet Settings -->
     <string name="budget_wallet_settings_title">Thiết lập ví</string>
@@ -267,4 +268,5 @@
     <string name="budget_btn_save">Lưu</string>
     <string name="budget_btn_cancel">Hủy</string>
     <string name="budget_btn_retry">Thử lại</string>
+    <string name="budget_btn_back">Quay lại</string>
 </resources>

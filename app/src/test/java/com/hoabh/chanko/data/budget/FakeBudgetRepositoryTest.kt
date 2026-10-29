@@ -1,5 +1,11 @@
 package com.hoabh.chanko.data.budget
 
+import com.hoabh.chanko.domain.budget.model.BudgetConflictException
+import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
+import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
+import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
+import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -18,11 +24,17 @@ class FakeBudgetRepositoryTest {
     }
 
     @Test
-    fun `getAvailableCycles returns current and past cycles`() = runTest {
+    fun `getAvailableCycles returns current, cached past, and uncached past cycles`() = runTest {
         val cycles = repository.getAvailableCycles().first()
-        assertEquals(2, cycles.size)
+        assertEquals(3, cycles.size)
         assertTrue(cycles[0].isCurrent)
         assertFalse(cycles[1].isCurrent)
+        assertFalse(cycles[2].isCurrent)
+
+        val cachedIds = repository.getOfflineCachedCycleIds().first()
+        assertTrue(repository.currentCycleId in cachedIds)
+        assertTrue(repository.pastCycleId in cachedIds)
+        assertFalse(repository.pastUncachedCycleId in cachedIds)
     }
 
     @Test
@@ -31,6 +43,17 @@ class FakeBudgetRepositoryTest {
         assertEquals(5_000_000L, snapshot.budgetMinor)
         assertEquals(3_000_000L, snapshot.spentMinor)
         assertEquals(2_000_000L, snapshot.remainingMinor)
+    }
+
+    @Test
+    fun `getCycleOverview throws BudgetNoOfflineCacheException when offline and cycle not cached`() = runTest {
+        repository.setNetworkOnline(false)
+        try {
+            repository.getCycleOverview(repository.pastUncachedCycleId).first()
+            assertTrue("Expected BudgetNoOfflineCacheException", false)
+        } catch (e: BudgetNoOfflineCacheException) {
+            assertEquals("Chưa có dữ liệu để xem ngoại tuyến", e.message)
+        }
     }
 
     @Test
@@ -55,10 +78,26 @@ class FakeBudgetRepositoryTest {
     }
 
     @Test
+    fun `updateBudgetLimit validates 1 to 999_999_999_999 range at repository level`() = runTest {
+        val zeroResult = repository.updateBudgetLimit(repository.currentCycleId, 0L, 1)
+        assertTrue(zeroResult.isFailure)
+        assertTrue(zeroResult.exceptionOrNull() is InvalidBudgetAmountException)
+
+        val overflowResult = repository.updateBudgetLimit(
+            repository.currentCycleId,
+            MoneyVnd.MAX_BUDGET_AMOUNT + 1L,
+            1
+        )
+        assertTrue(overflowResult.isFailure)
+        assertTrue(overflowResult.exceptionOrNull() is InvalidBudgetAmountException)
+    }
+
+    @Test
     fun `updateBudgetLimit fails when offline`() = runTest {
         repository.setNetworkOnline(false)
         val result = repository.updateBudgetLimit(repository.currentCycleId, 6_000_000L, 1)
         assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is BudgetOfflineException)
         assertEquals("Kết nối mạng để chỉnh sửa", result.exceptionOrNull()?.message)
     }
 
@@ -66,6 +105,7 @@ class FakeBudgetRepositoryTest {
     fun `updateBudgetLimit fails on past cycle`() = runTest {
         val result = repository.updateBudgetLimit(repository.pastCycleId, 6_000_000L, 1)
         assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is BudgetPastCycleException)
         assertEquals("Chỉ chỉnh sửa trong chu kỳ hiện tại", result.exceptionOrNull()?.message)
     }
 
@@ -73,6 +113,7 @@ class FakeBudgetRepositoryTest {
     fun `updateBudgetLimit fails on revision conflict`() = runTest {
         val result = repository.updateBudgetLimit(repository.currentCycleId, 6_000_000L, expectedRevision = 99)
         assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is BudgetConflictException)
         assertEquals("Ngân sách đã thay đổi. Tải lại để chỉnh sửa.", result.exceptionOrNull()?.message)
     }
 
@@ -108,7 +149,7 @@ class FakeBudgetRepositoryTest {
     }
 
     @Test
-    fun `scenario switchers update snapshots as expected`() = runTest {
+    fun `scenario switchers update snapshots including combined past+offline+over and zero`() = runTest {
         repository.setScenarioOverBudget()
         val overSnap = repository.getBudgetSnapshot(repository.currentCycleId).first()
         assertTrue(overSnap.isOverBudget)
@@ -118,5 +159,15 @@ class FakeBudgetRepositoryTest {
         val zeroSnap = repository.getBudgetSnapshot(repository.currentCycleId).first()
         assertTrue(zeroSnap.isZeroSpend)
         assertEquals(0L, zeroSnap.spentMinor)
+
+        repository.setScenarioPastOfflineOver()
+        assertFalse(repository.isOnlineFlow().first())
+        val pastOverSnap = repository.getBudgetSnapshot(repository.pastCycleId).first()
+        assertTrue(pastOverSnap.isOverBudget)
+        assertEquals(500_000L, pastOverSnap.overMinor)
+
+        repository.setScenarioPastOfflineZero()
+        val pastZeroSnap = repository.getBudgetSnapshot(repository.pastCycleId).first()
+        assertTrue(pastZeroSnap.isZeroSpend)
     }
 }

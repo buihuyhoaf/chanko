@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.budget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
@@ -89,7 +89,12 @@ fun BudgetScreen(
 
                     state.errorMessage != null && state.snapshot == null -> {
                         BudgetErrorView(
+                            cycleRangeText = state.selectedCycle?.dateRangeText ?: "",
+                            isOnline = state.isOnline,
+                            lastSyncTimeText = state.lastSyncTimeText,
+                            isPastCycle = !state.isCurrentCycle,
                             message = state.errorMessage,
+                            onCyclePickerClick = { onEvent(BudgetUiEvent.OpenCyclePicker) },
                             onRetry = { onEvent(BudgetUiEvent.Retry) }
                         )
                     }
@@ -184,7 +189,7 @@ private fun BudgetTopAppBar(
         IconButton(
             onClick = onWalletSettingsClick,
             modifier = Modifier
-                .size(40.dp)
+                .size(48.dp)
                 .semantics {
                     role = Role.Button
                     contentDescription = settingsActionDesc
@@ -201,46 +206,72 @@ private fun BudgetTopAppBar(
 
 @Composable
 private fun BudgetErrorView(
+    cycleRangeText: String,
+    isOnline: Boolean,
+    lastSyncTimeText: String?,
+    isPastCycle: Boolean,
     message: String,
+    onCyclePickerClick: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(CandySpace.lg),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = CandySpace.lg, vertical = CandySpace.xs),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
     ) {
-        Text(
-            text = message,
-            fontFamily = Nunito,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = CandyColors.textSecondary,
-            modifier = Modifier.padding(bottom = CandySpace.md)
+        if (cycleRangeText.isNotEmpty()) {
+            BudgetCycleHeader(
+                cycleRangeText = cycleRangeText,
+                onClick = onCyclePickerClick
+            )
+        }
+
+        BudgetReadOnlyBanner(
+            isOnline = isOnline,
+            lastSyncTimeText = lastSyncTimeText,
+            isPastCycle = isPastCycle
         )
-        Surface(
-            shape = CircleShape,
-            color = CandyColors.brandPurple,
+
+        Column(
             modifier = Modifier
-                .heightIn(min = 44.dp)
-                .semantics {
-                    role = Role.Button
-                    contentDescription = "Thử lại"
-                }
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
-                contentAlignment = Alignment.Center
+            Text(
+                text = message,
+                fontFamily = Nunito,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = CandyColors.textSecondary,
+                modifier = Modifier.padding(bottom = CandySpace.md)
+            )
+            Surface(
+                shape = CircleShape,
+                color = CandyColors.brandPurple,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = "Thử lại"
+                    }
+                    .clickable(role = Role.Button, onClick = onRetry)
             ) {
-                Text(
-                    text = stringResource(R.string.budget_btn_retry),
-                    fontFamily = Nunito,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CandyColors.budgetSnapshotSpendingPanel
-                )
+                Box(
+                    modifier = Modifier.padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.budget_btn_retry),
+                        fontFamily = Nunito,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CandyColors.budgetSnapshotSpendingPanel
+                    )
+                }
             }
         }
     }

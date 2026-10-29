@@ -3,12 +3,14 @@ package com.hoabh.chanko.presentation.screens.budget.sheets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -38,12 +41,31 @@ fun WalletSettingsSheet(
     selectedCycle: BudgetCycle?,
     currentSnapshot: BudgetSnapshot?,
     canWrite: Boolean,
+    disabledReason: String? = null,
     onEditBudgetClick: () -> Unit,
     onManageCardsClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val resolvedDisabledReason = if (!canWrite) {
+        disabledReason ?: stringResource(R.string.budget_wallet_disabled_past_reason)
+    } else {
+        null
+    }
+
+    val currentBudgetDisplay = when {
+        currentSnapshot == null -> stringResource(R.string.budget_wallet_no_data)
+        currentSnapshot.budgetMinor <= 0L -> stringResource(R.string.budget_state_zero_limit)
+        else -> currentSnapshot.budgetFormatted
+    }
+
+    val currentBudgetSpoken = when {
+        currentSnapshot == null -> stringResource(R.string.budget_wallet_no_data)
+        currentSnapshot.budgetMinor <= 0L -> stringResource(R.string.budget_state_zero_limit)
+        else -> MoneyVnd.spoken(currentSnapshot.budgetMinor)
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -63,25 +85,37 @@ fun WalletSettingsSheet(
                 fontWeight = FontWeight.Bold,
                 color = CandyColors.textPrimary
             )
-            Text(
-                text = stringResource(R.string.budget_btn_close),
-                fontFamily = Nunito,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = CandyColors.brandPurple,
+            Box(
                 modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .widthIn(min = 48.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(role = Role.Button, onClick = onClose)
-                    .padding(CandySpace.xs)
-            )
+                    .padding(horizontal = CandySpace.xs),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.budget_btn_close),
+                    fontFamily = Nunito,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CandyColors.brandPurple
+                )
+            }
         }
 
         // Info Panel
+        val anchorText = stringResource(R.string.budget_wallet_settings_anchor_format, selectedCycle?.anchorDay ?: 1)
+        val infoPanelA11y = "${selectedCycle?.dateRangeText ?: ""}, ${stringResource(R.string.budget_wallet_settings_current_budget)}: $currentBudgetSpoken, $anchorText"
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(CandyColors.primarySoft)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = infoPanelA11y
+                }
                 .padding(CandySpace.md),
             verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
@@ -93,14 +127,14 @@ fun WalletSettingsSheet(
                 color = CandyColors.textSecondary
             )
             Text(
-                text = "${stringResource(R.string.budget_wallet_settings_current_budget)}: ${currentSnapshot?.budgetFormatted ?: stringResource(R.string.budget_wallet_no_data)}",
+                text = "${stringResource(R.string.budget_wallet_settings_current_budget)}: $currentBudgetDisplay",
                 fontFamily = Nunito,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = CandyColors.textPrimary
             )
             Text(
-                text = stringResource(R.string.budget_wallet_settings_anchor_format, selectedCycle?.anchorDay ?: 1),
+                text = anchorText,
                 fontFamily = Nunito,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
@@ -118,7 +152,7 @@ fun WalletSettingsSheet(
                 iconId = ChankoIconId.ACT_05,
                 title = stringResource(R.string.budget_wallet_action_edit_budget),
                 enabled = canWrite,
-                disabledReason = if (!canWrite) stringResource(R.string.budget_wallet_disabled_past_reason) else null,
+                disabledReason = resolvedDisabledReason,
                 onClick = onEditBudgetClick
             )
 
@@ -127,7 +161,7 @@ fun WalletSettingsSheet(
                 iconId = ChankoIconId.BUD_01,
                 title = stringResource(R.string.budget_wallet_action_manage_cards),
                 enabled = canWrite,
-                disabledReason = if (!canWrite) stringResource(R.string.budget_wallet_disabled_past_reason) else null,
+                disabledReason = resolvedDisabledReason,
                 onClick = onManageCardsClick
             )
 

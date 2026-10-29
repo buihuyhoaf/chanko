@@ -1,6 +1,8 @@
 package com.hoabh.chanko.domain.budget.model
 
+import java.text.BreakIterator
 import java.text.Normalizer
+import java.util.Locale
 
 /**
  * Metadata thẻ tín dụng (Domain Model).
@@ -24,16 +26,33 @@ data class CreditCard(
         }
 
         /**
-         * Kiểm tra tính hợp lệ của tên thẻ.
+         * Đếm số grapheme cluster (ký tự người dùng nhìn thấy), không phải UTF-16 code unit.
+         * Ví dụ: emoji ghép "👨‍👩‍👧" = 1, "Thẻ" (NFC) = 3.
+         */
+        fun graphemeCount(text: String): Int {
+            if (text.isEmpty()) return 0
+            val iterator = BreakIterator.getCharacterInstance()
+            iterator.setText(text)
+            var count = 0
+            while (iterator.next() != BreakIterator.DONE) count++
+            return count
+        }
+
+        /**
+         * Kiểm tra tính hợp lệ của tên thẻ: 1–40 grapheme sau trim + NFC.
          */
         fun validateName(name: String): CardNameValidationResult {
             val normalized = normalizeName(name)
             return when {
                 normalized.isEmpty() -> CardNameValidationResult.Empty
-                normalized.length > MAX_NAME_LENGTH -> CardNameValidationResult.TooLong
+                graphemeCount(normalized) > MAX_NAME_LENGTH -> CardNameValidationResult.TooLong
                 else -> CardNameValidationResult.Valid(normalized)
             }
         }
+
+        /** So trùng case-insensitive sau trim/NFC. */
+        fun isSameName(a: String, b: String): Boolean =
+            normalizeName(a).lowercase(Locale.ROOT) == normalizeName(b).lowercase(Locale.ROOT)
     }
 }
 

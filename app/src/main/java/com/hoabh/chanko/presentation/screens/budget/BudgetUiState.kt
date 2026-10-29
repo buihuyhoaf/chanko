@@ -13,8 +13,10 @@ import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetDestinatio
  * Trạng thái UI đa trục cho phân hệ Ngân sách (C01–C13).
  */
 data class BudgetUiState(
+    val selectedCycleId: String? = null,
     val selectedCycle: BudgetCycle? = null,
     val availableCycles: List<BudgetCycle> = emptyList(),
+    val offlineCachedCycleIds: Set<String> = emptySet(),
     val snapshot: BudgetSnapshot? = null,
     val paymentMethods: List<PaymentMethodBreakdown> = emptyList(),
     val notableItems: List<NotableItem> = emptyList(),
@@ -24,12 +26,28 @@ data class BudgetUiState(
     val isOnline: Boolean = true,
     val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
+    val isOfflineNoCache: Boolean = false,
     val errorMessage: String? = null,
+    val dataUpdatedAt: Long? = null,
     val lastSyncTimeText: String? = null,
     val currentSheet: BudgetSheetDestination? = null,
     val sheetBackStack: List<BudgetSheetDestination> = emptyList(),
     val isDiscardDialogOpen: Boolean = false,
-    val cardToDelete: CreditCard? = null
+    val cardToDelete: CreditCard? = null,
+    val deleteCardInlineError: String? = null,
+    // C04 Edit Budget form state & conflict state
+    val editBudgetDraft: String = "",
+    val editBudgetInitialText: String = "",
+    val editBudgetBaseRevision: Int? = null,
+    val editBudgetInlineError: String? = null,
+    val hasEditBudgetConflict: Boolean = false,
+    // C06 Add Credit Card form state
+    val addCardDraft: String = "",
+    val addCardInlineError: String? = null,
+    // C07 Rename Credit Card form state
+    val renameCardDraft: String = "",
+    val renameCardInitialText: String = "",
+    val renameCardInlineError: String? = null
 ) {
     val isCurrentCycle: Boolean get() = selectedCycle?.isCurrent == true
 
@@ -39,7 +57,25 @@ data class BudgetUiState(
      */
     val canWrite: Boolean get() = isOnline && isCurrentCycle && !isLoading && !isSubmitting
 
+    /** Lý do khóa chỉnh sửa hiển thị trên C03/C04/C05/C06/C07/C08 khi !canWrite. */
+    val writeDisabledReason: String?
+        get() = when {
+            !isOnline -> "Kết nối mạng để chỉnh sửa"
+            selectedCycle != null && !isCurrentCycle -> "Chỉ chỉnh sửa trong chu kỳ hiện tại"
+            else -> null
+        }
+
     val isOverBudget: Boolean get() = snapshot?.isOverBudget == true
 
     val isZeroSpend: Boolean get() = snapshot?.isZeroSpend == true
+
+    /** Kiểm tra form đang mở có thay đổi chưa lưu hay không. */
+    val isCurrentSheetDirty: Boolean
+        get() = when (currentSheet) {
+            is BudgetSheetDestination.EditBudget -> editBudgetDraft.trim() != editBudgetInitialText.trim()
+            BudgetSheetDestination.AddCreditCard -> addCardDraft.isNotBlank()
+            is BudgetSheetDestination.RenameCreditCard ->
+                CreditCard.normalizeName(renameCardDraft) != CreditCard.normalizeName(renameCardInitialText)
+            else -> false
+        }
 }

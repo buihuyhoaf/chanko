@@ -21,13 +21,18 @@ class CreditCardManagementTest {
     }
 
     @Test
-    fun `validateName trims whitespace and accepts 1 to 40 characters`() {
+    fun `validateName trims whitespace and counts graphemes using BreakIterator`() {
         val emptyResult = CreditCard.validateName("   ")
         assertTrue(emptyResult is CardNameValidationResult.Empty)
 
         val validResult = CreditCard.validateName("  Thẻ Techcombank  ")
         assertTrue(validResult is CardNameValidationResult.Valid)
         assertEquals("Thẻ Techcombank", (validResult as CardNameValidationResult.Valid).normalizedName)
+
+        // Emoji family (surrogate pairs + ZWJ) has multiple UTF-16 code units but 1 grapheme cluster
+        val emojiCard = "Thẻ 💳 " + "A".repeat(34) // "Thẻ " (4) + "💳" (1 grapheme, 2 UTF-16 chars) + " " (1) + 34 = 40 graphemes (41 UTF-16 chars)
+        assertEquals(40, CreditCard.graphemeCount(emojiCard))
+        assertTrue(CreditCard.validateName(emojiCard) is CardNameValidationResult.Valid)
 
         val longName = "A".repeat(41)
         val tooLongResult = CreditCard.validateName(longName)
@@ -48,7 +53,7 @@ class CreditCardManagementTest {
     }
 
     @Test
-    fun `renameCreditCard allows keeping same name but rejects other existing active names`() = runTest {
+    fun `renameCreditCard allows keeping same name but rejects other existing active names and archived cards`() = runTest {
         val cards = repository.getCreditCards().first()
         val card1 = cards[0] // "Thẻ Techcombank"
         val card2 = cards[1] // "Thẻ VPBank Cake"
@@ -61,6 +66,12 @@ class CreditCardManagementTest {
         val dupResult = repository.renameCreditCard(card1.id, card2.name)
         assertTrue(dupResult.isFailure)
         assertEquals("Tên thẻ đã tồn tại", dupResult.exceptionOrNull()?.message)
+
+        // Khi thẻ đã bị xóa/archive trước đó -> trả về lỗi "Thẻ không còn khả dụng"
+        repository.archiveCreditCard(card1.id)
+        val renameArchivedResult = repository.renameCreditCard(card1.id, "Thẻ Mới")
+        assertTrue(renameArchivedResult.isFailure)
+        assertEquals("Thẻ không còn khả dụng", renameArchivedResult.exceptionOrNull()?.message)
     }
 
     @Test

@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
+import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
@@ -85,6 +86,10 @@ fun NavGraphBuilder.mainDestination(
 }
 
 internal fun NavHostController.selectTab(destination: TopLevelDestination) {
+    if (destination == TopLevelDestination.Home && currentDestination?.route == Screen.BudgetDetails.route) {
+        popBackStack(TopLevelDestination.Home.route, inclusive = false)
+        return
+    }
     navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
@@ -133,7 +138,18 @@ fun MainNavigation(
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
                         onProfileClick = onNavigateToProfile,
-                        onBudgetDetailsClick = onNavigateToBudgetDetails
+                        onBudgetDetailsClick = {
+                            controller.navigate(Screen.BudgetDetails.route) {
+                                launchSingleTop = true
+                            }
+                            onNavigateToBudgetDetails()
+                        }
+                    )
+                }
+                composable(Screen.BudgetDetails.route) {
+                    BudgetRoute(
+                        onBackClick = { controller.popBackStack() },
+                        onNavigateToItemDetail = onNavigateToItemDetail
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {

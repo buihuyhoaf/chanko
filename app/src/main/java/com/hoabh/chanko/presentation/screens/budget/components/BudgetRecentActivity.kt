@@ -24,10 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.budget.model.BudgetActivity
-import com.hoabh.chanko.domain.budget.model.BudgetActivityType
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.Nunito
+import kotlin.math.abs
 
 @Composable
 fun BudgetRecentActivity(
@@ -66,13 +67,13 @@ fun BudgetRecentActivity(
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
                 activities.take(3).forEach { activity ->
-                    val isAdjust = activity.type == BudgetActivityType.BUDGET_ADJUSTED
                     val amountColor = if (activity.amountChangeMinor >= 0) {
                         CandyColors.brandPurple
                     } else {
                         CandyColors.textPrimary
                     }
-                    val a11yDesc = "${activity.title}, ${activity.amountFormatted}, ${activity.occurredAt}"
+                    val spokenPrefix = if (activity.amountChangeMinor >= 0) "cộng " else "trừ "
+                    val a11yDesc = "${activity.title}, $spokenPrefix${MoneyVnd.spoken(abs(activity.amountChangeMinor))}, ${activity.occurredAt}"
 
                     Row(
                         modifier = Modifier
