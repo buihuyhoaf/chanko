@@ -3,6 +3,7 @@ package com.hoabh.chanko.presentation.screens.budget
 import androidx.lifecycle.SavedStateHandle
 import com.hoabh.chanko.data.budget.FakeBudgetRepository
 import com.hoabh.chanko.data.budget.InMemorySharedItemResolver
+import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetDestination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -339,5 +340,196 @@ class BudgetViewModelTest {
         assertEquals("6000000", viewModel.uiState.value.editBudgetDraft)
         assertEquals(1, viewModel.uiState.value.editBudgetBaseRevision)
         assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `OpenRenameCreditCard sets dialog state, prefill, and initializes flags`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        val cards = repository.getCreditCards().first()
+        val targetCard = cards.first()
+
+        viewModel.onEvent(BudgetUiEvent.OpenRenameCreditCard(targetCard))
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isRenameCardDialogOpen)
+        assertEquals(targetCard, state.cardToRename)
+        assertEquals(targetCard.name, state.renameCardDraft)
+        assertEquals(targetCard.name, state.renameCardInitialText)
+        assertFalse(state.isRenameCardDirty)
+        assertFalse(state.canSubmitRename) // No-change -> disabled
+        assertNull(state.renameCardInlineError)
+    }
+
+    @Test
+    fun `UpdateRenameCardDraft validates 30 graphemes, reserved Pay Now, duplicate, and self case change`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        val cards = repository.getCreditCards().first()
+        val targetCard = cards[0] // "Thẻ Techcombank"
+        val otherCard = cards[1] // "Thẻ VPBank Cake"
+
+        viewModel.onEvent(BudgetUiEvent.OpenRenameCreditCard(targetCard))
+
+        // 1. > 30 graphemes -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("A".repeat(31)))
+        assertEquals("Tên thẻ tối đa 30 ký tự", viewModel.uiState.value.renameCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitRename)
+
+        // 2. Pay Now -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("Pay Now"))
+        assertEquals("Tên này dành cho Pay Now", viewModel.uiState.value.renameCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitRename)
+
+        // 3. Duplicate other card -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft(otherCard.name))
+        assertEquals("Tên thẻ đã tồn tại", viewModel.uiState.value.renameCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitRename)
+
+        // 4. Case-only change of self -> Allowed
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft(targetCard.name.lowercase()))
+        assertNull(viewModel.uiState.value.renameCardInlineError)
+        assertTrue(viewModel.uiState.value.canSubmitRename)
+
+        // 5. Valid unique new name -> Allowed
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("Thẻ Chi Tiêu Riêng"))
+        assertNull(viewModel.uiState.value.renameCardInlineError)
+        assertTrue(viewModel.uiState.value.isRenameCardDirty)
+        assertTrue(viewModel.uiState.value.canSubmitRename)
+    }
+
+    @Test
+    fun `DismissRenameCreditCardDialog checks dirty state and prompts discard dialog`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        val card = repository.getCreditCards().first().first()
+        viewModel.onEvent(BudgetUiEvent.OpenRenameCreditCard(card))
+
+        // Unchanged dismiss -> closes immediately
+        viewModel.onEvent(BudgetUiEvent.DismissRenameCreditCardDialog)
+        assertFalse(viewModel.uiState.value.isRenameCardDialogOpen)
+        assertFalse(viewModel.uiState.value.isDiscardDialogOpen)
+
+        // Re-open and modify -> dismiss triggers discard dialog
+        viewModel.onEvent(BudgetUiEvent.OpenRenameCreditCard(card))
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("Tên Mới"))
+        assertTrue(viewModel.uiState.value.isRenameCardDirty)
+
+        viewModel.onEvent(BudgetUiEvent.DismissRenameCreditCardDialog)
+        assertTrue(viewModel.uiState.value.isRenameCardDialogOpen)
+        assertTrue(viewModel.uiState.value.isDiscardDialogOpen)
+
+        // Confirm discard -> closes dialog and cleans draft
+        viewModel.onEvent(BudgetUiEvent.ConfirmDiscardChanges)
+        assertFalse(viewModel.uiState.value.isDiscardDialogOpen)
+        assertFalse(viewModel.uiState.value.isRenameCardDialogOpen)
+        assertNull(viewModel.uiState.value.cardToRename)
+    }
+
+    @Test
+    fun `SubmitRenameCreditCard updates repository and closes dialog on success`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        val card = repository.getCreditCards().first().first()
+        viewModel.onEvent(BudgetUiEvent.OpenRenameCreditCard(card))
+        viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("Thẻ Ngân Hàng Mới"))
+
+        viewModel.onEvent(BudgetUiEvent.SubmitRenameCreditCard(card.id, "Thẻ Ngân Hàng Mới"))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isRenameCardDialogOpen)
+        assertNull(state.cardToRename)
+
+        val updatedCards = repository.getCreditCards().first()
+        val renamed = updatedCards.first { it.id == card.id }
+        assertEquals("Thẻ Ngân Hàng Mới", renamed.name)
+    }
+
+    @Test
+    fun `OpenAddCreditCard initializes dialog, empty draft, and default PURPLE color`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenAddCreditCard)
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isAddCardDialogOpen)
+        assertEquals("", state.addCardDraft)
+        assertEquals(CardColor.PURPLE, state.addCardColor)
+        assertFalse(state.isAddCardDirty)
+        assertFalse(state.canSubmitAddCard)
+        assertNull(state.addCardInlineError)
+    }
+
+    @Test
+    fun `UpdateAddCardDraft and SelectAddCardColor validate rules and dirty state`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        val existingCard = repository.getCreditCards().first().first()
+        viewModel.onEvent(BudgetUiEvent.OpenAddCreditCard)
+
+        // 1. Select color marks dirty
+        viewModel.onEvent(BudgetUiEvent.SelectAddCardColor(CardColor.PINK))
+        assertEquals(CardColor.PINK, viewModel.uiState.value.addCardColor)
+        assertTrue(viewModel.uiState.value.isAddCardDirty)
+
+        // 2. > 30 chars -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("A".repeat(31)))
+        assertEquals("Tên thẻ tối đa 30 ký tự", viewModel.uiState.value.addCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitAddCard)
+
+        // 3. Reserved Pay Now -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("Pay Now"))
+        assertEquals("Tên này dành cho Pay Now", viewModel.uiState.value.addCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitAddCard)
+
+        // 4. Duplicate name -> Error
+        viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft(existingCard.name))
+        assertEquals("Tên thẻ đã tồn tại", viewModel.uiState.value.addCardInlineError)
+        assertFalse(viewModel.uiState.value.canSubmitAddCard)
+
+        // 5. Valid unique name -> canSubmitAddCard = true
+        viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("Thẻ Mới Đẹp"))
+        assertNull(viewModel.uiState.value.addCardInlineError)
+        assertTrue(viewModel.uiState.value.canSubmitAddCard)
+    }
+
+    @Test
+    fun `DismissAddCreditCardDialog triggers discard when dirty and closes on confirm`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenAddCreditCard)
+
+        // Clean dismiss -> closes immediately
+        viewModel.onEvent(BudgetUiEvent.DismissAddCreditCardDialog)
+        assertFalse(viewModel.uiState.value.isAddCardDialogOpen)
+        assertFalse(viewModel.uiState.value.isDiscardDialogOpen)
+
+        // Dirty dismiss (only color changed) -> triggers discard dialog
+        viewModel.onEvent(BudgetUiEvent.OpenAddCreditCard)
+        viewModel.onEvent(BudgetUiEvent.SelectAddCardColor(CardColor.MINT))
+        assertTrue(viewModel.uiState.value.isAddCardDirty)
+
+        viewModel.onEvent(BudgetUiEvent.DismissAddCreditCardDialog)
+        assertTrue(viewModel.uiState.value.isAddCardDialogOpen)
+        assertTrue(viewModel.uiState.value.isDiscardDialogOpen)
+
+        // Confirm discard -> closes dialog and resets
+        viewModel.onEvent(BudgetUiEvent.ConfirmDiscardChanges)
+        assertFalse(viewModel.uiState.value.isDiscardDialogOpen)
+        assertFalse(viewModel.uiState.value.isAddCardDialogOpen)
+    }
+
+    @Test
+    fun `SubmitAddCreditCard saves card with chosen color and closes dialog`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenAddCreditCard)
+        viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("Thẻ Sinh Viên"))
+        viewModel.onEvent(BudgetUiEvent.SelectAddCardColor(CardColor.YELLOW))
+
+        viewModel.onEvent(BudgetUiEvent.SubmitAddCreditCard("Thẻ Sinh Viên", CardColor.YELLOW))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isAddCardDialogOpen)
+        assertEquals("", state.addCardDraft)
+
+        val cards = repository.getCreditCards().first()
+        val created = cards.firstOrNull { it.name == "Thẻ Sinh Viên" }
+        assertNotNull(created)
+        assertEquals(CardColor.YELLOW, created?.color)
     }
 }

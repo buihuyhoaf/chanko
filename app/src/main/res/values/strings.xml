@@ -275,4 +275,23 @@
     <string name="budget_card_add_submit">Thêm</string>
     <string name="budget_edit_preview_spoken_over">Ngân sách mới: %1$s. Đã chi: %2$s. Vượt ngân sách sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
     <string name="budget_edit_preview_spoken_remaining">Ngân sách mới: %1$s. Đã chi: %2$s. Còn lại sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
+    <string name="budget_payment_description">Pay Now và thẻ tín dụng đều tính vào ngân sách khi xác nhận mua.</string>
+    <string name="budget_payment_description_action">Giải thích phương thức thanh toán</string>
+    <string name="budget_payment_description_ok">OK</string>
+    <string name="budget_payment_pay_now">Pay Now</string>
+    <string name="budget_payment_default">Mặc định</string>
+    <string name="budget_payment_pay_now_description">Thanh toán ngay bằng tiền mặt / ví</string>
+    <string name="budget_payment_no_cards">Chưa có thẻ tín dụng</string>
+    <string name="budget_card_color_format">Màu %1$s</string>
+    <string name="budget_card_rename_action_format">Đổi tên %1$s</string>
+    <string name="budget_card_delete_action_format">Xóa %1$s</string>
+    <string name="budget_card_color_purple">Tím</string>
+    <string name="budget_card_color_pink">Hồng</string>
+    <string name="budget_card_color_blue">Xanh dương</string>
+    <string name="budget_card_color_mint">Bạc hà</string>
+    <string name="budget_card_color_yellow">Vàng</string>
+    <string name="budget_card_color_orange">Cam</string>
+    <string name="budget_cycle_selection_empty">Chưa chọn chu kỳ</string>
+    <string name="budget_cycle_selection_action">Chọn chu kỳ ngân sách, %1$s</string>
+    <string name="budget_payment_credit_card_label">Thẻ tín dụng</string>
 </resources>

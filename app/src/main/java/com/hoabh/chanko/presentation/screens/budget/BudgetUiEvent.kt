@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.screens.budget
 
 import com.hoabh.chanko.domain.budget.model.BudgetActivity
+import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.domain.budget.model.CreditCard
 
 sealed interface BudgetUiEvent {
@@ -16,15 +17,21 @@ sealed interface BudgetUiEvent {
     // Cycle selection
     data class SelectCycle(val cycleId: String) : BudgetUiEvent
 
+    // C09 Accordion toggle
+    data class ToggleHistoryAccordion(val isExpanded: Boolean? = null) : BudgetUiEvent
+
     // Draft updates
     data class UpdateEditBudgetDraft(val text: String) : BudgetUiEvent
     data class UpdateAddCardDraft(val text: String) : BudgetUiEvent
+    data class SelectAddCardColor(val color: CardColor) : BudgetUiEvent
     data class UpdateRenameCardDraft(val text: String) : BudgetUiEvent
 
     // Mutations
     data class SubmitBudgetLimit(val newLimitMinor: Long) : BudgetUiEvent
-    data class SubmitAddCreditCard(val name: String) : BudgetUiEvent
+    data class SubmitAddCreditCard(val name: String, val color: CardColor = CardColor.PURPLE) : BudgetUiEvent
+    data object DismissAddCreditCardDialog : BudgetUiEvent
     data class SubmitRenameCreditCard(val cardId: String, val newName: String) : BudgetUiEvent
+    data object DismissRenameCreditCardDialog : BudgetUiEvent
     data class RequestDeleteCreditCard(val card: CreditCard) : BudgetUiEvent
     data object ConfirmDeleteCreditCard : BudgetUiEvent
     data object DismissDeleteCreditCardDialog : BudgetUiEvent

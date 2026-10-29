@@ -12,8 +12,10 @@ import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
 import com.hoabh.chanko.domain.budget.model.BudgetSaveException
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.domain.budget.model.CardNameValidationResult
 import com.hoabh.chanko.domain.budget.model.CreditCard
+import com.hoabh.chanko.domain.budget.model.AddCardValidationResult
 import com.hoabh.chanko.domain.budget.model.CreditCardUnavailableException
 import com.hoabh.chanko.domain.budget.model.DuplicateCardNameException
 import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
@@ -21,6 +23,7 @@ import com.hoabh.chanko.domain.budget.model.InvalidCardNameException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
+import com.hoabh.chanko.domain.budget.model.ReservedCardNameException
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -171,8 +175,8 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     // Credit cards
     private val cardsState = MutableStateFlow(
         listOf(
-            CreditCard("card_1", "Thẻ Techcombank", isArchived = false),
-            CreditCard("card_2", "Thẻ VPBank Cake", isArchived = false)
+            CreditCard("card_1", "Thẻ Techcombank", color = CardColor.PINK, isArchived = false),
+            CreditCard("card_2", "Thẻ VPBank Cake", color = CardColor.PURPLE, isArchived = false)
         )
     )
 
@@ -422,22 +426,19 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         return Result.success(Unit)
     }
 
-    override suspend fun addCreditCard(name: String): Result<CreditCard> {
+    override suspend fun addCreditCard(name: String, color: CardColor): Result<CreditCard> {
         if (simulatedDelayMs > 0L) delay(simulatedDelayMs)
 
         if (!isOnlineState.value) {
             return Result.failure(BudgetOfflineException())
         }
 
-        val validation = CreditCard.validateName(name)
-        if (validation !is CardNameValidationResult.Valid) {
-            return Result.failure(InvalidCardNameException())
-        }
-
-        val normalized = validation.normalizedName
-        val activeCards = cardsState.value.filter { !it.isArchived }
-        if (activeCards.any { CreditCard.isSameName(it.name, normalized) }) {
-            return Result.failure(DuplicateCardNameException())
+        val validation = CreditCard.validateAdd(name, cardsState.value.filter { !it.isArchived }.map { it.name })
+        val normalized = when (validation) {
+            is AddCardValidationResult.Valid -> validation.normalizedName
+            AddCardValidationResult.ReservedPayNow -> return Result.failure(ReservedCardNameException())
+            AddCardValidationResult.Duplicate -> return Result.failure(DuplicateCardNameException())
+            else -> return Result.failure(InvalidCardNameException())
         }
 
         if (simulateSaveErrorOnNextMutation) {
@@ -448,6 +449,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val newCard = CreditCard(
             id = "card_${UUID.randomUUID()}",
             name = normalized,
+            color = color,
             isArchived = false
         )
         cardsState.value = cardsState.value + newCard
@@ -470,6 +472,10 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         }
 
         val normalized = validation.normalizedName
+        if (normalized.lowercase(Locale.ROOT) == CreditCard.RESERVED_PAY_NOW) {
+            return Result.failure(ReservedCardNameException())
+        }
+
         val activeCards = cardsState.value.filter { !it.isArchived && it.id != cardId }
         if (activeCards.any { CreditCard.isSameName(it.name, normalized) }) {
             return Result.failure(DuplicateCardNameException())

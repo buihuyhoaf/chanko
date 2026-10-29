@@ -7,8 +7,12 @@ import com.hoabh.chanko.domain.budget.model.BudgetActivityType
 import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
+import com.hoabh.chanko.domain.budget.model.CardColor
+import com.hoabh.chanko.domain.budget.model.CreditCard
+import com.hoabh.chanko.domain.budget.model.AddCardValidationResult
 import com.hoabh.chanko.domain.budget.model.CreditCardUnavailableException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
+import com.hoabh.chanko.domain.budget.model.RenameValidationResult
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import com.hoabh.chanko.domain.budget.repository.SharedItemResolver
 import com.hoabh.chanko.presentation.base.BaseViewModel
@@ -233,7 +237,7 @@ class BudgetViewModel @Inject constructor(
     fun onEvent(event: BudgetUiEvent) {
         when (event) {
             BudgetUiEvent.OpenCyclePicker -> navigateToSheet(BudgetSheetDestination.CyclePicker)
-            BudgetUiEvent.OpenWalletSettings -> navigateToSheet(BudgetSheetDestination.WalletSettings)
+            BudgetUiEvent.OpenWalletSettings -> sendEffect(BudgetUiEffect.NavigateToWalletSettings(expandHistory = false))
             BudgetUiEvent.OpenEditBudget -> {
                 val currentLimit = currentState.snapshot?.budgetMinor ?: 0L
                 val currentRevision = currentState.snapshot?.revision
@@ -250,29 +254,33 @@ class BudgetViewModel @Inject constructor(
                 }
                 navigateToSheet(BudgetSheetDestination.EditBudget(currentLimit))
             }
-            BudgetUiEvent.OpenCreditCardManage -> navigateToSheet(BudgetSheetDestination.CreditCardManage)
+            BudgetUiEvent.OpenCreditCardManage -> sendEffect(BudgetUiEffect.NavigateToWalletSettings(expandHistory = false))
             BudgetUiEvent.OpenAddCreditCard -> {
                 savedStateHandle[KEY_ADD_CARD_DRAFT] = ""
                 updateState {
                     it.copy(
+                        isAddCardDialogOpen = true,
                         addCardDraft = "",
+                        addCardColor = CardColor.PURPLE,
                         addCardInlineError = null
                     )
                 }
-                navigateToSheet(BudgetSheetDestination.AddCreditCard)
             }
             is BudgetUiEvent.OpenRenameCreditCard -> {
                 savedStateHandle[KEY_RENAME_CARD_DRAFT] = event.card.name
+                val isLegacy = CreditCard.isLegacyOverLimit(event.card.name)
                 updateState {
                     it.copy(
+                        isRenameCardDialogOpen = true,
+                        cardToRename = event.card,
                         renameCardInitialText = event.card.name,
                         renameCardDraft = event.card.name,
-                        renameCardInlineError = null
+                        renameCardInlineError = null,
+                        isLegacyNameOverLimit = isLegacy
                     )
                 }
-                navigateToSheet(BudgetSheetDestination.RenameCreditCard(event.card))
             }
-            BudgetUiEvent.OpenAdjustmentHistory -> navigateToSheet(BudgetSheetDestination.AdjustmentHistory)
+            BudgetUiEvent.OpenAdjustmentHistory -> sendEffect(BudgetUiEffect.NavigateToWalletSettings(expandHistory = true))
 
             is BudgetUiEvent.SelectCycle -> {
                 if (currentState.isSubmitting) return
@@ -301,6 +309,12 @@ class BudgetViewModel @Inject constructor(
                 }
             }
 
+            is BudgetUiEvent.ToggleHistoryAccordion -> {
+                updateState {
+                    it.copy(isHistoryExpanded = event.isExpanded ?: !it.isHistoryExpanded)
+                }
+            }
+
             is BudgetUiEvent.UpdateEditBudgetDraft -> {
                 savedStateHandle[KEY_EDIT_BUDGET_DRAFT] = event.text
                 updateState {
@@ -313,27 +327,85 @@ class BudgetViewModel @Inject constructor(
 
             is BudgetUiEvent.UpdateAddCardDraft -> {
                 savedStateHandle[KEY_ADD_CARD_DRAFT] = event.text
+                val otherActiveNames = currentState.creditCards.map { it.name }
+                val validation = CreditCard.validateAdd(event.text, otherActiveNames)
+                val inlineError = when (validation) {
+                    is AddCardValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
+                    is AddCardValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
+                    is AddCardValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                    else -> null
+                }
                 updateState {
                     it.copy(
                         addCardDraft = event.text,
-                        addCardInlineError = null
+                        addCardInlineError = inlineError
                     )
+                }
+            }
+
+            is BudgetUiEvent.SelectAddCardColor -> {
+                updateState { it.copy(addCardColor = event.color) }
+            }
+
+            BudgetUiEvent.DismissAddCreditCardDialog -> {
+                if (currentState.isSubmitting) return
+                if (currentState.isAddCardDirty) {
+                    updateState { it.copy(isDiscardDialogOpen = true) }
+                } else {
+                    savedStateHandle[KEY_ADD_CARD_DRAFT] = ""
+                    updateState {
+                        it.copy(
+                            isAddCardDialogOpen = false,
+                            addCardDraft = "",
+                            addCardColor = CardColor.PURPLE,
+                            addCardInlineError = null
+                        )
+                    }
                 }
             }
 
             is BudgetUiEvent.UpdateRenameCardDraft -> {
                 savedStateHandle[KEY_RENAME_CARD_DRAFT] = event.text
+                val card = currentState.cardToRename
+                val otherActiveNames = currentState.creditCards.filter { it.id != card?.id }.map { it.name }
+                val validation = if (card != null) {
+                    CreditCard.validateRename(event.text, card.name, otherActiveNames)
+                } else null
+                val inlineError = when (validation) {
+                    is RenameValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
+                    is RenameValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
+                    is RenameValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                    else -> null
+                }
                 updateState {
                     it.copy(
                         renameCardDraft = event.text,
-                        renameCardInlineError = null
+                        renameCardInlineError = inlineError
                     )
                 }
             }
 
             is BudgetUiEvent.SubmitBudgetLimit -> submitBudgetLimit(event.newLimitMinor)
-            is BudgetUiEvent.SubmitAddCreditCard -> submitAddCreditCard(event.name)
+            is BudgetUiEvent.SubmitAddCreditCard -> submitAddCreditCard(event.name, event.color)
             is BudgetUiEvent.SubmitRenameCreditCard -> submitRenameCreditCard(event.cardId, event.newName)
+            BudgetUiEvent.DismissRenameCreditCardDialog -> {
+                if (currentState.isSubmitting) return
+                if (currentState.isRenameCardDirty) {
+                    updateState { it.copy(isDiscardDialogOpen = true) }
+                } else {
+                    savedStateHandle[KEY_RENAME_CARD_DRAFT] = ""
+                    updateState {
+                        it.copy(
+                            isRenameCardDialogOpen = false,
+                            cardToRename = null,
+                            renameCardDraft = "",
+                            renameCardInitialText = "",
+                            renameCardInlineError = null,
+                            isLegacyNameOverLimit = false
+                        )
+                    }
+                }
+            }
             is BudgetUiEvent.RequestDeleteCreditCard -> {
                 updateState {
                     it.copy(
@@ -351,7 +423,7 @@ class BudgetViewModel @Inject constructor(
             is BudgetUiEvent.NotableItemClicked -> handleOpenSharedItemDetail(event.itemId)
             is BudgetUiEvent.ActivityItemClicked -> {
                 if (event.activity.type == BudgetActivityType.BUDGET_ADJUSTED) {
-                    navigateToSheet(BudgetSheetDestination.AdjustmentHistory)
+                    sendEffect(BudgetUiEffect.NavigateToWalletSettings(expandHistory = true))
                 } else if (!event.activity.itemId.isNullOrBlank()) {
                     handleOpenSharedItemDetail(event.activity.itemId)
                 }
@@ -387,9 +459,35 @@ class BudgetViewModel @Inject constructor(
 
             BudgetUiEvent.ConfirmDiscardChanges -> {
                 if (currentState.isSubmitting) return
-                clearCurrentFormDraft()
-                updateState { it.copy(isDiscardDialogOpen = false) }
-                popSheet()
+                if (currentState.isRenameCardDialogOpen) {
+                    savedStateHandle[KEY_RENAME_CARD_DRAFT] = ""
+                    updateState {
+                        it.copy(
+                            isDiscardDialogOpen = false,
+                            isRenameCardDialogOpen = false,
+                            cardToRename = null,
+                            renameCardDraft = "",
+                            renameCardInitialText = "",
+                            renameCardInlineError = null,
+                            isLegacyNameOverLimit = false
+                        )
+                    }
+                } else if (currentState.isAddCardDialogOpen) {
+                    savedStateHandle[KEY_ADD_CARD_DRAFT] = ""
+                    updateState {
+                        it.copy(
+                            isDiscardDialogOpen = false,
+                            isAddCardDialogOpen = false,
+                            addCardDraft = "",
+                            addCardColor = CardColor.PURPLE,
+                            addCardInlineError = null
+                        )
+                    }
+                } else {
+                    clearCurrentFormDraft()
+                    updateState { it.copy(isDiscardDialogOpen = false) }
+                    popSheet()
+                }
             }
 
             BudgetUiEvent.CancelDiscardChanges -> {
@@ -435,20 +533,6 @@ class BudgetViewModel @Inject constructor(
                         editBudgetInitialText = "",
                         editBudgetInlineError = null,
                         hasEditBudgetConflict = false
-                    )
-                }
-            }
-            BudgetSheetDestination.AddCreditCard -> {
-                savedStateHandle[KEY_ADD_CARD_DRAFT] = ""
-                updateState { it.copy(addCardDraft = "", addCardInlineError = null) }
-            }
-            is BudgetSheetDestination.RenameCreditCard -> {
-                savedStateHandle[KEY_RENAME_CARD_DRAFT] = ""
-                updateState {
-                    it.copy(
-                        renameCardDraft = "",
-                        renameCardInitialText = "",
-                        renameCardInlineError = null
                     )
                 }
             }
@@ -523,17 +607,40 @@ class BudgetViewModel @Inject constructor(
         }
     }
 
-    private fun submitAddCreditCard(name: String) {
+    private fun submitAddCreditCard(name: String, color: CardColor = currentState.addCardColor) {
         if (!currentState.canWrite) return
+
+        val otherNames = currentState.creditCards.map { it.name }
+        val validation = CreditCard.validateAdd(name, otherNames)
+        if (validation !is AddCardValidationResult.Valid) {
+            val errorMsg = when (validation) {
+                is AddCardValidationResult.Empty -> "Nhập tên thẻ"
+                is AddCardValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
+                is AddCardValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
+                is AddCardValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                else -> null
+            }
+            if (errorMsg != null) {
+                updateState { it.copy(addCardInlineError = errorMsg) }
+            }
+            return
+        }
 
         viewModelScope.launch {
             updateState { it.copy(isSubmitting = true, addCardInlineError = null) }
-            val result = repository.addCreditCard(name)
+            val result = repository.addCreditCard(validation.normalizedName, color)
             updateState { it.copy(isSubmitting = false) }
 
             result.onSuccess {
-                clearCurrentFormDraft()
-                popSheet()
+                savedStateHandle[KEY_ADD_CARD_DRAFT] = ""
+                updateState {
+                    it.copy(
+                        isAddCardDialogOpen = false,
+                        addCardDraft = "",
+                        addCardColor = CardColor.PURPLE,
+                        addCardInlineError = null
+                    )
+                }
                 sendEffect(BudgetUiEffect.ShowSnackbar("Đã thêm thẻ"))
             }.onFailure { error ->
                 val msg = error.message ?: "Chưa thêm được thẻ. Vui lòng thử lại."
@@ -546,20 +653,46 @@ class BudgetViewModel @Inject constructor(
     private fun submitRenameCreditCard(cardId: String, newName: String) {
         if (!currentState.canWrite) return
 
+        val card = currentState.cardToRename
+        val otherNames = currentState.creditCards.filter { it.id != cardId }.map { it.name }
+        val validation = CreditCard.validateRename(newName, card?.name ?: "", otherNames)
+        if (validation !is RenameValidationResult.Valid) {
+            val errorMsg = when (validation) {
+                is RenameValidationResult.Empty -> "Nhập tên thẻ"
+                is RenameValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
+                is RenameValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
+                is RenameValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                else -> null
+            }
+            if (errorMsg != null) {
+                updateState { it.copy(renameCardInlineError = errorMsg) }
+            }
+            return
+        }
+
         viewModelScope.launch {
             updateState { it.copy(isSubmitting = true, renameCardInlineError = null) }
-            val result = repository.renameCreditCard(cardId, newName)
+            val result = repository.renameCreditCard(cardId, validation.normalizedName)
             updateState { it.copy(isSubmitting = false) }
 
             result.onSuccess {
-                clearCurrentFormDraft()
-                popSheet()
+                savedStateHandle[KEY_RENAME_CARD_DRAFT] = ""
+                updateState {
+                    it.copy(
+                        isRenameCardDialogOpen = false,
+                        cardToRename = null,
+                        renameCardDraft = "",
+                        renameCardInitialText = "",
+                        renameCardInlineError = null,
+                        isLegacyNameOverLimit = false
+                    )
+                }
                 sendEffect(BudgetUiEffect.ShowSnackbar("Đã đổi tên thẻ"))
             }.onFailure { error ->
                 val inlineMsg = if (error is CreditCardUnavailableException) {
                     "Thẻ không còn khả dụng"
                 } else {
-                    "Chưa đổi được tên thẻ. Vui lòng thử lại."
+                    "Chưa đổi tên được thẻ. Vui lòng thử lại."
                 }
                 updateState { it.copy(renameCardInlineError = inlineMsg) }
                 sendEffect(BudgetUiEffect.ShowSnackbar(inlineMsg))

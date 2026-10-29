@@ -1,31 +1,27 @@
 package com.hoabh.chanko.presentation.screens.budget
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.base.CollectEffect
-import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetHost
-import com.hoabh.chanko.presentation.screens.budget.sheets.DeleteCardConfirmDialog
-import com.hoabh.chanko.presentation.screens.budget.sheets.DiscardChangesDialog
-import com.hoabh.chanko.ui.theme.CandyColors
 import kotlinx.coroutines.launch
 
+/**
+ * Route cho phân hệ Ngân sách (BudgetDetails route).
+ * Hiển thị trực tiếp màn hình Ngân sách chuẩn v2.1:
+ * Top app bar đồng bộ 100% phong cách Món đồ (MyItemsScreen), tích hợp trực tiếp 3 Section:
+ * Ngân sách mua sắm, Phương thức thanh toán, Lịch sử điều chỉnh.
+ */
 @Composable
 fun BudgetRoute(
     onBackClick: () -> Unit,
-    onNavigateToItemDetail: (Int) -> Unit,
+    onNavigateToItemDetail: (Int) -> Unit = {},
+    onNavigateToWalletSettings: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: BudgetViewModel = hiltViewModel()
 ) {
@@ -43,75 +39,15 @@ fun BudgetRoute(
                     snackbarHostState.showSnackbar(effect.message)
                 }
             }
+            else -> Unit
         }
     }
 
-    // Intercept back press when sheet or dialog is open
-    BackHandler {
-        when {
-            state.isSubmitting -> {
-                // Khóa đóng khi đang lưu (pending lock)
-            }
-            state.isDiscardDialogOpen -> {
-                viewModel.onEvent(BudgetUiEvent.CancelDiscardChanges)
-            }
-            state.cardToDelete != null -> {
-                viewModel.onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog)
-            }
-            state.currentSheet != null -> {
-                viewModel.onEvent(BudgetUiEvent.RequestCloseCurrentSheet)
-            }
-            else -> {
-                onBackClick()
-            }
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(CandyColors.background)
-    ) {
-        BudgetScreen(
-            state = state,
-            onEvent = viewModel::onEvent,
-            onBackClick = onBackClick
-        )
-
-        // Single Sheet Host
-        BudgetSheetHost(
-            destination = state.currentSheet,
-            state = state,
-            onEvent = viewModel::onEvent
-        )
-
-        // C08 Delete Card Dialog
-        state.cardToDelete?.let { card ->
-            DeleteCardConfirmDialog(
-                card = card,
-                canWrite = state.canWrite,
-                isSubmitting = state.isSubmitting,
-                disabledReason = state.writeDisabledReason,
-                errorMessage = state.deleteCardInlineError,
-                onConfirm = { viewModel.onEvent(BudgetUiEvent.ConfirmDeleteCreditCard) },
-                onDismiss = { viewModel.onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog) }
-            )
-        }
-
-        // Discard Changes Dialog
-        if (state.isDiscardDialogOpen) {
-            DiscardChangesDialog(
-                onConfirmDiscard = { viewModel.onEvent(BudgetUiEvent.ConfirmDiscardChanges) },
-                onContinueEditing = { viewModel.onEvent(BudgetUiEvent.CancelDiscardChanges) }
-            )
-        }
-
-        // Snackbar Host
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-        )
-    }
+    BudgetScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onBackClick = onBackClick,
+        modifier = modifier,
+        snackbarHostState = snackbarHostState
+    )
 }

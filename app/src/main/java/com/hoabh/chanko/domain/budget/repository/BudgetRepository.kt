@@ -5,6 +5,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.domain.budget.model.CreditCard
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
@@ -41,7 +42,7 @@ interface BudgetRepository {
     fun isOnlineFlow(): Flow<Boolean>
 
     suspend fun updateBudgetLimit(cycleId: String, newLimitMinor: Long, expectedRevision: Int): Result<Unit>
-    suspend fun addCreditCard(name: String): Result<CreditCard>
+    suspend fun addCreditCard(name: String, color: CardColor = CardColor.PURPLE): Result<CreditCard>
     suspend fun renameCreditCard(cardId: String, newName: String): Result<Unit>
     suspend fun archiveCreditCard(cardId: String): Result<Unit>
     suspend fun setNetworkOnline(isOnline: Boolean)

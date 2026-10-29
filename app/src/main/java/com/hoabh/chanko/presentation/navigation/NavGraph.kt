@@ -12,6 +12,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.archived.ArchivedItemsRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
+import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
+import com.hoabh.chanko.presentation.screens.budget.wallet.WalletSettingsRoute
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
 import com.hoabh.chanko.presentation.screens.transaction.TransactionDetailRoute
@@ -154,7 +156,37 @@ fun NavGraph(
                     navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
                         launchSingleTop = true
                     }
+                },
+                onNavigateToWalletSettings = { expandHistory ->
+                    navController.navigate(Screen.WalletSettings.createRoute(expandHistory)) {
+                        launchSingleTop = true
+                    }
                 }
+            )
+        }
+
+        composable(
+            route = Screen.WalletSettings.route,
+            arguments = listOf(
+                navArgument("expandHistory") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val expandHistory = backStackEntry.arguments?.getBoolean("expandHistory") ?: false
+            val parentEntry = androidx.compose.runtime.remember(backStackEntry) {
+                try {
+                    navController.getBackStackEntry(Screen.BudgetDetails.route)
+                } catch (e: Exception) {
+                    backStackEntry
+                }
+            }
+            val budgetViewModel: BudgetViewModel = hiltViewModel(parentEntry)
+            WalletSettingsRoute(
+                onBackClick = { navController.popBackStack() },
+                expandHistory = expandHistory,
+                viewModel = budgetViewModel
             )
         }
 

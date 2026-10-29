@@ -1,34 +1,38 @@
 package com.hoabh.chanko.presentation.screens.budget
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,24 +40,48 @@ import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetCycleHeader
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetMascotSlot
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetNotableItems
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetPaymentBreakdown
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetReadOnlyBanner
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetRecentActivity
-import com.hoabh.chanko.presentation.screens.budget.components.BudgetSummaryCard
+import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetHost
+import com.hoabh.chanko.presentation.screens.budget.sheets.DeleteCardConfirmDialog
+import com.hoabh.chanko.presentation.screens.budget.sheets.DiscardChangesDialog
+import com.hoabh.chanko.presentation.screens.budget.wallet.components.AdjustmentHistorySection
+import com.hoabh.chanko.presentation.screens.budget.wallet.components.BudgetSettingsSection
+import com.hoabh.chanko.presentation.screens.budget.wallet.components.PaymentMethodsSection
+import com.hoabh.chanko.presentation.screens.budget.wallet.dialogs.AddCreditCardDialog
+import com.hoabh.chanko.presentation.screens.budget.wallet.dialogs.RenameCreditCardDialog
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
-import com.hoabh.chanko.ui.theme.Nunito
 
+/**
+ * Màn hình Ngân sách (BudgetScreen) chuẩn v2.1.
+ * Đã hợp nhất màn Tổng quan cũ và màn Thiết lập ví thành một màn hình Ngân sách duy nhất:
+ * 1. Top App Bar: Đồng bộ 100% với màn hình Món đồ (MyItemsScreen) với nút Quay lại và tiêu đề "Ngân sách" 24sp Bold.
+ * 2. Section 1: Ngân sách mua sắm (Đã chi, Còn lại, % tiến độ, Chu kỳ, Sửa ngân sách).
+ * 3. Section 2: Phương thức thanh toán (Pay Now mặc định, danh sách thẻ tín dụng Candy, Thêm thẻ, Sửa, Xóa).
+ * 4. Section 3: Lịch sử điều chỉnh ngân sách (Timeline Tăng/Giảm hạn mức).
+ */
 @Composable
 fun BudgetScreen(
     state: BudgetUiState,
     onEvent: (BudgetUiEvent) -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {}
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    // Bắt phím Back phần cứng / hệ thống
+    BackHandler {
+        when {
+            state.isSubmitting -> Unit
+            state.isDiscardDialogOpen -> onEvent(BudgetUiEvent.CancelDiscardChanges)
+            state.isAddCardDialogOpen -> onEvent(BudgetUiEvent.DismissAddCreditCardDialog)
+            state.isRenameCardDialogOpen -> onEvent(BudgetUiEvent.DismissRenameCreditCardDialog)
+            state.cardToDelete != null -> onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog)
+            state.currentSheet != null -> onEvent(BudgetUiEvent.RequestCloseCurrentSheet)
+            else -> onBackClick()
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -64,215 +92,171 @@ fun BudgetScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            // 1. Top App Bar (đồng bộ 100% kiểu dáng thanh tiêu đề Món đồ)
-            BudgetTopAppBar(
-                onWalletSettingsClick = { onEvent(BudgetUiEvent.OpenWalletSettings) }
-            )
-
-            Box(
+            // 1. Top App Bar — Đồng bộ 100% phong cách màn hình Món đồ (MyItemsScreen)
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                when {
-                    state.isLoading && state.snapshot == null -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = CandyColors.brandPurple,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                    }
+                Text(
+                    text = stringResource(R.string.budget_title),
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    ),
+                    color = CandyColors.textPrimary
+                )
 
-                    state.errorMessage != null && state.snapshot == null -> {
-                        BudgetErrorView(
-                            cycleRangeText = state.selectedCycle?.dateRangeText ?: "",
-                            isOnline = state.isOnline,
-                            lastSyncTimeText = state.lastSyncTimeText,
-                            isPastCycle = !state.isCurrentCycle,
-                            message = state.errorMessage,
-                            onCyclePickerClick = { onEvent(BudgetUiEvent.OpenCyclePicker) },
-                            onRetry = { onEvent(BudgetUiEvent.Retry) }
+                Box {
+                    IconButton(onClick = { isMenuExpanded = true }) {
+                        ChankoIcon(
+                            id = ChankoIconId.ACT_10,
+                            contentDescription = "Tùy chọn ngân sách"
                         )
                     }
-
-                    state.snapshot != null -> {
-                        val scrollState = rememberScrollState()
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState)
-                                .padding(horizontal = CandySpace.lg)
-                                .padding(top = CandySpace.xs, bottom = 96.dp),
-                            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-                        ) {
-                            // 1. Cycle Selector Header
-                            val cycleText = state.selectedCycle?.dateRangeText ?: ""
-                            BudgetCycleHeader(
-                                cycleRangeText = cycleText,
-                                onClick = { onEvent(BudgetUiEvent.OpenCyclePicker) }
-                            )
-
-                            // 2. Offline and Past-cycle Banners
-                            BudgetReadOnlyBanner(
-                                isOnline = state.isOnline,
-                                lastSyncTimeText = state.lastSyncTimeText,
-                                isPastCycle = !state.isCurrentCycle
-                            )
-
-                            // 3. Summary Card (Ngân sách, Đã chi, Còn lại / Vượt ngân sách, Progress bar)
-                            BudgetSummaryCard(
-                                snapshot = state.snapshot,
-                                canWrite = state.canWrite,
-                                onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
-                            )
-
-                            // 4. Mascot 3D Slot
-                            BudgetMascotSlot(
-                                isOverBudget = state.isOverBudget,
-                                isZeroSpend = state.isZeroSpend
-                            )
-
-                            // 5. Payment Breakdown (Readonly list)
-                            BudgetPaymentBreakdown(
-                                methods = state.paymentMethods
-                            )
-
-                            // 6. Notable Items (Up to 3 items -> Shared Item Detail)
-                            BudgetNotableItems(
-                                items = state.notableItems,
-                                isPastCycle = !state.isCurrentCycle,
-                                onItemClick = { itemId -> onEvent(BudgetUiEvent.NotableItemClicked(itemId)) }
-                            )
-
-                            // 7. Recent Activity (Up to 3 budget-affecting events)
-                            BudgetRecentActivity(
-                                activities = state.recentActivities,
-                                onActivityClick = { activity -> onEvent(BudgetUiEvent.ActivityItemClicked(activity)) }
-                            )
-
-                            Spacer(modifier = Modifier.height(CandySpace.xl))
-                        }
+                    DropdownMenu(
+                        expanded = isMenuExpanded,
+                        onDismissRequest = { isMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Sửa ngân sách") },
+                            leadingIcon = {
+                                ChankoIcon(
+                                    id = ChankoIconId.ACT_05,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            enabled = state.canWrite,
+                            onClick = {
+                                isMenuExpanded = false
+                                onEvent(BudgetUiEvent.OpenEditBudget)
+                            }
+                        )
                     }
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun BudgetTopAppBar(
-    onWalletSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val settingsActionDesc = stringResource(R.string.budget_settings_action)
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = stringResource(R.string.budget_title),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            ),
-            color = CandyColors.textPrimary
-        )
-
-        IconButton(
-            onClick = onWalletSettingsClick,
-            modifier = Modifier
-                .size(48.dp)
-                .semantics {
-                    role = Role.Button
-                    contentDescription = settingsActionDesc
-                }
-        ) {
-            ChankoIcon(
-                id = ChankoIconId.SYS_04,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun BudgetErrorView(
-    cycleRangeText: String,
-    isOnline: Boolean,
-    lastSyncTimeText: String?,
-    isPastCycle: Boolean,
-    message: String,
-    onCyclePickerClick: () -> Unit,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = CandySpace.lg, vertical = CandySpace.xs),
-        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-    ) {
-        if (cycleRangeText.isNotEmpty()) {
-            BudgetCycleHeader(
-                cycleRangeText = cycleRangeText,
-                onClick = onCyclePickerClick
-            )
-        }
-
-        BudgetReadOnlyBanner(
-            isOnline = isOnline,
-            lastSyncTimeText = lastSyncTimeText,
-            isPastCycle = isPastCycle
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = message,
-                fontFamily = Nunito,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = CandyColors.textSecondary,
-                modifier = Modifier.padding(bottom = CandySpace.md)
-            )
-            Surface(
-                shape = CircleShape,
-                color = CandyColors.brandPurple,
+            // 2. Nội dung cuộn chính (3 Section)
+            LazyColumn(
                 modifier = Modifier
-                    .heightIn(min = 48.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = "Thử lại"
-                    }
-                    .clickable(role = Role.Button, onClick = onRetry)
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(
+                    start = CandySpace.lg,
+                    end = CandySpace.lg,
+                    top = CandySpace.xs,
+                    bottom = 96.dp // Để không bị BottomBar che khuất
+                ),
+                verticalArrangement = Arrangement.spacedBy(CandySpace.md)
             ) {
-                Box(
-                    modifier = Modifier.padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.budget_btn_retry),
-                        fontFamily = Nunito,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CandyColors.budgetSnapshotSpendingPanel
+                // Section 1: Ngân sách mua sắm
+                item {
+                    BudgetSettingsSection(
+                        selectedCycle = state.selectedCycle,
+                        snapshot = state.snapshot,
+                        canWrite = state.canWrite,
+                        onCycleClick = { onEvent(BudgetUiEvent.OpenCyclePicker) }
+                    )
+                }
+
+                // Section 2: Phương thức thanh toán (C05)
+                item {
+                    PaymentMethodsSection(
+                        cards = state.creditCards,
+                        canWrite = state.canWrite,
+                        disabledReason = state.writeDisabledReason,
+                        onAddCardClick = { onEvent(BudgetUiEvent.OpenAddCreditCard) },
+                        onRenameCardClick = { card -> onEvent(BudgetUiEvent.OpenRenameCreditCard(card)) },
+                        onDeleteCardClick = { card -> onEvent(BudgetUiEvent.RequestDeleteCreditCard(card)) }
+                    )
+                }
+
+                // Section 3: Lịch sử điều chỉnh ngân sách (C09)
+                item {
+                    AdjustmentHistorySection(
+                        adjustments = state.adjustments,
+                        cycleRange = state.selectedCycle?.dateRangeText ?: "",
+                        isExpanded = state.isHistoryExpanded,
+                        onToggleExpanded = { onEvent(BudgetUiEvent.ToggleHistoryAccordion()) }
                     )
                 }
             }
         }
+
+        // Bottom Sheets (C02 Chọn chu kỳ & C04 Sửa ngân sách)
+        BudgetSheetHost(
+            destination = state.currentSheet,
+            state = state,
+            onEvent = onEvent
+        )
+
+        // C06 Add Credit Card Dialog
+        if (state.isAddCardDialogOpen) {
+            AddCreditCardDialog(
+                isOpen = state.isAddCardDialogOpen,
+                draftName = state.addCardDraft,
+                selectedColor = state.addCardColor,
+                errorMessage = state.addCardInlineError,
+                canSave = state.canSubmitAddCard,
+                isSubmitting = state.isSubmitting,
+                onDraftChange = { text -> onEvent(BudgetUiEvent.UpdateAddCardDraft(text)) },
+                onColorSelect = { color -> onEvent(BudgetUiEvent.SelectAddCardColor(color)) },
+                onDismissRequest = { onEvent(BudgetUiEvent.DismissAddCreditCardDialog) },
+                onSubmit = {
+                    onEvent(BudgetUiEvent.SubmitAddCreditCard(state.addCardDraft, state.addCardColor))
+                }
+            )
+        }
+
+        // C07 Rename Credit Card Dialog
+        if (state.isRenameCardDialogOpen && state.cardToRename != null) {
+            RenameCreditCardDialog(
+                isOpen = state.isRenameCardDialogOpen,
+                card = state.cardToRename,
+                draftName = state.renameCardDraft,
+                errorMessage = state.renameCardInlineError,
+                isLegacyOverLimit = state.isLegacyNameOverLimit,
+                canSave = state.canSubmitRename,
+                isSubmitting = state.isSubmitting,
+                onDraftChange = { text -> onEvent(BudgetUiEvent.UpdateRenameCardDraft(text)) },
+                onDismissRequest = { onEvent(BudgetUiEvent.DismissRenameCreditCardDialog) },
+                onSubmit = {
+                    val cardId = state.cardToRename?.id ?: return@RenameCreditCardDialog
+                    onEvent(BudgetUiEvent.SubmitRenameCreditCard(cardId, state.renameCardDraft))
+                }
+            )
+        }
+
+        // C08 Delete Card Dialog
+        state.cardToDelete?.let { card ->
+            DeleteCardConfirmDialog(
+                card = card,
+                canWrite = state.canWrite,
+                isSubmitting = state.isSubmitting,
+                disabledReason = state.writeDisabledReason,
+                errorMessage = state.deleteCardInlineError,
+                onConfirm = { onEvent(BudgetUiEvent.ConfirmDeleteCreditCard) },
+                onDismiss = { onEvent(BudgetUiEvent.DismissDeleteCreditCardDialog) }
+            )
+        }
+
+        // Discard Changes Dialog
+        if (state.isDiscardDialogOpen) {
+            DiscardChangesDialog(
+                onConfirmDiscard = { onEvent(BudgetUiEvent.ConfirmDiscardChanges) },
+                onContinueEditing = { onEvent(BudgetUiEvent.CancelDiscardChanges) }
+            )
+        }
+
+        // Snackbar Host
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+        )
     }
 }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
  * Host quản lý ModalBottomSheet duy nhất cho toàn bộ phân hệ Ngân sách.
  * Tuân thủ quy tắc: "Không stack nhiều sheet, host thay nội dung và duy trì backstack nội bộ".
  * Hỗ trợ khóa dismiss khi đang lưu (isSubmitting) và kiểm tra bản nháp bẩn (isCurrentSheetDirty).
+ * v2.1: Đúng 2 bottom sheets: CyclePickerSheet (C02) và EditBudgetSheet (C04).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,8 +29,6 @@ fun BudgetSheetHost(
 ) {
     if (destination == null) return
 
-    // Giữ tham chiếu lambda confirmValueChange ổn định qua các lần recompose khi gõ phím;
-    // tránh để rememberSaveable bên trong rememberModalBottomSheetState khởi tạo lại SheetState mỗi lần state đổi.
     val isSubmittingState = rememberUpdatedState(state.isSubmitting)
     val confirmSheetValueChange: (SheetValue) -> Boolean = remember {
         { !isSubmittingState.value }
@@ -70,23 +69,6 @@ fun BudgetSheetHost(
                 )
             }
 
-            BudgetSheetDestination.WalletSettings -> {
-                WalletSettingsSheet(
-                    selectedCycle = state.selectedCycle,
-                    currentSnapshot = state.snapshot,
-                    canWrite = state.canWrite,
-                    disabledReason = state.writeDisabledReason,
-                    onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) },
-                    onManageCardsClick = { onEvent(BudgetUiEvent.OpenCreditCardManage) },
-                    onHistoryClick = { onEvent(BudgetUiEvent.OpenAdjustmentHistory) },
-                    onClose = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            onEvent(BudgetUiEvent.DismissSheet)
-                        }
-                    }
-                )
-            }
-
             is BudgetSheetDestination.EditBudget -> {
                 EditBudgetSheet(
                     currentLimit = destination.currentLimit,
@@ -103,64 +85,6 @@ fun BudgetSheetHost(
                     onSave = { newLimit -> onEvent(BudgetUiEvent.SubmitBudgetLimit(newLimit)) },
                     onCancel = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) },
                     onClose = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) }
-                )
-            }
-
-            BudgetSheetDestination.CreditCardManage -> {
-                CreditCardManageSheet(
-                    cards = state.creditCards,
-                    canWrite = state.canWrite,
-                    disabledReason = state.writeDisabledReason,
-                    isSubmitting = state.isSubmitting,
-                    onAddCardClick = { onEvent(BudgetUiEvent.OpenAddCreditCard) },
-                    onRenameCardClick = { card -> onEvent(BudgetUiEvent.OpenRenameCreditCard(card)) },
-                    onDeleteCardClick = { card -> onEvent(BudgetUiEvent.RequestDeleteCreditCard(card)) },
-                    onClose = {
-                        onEvent(BudgetUiEvent.BackPressedInSheet(isDirty = false))
-                    }
-                )
-            }
-
-            BudgetSheetDestination.AddCreditCard -> {
-                AddCreditCardSheet(
-                    draftText = state.addCardDraft,
-                    onDraftChange = { text -> onEvent(BudgetUiEvent.UpdateAddCardDraft(text)) },
-                    canWrite = state.canWrite,
-                    disabledReason = state.writeDisabledReason,
-                    isSubmitting = state.isSubmitting,
-                    inlineError = state.addCardInlineError,
-                    existingCardNames = state.creditCards.map { it.name },
-                    onSave = { name -> onEvent(BudgetUiEvent.SubmitAddCreditCard(name)) },
-                    onCancel = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) },
-                    onClose = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) }
-                )
-            }
-
-            is BudgetSheetDestination.RenameCreditCard -> {
-                val isCardAvailable = state.creditCards.any { it.id == destination.card.id && !it.isArchived }
-                RenameCreditCardSheet(
-                    card = destination.card,
-                    draftText = state.renameCardDraft,
-                    onDraftChange = { text -> onEvent(BudgetUiEvent.UpdateRenameCardDraft(text)) },
-                    isCardAvailable = isCardAvailable,
-                    canWrite = state.canWrite,
-                    disabledReason = state.writeDisabledReason,
-                    isSubmitting = state.isSubmitting,
-                    inlineError = state.renameCardInlineError,
-                    existingCardNames = state.creditCards.map { it.name },
-                    onSave = { newName -> onEvent(BudgetUiEvent.SubmitRenameCreditCard(destination.card.id, newName)) },
-                    onCancel = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) },
-                    onClose = { isDirty -> onEvent(BudgetUiEvent.BackPressedInSheet(isDirty)) }
-                )
-            }
-
-            BudgetSheetDestination.AdjustmentHistory -> {
-                AdjustmentHistorySheet(
-                    adjustments = state.adjustments,
-                    cycleRange = state.selectedCycle?.dateRangeText ?: "",
-                    onClose = {
-                        onEvent(BudgetUiEvent.BackPressedInSheet(isDirty = false))
-                    }
                 )
             }
         }

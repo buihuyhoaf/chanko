@@ -5,5 +5,6 @@ sealed interface BudgetUiEffect {
         val itemId: String,
         val routeId: Int = itemId.trim().removePrefix("item_").toIntOrNull() ?: -1
     ) : BudgetUiEffect
+    data class NavigateToWalletSettings(val expandHistory: Boolean = false) : BudgetUiEffect
     data class ShowSnackbar(val message: String) : BudgetUiEffect
 }
