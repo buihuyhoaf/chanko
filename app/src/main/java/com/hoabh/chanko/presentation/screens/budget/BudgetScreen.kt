@@ -6,22 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,98 +54,103 @@ fun BudgetScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars),
-        containerColor = CandyColors.background,
-        topBar = {
+            .background(CandyColors.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+        ) {
+            // 1. Top App Bar (đồng bộ kiểu dáng thanh tiêu đề Món đồ)
             BudgetTopAppBar(
                 onBackClick = onBackClick,
                 onWalletSettingsClick = { onEvent(BudgetUiEvent.OpenWalletSettings) }
             )
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when {
-                state.isLoading && state.snapshot == null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = CandyColors.brandPurple,
-                            modifier = Modifier.size(40.dp)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                when {
+                    state.isLoading && state.snapshot == null -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = CandyColors.brandPurple,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
+
+                    state.errorMessage != null && state.snapshot == null -> {
+                        BudgetErrorView(
+                            message = state.errorMessage,
+                            onRetry = { onEvent(BudgetUiEvent.Retry) }
                         )
                     }
-                }
 
-                state.errorMessage != null && state.snapshot == null -> {
-                    BudgetErrorView(
-                        message = state.errorMessage,
-                        onRetry = { onEvent(BudgetUiEvent.Retry) }
-                    )
-                }
+                    state.snapshot != null -> {
+                        val scrollState = rememberScrollState()
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(scrollState)
+                                .padding(CandySpace.md),
+                            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+                        ) {
+                            // 1. Cycle Selector Header
+                            val cycleText = state.selectedCycle?.dateRangeText ?: ""
+                            BudgetCycleHeader(
+                                cycleRangeText = cycleText,
+                                onClick = { onEvent(BudgetUiEvent.OpenCyclePicker) }
+                            )
 
-                state.snapshot != null -> {
-                    val scrollState = rememberScrollState()
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                            .padding(CandySpace.md),
-                        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-                    ) {
-                        // 1. Cycle Selector Header
-                        val cycleText = state.selectedCycle?.dateRangeText ?: ""
-                        BudgetCycleHeader(
-                            cycleRangeText = cycleText,
-                            onClick = { onEvent(BudgetUiEvent.OpenCyclePicker) }
-                        )
+                            // 2. Offline and Past-cycle Banners
+                            BudgetReadOnlyBanner(
+                                isOnline = state.isOnline,
+                                lastSyncTimeText = state.lastSyncTimeText,
+                                isPastCycle = !state.isCurrentCycle
+                            )
 
-                        // 2. Offline and Past-cycle Banners
-                        BudgetReadOnlyBanner(
-                            isOnline = state.isOnline,
-                            lastSyncTimeText = state.lastSyncTimeText,
-                            isPastCycle = !state.isCurrentCycle
-                        )
+                            // 3. Summary Card (Ngân sách, Đã chi, Còn lại / Vượt ngân sách, Progress bar)
+                            BudgetSummaryCard(
+                                snapshot = state.snapshot,
+                                canWrite = state.canWrite,
+                                onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
+                            )
 
-                        // 3. Summary Card (Ngân sách, Đã chi, Còn lại / Vượt ngân sách, Progress bar)
-                        BudgetSummaryCard(
-                            snapshot = state.snapshot,
-                            canWrite = state.canWrite,
-                            onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
-                        )
+                            // 4. Mascot 3D Slot
+                            BudgetMascotSlot(
+                                isOverBudget = state.isOverBudget,
+                                isZeroSpend = state.isZeroSpend
+                            )
 
-                        // 4. Mascot 3D Slot
-                        BudgetMascotSlot(
-                            isOverBudget = state.isOverBudget,
-                            isZeroSpend = state.isZeroSpend
-                        )
+                            // 5. Payment Breakdown (Readonly list)
+                            BudgetPaymentBreakdown(
+                                methods = state.paymentMethods
+                            )
 
-                        // 5. Payment Breakdown (Readonly list)
-                        BudgetPaymentBreakdown(
-                            methods = state.paymentMethods
-                        )
+                            // 6. Notable Items (Up to 3 items -> Shared Item Detail)
+                            BudgetNotableItems(
+                                items = state.notableItems,
+                                isPastCycle = !state.isCurrentCycle,
+                                onItemClick = { itemId -> onEvent(BudgetUiEvent.NotableItemClicked(itemId)) }
+                            )
 
-                        // 6. Notable Items (Up to 3 items -> Shared Item Detail)
-                        BudgetNotableItems(
-                            items = state.notableItems,
-                            isPastCycle = !state.isCurrentCycle,
-                            onItemClick = { itemId -> onEvent(BudgetUiEvent.NotableItemClicked(itemId)) }
-                        )
+                            // 7. Recent Activity (Up to 3 budget-affecting events)
+                            BudgetRecentActivity(
+                                activities = state.recentActivities,
+                                onActivityClick = { activity -> onEvent(BudgetUiEvent.ActivityItemClicked(activity)) }
+                            )
 
-                        // 7. Recent Activity (Up to 3 budget-affecting events)
-                        BudgetRecentActivity(
-                            activities = state.recentActivities,
-                            onActivityClick = { activity -> onEvent(BudgetUiEvent.ActivityItemClicked(activity)) }
-                        )
-
-                        Spacer(modifier = Modifier.height(CandySpace.xl))
+                            Spacer(modifier = Modifier.height(CandySpace.xl))
+                        }
                     }
                 }
             }
@@ -166,39 +169,44 @@ private fun BudgetTopAppBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(horizontal = CandySpace.sm),
+            .padding(start = CandySpace.sm, end = CandySpace.lg, top = CandySpace.xs, bottom = CandySpace.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .size(48.dp)
-                .semantics {
-                    role = Role.Button
-                    contentDescription = "Quay lại"
-                }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            ChankoIcon(
-                id = ChankoIconId.ACT_02,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .size(44.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = "Quay lại"
+                    }
+            ) {
+                ChankoIcon(
+                    id = ChankoIconId.ACT_02,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.budget_title),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                ),
+                color = CandyColors.textPrimary
             )
         }
-
-        Text(
-            text = stringResource(R.string.budget_title),
-            fontFamily = Nunito,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = CandyColors.textPrimary
-        )
 
         IconButton(
             onClick = onWalletSettingsClick,
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .semantics {
                     role = Role.Button
                     contentDescription = settingsActionDesc

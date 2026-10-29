@@ -76,8 +76,23 @@ fun HomeBudgetSnapshot(
     modifier: Modifier = Modifier,
     canOpenDetails: Boolean = true
 ) {
+    val isCardClickable = canOpenDetails && sectionState is SectionState.Content
+
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(SnapshotCardRadius))
+            .then(
+                if (isCardClickable) {
+                    Modifier.clickable(
+                        role = Role.Button,
+                        onClickLabel = stringResource(R.string.home_budget_details_cta),
+                        onClick = onDetailsClick
+                    )
+                } else {
+                    Modifier
+                }
+            ),
         shape = RoundedCornerShape(SnapshotCardRadius),
         color = CandyColors.budgetSnapshotBg,
         tonalElevation = CandyElevation.low,
