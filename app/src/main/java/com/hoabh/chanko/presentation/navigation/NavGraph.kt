@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.archived.ArchivedItemsRoute
+import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
 import com.hoabh.chanko.presentation.screens.transaction.TransactionDetailRoute
@@ -138,8 +139,26 @@ fun NavGraph(
                 navController.navigate(Screen.NewChat.route) {
                     launchSingleTop = true
                 }
+            },
+            onNavigateToBudgetDetails = {
+                navController.navigate(Screen.BudgetDetails.route) {
+                    launchSingleTop = true
+                }
             }
         )
+
+        composable(
+            route = Screen.BudgetDetails.route
+        ) {
+            BudgetRoute(
+                onBackClick = { navController.popBackStack() },
+                onNavigateToItemDetail = { itemId ->
+                    navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
 
         composable(
             route = Screen.ArchivedItems.route

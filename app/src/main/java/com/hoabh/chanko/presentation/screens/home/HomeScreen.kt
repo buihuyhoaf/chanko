@@ -44,6 +44,7 @@ fun HomeRoute(
     modifier: Modifier = Modifier,
     onAddNewItemClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
+    onBudgetDetailsClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -53,7 +54,7 @@ fun HomeRoute(
             HomeUiEffect.NavigateToProfile -> onProfileClick()
             HomeUiEffect.OpenQuickCheckFlow,
             HomeUiEffect.OpenSaveItemFlow -> onAddNewItemClick()
-            HomeUiEffect.NavigateToBudgetDetails,
+            HomeUiEffect.NavigateToBudgetDetails -> onBudgetDetailsClick()
             is HomeUiEffect.NavigateToDecisionDetail,
             HomeUiEffect.NavigateToAllDecisions,
             is HomeUiEffect.OpenObservationExplanation,

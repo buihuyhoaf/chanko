@@ -68,7 +68,8 @@ fun NavGraphBuilder.mainDestination(
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
     onNavigateToChatThread: (String) -> Unit = {},
-    onNavigateToNewChat: () -> Unit = {}
+    onNavigateToNewChat: () -> Unit = {},
+    onNavigateToBudgetDetails: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
         MainNavigation(
@@ -77,7 +78,8 @@ fun NavGraphBuilder.mainDestination(
             onNavigateToItemDetail = onNavigateToItemDetail,
             onNavigateToArchived = onNavigateToArchived,
             onNavigateToChatThread = onNavigateToChatThread,
-            onNavigateToNewChat = onNavigateToNewChat
+            onNavigateToNewChat = onNavigateToNewChat,
+            onNavigateToBudgetDetails = onNavigateToBudgetDetails
         )
     }
 }
@@ -100,7 +102,8 @@ fun MainNavigation(
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {},
     onNavigateToChatThread: (String) -> Unit = {},
-    onNavigateToNewChat: () -> Unit = {}
+    onNavigateToNewChat: () -> Unit = {},
+    onNavigateToBudgetDetails: () -> Unit = {}
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
@@ -129,7 +132,8 @@ fun MainNavigation(
                 composable(TopLevelDestination.Home.route) {
                     HomeRoute(
                         onAddNewItemClick = onAddNewItemClick,
-                        onProfileClick = onNavigateToProfile
+                        onProfileClick = onNavigateToProfile,
+                        onBudgetDetailsClick = onNavigateToBudgetDetails
                     )
                 }
                 composable(TopLevelDestination.MyItems.route) {

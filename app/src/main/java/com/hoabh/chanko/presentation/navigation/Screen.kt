@@ -16,6 +16,7 @@ sealed class Screen(val route: String) {
     data object ArchivedItems : Screen("archived_items")
     data object Profile : Screen("profile")
     data object Personality : Screen("personality")
+    data object BudgetDetails : Screen("budget_details")
 
     // CHAT-UX-REV-01 Navigation Routes
     data object Chat : Screen("chat") // Screen 1: CL (Chat List)
