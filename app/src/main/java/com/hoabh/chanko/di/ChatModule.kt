@@ -2,6 +2,7 @@ package com.hoabh.chanko.di
 
 import com.hoabh.chanko.data.chat.remote.FakeChatDataSource
 import com.hoabh.chanko.data.chat.repository.ChatRepositoryImpl
+import com.hoabh.chanko.data.local.chat.dao.ChatDao
 import com.hoabh.chanko.domain.chat.repository.ChatRepository
 import dagger.Module
 import dagger.Provides
@@ -22,8 +23,9 @@ object ChatModule {
     @Provides
     @Singleton
     fun provideChatRepository(
+        chatDao: ChatDao,
         fakeDataSource: FakeChatDataSource
     ): ChatRepository {
-        return ChatRepositoryImpl(fakeDataSource)
+        return ChatRepositoryImpl(chatDao, fakeDataSource)
     }
 }

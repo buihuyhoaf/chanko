@@ -2,8 +2,12 @@ package com.hoabh.chanko.data.local.chat.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.hoabh.chanko.domain.chat.model.ChatMessage
 import com.hoabh.chanko.domain.chat.model.ChatThread
+import com.hoabh.chanko.domain.chat.model.DecisionVerdict
 import com.hoabh.chanko.domain.chat.model.ItemContextStatus
+import com.hoabh.chanko.domain.chat.model.MascotEmotion
+import com.hoabh.chanko.domain.chat.model.MessageSender
 import com.hoabh.chanko.domain.chat.model.ThreadMode
 
 @Entity(tableName = "chat_threads")
@@ -67,4 +71,33 @@ data class ChatMessageEntity(
     val emotion: String,
     val verdict: String?,
     val cachedAt: Long
-)
+) {
+    fun toDomain(): ChatMessage = ChatMessage(
+        id = id,
+        threadId = threadId,
+        sender = when (sender) {
+            "USER" -> MessageSender.USER
+            "SYSTEM" -> MessageSender.SYSTEM
+            else -> MessageSender.CHANKO
+        },
+        text = text,
+        timestamp = timestamp,
+        emotion = runCatching { MascotEmotion.valueOf(emotion) }.getOrDefault(MascotEmotion.NEUTRAL),
+        verdict = verdict?.let { runCatching { DecisionVerdict.valueOf(it) }.getOrNull() },
+        isPending = false
+    )
+
+    companion object {
+        fun fromDomain(domain: ChatMessage, cachedAt: Long = System.currentTimeMillis()): ChatMessageEntity =
+            ChatMessageEntity(
+                id = domain.id,
+                threadId = domain.threadId,
+                sender = domain.sender.name,
+                text = domain.text,
+                timestamp = domain.timestamp,
+                emotion = domain.emotion.name,
+                verdict = domain.verdict?.name,
+                cachedAt = cachedAt
+            )
+    }
+}
