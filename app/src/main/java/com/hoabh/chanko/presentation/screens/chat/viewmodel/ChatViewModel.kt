@@ -80,8 +80,14 @@ class ChatViewModel @Inject constructor(
         itemPrice: Long? = null
     ) {
         if (!threadId.isNullOrBlank() && threadId != "new") {
-            selectThread(threadId)
+            if (currentState.thread?.id != threadId) {
+                selectThread(threadId)
+            }
         } else {
+            if (currentState.thread != null) {
+                return
+            }
+
             observeThreadJob?.cancel()
             observeMessagesJob?.cancel()
 

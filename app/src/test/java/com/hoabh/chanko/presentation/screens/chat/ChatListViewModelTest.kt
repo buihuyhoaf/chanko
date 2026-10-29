@@ -22,6 +22,7 @@ import org.junit.Test
 class ChatListViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private lateinit var fakeChatDao: FakeChatDao
     private lateinit var fakeDataSource: FakeChatDataSource
     private lateinit var repository: ChatRepositoryImpl
     private lateinit var viewModel: ChatListViewModel
@@ -29,8 +30,9 @@ class ChatListViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        fakeChatDao = FakeChatDao()
         fakeDataSource = FakeChatDataSource()
-        repository = ChatRepositoryImpl(fakeDataSource)
+        repository = ChatRepositoryImpl(fakeChatDao, fakeDataSource)
         viewModel = ChatListViewModel(repository)
     }
 

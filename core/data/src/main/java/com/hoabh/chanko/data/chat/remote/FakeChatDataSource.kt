@@ -26,6 +26,12 @@ class FakeChatDataSource {
 
     private val _messages = MutableStateFlow<Map<String, List<ChatMessage>>>(emptyMap())
 
+    val initialThreads: List<ChatThread>
+        get() = _threads.value
+
+    val initialMessages: Map<String, List<ChatMessage>>
+        get() = _messages.value
+
     init {
         seedInitialFixtures()
     }
