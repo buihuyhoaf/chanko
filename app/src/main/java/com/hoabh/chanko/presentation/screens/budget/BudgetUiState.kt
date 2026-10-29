@@ -5,6 +5,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.CreditCard
+import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
 import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetDestination
@@ -49,6 +50,15 @@ data class BudgetUiState(
     val renameCardInitialText: String = "",
     val renameCardInlineError: String? = null
 ) {
+    companion object {
+        fun isBudgetDraftDirty(draft: String, initialText: String): Boolean {
+            val initialAmount = MoneyVnd.parse(initialText)
+            val amount = MoneyVnd.parse(draft)
+            return if (amount != null && initialAmount != null) amount != initialAmount
+            else draft.trim() != initialText.trim()
+        }
+    }
+
     val isCurrentCycle: Boolean get() = selectedCycle?.isCurrent == true
 
     /**
@@ -72,7 +82,7 @@ data class BudgetUiState(
     /** Kiểm tra form đang mở có thay đổi chưa lưu hay không. */
     val isCurrentSheetDirty: Boolean
         get() = when (currentSheet) {
-            is BudgetSheetDestination.EditBudget -> editBudgetDraft.trim() != editBudgetInitialText.trim()
+            is BudgetSheetDestination.EditBudget -> isBudgetDraftDirty(editBudgetDraft, editBudgetInitialText)
             BudgetSheetDestination.AddCreditCard -> addCardDraft.isNotBlank()
             is BudgetSheetDestination.RenameCreditCard ->
                 CreditCard.normalizeName(renameCardDraft) != CreditCard.normalizeName(renameCardInitialText)

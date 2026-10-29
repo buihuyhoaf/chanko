@@ -2,9 +2,12 @@ package com.hoabh.chanko.presentation.screens.budget.sheets
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import com.hoabh.chanko.presentation.screens.budget.BudgetUiEvent
 import com.hoabh.chanko.presentation.screens.budget.BudgetUiState
@@ -25,9 +28,16 @@ fun BudgetSheetHost(
 ) {
     if (destination == null) return
 
+    // Giữ tham chiếu lambda confirmValueChange ổn định qua các lần recompose khi gõ phím;
+    // tránh để rememberSaveable bên trong rememberModalBottomSheetState khởi tạo lại SheetState mỗi lần state đổi.
+    val isSubmittingState = rememberUpdatedState(state.isSubmitting)
+    val confirmSheetValueChange: (SheetValue) -> Boolean = remember {
+        { !isSubmittingState.value }
+    }
+
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { !state.isSubmitting }
+        confirmValueChange = confirmSheetValueChange
     )
     val scope = rememberCoroutineScope()
 

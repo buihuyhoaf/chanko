@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,8 +58,13 @@ fun AddCreditCardSheet(
     onClose: (Boolean) -> Unit = onCancel,
     modifier: Modifier = Modifier
 ) {
-    var localDraft by rememberSaveable { mutableStateOf("") }
-    val rawInput = draftText ?: localDraft
+    var localDraft by rememberSaveable { mutableStateOf(draftText ?: "") }
+    LaunchedEffect(draftText) {
+        if (draftText != null && draftText != localDraft) {
+            localDraft = draftText
+        }
+    }
+    val rawInput = localDraft
 
     var hadFocus by rememberSaveable { mutableStateOf(false) }
     var hasBlurred by rememberSaveable { mutableStateOf(false) }
@@ -253,7 +259,7 @@ fun AddCreditCardSheet(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = if (isSubmitting) "Đang thêm…" else stringResource(R.string.budget_card_action_add),
+                        text = if (isSubmitting) stringResource(R.string.budget_status_adding) else stringResource(R.string.budget_card_add_submit),
                         fontFamily = Nunito,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,

@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,8 +59,13 @@ fun RenameCreditCardSheet(
     onClose: (Boolean) -> Unit = onCancel,
     modifier: Modifier = Modifier
 ) {
-    var localDraft by rememberSaveable(card.id) { mutableStateOf(card.name) }
-    val rawInput = draftText ?: localDraft
+    var localDraft by rememberSaveable(card.id) { mutableStateOf(draftText ?: card.name) }
+    LaunchedEffect(draftText) {
+        if (draftText != null && draftText != localDraft) {
+            localDraft = draftText
+        }
+    }
+    val rawInput = localDraft
 
     val normalized = CreditCard.normalizeName(rawInput)
     val graphemeCount = CreditCard.graphemeCount(normalized)
@@ -259,7 +265,7 @@ fun RenameCreditCardSheet(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = if (isSubmitting) "Đang lưu…" else stringResource(R.string.budget_btn_save),
+                        text = if (isSubmitting) stringResource(R.string.budget_status_saving) else stringResource(R.string.budget_btn_save),
                         fontFamily = Nunito,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,

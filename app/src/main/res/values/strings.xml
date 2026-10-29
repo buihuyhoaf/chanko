@@ -269,4 +269,10 @@
     <string name="budget_btn_cancel">Hủy</string>
     <string name="budget_btn_retry">Thử lại</string>
     <string name="budget_btn_back">Quay lại</string>
+    <string name="budget_status_saving">Đang lưu…</string>
+    <string name="budget_status_adding">Đang thêm…</string>
+    <string name="budget_status_deleting">Đang xóa…</string>
+    <string name="budget_card_add_submit">Thêm</string>
+    <string name="budget_edit_preview_spoken_over">Ngân sách mới: %1$s. Đã chi: %2$s. Vượt ngân sách sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
+    <string name="budget_edit_preview_spoken_remaining">Ngân sách mới: %1$s. Đã chi: %2$s. Còn lại sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
 </resources>

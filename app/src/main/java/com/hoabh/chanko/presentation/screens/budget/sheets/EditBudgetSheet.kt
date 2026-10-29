@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,7 +50,8 @@ import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.Nunito
-import kotlin.math.roundToInt
+import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.presentation.screens.budget.BudgetUiState
 
 @Composable
 fun EditBudgetSheet(
@@ -70,8 +72,15 @@ fun EditBudgetSheet(
     modifier: Modifier = Modifier
 ) {
     val initialText = if (currentLimit > 0L) MoneyVnd.formatWithoutSymbol(currentLimit) else ""
-    var localDraft by rememberSaveable(currentLimit) { mutableStateOf(initialText) }
-    val rawInput = draftText ?: localDraft
+    var localDraft by rememberSaveable(currentLimit) {
+        mutableStateOf(draftText?.takeIf { it.isNotEmpty() } ?: initialText)
+    }
+    LaunchedEffect(draftText) {
+        if (draftText != null && draftText != localDraft) {
+            localDraft = draftText
+        }
+    }
+    val rawInput = localDraft
 
     var hadFocus by rememberSaveable { mutableStateOf(false) }
     var hasBlurred by rememberSaveable { mutableStateOf(false) }
@@ -79,8 +88,8 @@ fun EditBudgetSheet(
     val trimmed = rawInput.trim()
     val parsedAmount = MoneyVnd.parse(rawInput)
     val isValid = parsedAmount != null && MoneyVnd.isValidBudget(parsedAmount)
-    val isDirty = (parsedAmount ?: -1L) != currentLimit && trimmed != initialText.trim()
-    val canSubmit = isValid && (parsedAmount != currentLimit) && canWrite && !isSubmitting && !hasConflict
+    val isDirty = BudgetUiState.isBudgetDraftDirty(rawInput, initialText)
+    val canSubmit = isValid && isDirty && canWrite && !isSubmitting && !hasConflict
 
     val fieldError: String? = when {
         trimmed.isEmpty() && hasBlurred -> stringResource(R.string.budget_edit_error_empty)
@@ -267,21 +276,16 @@ fun EditBudgetSheet(
             val isOver = newLimit < currentSpent
             val remainingOrOver = if (isOver) currentSpent - newLimit else newLimit - currentSpent
             val ratio = if (newLimit > 0L) currentSpent.toFloat() / newLimit else 0f
-            val percentageInt = (ratio * 100f).roundToInt()
+            val percentageInt = BudgetSnapshot.calculatePercentageInt(currentSpent, newLimit)
             val visualProgress = ratio.coerceIn(0f, 1f)
 
             val animatedProgress by animateFloatAsState(targetValue = visualProgress, label = "EditPreviewProgress")
 
-            val previewSpoken = buildString {
-                append("Ngân sách mới: ${MoneyVnd.spoken(newLimit)}. ")
-                append("Đã chi: ${MoneyVnd.spoken(currentSpent)}. ")
-                if (isOver) {
-                    append("Vượt ngân sách sau thay đổi: ${MoneyVnd.spoken(remainingOrOver)}. ")
-                } else {
-                    append("Còn lại sau thay đổi: ${MoneyVnd.spoken(remainingOrOver)}. ")
-                }
-                append("Tỷ lệ: $percentageInt phần trăm.")
-            }
+            val previewSpoken = stringResource(
+                if (isOver) R.string.budget_edit_preview_spoken_over else R.string.budget_edit_preview_spoken_remaining,
+                MoneyVnd.spoken(newLimit), MoneyVnd.spoken(currentSpent),
+                MoneyVnd.spoken(remainingOrOver), percentageInt
+            )
 
             Column(
                 modifier = Modifier
@@ -462,7 +466,7 @@ fun EditBudgetSheet(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = if (isSubmitting) "Đang lưu…" else stringResource(R.string.budget_btn_save),
+                        text = if (isSubmitting) stringResource(R.string.budget_status_saving) else stringResource(R.string.budget_btn_save),
                         fontFamily = Nunito,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,

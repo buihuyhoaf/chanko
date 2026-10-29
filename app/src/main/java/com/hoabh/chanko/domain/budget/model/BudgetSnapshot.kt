@@ -1,6 +1,7 @@
 package com.hoabh.chanko.domain.budget.model
 
-import kotlin.math.roundToInt
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
  * Ảnh chụp trạng thái ngân sách của một chu kỳ (Domain Model).
@@ -17,6 +18,17 @@ data class BudgetSnapshot(
     val revision: Int = 1,
     val updatedAt: Long = System.currentTimeMillis()
 ) {
+    companion object {
+        /** Exact half-up label; Float is reserved for drawing the progress bar. */
+        fun calculatePercentageInt(spentMinor: Long, budgetMinor: Long): Int {
+            if (budgetMinor <= 0L) return 0
+            return BigDecimal.valueOf(spentMinor).movePointRight(2)
+                .divide(BigDecimal.valueOf(budgetMinor), 0, RoundingMode.HALF_UP)
+                .coerceIn(BigDecimal.valueOf(Int.MIN_VALUE.toLong()), BigDecimal.valueOf(Int.MAX_VALUE.toLong()))
+                .toInt()
+        }
+    }
+
     val remainingMinor: Long get() = budgetMinor - spentMinor
 
     val overMinor: Long get() = (spentMinor - budgetMinor).coerceAtLeast(0L)
@@ -29,7 +41,7 @@ data class BudgetSnapshot(
         get() = if (budgetMinor > 0L) spentMinor.toFloat() / budgetMinor else 0f
 
     val percentageInt: Int
-        get() = (ratio * 100f).roundToInt()
+        get() = calculatePercentageInt(spentMinor, budgetMinor)
 
     val visualProgress: Float
         get() = ratio.coerceIn(0f, 1f)

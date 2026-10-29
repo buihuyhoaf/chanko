@@ -84,4 +84,14 @@ class BudgetSnapshotTest {
         val snap2 = BudgetSnapshot("c1", 3_000_000L, 2_000_000L)
         assertEquals(67, snap2.percentageInt)
     }
+    @Test
+    fun `large amounts around a half percent boundary remain exact`() {
+        val limit = 999_999_999_800L
+        val half = 504_999_999_899L
+        assertEquals(50, BudgetSnapshot.calculatePercentageInt(half - 1L, limit))
+        assertEquals(51, BudgetSnapshot.calculatePercentageInt(half, limit))
+        assertEquals(51, BudgetSnapshot.calculatePercentageInt(half + 1L, limit))
+        assertEquals(111, BudgetSnapshot.calculatePercentageInt(221L, 200L))
+        assertEquals(Int.MAX_VALUE, BudgetSnapshot.calculatePercentageInt(Long.MAX_VALUE, 1L))
+    }
 }

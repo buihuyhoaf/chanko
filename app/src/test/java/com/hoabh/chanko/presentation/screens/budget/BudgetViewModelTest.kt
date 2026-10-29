@@ -294,4 +294,50 @@ class BudgetViewModelTest {
         assertNull(viewModel.uiState.value.deleteCardInlineError)
         assertFalse(viewModel.uiState.value.creditCards.any { it.id == targetCard.id })
     }
+    @Test
+    fun `equivalent budget formatting does not prompt discard but invalid edits do`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenEditBudget)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("5000000"))
+        assertFalse(viewModel.uiState.value.isCurrentSheetDirty)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("6000000"))
+        assertTrue(viewModel.uiState.value.isCurrentSheetDirty)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("invalid"))
+        assertTrue(viewModel.uiState.value.isCurrentSheetDirty)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft(""))
+        assertTrue(viewModel.uiState.value.isCurrentSheetDirty)
+    }
+
+    @Test
+    fun `conflict reload waits for cold overview and resets draft only once`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenEditBudget)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("6000000"))
+        // The existing subscriber has not processed this external update yet.
+        repository.simulateExternalBudgetUpdate(repository.currentCycleId, 7_000_000L)
+        viewModel.onEvent(BudgetUiEvent.ReloadConflict)
+        assertEquals("6000000", viewModel.uiState.value.editBudgetDraft)
+        assertTrue(viewModel.uiState.value.isLoading)
+        advanceUntilIdle()
+        assertEquals("7.000.000", viewModel.uiState.value.editBudgetDraft)
+        assertEquals(2, viewModel.uiState.value.editBudgetBaseRevision)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("8000000"))
+        repository.simulateExternalBudgetUpdate(repository.currentCycleId, 9_000_000L)
+        advanceUntilIdle()
+        assertEquals("8000000", viewModel.uiState.value.editBudgetDraft)
+        assertEquals(2, viewModel.uiState.value.editBudgetBaseRevision)
+    }
+
+    @Test
+    fun `failed conflict reload preserves draft and base revision`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(BudgetUiEvent.OpenEditBudget)
+        viewModel.onEvent(BudgetUiEvent.UpdateEditBudgetDraft("6000000"))
+        repository.simulateLoadErrorOnNextFetch = true
+        viewModel.onEvent(BudgetUiEvent.ReloadConflict)
+        advanceUntilIdle()
+        assertEquals("6000000", viewModel.uiState.value.editBudgetDraft)
+        assertEquals(1, viewModel.uiState.value.editBudgetBaseRevision)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
 }

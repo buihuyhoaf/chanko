@@ -82,7 +82,7 @@ fun DeleteCardConfirmDialog(
                 modifier = Modifier.heightIn(min = 48.dp)
             ) {
                 Text(
-                    text = if (isSubmitting) "Đang xóa…" else stringResource(R.string.budget_card_delete_confirm),
+                    text = if (isSubmitting) stringResource(R.string.budget_status_deleting) else stringResource(R.string.budget_card_delete_confirm),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
                     color = if (canConfirm) CandyColors.overBudget else CandyColors.textSecondary

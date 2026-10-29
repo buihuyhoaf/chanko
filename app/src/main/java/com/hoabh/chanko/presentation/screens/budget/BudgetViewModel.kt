@@ -140,7 +140,8 @@ class BudgetViewModel @Inject constructor(
      * Xoá ngay dữ liệu của kỳ cũ khi đổi kỳ để không bao giờ trộn số liệu giữa các kỳ
      * hoặc che khuất lỗi tải kỳ mới dưới snapshot kỳ cũ (C02, AC02/AC06).
      */
-    private fun loadCycleData(cycle: BudgetCycle) {
+    private fun loadCycleData(cycle: BudgetCycle, resetEditDraft: Boolean = false) {
+        var shouldResetDraft = resetEditDraft
         cycleDataJob?.cancel()
         val isSwitchingCycle = currentState.snapshot != null && currentState.snapshot?.cycleId != cycle.id
 
@@ -183,6 +184,25 @@ class BudgetViewModel @Inject constructor(
                     }
                 }
                 .collect { overview ->
+                    if (shouldResetDraft && currentState.selectedCycle?.id == cycle.id &&
+                        overview.cycleId == cycle.id && currentState.currentSheet is BudgetSheetDestination.EditBudget
+                    ) {
+                        val latestLimit = overview.snapshot.budgetMinor
+                        val latestText = if (latestLimit > 0L) MoneyVnd.formatWithoutSymbol(latestLimit) else ""
+                        savedStateHandle[KEY_EDIT_BUDGET_DRAFT] = latestText
+                        updateState {
+                            it.copy(
+                                currentSheet = BudgetSheetDestination.EditBudget(latestLimit),
+                                editBudgetInitialText = latestText,
+                                editBudgetDraft = latestText,
+                                editBudgetBaseRevision = overview.snapshot.revision,
+                                editBudgetInlineError = null,
+                                hasEditBudgetConflict = false
+                            )
+                        }
+                        shouldResetDraft = false
+                        sendEffect(BudgetUiEffect.ShowSnackbar("Đã tải lại ngân sách mới nhất. Vui lòng kiểm tra trước khi lưu."))
+                    }
                     updateState { state ->
                         if (state.selectedCycle?.id != cycle.id || overview.cycleId != cycle.id) {
                             state
@@ -399,27 +419,10 @@ class BudgetViewModel @Inject constructor(
 
     private fun handleReloadConflict() {
         val cycle = currentState.selectedCycle ?: return
-        loadCycleData(cycle)
-        val latestLimit = currentState.snapshot?.budgetMinor ?: 0L
-        val latestRevision = currentState.snapshot?.revision
-        val latestText = if (latestLimit > 0L) MoneyVnd.formatWithoutSymbol(latestLimit) else ""
-        savedStateHandle[KEY_EDIT_BUDGET_DRAFT] = latestText
-        updateState { state ->
-            val updatedSheet = if (state.currentSheet is BudgetSheetDestination.EditBudget) {
-                BudgetSheetDestination.EditBudget(latestLimit)
-            } else {
-                state.currentSheet
-            }
-            state.copy(
-                currentSheet = updatedSheet,
-                editBudgetInitialText = latestText,
-                editBudgetDraft = latestText,
-                editBudgetBaseRevision = latestRevision,
-                editBudgetInlineError = null,
-                hasEditBudgetConflict = false
-            )
-        }
-        sendEffect(BudgetUiEffect.ShowSnackbar("Đã tải lại ngân sách mới nhất. Vui lòng kiểm tra trước khi lưu."))
+        if (currentState.isLoading || currentState.isSubmitting ||
+            currentState.currentSheet !is BudgetSheetDestination.EditBudget
+        ) return
+        loadCycleData(cycle, resetEditDraft = true)
     }
 
     private fun clearCurrentFormDraft() {
