@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.screens.budget
 
+import com.hoabh.chanko.R
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.data.budget.InMemorySharedItemResolver
@@ -330,9 +331,9 @@ class BudgetViewModel @Inject constructor(
                 val otherActiveNames = currentState.creditCards.map { it.name }
                 val validation = CreditCard.validateAdd(event.text, otherActiveNames)
                 val inlineError = when (validation) {
-                    is AddCardValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
-                    is AddCardValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
-                    is AddCardValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                    is AddCardValidationResult.TooLong -> R.string.budget_card_error_ui_too_long
+                    is AddCardValidationResult.ReservedPayNow -> R.string.budget_card_error_reserved
+                    is AddCardValidationResult.Duplicate -> R.string.budget_card_error_duplicate
                     else -> null
                 }
                 updateState {
@@ -372,9 +373,9 @@ class BudgetViewModel @Inject constructor(
                     CreditCard.validateRename(event.text, card.name, otherActiveNames)
                 } else null
                 val inlineError = when (validation) {
-                    is RenameValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
-                    is RenameValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
-                    is RenameValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                    is RenameValidationResult.TooLong -> R.string.budget_card_error_ui_too_long
+                    is RenameValidationResult.ReservedPayNow -> R.string.budget_card_error_reserved
+                    is RenameValidationResult.Duplicate -> R.string.budget_card_error_duplicate
                     else -> null
                 }
                 updateState {
@@ -614,10 +615,10 @@ class BudgetViewModel @Inject constructor(
         val validation = CreditCard.validateAdd(name, otherNames)
         if (validation !is AddCardValidationResult.Valid) {
             val errorMsg = when (validation) {
-                is AddCardValidationResult.Empty -> "Nhập tên thẻ"
-                is AddCardValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
-                is AddCardValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
-                is AddCardValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                is AddCardValidationResult.Empty -> R.string.budget_card_error_empty
+                is AddCardValidationResult.TooLong -> R.string.budget_card_error_ui_too_long
+                is AddCardValidationResult.ReservedPayNow -> R.string.budget_card_error_reserved
+                is AddCardValidationResult.Duplicate -> R.string.budget_card_error_duplicate
                 else -> null
             }
             if (errorMsg != null) {
@@ -643,9 +644,9 @@ class BudgetViewModel @Inject constructor(
                 }
                 sendEffect(BudgetUiEffect.ShowSnackbar("Đã thêm thẻ"))
             }.onFailure { error ->
-                val msg = error.message ?: "Chưa thêm được thẻ. Vui lòng thử lại."
-                updateState { it.copy(addCardInlineError = "Chưa thêm được thẻ. Vui lòng thử lại.") }
-                sendEffect(BudgetUiEffect.ShowSnackbar(msg))
+                val msg = R.string.budget_card_add_error
+                updateState { it.copy(addCardInlineError = R.string.budget_card_add_error) }
+                sendEffect(BudgetUiEffect.ShowSnackbarResource(msg))
             }
         }
     }
@@ -658,10 +659,10 @@ class BudgetViewModel @Inject constructor(
         val validation = CreditCard.validateRename(newName, card?.name ?: "", otherNames)
         if (validation !is RenameValidationResult.Valid) {
             val errorMsg = when (validation) {
-                is RenameValidationResult.Empty -> "Nhập tên thẻ"
-                is RenameValidationResult.TooLong -> "Tên thẻ tối đa 30 ký tự"
-                is RenameValidationResult.ReservedPayNow -> "Tên này dành cho Pay Now"
-                is RenameValidationResult.Duplicate -> "Tên thẻ đã tồn tại"
+                is RenameValidationResult.Empty -> R.string.budget_card_error_empty
+                is RenameValidationResult.TooLong -> R.string.budget_card_error_ui_too_long
+                is RenameValidationResult.ReservedPayNow -> R.string.budget_card_error_reserved
+                is RenameValidationResult.Duplicate -> R.string.budget_card_error_duplicate
                 else -> null
             }
             if (errorMsg != null) {
@@ -690,12 +691,12 @@ class BudgetViewModel @Inject constructor(
                 sendEffect(BudgetUiEffect.ShowSnackbar("Đã đổi tên thẻ"))
             }.onFailure { error ->
                 val inlineMsg = if (error is CreditCardUnavailableException) {
-                    "Thẻ không còn khả dụng"
+                    R.string.budget_card_rename_unusable
                 } else {
-                    "Chưa đổi tên được thẻ. Vui lòng thử lại."
+                    R.string.budget_card_rename_error
                 }
                 updateState { it.copy(renameCardInlineError = inlineMsg) }
-                sendEffect(BudgetUiEffect.ShowSnackbar(inlineMsg))
+                sendEffect(BudgetUiEffect.ShowSnackbarResource(inlineMsg))
             }
         }
     }

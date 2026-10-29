@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.hoabh.chanko.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -44,7 +46,17 @@ fun CardPreview(
     color: CardColor,
     modifier: Modifier = Modifier
 ) {
-    val displayName = name.trim().ifEmpty { "Tên thẻ" }
+    val placeholder = stringResource(R.string.budget_card_add_field_label)
+    val displayName = name.trim().ifEmpty { placeholder }
+    val colorName = stringResource(when (color) {
+        CardColor.PURPLE -> R.string.budget_card_color_purple
+        CardColor.PINK -> R.string.budget_card_color_pink
+        CardColor.BLUE -> R.string.budget_card_color_blue
+        CardColor.MINT -> R.string.budget_card_color_mint
+        CardColor.YELLOW -> R.string.budget_card_color_yellow
+        CardColor.ORANGE -> R.string.budget_card_color_orange
+    })
+    val previewDescription = stringResource(R.string.budget_card_preview_description, displayName, colorName)
     val isPlaceholder = name.trim().isEmpty()
     val baseColor = Color(color.colorLong)
     val gradientBrush = Brush.linearGradient(
@@ -65,7 +77,7 @@ fun CardPreview(
                 ambientColor = baseColor.copy(alpha = 0.2f)
             )
             .semantics {
-                contentDescription = "Thẻ xem trước: $displayName, màu ${color.displayName}"
+                contentDescription = previewDescription
             },
         shape = RoundedCornerShape(20.dp),
         color = Color.Transparent
@@ -139,7 +151,7 @@ fun CardPreview(
                     )
 
                     Text(
-                        text = "CHANKO",
+                        text = stringResource(R.string.budget_card_preview_brand),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.ExtraBold,

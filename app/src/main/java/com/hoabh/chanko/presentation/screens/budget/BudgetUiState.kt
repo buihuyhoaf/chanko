@@ -1,5 +1,7 @@
 package com.hoabh.chanko.presentation.screens.budget
 
+import androidx.annotation.StringRes
+
 import com.hoabh.chanko.domain.budget.model.BudgetActivity
 import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
@@ -48,13 +50,13 @@ data class BudgetUiState(
     val isAddCardDialogOpen: Boolean = false,
     val addCardDraft: String = "",
     val addCardColor: CardColor = CardColor.PURPLE,
-    val addCardInlineError: String? = null,
+    @param:StringRes val addCardInlineError: Int? = null,
     // C07 Rename Credit Card form state (Dialog)
     val isRenameCardDialogOpen: Boolean = false,
     val cardToRename: CreditCard? = null,
     val renameCardDraft: String = "",
     val renameCardInitialText: String = "",
-    val renameCardInlineError: String? = null,
+    @param:StringRes val renameCardInlineError: Int? = null,
     val isLegacyNameOverLimit: Boolean = false,
     // C09 Adjustment History accordion state in C03 Screen
     val isHistoryExpanded: Boolean = false

@@ -113,7 +113,7 @@ fun BudgetScreen(
                     IconButton(onClick = { isMenuExpanded = true }) {
                         ChankoIcon(
                             id = ChankoIconId.ACT_10,
-                            contentDescription = "Tùy chọn ngân sách"
+                            contentDescription = stringResource(R.string.budget_menu_options)
                         )
                     }
                     DropdownMenu(
@@ -121,7 +121,7 @@ fun BudgetScreen(
                         onDismissRequest = { isMenuExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Sửa ngân sách") },
+                            text = { Text(stringResource(R.string.budget_wallet_action_edit_budget)) },
                             leadingIcon = {
                                 ChankoIcon(
                                     id = ChankoIconId.ACT_05,
@@ -199,7 +199,7 @@ fun BudgetScreen(
                 isOpen = state.isAddCardDialogOpen,
                 draftName = state.addCardDraft,
                 selectedColor = state.addCardColor,
-                errorMessage = state.addCardInlineError,
+                errorMessage = state.addCardInlineError?.let { stringResource(it) },
                 canSave = state.canSubmitAddCard,
                 isSubmitting = state.isSubmitting,
                 onDraftChange = { text -> onEvent(BudgetUiEvent.UpdateAddCardDraft(text)) },
@@ -217,7 +217,7 @@ fun BudgetScreen(
                 isOpen = state.isRenameCardDialogOpen,
                 card = state.cardToRename,
                 draftName = state.renameCardDraft,
-                errorMessage = state.renameCardInlineError,
+                errorMessage = state.renameCardInlineError?.let { stringResource(it) },
                 isLegacyOverLimit = state.isLegacyNameOverLimit,
                 canSave = state.canSubmitRename,
                 isSubmitting = state.isSubmitting,

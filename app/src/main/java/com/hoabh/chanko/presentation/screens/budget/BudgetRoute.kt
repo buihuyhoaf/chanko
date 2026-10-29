@@ -1,6 +1,8 @@
 package com.hoabh.chanko.presentation.screens.budget
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,13 +23,17 @@ import kotlinx.coroutines.launch
 fun BudgetRoute(
     onBackClick: () -> Unit,
     onNavigateToItemDetail: (Int) -> Unit = {},
-    onNavigateToWalletSettings: (Boolean) -> Unit = {},
+    expandHistory: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: BudgetViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    LaunchedEffect(expandHistory) {
+        if (expandHistory) viewModel.onEvent(BudgetUiEvent.ToggleHistoryAccordion(isExpanded = true))
+    }
 
     CollectEffect(effectFlow = viewModel.effect) { effect ->
         when (effect) {
@@ -39,7 +45,12 @@ fun BudgetRoute(
                     snackbarHostState.showSnackbar(effect.message)
                 }
             }
-            else -> Unit
+            is BudgetUiEffect.ShowSnackbarResource -> {
+                scope.launch { snackbarHostState.showSnackbar(context.getString(effect.messageRes)) }
+            }
+            is BudgetUiEffect.NavigateToWalletSettings -> {
+                if (effect.expandHistory) viewModel.onEvent(BudgetUiEvent.ToggleHistoryAccordion(isExpanded = true))
+            }
         }
     }
 

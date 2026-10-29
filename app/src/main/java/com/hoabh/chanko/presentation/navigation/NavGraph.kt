@@ -13,7 +13,6 @@ import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.presentation.screens.archived.ArchivedItemsRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
-import com.hoabh.chanko.presentation.screens.budget.wallet.WalletSettingsRoute
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
 import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
 import com.hoabh.chanko.presentation.screens.transaction.TransactionDetailRoute
@@ -156,11 +155,6 @@ fun NavGraph(
                     navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
                         launchSingleTop = true
                     }
-                },
-                onNavigateToWalletSettings = { expandHistory ->
-                    navController.navigate(Screen.WalletSettings.createRoute(expandHistory)) {
-                        launchSingleTop = true
-                    }
                 }
             )
         }
@@ -183,7 +177,7 @@ fun NavGraph(
                 }
             }
             val budgetViewModel: BudgetViewModel = hiltViewModel(parentEntry)
-            WalletSettingsRoute(
+            BudgetRoute(
                 onBackClick = { navController.popBackStack() },
                 expandHistory = expandHistory,
                 viewModel = budgetViewModel

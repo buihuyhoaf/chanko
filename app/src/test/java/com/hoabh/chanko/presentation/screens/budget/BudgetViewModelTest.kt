@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.screens.budget
 
+import com.hoabh.chanko.R
 import androidx.lifecycle.SavedStateHandle
 import com.hoabh.chanko.data.budget.FakeBudgetRepository
 import com.hoabh.chanko.data.budget.InMemorySharedItemResolver
@@ -371,17 +372,17 @@ class BudgetViewModelTest {
 
         // 1. > 30 graphemes -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("A".repeat(31)))
-        assertEquals("Tên thẻ tối đa 30 ký tự", viewModel.uiState.value.renameCardInlineError)
+        assertEquals(R.string.budget_card_error_ui_too_long, viewModel.uiState.value.renameCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitRename)
 
         // 2. Pay Now -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft("Pay Now"))
-        assertEquals("Tên này dành cho Pay Now", viewModel.uiState.value.renameCardInlineError)
+        assertEquals(R.string.budget_card_error_reserved, viewModel.uiState.value.renameCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitRename)
 
         // 3. Duplicate other card -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateRenameCardDraft(otherCard.name))
-        assertEquals("Tên thẻ đã tồn tại", viewModel.uiState.value.renameCardInlineError)
+        assertEquals(R.string.budget_card_error_duplicate, viewModel.uiState.value.renameCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitRename)
 
         // 4. Case-only change of self -> Allowed
@@ -469,17 +470,17 @@ class BudgetViewModelTest {
 
         // 2. > 30 chars -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("A".repeat(31)))
-        assertEquals("Tên thẻ tối đa 30 ký tự", viewModel.uiState.value.addCardInlineError)
+        assertEquals(R.string.budget_card_error_ui_too_long, viewModel.uiState.value.addCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitAddCard)
 
         // 3. Reserved Pay Now -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft("Pay Now"))
-        assertEquals("Tên này dành cho Pay Now", viewModel.uiState.value.addCardInlineError)
+        assertEquals(R.string.budget_card_error_reserved, viewModel.uiState.value.addCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitAddCard)
 
         // 4. Duplicate name -> Error
         viewModel.onEvent(BudgetUiEvent.UpdateAddCardDraft(existingCard.name))
-        assertEquals("Tên thẻ đã tồn tại", viewModel.uiState.value.addCardInlineError)
+        assertEquals(R.string.budget_card_error_duplicate, viewModel.uiState.value.addCardInlineError)
         assertFalse(viewModel.uiState.value.canSubmitAddCard)
 
         // 5. Valid unique name -> canSubmitAddCard = true

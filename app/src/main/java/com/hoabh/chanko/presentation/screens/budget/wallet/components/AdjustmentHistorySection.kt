@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.hoabh.chanko.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -42,7 +44,7 @@ import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 /**
  * Section 3 trong màn Thiết lập ví (C03): Lịch sử điều chỉnh ngân sách.
  * Đồng bộ 100% với reference/wallet-settings-v2.1-approved-reference.png:
- * Header: Icon đồng hồ vàng cam + "Lịch sử điều chỉnh ngân sách" + chevron đóng/mở.
+ * Header: Icon đồng hồ vàng cam + stringResource(R.string.budget_adjustment_history_title) + chevron đóng/mở.
  * Content Timeline:
  * Cột 1: Ngày giờ địa phương.
  * Cột 2: Huy hiệu tròn mũi tên Tăng (xanh) hoặc Giảm (đỏ).
@@ -57,6 +59,9 @@ fun AdjustmentHistorySection(
     onToggleExpanded: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val historyDescription = stringResource(
+        if (isExpanded) R.string.budget_history_expanded_description else R.string.budget_history_collapsed_description
+    )
     val textPrimary = Color(0xFF24183E)
     val textMuted = Color(0xFF7E7694)
 
@@ -79,7 +84,7 @@ fun AdjustmentHistorySection(
                     .clickable(onClick = onToggleExpanded)
                     .semantics {
                         heading()
-                        contentDescription = "Lịch sử điều chỉnh ngân sách, ${if (isExpanded) "đang mở rộng" else "đang thu gọn"}"
+                        contentDescription = historyDescription
                     },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -106,7 +111,7 @@ fun AdjustmentHistorySection(
 
                     Column {
                         Text(
-                            text = "Lịch sử điều chỉnh ngân sách",
+                            text = stringResource(R.string.budget_adjustment_history_title),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = textPrimary,
@@ -115,7 +120,7 @@ fun AdjustmentHistorySection(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Xem lại các lần thay đổi hạn mức ngân sách.",
+                            text = stringResource(R.string.budget_history_helper),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = textMuted,
                                 fontSize = 11.5.sp
@@ -136,7 +141,7 @@ fun AdjustmentHistorySection(
                 ) {
                     ChankoIcon(
                         id = if (isExpanded) ChankoIconId.ACT_08 else ChankoIconId.ACT_09,
-                        contentDescription = if (isExpanded) "Thu gọn" else "Mở rộng",
+                        contentDescription = if (isExpanded) stringResource(R.string.budget_history_collapse) else stringResource(R.string.budget_history_expand),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -155,7 +160,7 @@ fun AdjustmentHistorySection(
                 ) {
                     if (adjustments.isEmpty()) {
                         Text(
-                            text = "Chưa có điều chỉnh ngân sách trong chu kỳ này.",
+                            text = stringResource(R.string.budget_history_empty),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = textMuted,
                                 fontSize = 13.sp
@@ -189,7 +194,7 @@ fun AdjustmentHistorySection(
                                         )
                                     )
                                     Text(
-                                        text = "Chu kỳ này",
+                                        text = stringResource(R.string.budget_history_current_cycle),
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             color = textMuted,
                                             fontSize = 10.5.sp
@@ -209,7 +214,7 @@ fun AdjustmentHistorySection(
                                 ) {
                                     ChankoIcon(
                                         id = badgeIconId,
-                                        contentDescription = if (isIncrease) "Tăng" else "Giảm",
+                                        contentDescription = if (isIncrease) stringResource(R.string.budget_history_increase_short) else stringResource(R.string.budget_history_decrease_short),
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -219,7 +224,7 @@ fun AdjustmentHistorySection(
                                 // Cột 3: Tăng/Giảm ngân sách + Hạn mức
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = if (isIncrease) "Tăng ngân sách" else "Giảm ngân sách",
+                                        text = if (isIncrease) stringResource(R.string.budget_history_increase) else stringResource(R.string.budget_history_decrease),
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             fontWeight = FontWeight.Bold,
                                             color = textPrimary,
@@ -228,7 +233,7 @@ fun AdjustmentHistorySection(
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "${MoneyVnd.format(adj.oldLimitMinor)} → ${MoneyVnd.format(adj.newLimitMinor)}",
+                                        text = stringResource(R.string.budget_history_amount_change, MoneyVnd.format(adj.oldLimitMinor), MoneyVnd.format(adj.newLimitMinor)),
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = textMuted,
                                             fontSize = 12.sp

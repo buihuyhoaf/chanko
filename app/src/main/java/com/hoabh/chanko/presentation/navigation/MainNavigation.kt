@@ -58,7 +58,6 @@ import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
-import com.hoabh.chanko.presentation.screens.budget.wallet.WalletSettingsRoute
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
@@ -153,12 +152,7 @@ fun MainNavigation(
                 composable(Screen.BudgetDetails.route) {
                     BudgetRoute(
                         onBackClick = { controller.popBackStack() },
-                        onNavigateToItemDetail = onNavigateToItemDetail,
-                        onNavigateToWalletSettings = { expandHistory ->
-                            controller.navigate(Screen.WalletSettings.createRoute(expandHistory)) {
-                                launchSingleTop = true
-                            }
-                        }
+                        onNavigateToItemDetail = onNavigateToItemDetail
                     )
                 }
                 composable(
@@ -179,7 +173,7 @@ fun MainNavigation(
                         }
                     }
                     val budgetViewModel: BudgetViewModel = hiltViewModel(parentEntry)
-                    WalletSettingsRoute(
+                    BudgetRoute(
                         onBackClick = { controller.popBackStack() },
                         expandHistory = expandHistory,
                         viewModel = budgetViewModel

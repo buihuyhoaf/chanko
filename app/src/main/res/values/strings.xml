@@ -294,4 +294,21 @@
     <string name="budget_cycle_selection_empty">Chưa chọn chu kỳ</string>
     <string name="budget_cycle_selection_action">Chọn chu kỳ ngân sách, %1$s</string>
     <string name="budget_payment_credit_card_label">Thẻ tín dụng</string>
+    <string name="budget_card_error_ui_too_long">Tên thẻ tối đa 30 ký tự</string>
+    <string name="budget_card_error_reserved">Tên này dành cho Pay Now</string>
+    <string name="budget_menu_options">Tùy chọn ngân sách</string>
+    <string name="budget_history_expanded_description">Lịch sử điều chỉnh ngân sách, đang mở rộng</string>
+    <string name="budget_history_collapsed_description">Lịch sử điều chỉnh ngân sách, đang thu gọn</string>
+    <string name="budget_history_helper">Xem lại các lần thay đổi hạn mức ngân sách.</string>
+    <string name="budget_history_collapse">Thu gọn</string>
+    <string name="budget_history_expand">Mở rộng</string>
+    <string name="budget_history_empty">Chưa có điều chỉnh ngân sách trong chu kỳ này.</string>
+    <string name="budget_history_current_cycle">Chu kỳ này</string>
+    <string name="budget_history_increase">Tăng ngân sách</string>
+    <string name="budget_history_decrease">Giảm ngân sách</string>
+    <string name="budget_history_increase_short">Tăng</string>
+    <string name="budget_history_decrease_short">Giảm</string>
+    <string name="budget_history_amount_change">%1$s → %2$s</string>
+    <string name="budget_card_preview_description">Thẻ xem trước: %1$s, màu %2$s</string>
+    <string name="budget_card_preview_brand" translatable="false">CHANKO</string>
 </resources>
