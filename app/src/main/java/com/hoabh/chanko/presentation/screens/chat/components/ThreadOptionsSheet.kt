@@ -293,7 +293,7 @@ fun ArchivedBanner(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF3EDFD))
+            .background(CandyColors.Chat.itemIconBg)
             .border(1.dp, CandyColors.brandPurple.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .padding(12.dp)
     ) {

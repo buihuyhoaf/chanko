@@ -66,13 +66,13 @@ fun ChatMessageBubble(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp))
-                            .background(Color(0xFFEDE6F8))
-                            .border(1.dp, Color(0xFFDDD2F2), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp))
+                            .background(CandyColors.Chat.userBubbleBg)
+                            .border(1.dp, CandyColors.Chat.userBubbleBorder, RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp))
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
                         Text(
                             text = message.text,
-                            color = Color(0xFF241B35),
+                            color = CandyColors.Chat.userBubbleText,
                             fontSize = 15.sp,
                             lineHeight = 22.sp
                         )
@@ -162,7 +162,7 @@ fun ChatMessageBubble(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFFEDE6F8))
+                        .background(CandyColors.Chat.userBubbleBg)
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
@@ -206,7 +206,7 @@ fun DecisionVerdictCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFFFAF7FF))
+            .background(CandyColors.Chat.assistantBubbleBg)
             .border(1.5.dp, CandyColors.divider, RoundedCornerShape(18.dp))
             .padding(14.dp)
     ) {
@@ -227,7 +227,7 @@ fun DecisionVerdictCard(
                         text = verdictLabel,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF241B35)
+                        color = CandyColors.Chat.assistantBubbleText
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(

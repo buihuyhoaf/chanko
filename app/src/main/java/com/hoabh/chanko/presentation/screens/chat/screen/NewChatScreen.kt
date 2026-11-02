@@ -165,7 +165,7 @@ fun NewChatContent(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFFFFECE5)),
+                                .background(CandyColors.Chat.contextHeaderBg),
                             contentAlignment = Alignment.Center
                         ) {
                             ChankoIcon(

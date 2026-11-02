@@ -383,7 +383,7 @@ private fun ProvenanceBar(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFF3EDFD))
+            .background(CandyColors.Chat.itemCardBg)
             .border(1.dp, CandyColors.brandPurple.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp),

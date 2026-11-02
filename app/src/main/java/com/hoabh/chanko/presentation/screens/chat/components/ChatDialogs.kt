@@ -282,7 +282,7 @@ fun SameThreadItemPickerSheet(
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(if (isSelected) Color(0xFFF0E9FF) else Color(0xFFFAF8F5))
+                                .background(if (isSelected) CandyColors.Chat.selectedContextBg else CandyColors.Chat.unselectedContextBg)
                                 .border(
                                     1.5.dp,
                                     if (isSelected) CandyColors.brandPurple else CandyColors.divider,

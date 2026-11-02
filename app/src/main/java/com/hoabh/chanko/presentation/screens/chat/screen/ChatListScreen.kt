@@ -186,8 +186,8 @@ fun ChatListScreen(
                             .background(
                                 Brush.linearGradient(
                                     listOf(
-                                        Color(0xFFF0E7FF),
-                                        Color(0xFFFCEAF4)
+                                        CandyColors.Chat.headerGradientStart,
+                                        CandyColors.Chat.headerGradientEnd
                                     )
                                 )
                             )
@@ -515,7 +515,7 @@ fun ChatThreadRow(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF0E7FF)),
+                    .background(CandyColors.Chat.searchFieldBg),
                 contentAlignment = Alignment.Center
             ) {
                 if (thread.mode == ThreadMode.ITEM) {
@@ -574,11 +574,11 @@ fun ChatThreadRow(
 
                 // Tag trạng thái
                 val (tagLabel, tagBg, tagText) = when {
-                    thread.isArchived -> Triple("Đã lưu trữ", Color(0xFFEEEEEE), Color(0xFF666666))
-                    thread.itemStatus == ItemContextStatus.CONSIDERING -> Triple("Đang cân nhắc", Color(0xFFFFF7E6), Color(0xFFD48806))
-                    thread.itemStatus == ItemContextStatus.READY -> Triple("Chờ xem lại", Color(0xFFE6FFFB), Color(0xFF08979C))
-                    thread.itemStatus == ItemContextStatus.PURCHASED -> Triple("Đã mua", Color(0xFFF6FFED), Color(0xFF389E0D))
-                    else -> Triple("Tự do", Color(0xFFF0E7FF), CandyColors.brandPurple)
+                    thread.isArchived -> Triple("Đã lưu trữ", CandyColors.Chat.tagArchivedBg, CandyColors.Chat.tagArchivedText)
+                    thread.itemStatus == ItemContextStatus.CONSIDERING -> Triple("Đang cân nhắc", CandyColors.Chat.tagConsideringBg, CandyColors.Chat.tagConsideringText)
+                    thread.itemStatus == ItemContextStatus.READY -> Triple("Chờ xem lại", CandyColors.Chat.tagReadyBg, CandyColors.Chat.tagReadyText)
+                    thread.itemStatus == ItemContextStatus.PURCHASED -> Triple("Đã mua", CandyColors.Chat.tagPurchasedBg, CandyColors.Chat.tagPurchasedText)
+                    else -> Triple("Tự do", CandyColors.Chat.tagFreeformBg, CandyColors.brandPurple)
                 }
 
                 Box(
