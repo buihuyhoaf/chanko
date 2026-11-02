@@ -48,7 +48,6 @@ import androidx.navigation.compose.composable
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiEffect
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiState
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginViewModel
-import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import com.hoabh.chanko.ui.theme.Nunito
 
