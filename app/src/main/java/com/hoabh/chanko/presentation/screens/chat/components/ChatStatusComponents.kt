@@ -55,7 +55,7 @@ fun ChatOfflineBanner(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFFFF3CD))
+            .background(CandyColors.Chat.pendingBannerBg)
             .border(1.dp, CandyColors.budgetWarning, RoundedCornerShape(12.dp))
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {

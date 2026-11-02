@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.components.containerColor
+import com.hoabh.chanko.presentation.components.contentColor
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 import com.hoabh.chanko.presentation.screens.myitems.MyItemCardUi
 import com.hoabh.chanko.ui.theme.CandyColors

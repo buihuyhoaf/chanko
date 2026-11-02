@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.components.containerColor
+import com.hoabh.chanko.presentation.components.contentColor
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.screens.itemdetail.components.ChankoSpeechBubble
 import com.hoabh.chanko.presentation.screens.itemdetail.components.CoolingOffCountdownCard

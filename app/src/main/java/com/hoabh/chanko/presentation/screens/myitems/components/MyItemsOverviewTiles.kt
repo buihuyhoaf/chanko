@@ -64,7 +64,7 @@ fun MyItemsOverviewTiles(
             label = stringResource(R.string.my_items_tile_cooling),
             isSelected = isCoolingSelected,
             containerColor = CandyColors.blue.copy(alpha = 0.15f),
-            selectedBorderColor = Color(0xFF1B5A8A),
+            selectedBorderColor = CandyColors.Status.accentBlue,
             modifier = Modifier.weight(1f),
             onClick = { onTileClick(OverviewTileType.COOLING_OFF) }
         )

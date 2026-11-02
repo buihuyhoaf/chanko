@@ -66,10 +66,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.additem.AddItemStep
+import com.hoabh.chanko.ui.theme.CandyColors
 
-private val Ink = Color(0xFF42204E)
-private val Purple = Color(0xFF74418E)
-private val Outline = Color(0xFFD9C2E1)
+private val Ink = CandyColors.UrlImport.ink
+private val Purple = CandyColors.UrlImport.purple
+private val Outline = CandyColors.UrlImport.outline
 
 /** Main stays visible under this overlay. State belongs only to Main's in-memory ViewModel. */
 @Composable
@@ -143,7 +144,7 @@ internal fun CandyCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFFFF7F5),
+        color = CandyColors.UrlImport.dialogSurface,
         border = BorderStroke(1.dp, Color.White),
         shadowElevation = 12.dp
     ) {
@@ -176,7 +177,7 @@ fun UrlInputDialog(
                     CandyHeading(stringResource(R.string.candy_url_title))
                     Text(
                         text = stringResource(R.string.candy_url_body),
-                        color = Color(0xFF75667D),
+                        color = CandyColors.UrlImport.mutedText,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -225,8 +226,8 @@ fun UrlInputDialog(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Purple,
                             unfocusedBorderColor = Outline,
-                            focusedContainerColor = Color(0xFFFCF6FB),
-                            unfocusedContainerColor = Color(0xFFFCF6FB)
+                            focusedContainerColor = CandyColors.UrlImport.fieldContainer,
+                            unfocusedContainerColor = CandyColors.UrlImport.fieldContainer
                         )
                     )
                     if (extracting) {
@@ -277,7 +278,7 @@ fun ExtractionFailedDialog(
                 Text(
                     text = stringResource(R.string.candy_failure_body),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF75667D),
+                    color = CandyColors.UrlImport.mutedText,
                     textAlign = TextAlign.Center
                 )
                 CandyActions(
@@ -342,7 +343,7 @@ private fun CandyCancel(onClick: () -> Unit, modifier: Modifier) {
         border = BorderStroke(1.dp, Outline),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color(0xFFF2E5F7),
+            containerColor = CandyColors.UrlImport.disabledButtonBg,
             contentColor = Purple
         )
     ) {
@@ -361,9 +362,9 @@ private fun CandyPrimary(
     val shape = RoundedCornerShape(26.dp)
     val brush = Brush.verticalGradient(
         if (enabled || loading)
-            listOf(Color(0xFFA259D7), Color(0xFF7D35B3))
+            listOf(CandyColors.UrlImport.submitGradientStart, CandyColors.UrlImport.submitGradientEnd)
         else
-            listOf(Color(0xFFE5D9EB), Color(0xFFE5D9EB))
+            listOf(CandyColors.UrlImport.disabledGradient, CandyColors.UrlImport.disabledGradient)
     )
     Button(
         onClick = onClick,
@@ -379,7 +380,7 @@ private fun CandyPrimary(
             containerColor = Color.Transparent,
             disabledContainerColor = Color.Transparent,
             contentColor = Color.White,
-            disabledContentColor = if (loading) Color.White else Color(0xFF776A7E)
+            disabledContentColor = if (loading) Color.White else CandyColors.UrlImport.disabledButtonText
         )
     ) {
         if (loading) {

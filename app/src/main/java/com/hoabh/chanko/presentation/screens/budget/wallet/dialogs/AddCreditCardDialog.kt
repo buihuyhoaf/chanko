@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import com.hoabh.chanko.ui.theme.CandyColors
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -79,9 +80,9 @@ fun AddCreditCardDialog(
 
     val focusManager = LocalFocusManager.current
     val graphemeCount = CreditCard.graphemeCount(draftName)
-    val purplePrimary = Color(0xFF7447FF)
-    val textPrimary = Color(0xFF24183E)
-    val textMuted = Color(0xFF7E7694)
+    val purplePrimary = CandyColors.Wallet.purplePrimary
+    val textPrimary = CandyColors.Wallet.textPrimary
+    val textMuted = CandyColors.Wallet.textMuted
 
     Dialog(
         onDismissRequest = {
@@ -125,7 +126,7 @@ fun AddCreditCardDialog(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFFEDE9FE)),
+                                .background(CandyColors.Wallet.iconContainerBg),
                             contentAlignment = Alignment.Center
                         ) {
                             ChankoIcon(
@@ -250,7 +251,7 @@ fun AddCreditCardDialog(
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White.copy(alpha = 0.6f),
                             focusedBorderColor = purplePrimary,
-                            unfocusedBorderColor = Color(0xFFE2DDEC)
+                            unfocusedBorderColor = CandyColors.Wallet.unfocusedBorder
                         )
                     )
 
@@ -352,9 +353,9 @@ fun AddCreditCardDialog(
                                 .height(48.dp),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFF3E8FF),
+                                containerColor = CandyColors.Wallet.presetTagBg,
                                 contentColor = purplePrimary,
-                                disabledContainerColor = Color(0xFFF3E8FF).copy(alpha = 0.5f),
+                                disabledContainerColor = CandyColors.Wallet.presetTagBg.copy(alpha = 0.5f),
                                 disabledContentColor = purplePrimary.copy(alpha = 0.5f)
                             )
                         ) {

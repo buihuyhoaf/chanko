@@ -2,135 +2,394 @@ package com.hoabh.chanko.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Raw color palette (CandyPalette).
+ * Every hex color in the application is declared here EXACTLY ONCE.
+ * Do not access CandyPalette directly from screens; use semantic tokens in CandyColors.
+ */
+private object CandyPalette {
+    // Brand & Primary Purples / Lavenders
+    val Purple500 = Color(0xFF8965F6)
+    val Purple600 = Color(0xFF7447FF)
+    val Purple700 = Color(0xFF7451E8)
+    val Purple750 = Color(0xFF7B57E8)
+    val Purple800 = Color(0xFF6F49DE)
+    val Purple900 = Color(0xFF5731C6)
+    val Purple400 = Color(0xFF9C7AF8)
+    val Purple300 = Color(0xFFA48BFF)
+    val Purple450 = Color(0xFF8B5CF6)
+    val Violet500 = Color(0xFFA259D7)
+    val Violet700 = Color(0xFF7D35B3)
+    val Violet800 = Color(0xFF74418E)
+    val Violet200 = Color(0xFFD9C2E1)
+    val Violet100 = Color(0xFFE5D9EB)
+    val Violet50 = Color(0xFFF2E5F7)
+    val VioletMuted = Color(0xFF776A7E)
+    val VioletMutedDark = Color(0xFF75667D)
+    val VioletDeep = Color(0xFF42204E)
+    val VioletSurface = Color(0xFFFCF6FB)
+    val Lavender100 = Color(0xFFF0E7FF)
+    val Lavender200 = Color(0xFFEBE1FF)
+    val Lavender50 = Color(0xFFF4EEFF)
+    val Lavender25 = Color(0xFFFAF7FF)
+    val Lavender150 = Color(0xFFEEE5FF)
+    val Lavender300 = Color(0xFFD9C5FF)
+    val Lavender40 = Color(0xFFF5F2FF)
+    val Lavender120 = Color(0xFFEDE7FF)
+    val Lavender130 = Color(0xFFEEE7FF)
+    val Lavender280 = Color(0xFFD9C8FF)
+    val Lavender60 = Color(0xFFF2EBFF)
+    val Lavender110 = Color(0xFFEDE6F8)
+    val Lavender250 = Color(0xFFDDD2F2)
+    val Lavender30 = Color(0xFFF3EDFD)
+    val Lavender80 = Color(0xFFF0E9FF)
+    val Lavender90 = Color(0xFFEDE9FE)
+    val Lavender70 = Color(0xFFF3E8FF)
+    val Lavender220 = Color(0xFFE4DDF2)
+    val Lavender210 = Color(0xFFE3DEEC)
+    val Lavender160 = Color(0xFFE7E1FF)
+    val Lavender290 = Color(0xFFD3D9FF)
+    val Lavender20 = Color(0xFFF8F5FC)
+    val Lavender85 = Color(0xFFF0ECF8)
+    val Lavender230 = Color(0xFFE2DDEC)
+    val Purple20 = Color(0xFFF6F0FF)
+    val Purple30 = Color(0xFFF7F3FF)
+    val Purple120 = Color(0xFFE8DFF8)
+    val Purple80 = Color(0xFFEEE8F5)
+
+    // Pinks, Roses & Magentas
+    val Pink500 = Color(0xFFFF85B3)
+    val Pink100 = Color(0xFFFCEAF4)
+    val Pink300 = Color(0xFFF4B3CB)
+    val Pink400 = Color(0xFFE68DB2)
+    val Pink50 = Color(0xFFFFEBF3)
+    val Pink700 = Color(0xFFE11D74)
+    val Pink60 = Color(0xFFFDE8F3)
+    val Pink20 = Color(0xFFFDF7FA)
+    val Plum900 = Color(0xFF512B45)
+    val Plum950 = Color(0xFF4D2939)
+    val Rose100 = Color(0xFFFFE4E6)
+    val Rose800 = Color(0xFFBE123C)
+
+    // Blues & Cyans
+    val Blue400 = Color(0xFF8DCDF8)
+    val Blue600 = Color(0xFF6888C9)
+    val Blue100 = Color(0xFFE0EBFF)
+    val Blue50 = Color(0xFFE8F4FF)
+    val Blue200 = Color(0xFFB8DFFF)
+    val Blue500 = Color(0xFF438BCB)
+    val Blue800 = Color(0xFF1B5A8A)
+    val Blue900 = Color(0xFF2E4E8A)
+    val Teal700 = Color(0xFF08979C)
+    val Teal50 = Color(0xFFE6FFFB)
+
+    // Greens & Mints
+    val Mint400 = Color(0xFF78DCC3)
+    val Mint700 = Color(0xFF269C78)
+    val Mint50 = Color(0xFFDFF9EE)
+    val Mint200 = Color(0xFFA6EBD1)
+    val Mint800 = Color(0xFF16856B)
+    val Green100 = Color(0xFFD9FAE6)
+    val Green150 = Color(0xFFCFF6DF)
+    val Green900 = Color(0xFF00634F)
+    val Green800 = Color(0xFF075C48)
+    val Green50 = Color(0xFFE6FFF0)
+    val Emerald50 = Color(0xFFECFDF5)
+    val Emerald100 = Color(0xFFD1FAE5)
+    val Emerald800 = Color(0xFF065F46)
+    val Green120 = Color(0xFFDCFCE7)
+    val Green40 = Color(0xFFF6FFED)
+    val Green600 = Color(0xFF389E0D)
+    val Green850 = Color(0xFF146E56)
+
+    // Yellows & Ambers
+    val Yellow400 = Color(0xFFFFD75E)
+    val Amber600 = Color(0xFFE9A23B)
+    val Amber50 = Color(0xFFFFF0DB)
+    val Amber700 = Color(0xFFD97706)
+    val Amber100 = Color(0xFFFFE8CC)
+    val Amber800 = Color(0xFFB45309)
+    val Amber150 = Color(0xFFFFE7B8)
+    val Amber900 = Color(0xFF8B5814)
+    val Amber40 = Color(0xFFFFFBEB)
+    val Amber120 = Color(0xFFFEF3C7)
+    val Amber850 = Color(0xFF92400E)
+    val Amber200 = Color(0xFFFFDBA7)
+    val Amber750 = Color(0xFFB67C28)
+    val Amber500 = Color(0xFFF59E0B)
+    val Amber60 = Color(0xFFFFF3CD)
+    val Amber70 = Color(0xFFFFF7E6)
+    val Amber720 = Color(0xFFD48806)
+
+    // Oranges, Corals & Browns
+    val Orange400 = Color(0xFFFFAA61)
+    val Orange800 = Color(0xFF8A4B10)
+    val Orange700 = Color(0xFFD46B08)
+    val Coral600 = Color(0xFFD63F55)
+    val Brown800 = Color(0xFF60362F)
+    val Peach100 = Color(0xFFFFECE5)
+    val Peach150 = Color(0xFFF2E6DE)
+    val Peach50 = Color(0xFFFFF7F5)
+
+    // Reds
+    val Red400 = Color(0xFFE56B73)
+    val Red600 = Color(0xFFD94B57)
+    val Red800 = Color(0xFFAA2635)
+    val Red500 = Color(0xFFFF4D4F)
+    val Red100 = Color(0xFFFEE2E2)
+
+    // Neutrals, Inks & Surfaces
+    val WarmWhite = Color(0xFFFAF8F5)
+    val WarmWhiteAlt = Color(0xFFFAF7F5)
+    val CoolWhite = Color(0xFFFDFBFF)
+    val WarmCream = Color(0xFFFFFBF8)
+    val Neutral150 = Color(0xFFEEEAF2)
+    val Neutral500 = Color(0xFF767676)
+    val Neutral550 = Color(0xFF747775)
+    val Neutral600 = Color(0xFF595959)
+    val Neutral650 = Color(0xFF6B6570)
+    val Neutral900 = Color(0xFF1F1F1F)
+    val Ink950 = Color(0xFF15131D)
+    val Ink900 = Color(0xFF151329)
+    val Ink850 = Color(0xFF24183E)
+    val Ink820 = Color(0xFF30233E)
+    val Ink800 = Color(0xFF241B35)
+    val Slate700 = Color(0xFF585066)
+    val Slate650 = Color(0xFF62596D)
+    val Slate620 = Color(0xFF665684)
+    val Slate600 = Color(0xFF585C82)
+    val Slate550 = Color(0xFF6C657E)
+    val Slate500 = Color(0xFF7E7694)
+    val Gray100 = Color(0xFFF3F4F6)
+    val Gray150 = Color(0xFFEEEEEE)
+    val Gray200 = Color(0xFFE5E7EB)
+    val Gray600 = Color(0xFF666666)
+    val Gray700 = Color(0xFF374151)
+    val Lavender240 = Color(0xFFD9D1E4)
+    val White = Color(0xFFFFFFFF)
+    val BlackShadow14 = Color(0x14000000)
+}
+
 // UI-02 approved signal colors. Do not use as small text on white.
 object CandyColors {
-    val primary = Color(0xFF8965F6)
-    val secondary = Color(0xFFFF85B3)
-    val background = Color(0xFFFAF8F5)
-    val yellow = Color(0xFFFFD75E)
-    val mint = Color(0xFF78DCC3)
-    val blue = Color(0xFF8DCDF8)
-    val orange = Color(0xFFFFAA61)
+    // --- Core Signal & Brand Tokens (Backward Compatible Root Tokens) ---
+    val primary = CandyPalette.Purple500
+    val secondary = CandyPalette.Pink500
+    val background = CandyPalette.WarmWhite
+    val yellow = CandyPalette.Yellow400
+    val mint = CandyPalette.Mint400
+    val blue = CandyPalette.Blue400
+    val orange = CandyPalette.Orange400
     val coolingOff = blue
     val readyForReview = yellow
-    val purchased = Color(0xFF6888C9)
+    val purchased = CandyPalette.Blue600
     val skipped = mint
     val postponed = orange
-    val budgetWarning = Color(0xFFE9A23B)
-    val overBudget = Color(0xFFE56B73)
-    val error = Color(0xFFD94B57)
-    val success = Color(0xFF269C78)
+    val budgetWarning = CandyPalette.Amber600
+    val overBudget = CandyPalette.Red400
+    val error = CandyPalette.Red600
+    val success = CandyPalette.Mint700
     // Reference foregrounds, verified in phase-2-1-completion.md; PV-01 remains open.
     val ink = Color.Black
-    val mutedInk = Color(0xFF595959)
-    val outline = Color(0xFF767676)
-    val errorText = Color(0xFFAA2635)
+    val mutedInk = CandyPalette.Neutral600
+    val outline = CandyPalette.Neutral500
+    val errorText = CandyPalette.Red800
     // Splash brand typography colors
-    val logoBrown = Color(0xFF60362F)
-    val logoCoral = Color(0xFFD63F55)
+    val logoBrown = CandyPalette.Brown800
+    val logoCoral = CandyPalette.Coral600
 
     // Home v5 Tokens (from UI-HANDOFF.md and tokens.json)
-    val brandPurple = Color(0xFF8965F6)
-    val brandPink = Color(0xFFFF85B3)
-    val backgroundLavender = Color(0xFFF0E7FF)
-    val backgroundPink = Color(0xFFFCEAF4)
-    val calendarSurface = Color(0xFFF4EEFF)
-    val calendarInnerSurface = Color(0xFFFAF7FF)
+    val brandPurple = CandyPalette.Purple500
+    val brandPink = CandyPalette.Pink500
+    val backgroundLavender = CandyPalette.Lavender100
+    val backgroundPink = CandyPalette.Pink100
+    val calendarSurface = CandyPalette.Lavender50
+    val calendarInnerSurface = CandyPalette.Lavender25
     // Add & Consider DESIGN-REVIEW.html disabled control surface.
-    val addItemDisabledSurface = Color(0xFFEEEAF2)
-    val primarySoft = Color(0xFFEBE1FF)
-    val primaryInk = Color(0xFF5731C6)
-    val textPrimary = Color(0xFF151329)
-    val textSecondary = Color(0xFF585C82)
-    val divider = Color(0xFFE4DDF2)
-    val progressTrack = Color(0xFFE3DEEC)
-    val readySurface = Color(0xFFD9FAE6)
-    val readySurfaceEnd = Color(0xFFCFF6DF)
-    val readyAction = Color(0xFF00634F)
-    val onReadyAction = Color(0xFFFFFFFF)
-    val readyInk = Color(0xFF075C48)
-    val readyChip = Color(0xFFE6FFF0)
-    val coolingBlue = Color(0xFFE0EBFF)
-    val coolingLavender = Color(0xFFE7E1FF)
-    val coolingChip = Color(0xFFD3D9FF)
-    val speechSurface = Color(0xFFFFECE5)
+    val addItemDisabledSurface = CandyPalette.Neutral150
+    val primarySoft = CandyPalette.Lavender200
+    val primaryInk = CandyPalette.Purple900
+    val textPrimary = CandyPalette.Ink900
+    val textSecondary = CandyPalette.Slate600
+    val divider = CandyPalette.Lavender220
+    val progressTrack = CandyPalette.Lavender210
+    val readySurface = CandyPalette.Green100
+    val readySurfaceEnd = CandyPalette.Green150
+    val readyAction = CandyPalette.Green900
+    val onReadyAction = CandyPalette.White
+    val readyInk = CandyPalette.Green800
+    val readyChip = CandyPalette.Green50
+    val coolingBlue = CandyPalette.Blue100
+    val coolingLavender = CandyPalette.Lavender160
+    val coolingChip = CandyPalette.Lavender290
+    val speechSurface = CandyPalette.Peach100
 
     // Home v2 Image-Aligned Semantic Tokens (approved-home-user-reference.png & 11-ASSET-DELIVERY.md)
-    val homeScreenBackgroundTop = Color(0xFFF6F0FF)
-    val homeScreenBackgroundBottom = Color(0xFFFDF7FA)
-    val homeCardSurface = Color(0xFFFDFBFF)
-    val homeCardBorder = Color(0xFFEDE6F8)
-    val dialogueBubbleSurface = Color(0xFFFFFBF8)
-    val dialogueBubbleBorder = Color(0xFFF2E6DE)
-    val calendarDayInk = Color(0xFF585066)
+    val homeScreenBackgroundTop = CandyPalette.Purple20
+    val homeScreenBackgroundBottom = CandyPalette.Pink20
+    val homeCardSurface = CandyPalette.CoolWhite
+    val homeCardBorder = CandyPalette.Lavender110
+    val dialogueBubbleSurface = CandyPalette.WarmCream
+    val dialogueBubbleBorder = CandyPalette.Peach150
+    val calendarDayInk = CandyPalette.Slate700
 
     // Quick Actions
-    val quickCheckGradientStart = Color(0xFF9C7AF8)
-    val quickCheckGradientEnd = Color(0xFF7B57E8)
-    val saveItemSurface = Color(0xFFF7F3FF)
-    val saveItemBorder = Color(0xFFE8DFF8)
-    val quickActionAskBg = Color(0xFF7451E8)
-    val quickActionAskBorder = Color(0xFFA48BFF)
-    val quickActionAskText = Color(0xFFFFFFFF)
-    val quickActionSaveBg = Color(0xFFF4B3CB)
-    val quickActionSaveBorder = Color(0xFFE68DB2)
-    val quickActionSaveText = Color(0xFF512B45)
+    val quickCheckGradientStart = CandyPalette.Purple400
+    val quickCheckGradientEnd = CandyPalette.Purple750
+    val saveItemSurface = CandyPalette.Purple30
+    val saveItemBorder = CandyPalette.Purple120
+    val quickActionAskBg = CandyPalette.Purple700
+    val quickActionAskBorder = CandyPalette.Purple300
+    val quickActionAskText = CandyPalette.White
+    val quickActionSaveBg = CandyPalette.Pink300
+    val quickActionSaveBorder = CandyPalette.Pink400
+    val quickActionSaveText = CandyPalette.Plum900
 
     // Candy Pop 3D Home Budget Snapshot
-    val budgetSnapshotBg = Color(0xFFEEE5FF)
-    val budgetSnapshotBorder = Color(0xFFD9C5FF)
-    val budgetSnapshotAmount = Color(0xFF6F49DE)
-    val budgetSnapshotSecondaryText = Color(0xFF665684)
-    val budgetSnapshotSpendingPanel = Color(0xFFFFFFFF)
-    val budgetSnapshotBadgeBg = Color(0xFFFFE7B8)
-    val budgetSnapshotBadgeText = Color(0xFF8B5814)
-    val budgetSnapshotProgressTrack = Color(0xFFEEE8F5)
-    val budgetSnapshotProgressFill = Color(0xFF8965F6)
+    val budgetSnapshotBg = CandyPalette.Lavender150
+    val budgetSnapshotBorder = CandyPalette.Lavender300
+    val budgetSnapshotAmount = CandyPalette.Purple800
+    val budgetSnapshotSecondaryText = CandyPalette.Slate620
+    val budgetSnapshotSpendingPanel = CandyPalette.White
+    val budgetSnapshotBadgeBg = CandyPalette.Amber150
+    val budgetSnapshotBadgeText = CandyPalette.Amber900
+    val budgetSnapshotProgressTrack = CandyPalette.Purple80
+    val budgetSnapshotProgressFill = CandyPalette.Purple500
 
     // Budget Snapshot
-    val budgetWarningBadgeBg = Color(0xFFFFF0DB)
-    val budgetWarningBadgeInk = Color(0xFFD97706)
-    val budgetReachedBadgeBg = Color(0xFFFFE8CC)
-    val budgetReachedBadgeInk = Color(0xFFB45309)
-    val budgetOverBadgeBg = Color(0xFFFFE4E6)
-    val budgetOverBadgeInk = Color(0xFFBE123C)
-    val budgetNormalBadgeBg = Color(0xFFE6FFF0)
-    val budgetNormalBadgeInk = Color(0xFF075C48)
+    val budgetWarningBadgeBg = CandyPalette.Amber50
+    val budgetWarningBadgeInk = CandyPalette.Amber700
+    val budgetReachedBadgeBg = CandyPalette.Amber100
+    val budgetReachedBadgeInk = CandyPalette.Amber800
+    val budgetOverBadgeBg = CandyPalette.Rose100
+    val budgetOverBadgeInk = CandyPalette.Rose800
+    val budgetNormalBadgeBg = CandyPalette.Green50
+    val budgetNormalBadgeInk = CandyPalette.Green800
 
     // Your Decisions Rows & Pills
-    val decisionReadyRowBg = Color(0xFFECFDF5)
-    val decisionReadyPillBg = Color(0xFFD1FAE5)
-    val decisionReadyPillInk = Color(0xFF065F46)
-    val decisionWaitingRowBg = Color(0xFFF5F2FF)
-    val decisionWaitingPillBg = Color(0xFFEDE7FF)
-    val decisionWaitingPillInk = Color(0xFF5731C6)
-    val decisionConsideringRowBg = Color(0xFFFFFBEB)
-    val decisionConsideringPillBg = Color(0xFFFEF3C7)
-    val decisionConsideringPillInk = Color(0xFF92400E)
-    val decisionSavedRowBg = Color(0xFFF3F4F6)
-    val decisionSavedPillBg = Color(0xFFE5E7EB)
-    val decisionSavedPillInk = Color(0xFF374151)
+    val decisionReadyRowBg = CandyPalette.Emerald50
+    val decisionReadyPillBg = CandyPalette.Emerald100
+    val decisionReadyPillInk = CandyPalette.Emerald800
+    val decisionWaitingRowBg = CandyPalette.Lavender40
+    val decisionWaitingPillBg = CandyPalette.Lavender120
+    val decisionWaitingPillInk = CandyPalette.Purple900
+    val decisionConsideringRowBg = CandyPalette.Amber40
+    val decisionConsideringPillBg = CandyPalette.Amber120
+    val decisionConsideringPillInk = CandyPalette.Amber850
+    val decisionSavedRowBg = CandyPalette.Gray100
+    val decisionSavedPillBg = CandyPalette.Gray200
+    val decisionSavedPillInk = CandyPalette.Gray700
 
     // Candy Item Tile Semantic Tokens
-    val attentionTileReadyBg = Color(0xFFDFF9EE)
-    val attentionTileReadyBorder = Color(0xFFA6EBD1)
-    val attentionTileReadyAccent = Color(0xFF16856B)
+    val attentionTileReadyBg = CandyPalette.Mint50
+    val attentionTileReadyBorder = CandyPalette.Mint200
+    val attentionTileReadyAccent = CandyPalette.Mint800
 
-    val attentionTileWaitingBg = Color(0xFFE8F4FF)
-    val attentionTileWaitingBorder = Color(0xFFB8DFFF)
-    val attentionTileWaitingAccent = Color(0xFF438BCB)
+    val attentionTileWaitingBg = CandyPalette.Blue50
+    val attentionTileWaitingBorder = CandyPalette.Blue200
+    val attentionTileWaitingAccent = CandyPalette.Blue500
 
-    val attentionTileConsideringBg = Color(0xFFEEE7FF)
-    val attentionTileConsideringBorder = Color(0xFFD9C8FF)
-    val attentionTileConsideringAccent = Color(0xFF7451E8)
+    val attentionTileConsideringBg = CandyPalette.Lavender130
+    val attentionTileConsideringBorder = CandyPalette.Lavender280
+    val attentionTileConsideringAccent = CandyPalette.Purple700
 
-    val attentionTileSavedBg = Color(0xFFFFF0DB)
-    val attentionTileSavedBorder = Color(0xFFFFDBA7)
-    val attentionTileSavedAccent = Color(0xFFB67C28)
+    val attentionTileSavedBg = CandyPalette.Amber50
+    val attentionTileSavedBorder = CandyPalette.Amber200
+    val attentionTileSavedAccent = CandyPalette.Amber750
 
     // Observation & Global Sheet
-    val observationIconTileBg = Color(0xFFF2EBFF)
-    val observationBulbYellow = Color(0xFFF59E0B)
-    val globalSheetSaveIconTileBg = Color(0xFFFFEBF3)
-    val globalSheetSaveIconInk = Color(0xFFE11D74)
+    val observationIconTileBg = CandyPalette.Lavender60
+    val observationBulbYellow = CandyPalette.Amber500
+    val globalSheetSaveIconTileBg = CandyPalette.Pink50
+    val globalSheetSaveIconInk = CandyPalette.Pink700
+
+    // =========================================================================
+    // Feature Sub-objects (Scoped Semantic Tokens)
+    // =========================================================================
+
+    /** Feature tokens for Budget & Wallet screens, components, and dialogs */
+    object Wallet {
+        val purplePrimary = CandyPalette.Purple600
+        val textPrimary = CandyPalette.Ink850
+        val textMuted = CandyPalette.Slate500
+        val textMutedAlt = CandyPalette.Slate550
+        val dialogBg = CandyPalette.WarmWhiteAlt
+        val shadowSpot = CandyPalette.BlackShadow14
+        val cycleIconBg = CandyPalette.Pink60
+        val progressTrack = CandyPalette.Lavender85
+        val progressGradientStart = CandyPalette.Purple450
+        val cardInnerBg = CandyPalette.Lavender20
+        val badgePillBg = CandyPalette.Amber120
+        val badgeIncreaseBg = CandyPalette.Green120
+        val badgeDecreaseBg = CandyPalette.Red100
+        val iconContainerBg = CandyPalette.Lavender90
+        val iconContainerBgAlt = CandyPalette.Lavender85
+        val unfocusedBorder = CandyPalette.Lavender230
+        val presetTagBg = CandyPalette.Lavender70
+        val deleteErrorText = CandyPalette.Red500
+        val warningText = CandyPalette.Orange700
+    }
+
+    /** Feature tokens for Chat screens, bubbles, and sheets */
+    object Chat {
+        val userBubbleBg = CandyPalette.Lavender110
+        val userBubbleBorder = CandyPalette.Lavender250
+        val userBubbleText = CandyPalette.Ink800
+        val assistantBubbleBg = CandyPalette.Lavender25
+        val assistantBubbleText = CandyPalette.Ink800
+        val itemIconBg = CandyPalette.Lavender30
+        val itemCardBg = CandyPalette.Lavender30
+        val contextHeaderBg = CandyPalette.Peach100
+        val selectedContextBg = CandyPalette.Lavender80
+        val unselectedContextBg = CandyPalette.WarmWhite
+        val pendingBannerBg = CandyPalette.Amber60
+        val headerGradientStart = CandyPalette.Lavender100
+        val headerGradientEnd = CandyPalette.Pink100
+        val searchFieldBg = CandyPalette.Lavender100
+        val tagArchivedBg = CandyPalette.Gray150
+        val tagArchivedText = CandyPalette.Gray600
+        val tagConsideringBg = CandyPalette.Amber70
+        val tagConsideringText = CandyPalette.Amber720
+        val tagReadyBg = CandyPalette.Teal50
+        val tagReadyText = CandyPalette.Teal700
+        val tagPurchasedBg = CandyPalette.Green40
+        val tagPurchasedText = CandyPalette.Green600
+        val tagFreeformBg = CandyPalette.Lavender100
+    }
+
+    /** Feature tokens for UrlInputDialog modal and extraction flow */
+    object UrlImport {
+        val ink = CandyPalette.VioletDeep
+        val purple = CandyPalette.Violet800
+        val outline = CandyPalette.Violet200
+        val dialogSurface = CandyPalette.Peach50
+        val mutedText = CandyPalette.VioletMutedDark
+        val fieldContainer = CandyPalette.VioletSurface
+        val disabledButtonBg = CandyPalette.Violet50
+        val submitGradientStart = CandyPalette.Violet500
+        val submitGradientEnd = CandyPalette.Violet700
+        val disabledGradient = CandyPalette.Violet100
+        val disabledButtonText = CandyPalette.VioletMuted
+    }
+
+    /** Feature tokens for Authentication (LoginScreen) and Initial Setup (SetupTheme) */
+    object Auth {
+        val loginPlum = CandyPalette.Plum950
+        val googleButtonBorder = CandyPalette.Neutral550
+        val googleButtonText = CandyPalette.Neutral900
+        val legalText = CandyPalette.Neutral650
+        val ink = CandyPalette.Ink820
+        val secondary = CandyPalette.Slate650
+        val onPurple = CandyPalette.Ink950
+        val stepDotInactive = CandyPalette.Lavender240
+    }
+
+    /** Shared status tokens for item states, badges, and countdown indicators */
+    object Status {
+        val accentBlue = CandyPalette.Blue800
+        val coolingOffText = CandyPalette.Blue800
+        val postponedText = CandyPalette.Orange800
+        val purchasedText = CandyPalette.Blue900
+        val skippedText = CandyPalette.Green850
+    }
 }

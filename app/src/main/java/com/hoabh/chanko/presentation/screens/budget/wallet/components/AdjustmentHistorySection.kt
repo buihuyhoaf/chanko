@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import com.hoabh.chanko.ui.theme.CandyColors
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,13 +63,13 @@ fun AdjustmentHistorySection(
     val historyDescription = stringResource(
         if (isExpanded) R.string.budget_history_expanded_description else R.string.budget_history_collapsed_description
     )
-    val textPrimary = Color(0xFF24183E)
-    val textMuted = Color(0xFF7E7694)
+    val textPrimary = CandyColors.Wallet.textPrimary
+    val textMuted = CandyColors.Wallet.textMuted
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(24.dp), spotColor = Color(0x14000000)),
+            .shadow(6.dp, RoundedCornerShape(24.dp), spotColor = CandyColors.Wallet.shadowSpot),
         shape = RoundedCornerShape(24.dp),
         color = Color.White
     ) {
@@ -97,7 +98,7 @@ fun AdjustmentHistorySection(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFFEF3C7)),
+                            .background(CandyColors.Wallet.badgePillBg),
                         contentAlignment = Alignment.Center
                     ) {
                         ChankoIcon(
@@ -136,7 +137,7 @@ fun AdjustmentHistorySection(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFF8F5FC)),
+                        .background(CandyColors.Wallet.cardInnerBg),
                     contentAlignment = Alignment.Center
                 ) {
                     ChankoIcon(
@@ -174,7 +175,7 @@ fun AdjustmentHistorySection(
                             }
 
                             val isIncrease = adj.newLimitMinor >= adj.oldLimitMinor
-                            val badgeBg = if (isIncrease) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
+                            val badgeBg = if (isIncrease) CandyColors.Wallet.badgeIncreaseBg else CandyColors.Wallet.badgeDecreaseBg
                             val badgeIconId = if (isIncrease) ChankoIconId.ACT_08 else ChankoIconId.ACT_09
 
                             Row(

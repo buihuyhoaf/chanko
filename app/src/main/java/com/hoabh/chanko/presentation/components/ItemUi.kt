@@ -11,6 +11,9 @@ import androidx.compose.ui.res.stringResource
 import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.model.CooldownItem
+import androidx.compose.ui.graphics.Color
+import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
+import com.hoabh.chanko.ui.theme.CandyColors
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -48,3 +51,25 @@ fun ItemRow(item: CooldownItem, onClick: (() -> Unit)? = null) {
         }
     }
 }
+
+val ItemDisplayStatus.containerColor: Color
+    get() = when (this) {
+        ItemDisplayStatus.Saved -> CandyColors.primarySoft
+        ItemDisplayStatus.Considering -> CandyColors.primarySoft
+        ItemDisplayStatus.CoolingOff -> CandyColors.blue.copy(alpha = 0.2f)
+        ItemDisplayStatus.ReadyForReview -> CandyColors.readyChip
+        ItemDisplayStatus.Postponed -> CandyColors.orange.copy(alpha = 0.2f)
+        ItemDisplayStatus.Purchased -> CandyColors.purchased.copy(alpha = 0.2f)
+        ItemDisplayStatus.Skipped -> CandyColors.skipped.copy(alpha = 0.2f)
+    }
+
+val ItemDisplayStatus.contentColor: Color
+    get() = when (this) {
+        ItemDisplayStatus.Saved -> CandyColors.primaryInk
+        ItemDisplayStatus.Considering -> CandyColors.primaryInk
+        ItemDisplayStatus.CoolingOff -> CandyColors.Status.coolingOffText
+        ItemDisplayStatus.ReadyForReview -> CandyColors.readyInk
+        ItemDisplayStatus.Postponed -> CandyColors.Status.postponedText
+        ItemDisplayStatus.Purchased -> CandyColors.Status.purchasedText
+        ItemDisplayStatus.Skipped -> CandyColors.Status.skippedText
+    }
