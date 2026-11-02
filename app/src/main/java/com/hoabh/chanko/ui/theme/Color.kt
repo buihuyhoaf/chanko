@@ -156,6 +156,7 @@ private object CandyPalette {
     val Ink800 = Color(0xFF241B35)
     val Slate700 = Color(0xFF585066)
     val Slate650 = Color(0xFF62596D)
+    val Slate620 = Color(0xFF665684)
     val Slate600 = Color(0xFF585C82)
     val Slate550 = Color(0xFF6C657E)
     val Slate500 = Color(0xFF7E7694)
@@ -248,7 +249,7 @@ object CandyColors {
     val budgetSnapshotBg = CandyPalette.Lavender150
     val budgetSnapshotBorder = CandyPalette.Lavender300
     val budgetSnapshotAmount = CandyPalette.Purple800
-    val budgetSnapshotSecondaryText = CandyPalette.Slate600 // Or Purple-tinted Slate
+    val budgetSnapshotSecondaryText = CandyPalette.Slate620
     val budgetSnapshotSpendingPanel = CandyPalette.White
     val budgetSnapshotBadgeBg = CandyPalette.Amber150
     val budgetSnapshotBadgeText = CandyPalette.Amber900
