@@ -1,8 +1,6 @@
 package com.hoabh.chanko.presentation.screens.myitems
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
-import com.hoabh.chanko.ui.theme.CandyColors
 
 /**
  * Filter cấp 1 theo ITEM-04:
@@ -43,17 +41,15 @@ enum class ItemSortOption {
  * Trạng thái hiển thị dẫn xuất (Derived Display Status) cho từng thẻ Item
  */
 enum class ItemDisplayStatus(
-    val labelText: String,
-    val containerColor: Color,
-    val contentColor: Color
+    val labelText: String
 ) {
-    Saved("Đã lưu", CandyColors.primarySoft, CandyColors.primaryInk),
-    Considering("Đang cân nhắc", CandyColors.primarySoft, CandyColors.primaryInk),
-    CoolingOff("Đang hạ nhiệt", CandyColors.blue.copy(alpha = 0.2f), Color(0xFF1B5A8A)),
-    ReadyForReview("Đến lúc xem lại", CandyColors.readyChip, CandyColors.readyInk),
-    Postponed("Đã hoãn", CandyColors.orange.copy(alpha = 0.2f), Color(0xFF8A4B10)),
-    Purchased("Đã mua", CandyColors.purchased.copy(alpha = 0.2f), Color(0xFF2E4E8A)),
-    Skipped("Đã bỏ qua", CandyColors.skipped.copy(alpha = 0.2f), Color(0xFF146E56))
+    Saved("Đã lưu"),
+    Considering("Đang cân nhắc"),
+    CoolingOff("Đang hạ nhiệt"),
+    ReadyForReview("Đến lúc xem lại"),
+    Postponed("Đã hoãn"),
+    Purchased("Đã mua"),
+    Skipped("Đã bỏ qua")
 }
 
 @Immutable

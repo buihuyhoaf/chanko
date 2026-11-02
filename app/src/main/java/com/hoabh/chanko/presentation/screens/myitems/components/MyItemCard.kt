@@ -128,6 +128,28 @@ fun MyItemCard(
     }
 }
 
+private val ItemDisplayStatus.containerColor: Color
+    get() = when (this) {
+        ItemDisplayStatus.Saved -> CandyColors.primarySoft
+        ItemDisplayStatus.Considering -> CandyColors.primarySoft
+        ItemDisplayStatus.CoolingOff -> CandyColors.blue.copy(alpha = 0.2f)
+        ItemDisplayStatus.ReadyForReview -> CandyColors.readyChip
+        ItemDisplayStatus.Postponed -> CandyColors.orange.copy(alpha = 0.2f)
+        ItemDisplayStatus.Purchased -> CandyColors.purchased.copy(alpha = 0.2f)
+        ItemDisplayStatus.Skipped -> CandyColors.skipped.copy(alpha = 0.2f)
+    }
+
+private val ItemDisplayStatus.contentColor: Color
+    get() = when (this) {
+        ItemDisplayStatus.Saved -> CandyColors.primaryInk
+        ItemDisplayStatus.Considering -> CandyColors.primaryInk
+        ItemDisplayStatus.CoolingOff -> CandyColors.Status.coolingOffText
+        ItemDisplayStatus.ReadyForReview -> CandyColors.readyInk
+        ItemDisplayStatus.Postponed -> CandyColors.Status.postponedText
+        ItemDisplayStatus.Purchased -> CandyColors.Status.purchasedText
+        ItemDisplayStatus.Skipped -> CandyColors.Status.skippedText
+    }
+
 @Composable
 private fun ItemStatusBadge(
     status: ItemDisplayStatus,
