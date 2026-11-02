@@ -61,12 +61,14 @@ import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
-import com.hoabh.chanko.presentation.screens.home.HomeSheet
-import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
 import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.presentation.screens.additem.AddItemViewModel
+import com.hoabh.chanko.presentation.screens.additem.AddItemEffect
+import com.hoabh.chanko.presentation.screens.additem.AddItemEntryHost
 
 fun NavGraphBuilder.mainDestination(
+    onAddItemEffect: (AddItemEffect) -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToChat: () -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
@@ -76,7 +78,10 @@ fun NavGraphBuilder.mainDestination(
     onNavigateToBudgetDetails: () -> Unit = {}
 ) {
     composable(route = Screen.Main.route) {
+        val addItemViewModel: AddItemViewModel = hiltViewModel()
+        AddItemEntryHost(addItemViewModel, onAddItemEffect)
         MainNavigation(
+            onAddNewItemClick = addItemViewModel::open,
             onNavigateToProfile = onNavigateToProfile,
             onNavigateToChat = onNavigateToChat,
             onNavigateToItemDetail = onNavigateToItemDetail,
@@ -115,7 +120,6 @@ fun MainNavigation(
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
-    var isGlobalQuickActionSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -125,8 +129,7 @@ fun MainNavigation(
                 ChankoBottomBar(
                     currentRoute = currentRoute,
                     onTabSelected = { controller.selectTab(it) },
-                    // S16 / HOME-08: Tapping + opens GlobalQuickActionSheet without changing selected tab
-                    onAddNewItemClick = { isGlobalQuickActionSheetOpen = true }
+                    onAddNewItemClick = onAddNewItemClick
                 )
             }
         ) { innerPadding ->
@@ -211,22 +214,7 @@ fun MainNavigation(
             }
         }
 
-        // Global + Modal Bottom Sheet Overlay (S16, S22)
-        if (isGlobalQuickActionSheetOpen) {
-            HomeSheetHost(
-                activeSheet = HomeSheet.Global,
-                onDismiss = { isGlobalQuickActionSheetOpen = false },
-                onQuickCheckClick = {
-                    isGlobalQuickActionSheetOpen = false
-                    onAddNewItemClick()
-                },
-                onSaveItemClick = {
-                    isGlobalQuickActionSheetOpen = false
-                    onAddNewItemClick()
-                },
-                onContextPrimaryAction = { _, _ -> isGlobalQuickActionSheetOpen = false }
-            )
-        }
+
     }
 }
 

@@ -21,6 +21,10 @@ import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
 import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
 import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
+import androidx.navigation.navigation
+import androidx.compose.runtime.remember
+import com.hoabh.chanko.domain.additem.AddItemStep
+import com.hoabh.chanko.presentation.screens.additem.*
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -111,6 +115,7 @@ fun NavGraph(
         )
 
         mainDestination(
+            onAddItemEffect = { navController.handleAddItemEffect(it) },
             onNavigateToProfile = {
                 navController.navigate(Screen.Profile.route) {
                     launchSingleTop = true
@@ -145,6 +150,19 @@ fun NavGraph(
                 // Màn hình Ngân sách đã được tích hợp trực tiếp trong MainNavigation để giữ Bottom Navigation
             }
         )
+
+        navigation(startDestination = Screen.ManualItemInput.route, route = Screen.AddFlow.route) {
+            listOf(Screen.VerifyItemInfo.route to AddItemStep.VERIFY_INFO,
+                Screen.ManualItemInput.route to AddItemStep.MANUAL_INPUT,
+                Screen.QuickCheck.route to AddItemStep.QUICK_CHECK,
+                Screen.DecisionResult.route to AddItemStep.DECISION_RESULT).forEach { (route, step) ->
+                composable(route) { entry ->
+                    val parent = remember(entry) { navController.getBackStackEntry(Screen.Main.route) }
+                    val viewModel: AddItemViewModel = hiltViewModel(parent)
+                    AddItemRoute(step, viewModel) { navController.handleAddItemEffect(it) }
+                }
+            }
+        }
 
         composable(
             route = Screen.BudgetDetails.route
@@ -395,6 +413,22 @@ fun NavGraph(
                     }
                 }
             )
+        }
+    }
+}
+
+private fun NavHostController.handleAddItemEffect(effect: AddItemEffect) {
+    when (effect) {
+        AddItemEffect.Exit -> popBackStack(Screen.Main.route, inclusive = false)
+        is AddItemEffect.Navigate -> {
+            val target = when (effect.step) {
+                AddItemStep.VERIFY_INFO -> Screen.VerifyItemInfo.route
+                AddItemStep.MANUAL_INPUT -> Screen.ManualItemInput.route
+                AddItemStep.QUICK_CHECK -> Screen.QuickCheck.route
+                AddItemStep.DECISION_RESULT -> Screen.DecisionResult.route
+                AddItemStep.URL_DIALOG -> return
+            }
+            if (currentDestination?.route != target) navigate(target) { launchSingleTop = true }
         }
     }
 }

@@ -36,6 +36,8 @@ object CandyColors {
     val backgroundPink = Color(0xFFFCEAF4)
     val calendarSurface = Color(0xFFF4EEFF)
     val calendarInnerSurface = Color(0xFFFAF7FF)
+    // Add & Consider DESIGN-REVIEW.html disabled control surface.
+    val addItemDisabledSurface = Color(0xFFEEEAF2)
     val primarySoft = Color(0xFFEBE1FF)
     val primaryInk = Color(0xFF5731C6)
     val textPrimary = Color(0xFF151329)

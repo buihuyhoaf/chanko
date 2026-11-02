@@ -22,7 +22,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.screens.home.components.BudgetCard
 import com.hoabh.chanko.presentation.screens.home.components.CompactLivingRoom
-import com.hoabh.chanko.presentation.screens.home.components.DraftResumeCard
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
 import com.hoabh.chanko.presentation.screens.home.components.HomeSheetHost
 import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
@@ -57,8 +56,7 @@ fun HomeRoute(
             HomeUiEffect.NavigateToBudgetDetails -> onBudgetDetailsClick()
             is HomeUiEffect.NavigateToDecisionDetail,
             HomeUiEffect.NavigateToAllDecisions,
-            is HomeUiEffect.OpenObservationExplanation,
-            is HomeUiEffect.OpenDraftFlow -> Unit
+            is HomeUiEffect.OpenObservationExplanation -> Unit
         }
     }
 
@@ -77,7 +75,6 @@ fun HomeRoute(
  * 4. Budget Snapshot (HOME-04)
  * 5. Your Decisions ("Những món cần chú ý" — HOME-05)
  * 6. Observation ("Góc nhìn hôm nay" — optional — HOME-06)
- * 7. Local Draft Indicator (optional — HOME-07)
  * + Modal Overlay Sheet Host (`HomeSheetHost` — HOME-08)
  */
 @Composable
@@ -177,17 +174,6 @@ fun HomeScreen(
                 }
             }
 
-            // 7. HOME-07 — Local Draft Indicator (optional)
-            state.draft?.let { draft ->
-                item(key = "home_07_draft_${draft.id}") {
-                    DraftResumeCard(
-                        draft = draft,
-                        onResumeClick = { id -> onEvent(HomeUiEvent.ResumeDraftTapped(id)) },
-                        canResume = state.capabilities.canResumeDraft
-                    )
-                }
-            }
-
             // Bottom clearance spacer cho cố định Bottom Navigation
             item(key = "bottom_nav_clearance") {
                 Spacer(modifier = Modifier.height(BottomNavClearanceHeight))
@@ -241,9 +227,9 @@ private fun HomeScreenS06OverBudgetPreview() {
     HomeScreenPreviewWrapper(HomeScenario.S06)
 }
 
-@Preview(name = "S09 - Observation + Local Draft", showBackground = true, widthDp = 393, heightDp = 1220)
+@Preview(name = "S09 - Observation", showBackground = true, widthDp = 393, heightDp = 1220)
 @Composable
-private fun HomeScreenS09ObservationAndDraftPreview() {
+private fun HomeScreenS09ObservationPreview() {
     HomeScreenPreviewWrapper(HomeScenario.S09)
 }
 

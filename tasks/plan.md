@@ -1,49 +1,60 @@
-# Implementation Plan: Chanko All 74 Icons System Migration
+# Implementation Plan: Cải tiến UI/UX UrlInputDialog (Chuẩn Handoff v1)
 
 ## Overview
-Di dời toàn bộ hệ thống icon của ứng dụng Chanko từ thư viện Google Material Icons (`androidx.compose.material.icons.extended`) sang bộ thiết kế độc quyền **Chanko All 74 Icons**:
-- **66 Icon 2D Candy Duotone v2.0-r1**: 198 Android Vector Drawables (3 biến thể `default`, `selected`, `disabled` cho mỗi icon) phủ 100% các icon chức năng trong ứng dụng.
-- **8 Icon 3D Signature (C01 - C08)**: 8 file WebP lossless 512×512 đặt tại `res/drawable-nodpi/` cho các điểm chạm trải nghiệm cảm xúc.
-- **Design Token Component**: Đóng gói qua `com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon`.
-- **Gỡ bỏ Dependency**: Loại bỏ hoàn toàn `material-icons-extended` khỏi `build.gradle.kts`.
+Nâng cấp toàn diện giao diện và trải nghiệm người dùng cho `UrlInputDialog` và `ExtractionFailedDialog` (kích hoạt khi người dùng nhấn nút `+` ở Bottom Bar) theo bộ tài liệu bàn giao `Chanko-Url-Dialogs-Handoff-v1`:
+- Thay thế phong cách form cũ bằng Card nền kem hồng `#FFF7F5`, bo góc `32dp`, viền trắng 1dp, shadow mềm 12dp.
+- Bổ sung minh họa giỏ hàng 3D `chanko_url_basket.png` tràn lên trên mép card `32dp`.
+- Bộ copy tiếng Việt mới tạo thiện cảm và cảm xúc tích cực (*"Món gì khiến bạn chú ý thế?"*).
+- Ô nhập link bo góc `20dp`, tích hợp icon "Dán" chủ động chuẩn trợ năng 48×48dp, chỉ đọc clipboard khi chạm.
+- Cặp nút hành động tỉ lệ 40:60 (Hủy viền tím nhạt, Lấy thông tin gradient tím `#A259D7` → `#7D35B3` với spinner lồng trong nút khi loading).
+- `ExtractionFailedDialog` độc lập (thay thế cửa sổ, không xếp chồng 2 dialog), icon cảnh báo vector riêng.
+- Quản lý trạng thái: Single-session in-memory qua `AddItemViewModel`, hủy job và dọn dẹp khi đóng.
 
 ---
 
-## Architectural Decisions
-1. **Resource Segregation**:
-   - 198 file vector XML 2D chuyển vào `app/src/main/res/drawable/`.
-   - Bảng màu tham khảo `chanko_icon_colors.xml` chuyển vào `app/src/main/res/values/`.
-   - 8 file WebP 3D chuyển vào `app/src/main/res/drawable-nodpi/` để triệt tiêu nguy cơ Out-Of-Memory do tự động scale mật độ màn hình trên Android.
-2. **Component Wrapper Pattern**:
-   - `ChankoIconId`: Enum định danh 66 ID ánh xạ chính xác đến 3 resource drawable (`normal`, `selected`, `disabled`).
-   - `ChankoIcon`: Composable chuẩn hóa, tự động chọn resource theo trạng thái `enabled` / `selected`, giữ nguyên kích thước mặc định 24dp và `tint = Color.Unspecified` để bảo toàn màu sắc Duotone.
-   - `ChankoSignatureImage`: Composable hiển thị 8 artwork 3D Signature với tỉ lệ fit gốc.
-3. **Accessibility First (A11y)**:
-   - Các icon có text nhãn đi kèm: `contentDescription = null` để chống đọc trùng lặp trên TalkBack.
-   - Các icon dạng button hành động độc lập: `contentDescription` bắt buộc lấy từ chuỗi Tiếng Việt trong `strings.xml`.
-   - Kích thước touch target tối thiểu của button bọc ngoài: `48.dp × 48.dp`.
+## Architecture Decisions
+- **Tài nguyên độc lập (Decoupled Assets):** Đặt ảnh 3D vào `res/drawable-nodpi/` để giữ nguyên độ phân giải và kích thước tính bằng `dp` trong Compose; các icon vector hình học đặt trong `res/drawable/`.
+- **Window Management & Scrim:** Chỉ render 1 Dialog window tại 1 thời điểm (`AddItemEntryHost` điều phối: hiển thị `UrlInputDialog` hoặc `ExtractionFailedDialog`), tránh lỗi double scrim và lỗi TalkBack focus xuyên nền.
+- **Responsive Layout & Keyboard Occlusion:** Dùng `BoxWithConstraints` và `verticalScroll` với `heightIn(max = maxHeight)` để đảm bảo dialog co giãn linh hoạt, không bị bàn phím ảo (IME) che khuất nút bấm.
+- **Privacy-First Clipboard:** Chỉ đọc `LocalClipboardManager` khi người dùng bấm trực tiếp vào icon Dán, không quét clipboard tự động.
+- **State Seam:** Giữ nguyên hợp đồng tương tác với `AddItemViewModel` (sự kiện `editUrl`, `extract`, `cancel`, `dismissExtractionFailure`, `confirmManualInput`).
 
 ---
 
 ## Phased Implementation Roadmap
 
-### Phase 1: Foundation (Assets & Design System Tokens)
-- Copy 198 vector drawables và file màu vào `res/drawable/` và `res/values/`.
-- Copy 8 file WebP 3D vào `res/drawable-nodpi/`.
-- Xây dựng `ChankoIconId.kt`, `ChankoIcon.kt`, và `ChankoSignatureImage.kt` trong package `com.hoabh.chanko.presentation.designsystem.icon`.
-- **Checkpoint 1**: Biên dịch `./gradlew assembleDevDebug` thành công với các resource mới.
+### Phase 1: Assets & Resources Setup
+- [ ] Task 1: Thiết lập Assets (Ảnh giỏ hàng 3D và các vector icon mới).
+- [ ] Task 2: Cập nhật String Resources tiếng Việt theo handoff.
 
-### Phase 2: Navigation & Core Shell Migration
-- Chuyển đổi toàn bộ `MainNavigation.kt`: 4 tabs BottomBar (`NAV_01` .. `NAV_04`) và nút thêm trung tâm (`ACT_01`).
-- **Checkpoint 2**: Kiểm tra navigation bar hiển thị icon Candy Duotone đúng trạng thái `selected` / `default`.
+### Checkpoint 1: Assets
+- [ ] Tất cả drawables và strings compile hợp lệ, không xung đột resource ID.
 
-### Phase 3: Screen Slices Migration
-- **Slice A (Home & Dashboard)**: `HomeScreen.kt`, `QuickActionsRow.kt`, `ObservationCard.kt`, `YourDecisionsSection.kt`, `DraftResumeCard.kt`, `HomeSheetHost.kt`. Tích hợp 3D Signature C01..C04 vào các card.
-- **Slice B (Item Detail & Actions)**: `ItemDetailScreen.kt`, `StickyBottomActionBar.kt`, `ItemMoreOptionsBottomSheet.kt`, `CoolingOffCountdownCard.kt`, `ExpandableDetailsSection.kt`, `DecisionJourneySection.kt`.
-- **Slice C (Add Item, Decision, Vault & Profile)**: `AddItemScreen.kt`, `DecisionScreen.kt`, `VaultScreen.kt`, `TransactionDetailScreen.kt`, `ProfileScreen.kt`, `ProfileComponents.kt`, `ArchivedItemsScreen.kt`, `ItemUi.kt`.
-- **Checkpoint 3**: Mọi màn hình UI biên dịch sạch sẽ không còn dùng `Icons.Rounded.*`.
+### Phase 2: Component Implementation & Host Wiring
+- [ ] Task 3: Xây dựng Composable `UrlInputDialog` và `ExtractionFailedDialog` mới theo chuẩn Handoff v1.
+- [ ] Task 4: Tích hợp thao tác Clipboard và bàn phím (IME Action Done).
+- [ ] Task 5: Cập nhật `AddItemEntryHost` điều phối hiển thị duy nhất 1 Dialog và dọn dẹp focus bàn phím.
 
-### Phase 4: Dependency Pruning & Verification
-- Xóa bỏ `implementation(libs.androidx.compose.material.icons.extended)` khỏi `app/build.gradle.kts`.
-- Dọn dẹp toàn bộ unused imports `androidx.compose.material.icons.*`.
-- **Checkpoint 4**: `./gradlew assembleDevDebug` và `./gradlew testDevDebugUnitTest` PASS 100%.
+### Checkpoint 2: UI & Navigation
+- [ ] Dialog hiển thị đúng giao diện, thao tác Dán / Hủy / Lấy thông tin / Popup lỗi chuyển Manual hoạt động mượt mà.
+
+### Phase 3: Previews, Testing & Verification
+- [ ] Task 6: Bổ sung Compose Previews cho các trạng thái Dialog (Idle, Extracting, Error, ExtractionFailed).
+- [ ] Task 7: Chạy kiểm thử tự động (`./gradlew testDevDebugUnitTest`) và verify build (`./gradlew assembleDevDebug`).
+
+### Checkpoint 3: Hoàn tất
+- [ ] Tất cả unit test passed, build assembleDevDebug thành công không có lỗi biên dịch.
+
+---
+
+## Risks and Mitigations
+| Rủi ro | Mức độ | Biện pháp giảm thiểu |
+| :--- | :--- | :--- |
+| Minh họa 3D bị cắt hoặc đẩy lệch khi bàn phím mở | Trung bình | Đặt trong `Box` với padding/offset hợp lý, bọc toàn bộ nội dung trong `BoxWithConstraints` và `verticalScroll`. |
+| Double dim / đơ focus khi popup lỗi bật lên | Cao | Chỉ hiển thị 1 Native Dialog tại một thời điểm trong `AddItemEntryHost` (`if (state.extractionFailed) ExtractionFailedDialog(...) else UrlInputDialog(...)`). |
+| Chữ trên nút gradient bị chói / khó đọc | Thấp | Sử dụng gradient tím đậm (`#A259D7` → `#7D35B3`) đảm bảo tỷ lệ tương phản chữ trắng ≥ 4.5:1. |
+
+---
+
+## Open Questions
+- Không có câu hỏi còn tồn đọng (Lựa chọn 1 đã được chốt và thống nhất).

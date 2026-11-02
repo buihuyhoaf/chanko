@@ -25,9 +25,6 @@ sealed interface HomeUiEvent {
     data class ObservationHideTapped(val id: String) : HomeUiEvent
     data class ObservationDismissTapped(val id: String) : HomeUiEvent
 
-    // Local Draft (HOME-07)
-    data class ResumeDraftTapped(val id: String) : HomeUiEvent
-
     // Bottom Navigation & Sheets (HOME-08)
     data object GlobalAddTapped : HomeUiEvent
     data object DismissSheet : HomeUiEvent

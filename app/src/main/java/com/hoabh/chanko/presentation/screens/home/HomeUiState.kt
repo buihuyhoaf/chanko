@@ -30,8 +30,7 @@ enum class HomeSection {
     LivingRoom,
     Budget,
     Decisions,
-    Observation,
-    Draft
+    Observation
 }
 
 enum class GreetingPeriod {
@@ -188,25 +187,6 @@ data class ObservationUi(
 )
 
 /**
- * HOME-07 — Local Draft Indicator.
- */
-enum class DraftSyncState {
-    LocalDraft,
-    PendingSync,
-    SyncFailed
-}
-
-@Immutable
-data class DraftUi(
-    val id: String,
-    val title: String,
-    val priceMinor: Long? = null,
-    val priceFormatted: String? = null,
-    val updatedLabel: String = "",
-    val syncState: DraftSyncState = DraftSyncState.LocalDraft
-)
-
-/**
  * HOME-08 — Bottom Sheet (tối đa 1 sheet mở tại một thời điểm).
  */
 enum class ContextKind {
@@ -245,7 +225,6 @@ data class HomeCapabilities(
     val canOpenViewAll: Boolean = true,
     val canOpenObservationExplain: Boolean = true,
     val canHideObservation: Boolean = true,
-    val canResumeDraft: Boolean = true
 )
 
 /**
@@ -260,7 +239,6 @@ data class HomeUiState(
     val decisionsSection: SectionState<List<DecisionUi>> = SectionState.Loading,
     val totalAttentionCount: Int = 0,
     val observation: ObservationUi? = null,
-    val draft: DraftUi? = null,
     val activeSheet: HomeSheet? = null,
     val selectedTab: HomeTab = HomeTab.Home,
     val capabilities: HomeCapabilities = HomeCapabilities()
@@ -268,6 +246,4 @@ data class HomeUiState(
     val isObservationVisible: Boolean
         get() = observation != null
 
-    val isLocalDraftVisible: Boolean
-        get() = draft != null
 }

@@ -1,0 +1,13 @@
+<resources>
+<string name="candy_url_title">Món gì khiến bạn chú ý thế?</string>
+<string name="candy_url_body">Dán link sản phẩm, Chanko sẽ lấy thông tin giúp bạn.</string>
+<string name="candy_url_label">Link sản phẩm</string>
+<string name="candy_url_hint">Dán liên kết sản phẩm</string>
+<string name="candy_url_paste">Dán liên kết</string>
+<string name="candy_cancel">Hủy</string>
+<string name="candy_extract">Lấy thông tin</string>
+<string name="candy_extracting">Đang lấy thông tin sản phẩm…</string>
+<string name="candy_failure_title">Chưa lấy được thông tin</string>
+<string name="candy_failure_body">Chanko chưa đọc được thông tin từ link này. Bạn có muốn tự nhập thông tin món đồ không?</string>
+<string name="candy_confirm">Xác nhận</string>
+</resources>

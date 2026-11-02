@@ -6,6 +6,11 @@ sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Login : Screen("login")
     data object Setup : Screen("setup")
+    data object AddFlow : Screen("add_flow")
+    data object VerifyItemInfo : Screen("verify_item_info")
+    data object ManualItemInput : Screen("manual_item_input")
+    data object QuickCheck : Screen("add_quick_check")
+    data object DecisionResult : Screen("add_result")
     data object Main : Screen("main")
     data object ItemDetail : Screen("item_detail/{itemId}") {
         fun createRoute(itemId: Int): String = "item_detail/$itemId"
