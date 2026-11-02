@@ -41,7 +41,7 @@ fun CoolingOffCountdownCard(
 ) {
     val isReady = displayStatus == ItemDisplayStatus.ReadyForReview
     val containerBg = if (isReady) CandyColors.readySurface else CandyColors.blue.copy(alpha = 0.15f)
-    val accentColor = if (isReady) CandyColors.readyAction else Color(0xFF1B5A8A)
+    val accentColor = if (isReady) CandyColors.readyAction else CandyColors.Status.accentBlue
 
     Surface(
         modifier = modifier
