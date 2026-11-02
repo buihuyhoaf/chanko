@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,16 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.DecisionStatus
 import com.hoabh.chanko.presentation.screens.home.DecisionUi
 import com.hoabh.chanko.presentation.screens.home.SectionState
@@ -49,58 +50,66 @@ import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
-import com.hoabh.chanko.ui.theme.ChankoTheme
 import com.hoabh.chanko.ui.theme.Nunito
 
-private val AttentionTileRadius = 24.dp
-private val AttentionTileBorderWidth = 2.dp
-private val ThumbnailSize = 72.dp
-private val ThumbnailRadius = 16.dp
-private val ChevronIconSize = 20.dp
+private val OuterSectionCardRadius = 24.dp
+private val AttentionTileRadius = 18.dp
+private val ThumbnailSize = 56.dp
+private val ThumbnailRadius = 14.dp
+private val ChevronIconSize = 18.dp
 private val StatusIconSize = 14.dp
 
 @Immutable
 data class AttentionItemStatusStyle(
-    val background: Color,
-    val border: Color,
-    val accent: Color,
+    val pillBackground: Color,
+    val pillText: Color,
     val icon: ChankoIconId
 )
 
-fun resolveAttentionItemStyle(status: DecisionStatus): AttentionItemStatusStyle = when (status) {
-    DecisionStatus.Ready -> AttentionItemStatusStyle(
-        background = CandyColors.attentionTileReadyBg,
-        border = CandyColors.attentionTileReadyBorder,
-        accent = CandyColors.attentionTileReadyAccent,
-        icon = ChankoIconId.ITM_05
-    )
-    DecisionStatus.Waiting -> AttentionItemStatusStyle(
-        background = CandyColors.attentionTileWaitingBg,
-        border = CandyColors.attentionTileWaitingBorder,
-        accent = CandyColors.attentionTileWaitingAccent,
+fun resolveAttentionItemStyle(
+    status: DecisionStatus,
+    isTimerExpiredLocally: Boolean = false
+): AttentionItemStatusStyle = when {
+    isTimerExpiredLocally -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.decisionWaitingPillBg,
+        pillText = CandyColors.decisionWaitingPillInk,
         icon = ChankoIconId.ITM_04
     )
-    DecisionStatus.Considering -> AttentionItemStatusStyle(
-        background = CandyColors.attentionTileConsideringBg,
-        border = CandyColors.attentionTileConsideringBorder,
-        accent = CandyColors.attentionTileConsideringAccent,
+    status == DecisionStatus.Ready -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.backgroundPink,
+        pillText = CandyColors.globalSheetSaveIconInk,
+        icon = ChankoIconId.ITM_05
+    )
+    status == DecisionStatus.Waiting -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.decisionWaitingPillBg,
+        pillText = CandyColors.decisionWaitingPillInk,
+        icon = ChankoIconId.ITM_04
+    )
+    status == DecisionStatus.Considering -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.decisionWaitingPillBg,
+        pillText = CandyColors.decisionWaitingPillInk,
         icon = ChankoIconId.ITM_12
     )
-    DecisionStatus.Saved -> AttentionItemStatusStyle(
-        background = CandyColors.attentionTileSavedBg,
-        border = CandyColors.attentionTileSavedBorder,
-        accent = CandyColors.attentionTileSavedAccent,
+    status == DecisionStatus.Saved -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.decisionConsideringPillBg,
+        pillText = CandyColors.decisionConsideringPillInk,
         icon = ChankoIconId.ITM_13
+    )
+    else -> AttentionItemStatusStyle(
+        pillBackground = CandyColors.decisionReadyPillBg,
+        pillText = CandyColors.decisionReadyPillInk,
+        icon = ChankoIconId.ITM_06
     )
 }
 
 /**
- * HOME-05 — Home Attention Items Section ("Những món cần chú ý"):
- * - No outer enclosing white card; items sit directly on the screen background.
- * - Header: Sparkles icon in lavender container + "Những món cần chú ý" + "Tất cả ›".
- * - Item list: Up to 3 standalone Candy Item Tiles, stacked vertically with 12dp spacing.
- * - Semantic tile colors: Ready (mint), Waiting (sky blue), Considering (lavender), Saved (warm peach).
- * - Full thumbnail (72x72, 16dp radius), title (max 2 lines), price, and status in a compact row.
+ * Khu vực 3 — Những món cần chú ý (Candy Pop 3D v1.0 — AC-07..AC-10, HOME-STATE-01, HOME-EDGE-04):
+ * - Khung card sáng bo góc lớn (`24dp`) bao quanh cả header và các hàng món đồ theo đúng mockup được duyệt.
+ * - Header: Icon ngôi sao lấp lánh + "Những món cần chú ý" + nút "Tất cả ›" (>= 48dp).
+ * - Tối đa 3 món, ưu tiên món cần hành động / đến hạn xem lại.
+ * - Giá thiếu hiển thị đúng "Chưa có giá" (không coi là 0đ).
+ * - На màn hình hẹp (< 360dp) hoặc font lớn (>= 1.35f), status pill tự động chuyển xuống dưới nội dung để không cắt chữ.
+ * - Giữ empty state nhỏ gọn trong card khi có 0 món (HOME-STATE-01).
  */
 @Composable
 fun HomeAttentionItemsSection(
@@ -108,44 +117,54 @@ fun HomeAttentionItemsSection(
     totalCount: Int,
     onDecisionClick: (String) -> Unit,
     onViewAllClick: () -> Unit,
-    onSaveFirstItemClick: () -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier,
     canOpenViewAll: Boolean = true
 ) {
-    Column(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+        shape = RoundedCornerShape(OuterSectionCardRadius),
+        color = CandyColors.homeCardSurface,
+        tonalElevation = CandyElevation.low,
+        shadowElevation = CandyElevation.low,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
     ) {
-        // 1. Header
-        AttentionItemsHeader(
-            canOpenViewAll = canOpenViewAll,
-            onViewAllClick = onViewAllClick
-        )
-
-        // 2. Content
-        when (sectionState) {
-            SectionState.Loading -> AttentionItemsLoadingState()
-            is SectionState.Empty -> AttentionItemsEmptyState(onSaveFirstItemClick = onSaveFirstItemClick)
-            is SectionState.Error -> AttentionItemsErrorState(
-                message = sectionState.message,
-                canRetry = sectionState.canRetry,
-                onRetryClick = onRetryClick
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CandySpace.lg),
+            verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+        ) {
+            // 1. Header inside enclosing card
+            AttentionItemsHeader(
+                canOpenViewAll = canOpenViewAll,
+                onViewAllClick = onViewAllClick
             )
-            is SectionState.Content -> {
-                if (sectionState.data.isEmpty()) {
-                    AttentionItemsEmptyState(onSaveFirstItemClick = onSaveFirstItemClick)
-                } else {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-                    ) {
-                        sectionState.data.take(3).forEach { decision ->
-                            key(decision.id) {
-                                HomeAttentionItemTile(
-                                    decision = decision,
-                                    onClick = { onDecisionClick(decision.id) }
-                                )
+
+            // 2. Content
+            when (sectionState) {
+                SectionState.Loading -> AttentionItemsLoadingState()
+                is SectionState.Empty -> AttentionItemsEmptyState(message = sectionState.message)
+                is SectionState.Error -> AttentionItemsErrorState(
+                    message = sectionState.message,
+                    canRetry = sectionState.canRetry,
+                    onRetryClick = onRetryClick
+                )
+                is SectionState.Content -> {
+                    if (sectionState.data.isEmpty()) {
+                        AttentionItemsEmptyState()
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+                        ) {
+                            sectionState.data.take(3).forEach { decision ->
+                                key(decision.id) {
+                                    HomeAttentionItemTile(
+                                        decision = decision,
+                                        onClick = { onDecisionClick(decision.id) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -156,7 +175,7 @@ fun HomeAttentionItemsSection(
 }
 
 /**
- * Backward compatibility alias for [HomeAttentionItemsSection].
+ * Alias tương thích với HomeScreen.
  */
 @Composable
 fun YourDecisionsSection(
@@ -164,7 +183,6 @@ fun YourDecisionsSection(
     totalCount: Int,
     onDecisionClick: (String) -> Unit,
     onViewAllClick: () -> Unit,
-    onSaveFirstItemClick: () -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier,
     canOpenViewAll: Boolean = true
@@ -174,7 +192,6 @@ fun YourDecisionsSection(
         totalCount = totalCount,
         onDecisionClick = onDecisionClick,
         onViewAllClick = onViewAllClick,
-        onSaveFirstItemClick = onSaveFirstItemClick,
         onRetryClick = onRetryClick,
         modifier = modifier,
         canOpenViewAll = canOpenViewAll
@@ -191,38 +208,31 @@ private fun AttentionItemsHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: Sparkles icon in lavender container + Title
         Row(
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(CandyColors.primarySoft),
-                contentAlignment = Alignment.Center
-            ) {
-                ChankoIcon(
-                    id = ChankoIconId.ITM_01,
-                    contentDescription = null,
-                    size = 18.dp
-                )
-            }
+            ChankoIcon(
+                id = ChankoIconId.ITM_01,
+                contentDescription = null,
+                size = 24.dp
+            )
 
             Text(
                 text = stringResource(R.string.home_decisions_title),
                 style = TextStyle(
                     fontFamily = Nunito,
-                    fontSize = 17.sp,
-                    lineHeight = 22.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 18.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.ExtraBold
                 ),
-                color = CandyColors.textPrimary
+                color = CandyColors.textPrimary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
-        // Right: "Tất cả ›"
         if (canOpenViewAll) {
             val viewAllText = stringResource(R.string.home_decisions_view_all_compact)
             Row(
@@ -231,21 +241,27 @@ private fun AttentionItemsHeader(
                     .clip(CandyShape.chip)
                     .clickable(
                         role = Role.Button,
-                        onClickLabel = viewAllText,
+                        onClickLabel = stringResource(R.string.home_decisions_view_all),
                         onClick = onViewAllClick
                     )
-                    .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = CandySpace.sm, vertical = CandySpace.xs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
                     text = viewAllText,
                     style = TextStyle(
                         fontFamily = Nunito,
                         fontSize = 14.sp,
-                        lineHeight = 18.sp,
+                        lineHeight = 20.sp,
                         fontWeight = FontWeight.Bold
                     ),
                     color = CandyColors.brandPurple
+                )
+                ChankoIcon(
+                    id = ChankoIconId.ACT_18,
+                    contentDescription = null,
+                    size = 14.dp
                 )
             }
         }
@@ -253,8 +269,10 @@ private fun AttentionItemsHeader(
 }
 
 /**
- * Individual Candy Item Tile:
- * [Product image (72x72)] [Title (max 2 lines) + Price + Status] [Chevron]
+ * Một hàng món đồ trong "Những món cần chú ý" (AC-10, AC-20, HOME-EDGE-04):
+ * - Toàn bộ tile là 1 action semantic mở ItemDetailScreen(itemId); chevron chỉ là affordance thị giác.
+ * - Khi cửa sổ rộng (>= 340dp) và font bình thường: [Thumbnail] [Tên + Giá] [Status Pill] [Chevron].
+ * - Khi cửa sổ hẹp (< 340dp) hoặc font lớn (>= 1.35f): Status Pill tự động chuyển xuống dưới Giá để không cắt chữ.
  */
 @Composable
 fun HomeAttentionItemTile(
@@ -262,203 +280,206 @@ fun HomeAttentionItemTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val effectiveStatus = if (decision.isTimerExpiredLocally) {
-        DecisionStatus.Ready
-    } else {
-        decision.status
-    }
-    val style = resolveAttentionItemStyle(effectiveStatus)
+    val configuration = LocalConfiguration.current
+    val isLargeFont = configuration.fontScale >= 1.35f
+    val style = resolveAttentionItemStyle(
+        status = decision.status,
+        isTimerExpiredLocally = decision.isTimerExpiredLocally
+    )
 
-    val displayStatusText = when (effectiveStatus) {
-        DecisionStatus.Ready -> stringResource(R.string.home_decision_status_ready)
-        DecisionStatus.Waiting -> {
-            if (!decision.secondaryText.isNullOrBlank()) {
-                "${decision.statusLabel} · ${decision.secondaryText}"
-            } else {
-                decision.statusLabel
-            }
-        }
-        DecisionStatus.Considering -> decision.statusLabel
-        DecisionStatus.Saved -> decision.statusLabel
+    val pillLabel = when {
+        decision.isTimerExpiredLocally -> stringResource(R.string.home_decision_status_expired)
+        decision.status == DecisionStatus.Ready -> stringResource(R.string.home_decision_status_ready)
+        else -> decision.statusLabel
     }
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = CandySize.touchTarget)
             .clip(RoundedCornerShape(AttentionTileRadius))
+            .semantics(mergeDescendants = true) {}
             .clickable(
                 role = Role.Button,
                 onClickLabel = decision.title,
                 onClick = onClick
             ),
         shape = RoundedCornerShape(AttentionTileRadius),
-        color = style.background,
-        border = BorderStroke(AttentionTileBorderWidth, style.border),
-        shadowElevation = CandyElevation.low
+        color = Color.White,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder),
+        shadowElevation = 1.dp
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CandySpace.md),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(CandySpace.md)
         ) {
-            // Thumbnail: 72x72dp, radius 16dp, background white
-            Box(
-                modifier = Modifier
-                    .size(ThumbnailSize)
-                    .clip(RoundedCornerShape(ThumbnailRadius))
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                if (decision.thumbnailResId != null) {
-                    Image(
-                        painter = painterResource(id = decision.thumbnailResId),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_03,
-                        contentDescription = null,
-                        size = 32.dp
-                    )
-                }
-            }
+            val stackStatusBelow = maxWidth < 310.dp || isLargeFont
 
-            Spacer(modifier = Modifier.width(CandySpace.md))
-
-            // Text Column: Title + Price + Status
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = decision.title,
-                    style = TextStyle(
-                        fontFamily = Nunito,
-                        fontSize = 15.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = CandyColors.textPrimary,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = decision.priceFormatted,
-                    style = TextStyle(
-                        fontFamily = Nunito,
-                        fontSize = 15.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = CandyColors.textPrimary
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                // Thumbnail: 56x56dp, radius 14dp, stable placeholder when missing
+                Box(
+                    modifier = Modifier
+                        .size(ThumbnailSize)
+                        .clip(RoundedCornerShape(ThumbnailRadius))
+                        .background(CandyColors.primarySoft.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    ChankoIcon(
-                        id = style.icon,
-                        contentDescription = null,
-                        size = StatusIconSize
-                    )
+                    if (decision.thumbnailResId != null) {
+                        Image(
+                            painter = painterResource(id = decision.thumbnailResId),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        ChankoIcon(
+                            id = ChankoIconId.ITM_03,
+                            contentDescription = null,
+                            size = 28.dp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(CandySpace.md))
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = displayStatusText,
+                        text = decision.title,
                         style = TextStyle(
                             fontFamily = Nunito,
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
+                            fontSize = 16.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = CandyColors.textPrimary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = decision.priceFormatted,
+                        style = TextStyle(
+                            fontFamily = Nunito,
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = style.accent
+                        color = if (decision.priceMinor == null) {
+                            CandyColors.textSecondary
+                        } else {
+                            CandyColors.textPrimary
+                        }
+                    )
+
+                    if (stackStatusBelow) {
+                        StatusPillBadge(
+                            label = pillLabel,
+                            style = style
+                        )
+                    }
+                }
+
+                if (!stackStatusBelow) {
+                    Spacer(modifier = Modifier.width(CandySpace.sm))
+                    StatusPillBadge(
+                        label = pillLabel,
+                        style = style
                     )
                 }
+
+                Spacer(modifier = Modifier.width(CandySpace.sm))
+
+                ChankoIcon(
+                    id = ChankoIconId.ACT_18,
+                    contentDescription = null,
+                    size = ChevronIconSize
+                )
             }
-
-            Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            // Chevron
-            ChankoIcon(
-                id = ChankoIconId.ACT_18,
-                contentDescription = null,
-                size = ChevronIconSize
-            )
         }
     }
 }
 
 @Composable
+private fun StatusPillBadge(
+    label: String,
+    style: AttentionItemStatusStyle,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = CandyShape.chip,
+        color = style.pillBackground
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ChankoIcon(
+                id = style.icon,
+                contentDescription = null,
+                size = StatusIconSize
+            )
+            Text(
+                text = label,
+                style = TextStyle(
+                    fontFamily = Nunito,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = style.pillText
+            )
+        }
+    }
+}
+
+/**
+ * Empty state nhỏ gọn bên trong section Những món cần chú ý (HOME-STATE-01, AC-09).
+ */
+@Composable
 private fun AttentionItemsEmptyState(
-    onSaveFirstItemClick: () -> Unit
+    message: String = ""
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = CandyColors.attentionTileConsideringBg,
-        border = BorderStroke(1.5.dp, CandyColors.attentionTileConsideringBorder),
-        shadowElevation = CandyElevation.low
+        shape = RoundedCornerShape(AttentionTileRadius),
+        color = CandyColors.primarySoft.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = CandySpace.lg, vertical = CandySpace.md),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.home_decisions_empty_title),
-                    style = TextStyle(
-                        fontFamily = Nunito,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = CandyColors.textPrimary
-                )
-                Text(
-                    text = stringResource(R.string.home_decisions_empty_subtitle),
-                    style = TextStyle(
-                        fontFamily = Nunito,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal
-                    ),
-                    color = CandyColors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            val ctaLabel = stringResource(R.string.home_decisions_empty_cta)
-            Surface(
-                modifier = Modifier
-                    .heightIn(min = 36.dp)
-                    .clip(CandyShape.chip)
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = ctaLabel,
-                        onClick = onSaveFirstItemClick
-                    ),
-                shape = CandyShape.chip,
-                color = Color.White
-            ) {
-                Text(
-                    text = ctaLabel,
-                    style = TextStyle(
-                        fontFamily = Nunito,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = CandyColors.brandPurple,
-                    modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs)
-                )
-            }
+            Text(
+                text = message.ifBlank { stringResource(R.string.home_decisions_empty_title) },
+                style = TextStyle(
+                    fontFamily = Nunito,
+                    fontSize = 15.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = CandyColors.textPrimary
+            )
+            Text(
+                text = stringResource(R.string.home_decisions_empty_subtitle),
+                style = TextStyle(
+                    fontFamily = Nunito,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = CandyColors.textSecondary
+            )
         }
     }
 }
@@ -467,16 +488,16 @@ private fun AttentionItemsEmptyState(
 private fun AttentionItemsLoadingState() {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
     ) {
         repeat(2) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(96.dp),
+                    .height(80.dp),
                 shape = RoundedCornerShape(AttentionTileRadius),
                 color = CandyColors.primarySoft.copy(alpha = 0.35f),
-                border = BorderStroke(1.5.dp, CandyColors.primarySoft)
+                border = BorderStroke(1.dp, CandyColors.primarySoft)
             ) {
                 Row(
                     modifier = Modifier
@@ -524,9 +545,9 @@ private fun AttentionItemsErrorState(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = CandyColors.attentionTileSavedBg,
-        border = BorderStroke(1.5.dp, CandyColors.attentionTileSavedBorder)
+        shape = RoundedCornerShape(AttentionTileRadius),
+        color = CandyColors.primarySoft.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
     ) {
         Row(
             modifier = Modifier
@@ -536,10 +557,8 @@ private fun AttentionItemsErrorState(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = message,
-                style = TextStyle(
-                    fontFamily = Nunito,
-                    fontSize = 13.sp,
+                text = message.ifBlank { stringResource(R.string.home_section_error_decisions) },
+                style = MaterialTheme.typography.bodySmall.copy(
                     fontWeight = FontWeight.Medium
                 ),
                 color = CandyColors.textSecondary,
@@ -547,191 +566,33 @@ private fun AttentionItemsErrorState(
             )
             if (canRetry) {
                 Spacer(modifier = Modifier.width(CandySpace.sm))
-                val retryText = stringResource(R.string.home_section_retry)
+                val retryLabel = stringResource(R.string.home_section_retry)
                 Surface(
                     modifier = Modifier
-                        .heightIn(min = 36.dp)
+                        .heightIn(min = CandySize.touchTarget)
                         .clip(CandyShape.chip)
                         .clickable(
                             role = Role.Button,
-                            onClickLabel = retryText,
+                            onClickLabel = retryLabel,
                             onClick = onRetryClick
                         ),
                     shape = CandyShape.chip,
                     color = Color.White
                 ) {
-                    Text(
-                        text = retryText,
-                        style = TextStyle(
-                            fontFamily = Nunito,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = CandyColors.brandPurple,
-                        modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs)
-                    )
+                    Box(
+                        modifier = Modifier.padding(horizontal = CandySpace.md, vertical = CandySpace.xs),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = retryLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = CandyColors.brandPurple
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-// ==========================================
-// PREVIEWS
-// ==========================================
-
-private val previewItemReady = DecisionUi(
-    id = "p_ready",
-    title = "Áo khoác vintage",
-    priceMinor = 680_000L,
-    priceFormatted = "680.000 ₫",
-    status = DecisionStatus.Ready,
-    statusLabel = "Sẵn sàng xem lại"
-)
-
-private val previewItemWaiting1 = DecisionUi(
-    id = "p_wait1",
-    title = "Sony WH-1000XM5",
-    priceMinor = 7_490_000L,
-    priceFormatted = "7.490.000 ₫",
-    status = DecisionStatus.Waiting,
-    statusLabel = "Đang chờ",
-    secondaryText = "Còn 18 giờ 24 phút",
-    remainingSeconds = 66_240L
-)
-
-private val previewItemWaiting2 = DecisionUi(
-    id = "p_wait2",
-    title = "Keychron K2",
-    priceMinor = 1_850_000L,
-    priceFormatted = "1.850.000 ₫",
-    status = DecisionStatus.Waiting,
-    statusLabel = "Đang chờ",
-    secondaryText = "Còn 6 giờ 10 phút",
-    remainingSeconds = 22_200L
-)
-
-private val previewItemConsidering = DecisionUi(
-    id = "p_consider",
-    title = "Màn hình LG UltraFine 4K 27 inch",
-    priceMinor = 9_200_000L,
-    priceFormatted = "9.200.000 ₫",
-    status = DecisionStatus.Considering,
-    statusLabel = "Đang cân nhắc"
-)
-
-private val previewItemSaved = DecisionUi(
-    id = "p_saved",
-    title = "Bình giữ nhiệt Stanley Aerolight",
-    priceMinor = 850_000L,
-    priceFormatted = "850.000 ₫",
-    status = DecisionStatus.Saved,
-    statusLabel = "Đã lưu"
-)
-
-private val previewItemLongName = DecisionUi(
-    id = "p_long",
-    title = "Bàn phím cơ Custom HHKB Professional HYBRID Type-S Snow Limited Edition kết nối Bluetooth",
-    priceMinor = 8_500_000L,
-    priceFormatted = "8.500.000 ₫",
-    status = DecisionStatus.Waiting,
-    statusLabel = "Đang chờ",
-    secondaryText = "Còn 12 giờ 30 phút",
-    remainingSeconds = 45_000L
-)
-
-@Preview(name = "1 Ready + 2 Waiting", showBackground = true, widthDp = 393)
-@Composable
-private fun HomeAttentionItemsPreview1Ready2Waiting() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Content(listOf(previewItemReady, previewItemWaiting1, previewItemWaiting2)),
-            totalCount = 3,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
-    }
-}
-
-@Preview(name = "3 Waiting", showBackground = true, widthDp = 393)
-@Composable
-private fun HomeAttentionItemsPreview3Waiting() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Content(listOf(previewItemWaiting1, previewItemWaiting2, previewItemLongName)),
-            totalCount = 3,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
-    }
-}
-
-@Preview(name = "Considering + Saved", showBackground = true, widthDp = 393)
-@Composable
-private fun HomeAttentionItemsPreviewConsideringSaved() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Content(listOf(previewItemConsidering, previewItemSaved)),
-            totalCount = 2,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
-    }
-}
-
-@Preview(name = "Empty State", showBackground = true, widthDp = 393)
-@Composable
-private fun HomeAttentionItemsPreviewEmpty() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Empty("Chưa có món đồ nào đang chờ"),
-            totalCount = 0,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
-    }
-}
-
-@Preview(name = "Long Product Name", showBackground = true, widthDp = 393)
-@Composable
-private fun HomeAttentionItemsPreviewLongName() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Content(listOf(previewItemLongName, previewItemReady)),
-            totalCount = 2,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
-    }
-}
-
-@Preview(name = "Large Font (2.0x)", showBackground = true, widthDp = 393, fontScale = 2.0f)
-@Composable
-private fun HomeAttentionItemsPreviewLargeFont() {
-    ChankoTheme {
-        HomeAttentionItemsSection(
-            sectionState = SectionState.Content(listOf(previewItemReady, previewItemWaiting1)),
-            totalCount = 2,
-            onDecisionClick = {},
-            onViewAllClick = {},
-            onSaveFirstItemClick = {},
-            onRetryClick = {},
-            modifier = Modifier.padding(CandySpace.screen)
-        )
     }
 }

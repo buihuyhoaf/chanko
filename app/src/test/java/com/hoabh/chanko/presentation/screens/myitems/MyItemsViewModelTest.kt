@@ -3,6 +3,7 @@ package com.hoabh.chanko.presentation.screens.myitems
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -166,6 +167,69 @@ class MyItemsViewModelTest {
         assertEquals(2, state.items.size)
         assertEquals(500_000L, state.items[0].rawPrice)
         assertEquals(1_500_000L, state.items[1].rawPrice)
+    }
+
+    @Test
+    fun applyExternalFilter_mapsAllHomeMyItemsFiltersCorrectly() = runTest(testDispatcher) {
+        val now = System.currentTimeMillis()
+        val coolingItem = CooldownItem(
+            id = 1,
+            name = "Bàn phím cơ",
+            price = 2_500_000L,
+            addedTimestamp = now,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Thích",
+            status = ItemStatus.COOLING_DOWN
+        )
+        val readyItem = CooldownItem(
+            id = 2,
+            name = "Tai nghe chống ồn",
+            price = 4_000_000L,
+            addedTimestamp = now - 100_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Cần",
+            status = ItemStatus.COOLING_DOWN
+        )
+        val skippedItem = CooldownItem(
+            id = 3,
+            name = "Máy ảnh film",
+            price = 3_200_000L,
+            addedTimestamp = now - 200_000_000L,
+            cooldownDurationMillis = 86_400_000L,
+            reason = "Chưa cần",
+            status = ItemStatus.PASSED
+        )
+        fakeRepository.setActive(listOf(coolingItem, readyItem))
+        fakeRepository.setPassed(listOf(skippedItem))
+        runCurrent()
+
+        // 1. WAITING -> ACTIVE + COOLING_OFF
+        viewModel.applyExternalFilter(HomeMyItemsFilter.WAITING)
+        runCurrent()
+        assertEquals(PrimaryFilter.ACTIVE, viewModel.uiState.value.primaryFilter)
+        assertEquals(ActiveSubFilter.COOLING_OFF, viewModel.uiState.value.activeSubFilter)
+        assertEquals(listOf(1), viewModel.uiState.value.items.map { it.id })
+
+        // 2. REVIEW -> ACTIVE + READY
+        viewModel.applyExternalFilter(HomeMyItemsFilter.REVIEW)
+        runCurrent()
+        assertEquals(PrimaryFilter.ACTIVE, viewModel.uiState.value.primaryFilter)
+        assertEquals(ActiveSubFilter.READY, viewModel.uiState.value.activeSubFilter)
+        assertEquals(listOf(2), viewModel.uiState.value.items.map { it.id })
+
+        // 3. SKIPPED -> SKIPPED + ALL_ACTIVE
+        viewModel.applyExternalFilter(HomeMyItemsFilter.SKIPPED)
+        runCurrent()
+        assertEquals(PrimaryFilter.SKIPPED, viewModel.uiState.value.primaryFilter)
+        assertEquals(ActiveSubFilter.ALL_ACTIVE, viewModel.uiState.value.activeSubFilter)
+        assertEquals(listOf(3), viewModel.uiState.value.items.map { it.id })
+
+        // 4. ALL -> ALL + ALL_ACTIVE
+        viewModel.applyExternalFilter(HomeMyItemsFilter.ALL)
+        runCurrent()
+        assertEquals(PrimaryFilter.ALL, viewModel.uiState.value.primaryFilter)
+        assertEquals(ActiveSubFilter.ALL_ACTIVE, viewModel.uiState.value.activeSubFilter)
+        assertEquals(3, viewModel.uiState.value.items.size)
     }
 
     private class FakeItemRepository : ItemRepository {

@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.GreetingPeriod
 import com.hoabh.chanko.presentation.screens.home.HeaderUiModel
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -35,13 +37,14 @@ import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
 
-private val HeaderControlVisualSize = 40.dp
+private val HeaderControlVisualSize = 42.dp
 
 /**
- * HOME-01 — Header (v2 Image-Aligned):
- * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng tinh tế (`"Chào buổi sáng, Hoa ☀️"`).
- * - Phụ đề ấm áp (`"Hôm nay là một ngày tuyệt vời để mua sắm có suy nghĩ nhé 💜"`).
- * - Nút Avatar tròn tím (`CandyColors.brandPurple`) có vùng chạm độc lập >= 48dp.
+ * Khu vực 1 — Header (AC-03, AC-16, HOME-EDGE-05):
+ * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng (`"Chào buổi sáng, Hoa ☀️"`).
+ * - Phụ đề ấm áp (`"Hôm nay mình cùng Chanko mua sắm có suy nghĩ nhé 💜"`).
+ * - Nút Avatar tròn tím (`CandyColors.brandPurple`) mở Profile & Settings, vùng chạm >= 48dp.
+ * - Khi offline: hiển thị badge ngoại tuyến kèm thời điểm đồng bộ thực tế (`lastSyncedAtText`).
  */
 @Composable
 fun HomeHeader(
@@ -96,7 +99,7 @@ fun HomeHeader(
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
-            // Profile Avatar Button in Purple Circle (Touch target >= 48dp)
+            // Profile Avatar Button in Purple Circle (Touch target >= 48dp, AC-03 & AC-20)
             if (canOpenProfile) {
                 val profileCd = stringResource(R.string.home_cd_profile)
                 Box(
@@ -130,21 +133,36 @@ fun HomeHeader(
         }
 
         if (header.isOffline) {
+            val offlineText = if (!header.lastSyncedAtText.isNullOrBlank()) {
+                stringResource(R.string.home_header_offline_badge_with_sync, header.lastSyncedAtText)
+            } else {
+                stringResource(R.string.home_header_offline_badge)
+            }
             Surface(
                 shape = CandyShape.chip,
                 color = CandyColors.primarySoft
             ) {
-                Text(
-                    text = stringResource(R.string.home_header_offline_badge),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = CandyColors.primaryInk,
+                Row(
                     modifier = Modifier.padding(
                         horizontal = CandySpace.md,
                         vertical = CandySpace.xs
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.SYS_10,
+                        contentDescription = null,
+                        size = 16.dp
                     )
-                )
+                    Text(
+                        text = offlineText,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = CandyColors.primaryInk
+                    )
+                }
             }
         }
     }
@@ -152,10 +170,17 @@ fun HomeHeader(
 
 @Composable
 private fun resolveGreetingText(header: HeaderUiModel): String {
-    val resId = when (header.greetingPeriod) {
-        GreetingPeriod.MORNING -> if (header.hasName) R.string.home_greeting_morning_named else R.string.home_greeting_morning_anonymous
-        GreetingPeriod.AFTERNOON -> if (header.hasName) R.string.home_greeting_afternoon_named else R.string.home_greeting_afternoon_anonymous
-        GreetingPeriod.EVENING -> if (header.hasName) R.string.home_greeting_evening_named else R.string.home_greeting_evening_anonymous
+    return if (header.hasName) {
+        when (header.greetingPeriod) {
+            GreetingPeriod.MORNING -> stringResource(R.string.home_greeting_morning_named, header.displayName)
+            GreetingPeriod.AFTERNOON -> stringResource(R.string.home_greeting_afternoon_named, header.displayName)
+            GreetingPeriod.EVENING -> stringResource(R.string.home_greeting_evening_named, header.displayName)
+        }
+    } else {
+        when (header.greetingPeriod) {
+            GreetingPeriod.MORNING -> stringResource(R.string.home_greeting_morning_anonymous)
+            GreetingPeriod.AFTERNOON -> stringResource(R.string.home_greeting_afternoon_anonymous)
+            GreetingPeriod.EVENING -> stringResource(R.string.home_greeting_evening_anonymous)
+        }
     }
-    return if (header.hasName) stringResource(resId, header.displayName) else stringResource(resId)
 }

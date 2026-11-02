@@ -7,7 +7,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -39,7 +38,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun initialState_loadsS21ScreenshotBaseline() = runTest(testDispatcher) {
+    fun `initialState loads Candy Pop 3D v1 baseline with 4 Little Room props and no open sheet`() = runTest(testDispatcher) {
         val state = viewModel.uiState.value
 
         assertEquals("S21", state.scenarioId)
@@ -49,97 +48,158 @@ class HomeViewModelTest {
         assertFalse(state.header.isOffline)
 
         val livingRoom = (state.livingRoom as SectionState.Content).data
-        assertEquals("OCT", livingRoom.calendarMonthText)
-        assertEquals("24", livingRoom.calendarDayText)
         assertNotNull(livingRoom.dialogue)
         assertEquals(4, livingRoom.props.size)
+        assertEquals(
+            listOf("Đang chờ", "Cần xem lại", "Ngân sách", "Đã bỏ qua"),
+            livingRoom.props.map { it.label }
+        )
+        // Wallet prop does not have a count badge
+        assertNull(livingRoom.props.first { it.kind == RoomPropKind.Wallet }.badgeText)
 
         val budget = (state.budgetSection as SectionState.Content).data
         assertEquals(600_000L, budget.remainingMinor)
         assertEquals(80, budget.percentageInt)
-        assertEquals("Đã tiêu 80%", budget.badgeText)
+        assertEquals("Đã chi 80%", budget.progressRightLabel)
 
         val decisions = (state.decisionsSection as SectionState.Content).data
         assertEquals(listOf("J1", "H1", "K1"), decisions.map { it.id })
-        assertNotNull(state.observation)
+        assertTrue(state.isObservationVisible)
         assertNull(state.activeSheet)
     }
 
     @Test
-    fun scenarios_S01_through_S04_and_S20_matchExpectedVisibleDecisionIds() = runTest(testDispatcher) {
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S01))
-        val s01 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("R1", "R2", "W1"), s01.map { it.id })
-        assertFalse(viewModel.uiState.value.isObservationVisible)
+    fun `AC-04 and AC-05 tapping all 4 Little Room props opens corresponding Contextual Sheet and supports empty state`() = runTest(testDispatcher) {
+        // 1. Hourglass -> Đang chờ
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Hourglass))
+        val hourglassSheet = viewModel.uiState.value.activeSheet
+        assertNotNull(hourglassSheet)
+        assertEquals(ContextKind.Hourglass, hourglassSheet?.kind)
+        assertEquals("Đang chờ", hourglassSheet?.title)
+        assertFalse(hourglassSheet!!.isEmpty)
 
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S02))
-        val s02 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("R1", "R2", "R3"), s02.map { it.id })
+        // 2. Calendar -> Cần xem lại
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Calendar))
+        val calendarSheet = viewModel.uiState.value.activeSheet
+        assertEquals(ContextKind.Calendar, calendarSheet?.kind)
+        assertEquals("Cần xem lại", calendarSheet?.title)
 
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S03))
-        val s03 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("R1", "W1", "W2"), s03.map { it.id })
+        // 3. Wallet -> Ngân sách
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Wallet))
+        val walletSheet = viewModel.uiState.value.activeSheet
+        assertEquals(ContextKind.Wallet, walletSheet?.kind)
+        assertEquals("Ngân sách", walletSheet?.title)
 
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S04))
-        val s04 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("S1"), s04.map { it.id })
+        // 4. PauseJar -> Đã bỏ qua
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.PauseJar))
+        val pauseJarSheet = viewModel.uiState.value.activeSheet
+        assertEquals(ContextKind.PauseJar, pauseJarSheet?.kind)
+        assertEquals("Đã bỏ qua", pauseJarSheet?.title)
 
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S20))
-        val s20 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("C1", "C2", "S1"), s20.map { it.id })
-    }
-
-    @Test
-    fun scenario_S05_and_budgetScenarios_S06_S07_S08_matchExpectedContracts() = runTest(testDispatcher) {
+        // AC-05: Empty state when group has 0 items (Scenario S05)
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S05))
-        assertTrue(viewModel.uiState.value.decisionsSection is SectionState.Empty)
-        assertEquals(0, viewModel.uiState.value.totalAttentionCount)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S06))
-        val s06Budget = (viewModel.uiState.value.budgetSection as SectionState.Content).data
-        assertEquals(-600_000L, s06Budget.remainingMinor)
-        assertEquals(120, s06Budget.percentageInt)
-        assertEquals(1.0f, s06Budget.visualProgress, 0.001f)
-        assertEquals(BudgetStateKind.OverBudget, s06Budget.stateKind)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S07))
-        val s07Budget = (viewModel.uiState.value.budgetSection as SectionState.Content).data
-        assertEquals(-100_000L, s07Budget.remainingMinor)
-        assertNull(s07Budget.ratio)
-        assertEquals(BudgetStateKind.Zero, s07Budget.stateKind)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S08))
-        val s08Budget = (viewModel.uiState.value.budgetSection as SectionState.Content).data
-        assertNull(s08Budget.remainingMinor)
-        assertNull(s08Budget.ratio)
-        assertEquals(BudgetStateKind.Unknown, s08Budget.stateKind)
-        assertFalse(s08Budget.spentFormatted.contains("0 ₫"))
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Hourglass))
+        val emptySheet = viewModel.uiState.value.activeSheet
+        assertNotNull(emptySheet)
+        assertTrue(emptySheet!!.isEmpty)
+        assertEquals("0", emptySheet.highlightValue)
     }
 
     @Test
-    fun scenarios_S09_S10_S11_controlOptionalObservationSection() = runTest(testDispatcher) {
+    fun `AC-06 primary action in Contextual Sheet navigates to MyItems with matching filter or BudgetScreen`() = runTest(testDispatcher) {
+        // Hourglass -> WAITING filter
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Hourglass))
+        viewModel.onEvent(HomeUiEvent.ContextSheetPrimaryAction(ContextKind.Hourglass))
+        assertEquals(HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.WAITING), viewModel.effect.first())
+        assertNull(viewModel.uiState.value.activeSheet)
+
+        // Calendar -> REVIEW filter
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Calendar))
+        viewModel.onEvent(HomeUiEvent.ContextSheetPrimaryAction(ContextKind.Calendar))
+        assertEquals(HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.REVIEW), viewModel.effect.first())
+
+        // PauseJar -> SKIPPED filter
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.PauseJar))
+        viewModel.onEvent(HomeUiEvent.ContextSheetPrimaryAction(ContextKind.PauseJar))
+        assertEquals(HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.SKIPPED), viewModel.effect.first())
+
+        // Wallet -> BudgetScreen
+        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Wallet))
+        viewModel.onEvent(HomeUiEvent.ContextSheetPrimaryAction(ContextKind.Wallet))
+        assertEquals(HomeUiEffect.NavigateToBudgetDetails, viewModel.effect.first())
+    }
+
+    @Test
+    fun `AC-07 and AC-08 cooling-off expiration reconciles Waiting into Review without mutating verdict to BUY`() = runTest(testDispatcher) {
+        // S21 baseline has 1 Review item (J1) and 2 Waiting items (H1: 66240s, K1: 22200s)
+        assertEquals(1, viewModel.uiState.value.reviewItems.size)
+        assertEquals(2, viewModel.uiState.value.waitingItems.size)
+
+        // Advance time by 30_000 seconds so K1 expires
+        viewModel.onEvent(HomeUiEvent.ReconcileCoolingOff(elapsedSeconds = 30_000L))
+
+        val state = viewModel.uiState.value
+        assertEquals(2, state.reviewItems.size)
+        assertEquals(1, state.waitingItems.size)
+
+        val expiredK1 = state.reviewItems.first { it.id == "K1" }
+        assertEquals(DecisionStatus.Ready, expiredK1.status)
+        assertEquals("Vừa hết thời gian chờ", expiredK1.statusLabel)
+        assertEquals(DecisionVerdict.WAIT, expiredK1.verdict)
+
+        // Verify Little Room prop badges updated in sync without double counting
+        val props = (state.livingRoom as SectionState.Content).data.props
+        assertEquals("1", props.first { it.kind == RoomPropKind.Hourglass }.badgeText)
+        assertEquals("2", props.first { it.kind == RoomPropKind.Calendar }.badgeText)
+    }
+
+    @Test
+    fun `AC-10 tapping decision tile emits NavigateToDecisionDetail with exact itemId`() = runTest(testDispatcher) {
+        viewModel.onEvent(HomeUiEvent.DecisionTapped("H1"))
+        assertEquals(HomeUiEffect.NavigateToDecisionDetail("H1"), viewModel.effect.first())
+    }
+
+    @Test
+    fun `AC-12 and AC-13 BudgetCard tap opens BudgetDetails and CycleChanged updates snapshot immediately`() = runTest(testDispatcher) {
+        viewModel.onEvent(HomeUiEvent.BudgetDetailsTapped)
+        assertEquals(HomeUiEffect.NavigateToBudgetDetails, viewModel.effect.first())
+
+        viewModel.onEvent(
+            HomeUiEvent.CycleChanged(
+                cycleLabel = "01/11 – 30/11 (còn 28 ngày)",
+                spentMinor = 1_500_000L,
+                limitMinor = 5_000_000L
+            )
+        )
+        val updatedBudget = (viewModel.uiState.value.budgetSection as SectionState.Content).data
+        assertEquals("01/11 – 30/11 (còn 28 ngày)", updatedBudget.cycleLabel)
+        assertEquals(3_500_000L, updatedBudget.remainingMinor)
+        assertEquals(30, updatedBudget.percentageInt)
+    }
+
+    @Test
+    fun `AC-14 Observation explain opens Contextual Sheet on Home and hidden insightId does not reappear on refresh`() = runTest(testDispatcher) {
+        viewModel.onEvent(HomeUiEvent.ObservationExplainTapped("O1"))
+        val sheet = viewModel.uiState.value.activeSheet
+        assertNotNull(sheet)
+        assertEquals(ContextKind.Observation, sheet?.kind)
+        assertEquals("Góc nhìn từ Chanko", sheet?.title)
+        assertTrue(sheet?.explanationDetail?.isNotBlank() == true)
+
+        // Hide insight O1
+        viewModel.onEvent(HomeUiEvent.ObservationHideTapped("O1"))
+        assertFalse(viewModel.uiState.value.isObservationVisible)
+        assertNull(viewModel.uiState.value.activeSheet)
+
+        // Refresh / reload S21 or S09 (which also uses id "O1") -> stays hidden!
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S21))
+        assertFalse(viewModel.uiState.value.isObservationVisible)
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S09))
-        assertTrue(viewModel.uiState.value.isObservationVisible)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S10))
-        assertTrue(viewModel.uiState.value.isObservationVisible)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S11))
         assertFalse(viewModel.uiState.value.isObservationVisible)
     }
 
     @Test
-    fun scenario_S12_preservesWaitingWhenLocalTimerHasExpired() = runTest(testDispatcher) {
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S12))
-        val decisions = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        val item = decisions.single()
-        assertEquals("W1", item.id)
-        assertEquals(DecisionStatus.Waiting, item.status)
-        assertTrue(item.isTimerExpiredLocally)
-    }
-
-    @Test
-    fun scenario_S13_isolatesBudgetErrorAndRecoversOnRetry() = runTest(testDispatcher) {
+    fun `AC-15 section error is isolated and recovers on retry`() = runTest(testDispatcher) {
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S13))
         val state = viewModel.uiState.value
         assertEquals("Hoa", state.header.displayName)
@@ -151,89 +211,26 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun scenarios_S14_S15_EMPTY_NAME_S18_S19_matchExpectedContracts() = runTest(testDispatcher) {
+    fun `AC-16 and AC-17 offline mode displays sync timestamp and blocks GlobalAddTapped without creating draft`() = runTest(testDispatcher) {
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S14))
-        assertTrue(viewModel.uiState.value.header.isOffline)
-        assertTrue((viewModel.uiState.value.budgetSection as SectionState.Content).isFromCache)
+        val state = viewModel.uiState.value
+        assertTrue(state.header.isOffline)
+        assertEquals("Đồng bộ lần cuối: 09:30 hôm nay", state.header.lastSyncedAtText)
+        assertTrue((state.budgetSection as SectionState.Content).isFromCache)
 
+        // Tapping + while offline emits ShowOfflineBlockedMessage, does not open Add Item or sheet
+        viewModel.onEvent(HomeUiEvent.GlobalAddTapped)
+        val effect = viewModel.effect.first()
+        assertTrue(effect is HomeUiEffect.ShowOfflineBlockedMessage)
+        assertNull(viewModel.uiState.value.activeSheet)
+    }
+
+    @Test
+    fun `scenario S15 handles long user name and missing item price as Chua co gia`() = runTest(testDispatcher) {
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S15))
         assertEquals("Nguyễn Hoàng Minh Anh", viewModel.uiState.value.header.displayName)
-        val s15Item = (viewModel.uiState.value.decisionsSection as SectionState.Content).data.single()
-        assertNull(s15Item.thumbnailResId)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.EMPTY_NAME))
-        assertFalse(viewModel.uiState.value.header.hasName)
-        assertEquals(HeaderUiModel.DEFAULT_AVATAR_INITIAL, viewModel.uiState.value.header.avatarInitial)
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S18))
-        val s18Items = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
-        assertEquals(listOf("X"), s18Items.map { it.id })
-
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S19))
-        val s19Room = (viewModel.uiState.value.livingRoom as SectionState.Content).data
-        assertEquals("OCT", s19Room.calendarMonthText)
-        assertEquals("25", s19Room.calendarDayText)
-    }
-
-    @Test
-    fun scenario_S16_and_S22_enforceSingleActiveSheetAndPreserveSelectedTab() = runTest(testDispatcher) {
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S16))
-        assertEquals(HomeTab.Home, viewModel.uiState.value.selectedTab)
-
-        // Tap + twice then dismiss (Back)
-        viewModel.onEvent(HomeUiEvent.GlobalAddTapped)
-        assertEquals(HomeSheet.Global, viewModel.uiState.value.activeSheet)
-        viewModel.onEvent(HomeUiEvent.GlobalAddTapped)
-        assertEquals(HomeSheet.Global, viewModel.uiState.value.activeSheet)
-        assertEquals(HomeTab.Home, viewModel.uiState.value.selectedTab)
-
-        viewModel.onEvent(HomeUiEvent.DismissSheet)
-        assertNull(viewModel.uiState.value.activeSheet)
-        assertEquals(HomeTab.Home, viewModel.uiState.value.selectedTab)
-
-        // S22 baseline starts with Global sheet open
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S22))
-        assertEquals(HomeSheet.Global, viewModel.uiState.value.activeSheet)
-    }
-
-    @Test
-    fun scenario_S17_disablesPrimaryActionWhenContextualEntityIsMissing() = runTest(testDispatcher) {
-        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S17))
-        val sheet = viewModel.uiState.value.activeSheet as HomeSheet.Contextual
-        assertTrue(sheet.isEntityMissing)
-
-        // Primary action should be ignored when entity is missing, while DismissSheet works cleanly
-        viewModel.onEvent(HomeUiEvent.ContextSheetPrimaryAction(ContextKind.Decision, "R1"))
-        assertNotNull(viewModel.uiState.value.activeSheet)
-
-        viewModel.onEvent(HomeUiEvent.DismissSheet)
-        assertNull(viewModel.uiState.value.activeSheet)
-    }
-
-    @Test
-    fun propTapped_and_directActions_and_observationActions_emitExpectedStateAndEffects() = runTest(testDispatcher) {
-        // PropTapped opens Contextual sheet
-        viewModel.onEvent(HomeUiEvent.PropTapped(RoomPropKind.Hourglass))
-        val propSheet = viewModel.uiState.value.activeSheet as HomeSheet.Contextual
-        assertEquals(ContextKind.Hourglass, propSheet.kind)
-
-        // QuickCheckTapped closes sheet and emits OpenQuickCheckFlow
-        viewModel.onEvent(HomeUiEvent.QuickCheckTapped)
-        runCurrent()
-        assertNull(viewModel.uiState.value.activeSheet)
-        assertEquals(HomeUiEffect.OpenQuickCheckFlow, viewModel.effect.first())
-
-        // SaveItemTapped emits OpenSaveItemFlow
-        viewModel.onEvent(HomeUiEvent.SaveItemTapped)
-        runCurrent()
-        assertEquals(HomeUiEffect.OpenSaveItemFlow, viewModel.effect.first())
-
-        // Observation Explain & Hide
-        viewModel.onEvent(HomeUiEvent.ObservationExplainTapped("O1"))
-        runCurrent()
-        assertEquals(HomeUiEffect.OpenObservationExplanation("O1"), viewModel.effect.first())
-
-        viewModel.onEvent(HomeUiEvent.ObservationHideTapped("O1"))
-        assertNull(viewModel.uiState.value.observation)
+        val item = (viewModel.uiState.value.decisionsSection as SectionState.Content).data.single()
+        assertNull(item.priceMinor)
+        assertEquals("Chưa có giá", item.priceFormatted)
     }
 }

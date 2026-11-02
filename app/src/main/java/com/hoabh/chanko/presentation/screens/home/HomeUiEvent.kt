@@ -3,29 +3,30 @@ package com.hoabh.chanko.presentation.screens.home
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 
 sealed interface HomeUiEvent {
-    // Header (HOME-01)
+    // 1. Header
     data object ProfileClick : HomeUiEvent
 
-    // Living Room Props (HOME-02)
+    // 2. Little Room
     data class PropTapped(val kind: RoomPropKind) : HomeUiEvent
 
-    // Quick Actions (HOME-03)
-    data object QuickCheckTapped : HomeUiEvent
-    data object SaveItemTapped : HomeUiEvent
-
-    // Budget Snapshot (HOME-04)
-    data object BudgetDetailsTapped : HomeUiEvent
-
-    // Your Decisions (HOME-05)
+    // 3. Những món cần chú ý (Attention)
     data class DecisionTapped(val id: String) : HomeUiEvent
     data object ViewAllTapped : HomeUiEvent
 
-    // Observation (HOME-06)
+    // 4. Budget Snapshot
+    data object BudgetDetailsTapped : HomeUiEvent
+    data class CycleChanged(
+        val cycleLabel: String,
+        val spentMinor: Long?,
+        val limitMinor: Long?
+    ) : HomeUiEvent
+
+    // 5. Observation ("Góc nhìn từ Chanko")
     data class ObservationExplainTapped(val id: String) : HomeUiEvent
     data class ObservationHideTapped(val id: String) : HomeUiEvent
     data class ObservationDismissTapped(val id: String) : HomeUiEvent
 
-    // Bottom Navigation & Sheets (HOME-08)
+    // 6. Contextual Sheet & Bottom Bar (+)
     data object GlobalAddTapped : HomeUiEvent
     data object DismissSheet : HomeUiEvent
     data class ContextSheetPrimaryAction(
@@ -34,7 +35,9 @@ sealed interface HomeUiEvent {
     ) : HomeUiEvent
     data class TabSelected(val tab: HomeTab) : HomeUiEvent
 
-    // Section Error Recovery & Scenario Selection
+    // 7. Lifecycle, Reconciliation, Motion & Scenario Control
+    data class ReconcileCoolingOff(val elapsedSeconds: Long = 0L) : HomeUiEvent
+    data class SetReducedMotion(val enabled: Boolean) : HomeUiEvent
     data class RetrySection(val section: HomeSection) : HomeUiEvent
     data class SelectScenario(val scenario: HomeScenario) : HomeUiEvent
 }

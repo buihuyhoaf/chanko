@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -188,6 +189,34 @@ class MyItemsViewModel @Inject constructor(
                 viewModelScope.launch {
                     _effect.emit(MyItemsUiEffect.NavigateToArchived)
                 }
+            }
+        }
+    }
+
+    /**
+     * AC-06: Áp dụng bộ lọc từ màn hình Home / Contextual Sheet khi điều hướng sang Món đồ:
+     * - WAITING ("Đang chờ" / Đồng hồ cát) -> ACTIVE + COOLING_OFF
+     * - REVIEW ("Cần xem lại" / Lịch) -> ACTIVE + READY
+     * - SKIPPED ("Đã bỏ qua" / Hũ tạm dừng) -> SKIPPED + ALL_ACTIVE
+     * - ALL ("Tất cả ›") -> ALL + ALL_ACTIVE
+     */
+    fun applyExternalFilter(filter: HomeMyItemsFilter) {
+        when (filter) {
+            HomeMyItemsFilter.ALL -> {
+                _primaryFilter.value = PrimaryFilter.ALL
+                _activeSubFilter.value = ActiveSubFilter.ALL_ACTIVE
+            }
+            HomeMyItemsFilter.WAITING -> {
+                _primaryFilter.value = PrimaryFilter.ACTIVE
+                _activeSubFilter.value = ActiveSubFilter.COOLING_OFF
+            }
+            HomeMyItemsFilter.REVIEW -> {
+                _primaryFilter.value = PrimaryFilter.ACTIVE
+                _activeSubFilter.value = ActiveSubFilter.READY
+            }
+            HomeMyItemsFilter.SKIPPED -> {
+                _primaryFilter.value = PrimaryFilter.SKIPPED
+                _activeSubFilter.value = ActiveSubFilter.ALL_ACTIVE
             }
         }
     }
