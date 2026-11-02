@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import com.hoabh.chanko.presentation.screens.myitems.components.FilterSortBottomSheet
 import com.hoabh.chanko.presentation.screens.myitems.components.MyItemCard
 import com.hoabh.chanko.presentation.screens.myitems.components.MyItemsEmptyState
@@ -59,10 +61,19 @@ import com.hoabh.chanko.ui.theme.CandySpace
 @Composable
 fun MyItemsRoute(
     viewModel: MyItemsViewModel = hiltViewModel(),
+    externalFilter: HomeMyItemsFilter? = null,
+    onExternalFilterConsumed: () -> Unit = {},
     onNavigateToDetail: (Int) -> Unit = {},
     onNavigateToArchived: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(externalFilter) {
+        if (externalFilter != null) {
+            viewModel.applyExternalFilter(externalFilter)
+            onExternalFilterConsumed()
+        }
+    }
 
     CollectEffect(viewModel.effect) { effect ->
         when (effect) {

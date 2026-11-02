@@ -26,8 +26,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,7 +62,10 @@ import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
 import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
 import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
+import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
+import com.hoabh.chanko.presentation.screens.home.HomeUiEvent
+import com.hoabh.chanko.presentation.screens.home.HomeViewModel
 import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.presentation.screens.additem.AddItemViewModel
@@ -120,6 +125,8 @@ fun MainNavigation(
 ) {
     val entry by controller.currentBackStackEntryAsState()
     val currentRoute = entry?.destination?.route
+    var pendingMyItemsFilter by rememberSaveable { mutableStateOf<HomeMyItemsFilter?>(null) }
+    var homeGlobalAddHandler by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -129,7 +136,14 @@ fun MainNavigation(
                 ChankoBottomBar(
                     currentRoute = currentRoute,
                     onTabSelected = { controller.selectTab(it) },
-                    onAddNewItemClick = onAddNewItemClick
+                    onAddNewItemClick = {
+                        val homeAdd = homeGlobalAddHandler
+                        if (currentRoute == TopLevelDestination.Home.route && homeAdd != null) {
+                            homeAdd()
+                        } else {
+                            onAddNewItemClick()
+                        }
+                    }
                 )
             }
         ) { innerPadding ->
@@ -141,7 +155,17 @@ fun MainNavigation(
                 modifier = Modifier.fillMaxSize()
             ) {
                 composable(TopLevelDestination.Home.route) {
+                    val homeViewModel: HomeViewModel = hiltViewModel()
+                    DisposableEffect(homeViewModel) {
+                        homeGlobalAddHandler = {
+                            homeViewModel.onEvent(HomeUiEvent.GlobalAddTapped)
+                        }
+                        onDispose {
+                            homeGlobalAddHandler = null
+                        }
+                    }
                     HomeRoute(
+                        viewModel = homeViewModel,
                         onAddNewItemClick = onAddNewItemClick,
                         onProfileClick = onNavigateToProfile,
                         onBudgetDetailsClick = {
@@ -149,6 +173,11 @@ fun MainNavigation(
                                 launchSingleTop = true
                             }
                             onNavigateToBudgetDetails()
+                        },
+                        onNavigateToItemDetail = onNavigateToItemDetail,
+                        onNavigateToMyItems = { filter ->
+                            pendingMyItemsFilter = filter
+                            controller.selectTab(TopLevelDestination.MyItems)
                         }
                     )
                 }
@@ -184,6 +213,8 @@ fun MainNavigation(
                 }
                 composable(TopLevelDestination.MyItems.route) {
                     MyItemsRoute(
+                        externalFilter = pendingMyItemsFilter,
+                        onExternalFilterConsumed = { pendingMyItemsFilter = null },
                         onNavigateToDetail = onNavigateToItemDetail,
                         onNavigateToArchived = onNavigateToArchived
                     )
