@@ -22,10 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,15 +34,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.ContextKind
+import com.hoabh.chanko.presentation.screens.home.DecisionUi
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
@@ -54,25 +56,24 @@ import com.hoabh.chanko.ui.theme.CandySpace
 private val DragHandleWidth = 36.dp
 private val DragHandleHeight = 4.dp
 private val SheetCloseVisualSize = 32.dp
-private val SheetTileIconBoxSize = 44.dp
-private val SheetTileIconBoxShape = RoundedCornerShape(12.dp)
-private val SheetTileShape = RoundedCornerShape(18.dp)
+private val SheetItemRowRadius = 14.dp
 private val ScrimColor = Color.Black.copy(alpha = 0.42f)
 
 /**
- * HOME-08 — Modal Sheet Host (v2 Image-Aligned):
- * - Đảm bảo chính sách tối đa 1 sheet hoạt động tại một thời điểm (`S16`).
- * - Hỗ trợ `GlobalQuickActionSheet` (`S22`) và `ContextualSheet` (`S17`).
- * - Render dưới dạng modal overlay có scrim phía trên nội dung Home (không bao giờ chèn vào LazyColumn).
+ * Contextual Modal Bottom Sheet Host (Candy Pop 3D v1.0 — AC-04, AC-05, AC-06, AC-14, AC-15, AC-19):
+ * - Đảm bảo tối đa 1 sheet hoạt động tại một thời điểm.
+ * - Phục vụ 4 vật thể Little Room ("Đang chờ", "Cần xem lại", "Ngân sách", "Đã bỏ qua")
+ *   và giải thích chi tiết "Góc nhìn từ Chanko" (ContextKind.Observation).
+ * - Hiển thị empty state theo ngữ cảnh khi nhóm có 0 món (AC-05) và cô lập lỗi/loading (AC-15).
+ * - Không tự mở lại sau khi Android hủy tiến trình (AC-19).
  */
 @Composable
 fun HomeSheetHost(
-    activeSheet: HomeSheet?,
+    activeSheet: HomeSheet.Contextual?,
     onDismiss: () -> Unit,
-    onQuickCheckClick: () -> Unit,
-    onSaveItemClick: () -> Unit,
     onContextPrimaryAction: (ContextKind, String?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClick: (String) -> Unit = {}
 ) {
     if (activeSheet == null) return
 
@@ -132,137 +133,15 @@ fun HomeSheetHost(
 
                 Spacer(modifier = Modifier.height(CandySpace.md))
 
-                when (activeSheet) {
-                    HomeSheet.Global -> GlobalQuickActionSheetContent(
-                        onDismiss = onDismiss,
-                        onQuickCheckClick = onQuickCheckClick,
-                        onSaveItemClick = onSaveItemClick
-                    )
-                    is HomeSheet.Contextual -> ContextualSheetContent(
-                        sheet = activeSheet,
-                        onDismiss = onDismiss,
-                        onPrimaryAction = {
-                            onContextPrimaryAction(activeSheet.kind, activeSheet.entityId)
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun GlobalQuickActionSheetContent(
-    onDismiss: () -> Unit,
-    onQuickCheckClick: () -> Unit,
-    onSaveItemClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(CandySpace.md)
-    ) {
-        // Header Row: "Bạn muốn làm gì?" + Close X Button
-        SheetHeaderRow(
-            title = stringResource(R.string.home_global_sheet_title),
-            onDismiss = onDismiss
-        )
-
-        // Entry 1: Quick Check
-        GlobalSheetActionTile(
-            title = stringResource(R.string.home_quick_check_title),
-            description = stringResource(R.string.home_global_sheet_quick_check_desc),
-            icon = ChankoIconId.ITM_01,
-            iconTileBg = CandyColors.primarySoft,
-            tileBg = CandyColors.saveItemSurface,
-            tileBorder = CandyColors.saveItemBorder,
-            onClick = onQuickCheckClick
-        )
-
-        // Entry 2: Save an Item
-        GlobalSheetActionTile(
-            title = stringResource(R.string.home_save_item_title),
-            description = stringResource(R.string.home_global_sheet_save_item_desc),
-            icon = ChankoIconId.ITM_02,
-            iconTileBg = CandyColors.globalSheetSaveIconTileBg,
-            tileBg = CandyColors.homeCardSurface,
-            tileBorder = CandyColors.homeCardBorder,
-            onClick = onSaveItemClick
-        )
-    }
-}
-
-@Composable
-private fun GlobalSheetActionTile(
-    title: String,
-    description: String,
-    icon: ChankoIconId,
-    iconTileBg: Color,
-    tileBg: Color,
-    tileBorder: Color,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(SheetTileShape)
-            .clickable(
-                role = Role.Button,
-                onClickLabel = title,
-                onClick = onClick
-            ),
-        shape = SheetTileShape,
-        color = tileBg,
-        border = BorderStroke(1.dp, tileBorder)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CandySpace.md),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(SheetTileIconBoxSize)
-                    .clip(SheetTileIconBoxShape)
-                    .background(iconTileBg),
-                contentAlignment = Alignment.Center
-            ) {
-                ChankoIcon(
-                    id = icon,
-                    contentDescription = null,
-                    size = 22.dp
+                ContextualSheetContent(
+                    sheet = activeSheet,
+                    onDismiss = onDismiss,
+                    onPrimaryAction = {
+                        onContextPrimaryAction(activeSheet.kind, activeSheet.entityId)
+                    },
+                    onItemClick = onItemClick
                 )
             }
-
-            Spacer(modifier = Modifier.width(CandySpace.md))
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = CandyColors.textPrimary
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = CandyColors.textSecondary
-                )
-            }
-
-            Spacer(modifier = Modifier.width(CandySpace.sm))
-
-            ChankoIcon(
-                id = ChankoIconId.ACT_18,
-                contentDescription = null,
-                size = 20.dp
-            )
         }
     }
 }
@@ -271,7 +150,8 @@ private fun GlobalSheetActionTile(
 private fun ContextualSheetContent(
     sheet: HomeSheet.Contextual,
     onDismiss: () -> Unit,
-    onPrimaryAction: () -> Unit
+    onPrimaryAction: () -> Unit,
+    onItemClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -283,50 +163,146 @@ private fun ContextualSheetContent(
             sheet.title
         }
 
-        val bodyText = if (sheet.isEntityMissing) {
-            stringResource(R.string.home_context_sheet_missing_body)
-        } else {
-            sheet.subtitle
-        }
-
         SheetHeaderRow(
             title = headerTitle,
             onDismiss = onDismiss
         )
 
-        if (!sheet.isEntityMissing && !sheet.highlightValue.isNullOrBlank()) {
-            Surface(
-                shape = CandyShape.chip,
-                color = CandyColors.primarySoft
-            ) {
-                Text(
-                    text = sheet.highlightValue,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = CandyColors.primaryInk,
-                    modifier = Modifier.padding(
-                        horizontal = CandySpace.md,
-                        vertical = CandySpace.xs
+        when {
+            sheet.isLoading -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = CandySpace.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.md)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = CandyColors.brandPurple,
+                        strokeWidth = 2.dp
                     )
+                    Text(
+                        text = stringResource(R.string.home_section_loading),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = CandyColors.textSecondary
+                    )
+                }
+            }
+
+            !sheet.errorMessage.isNullOrBlank() -> {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(SheetItemRowRadius),
+                    color = CandyColors.primarySoft.copy(alpha = 0.45f),
+                    border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+                ) {
+                    Text(
+                        text = sheet.errorMessage,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = CandyColors.textPrimary,
+                        modifier = Modifier.padding(CandySpace.md)
+                    )
+                }
+            }
+
+            sheet.isEntityMissing -> {
+                Text(
+                    text = stringResource(R.string.home_context_sheet_missing_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = CandyColors.textSecondary
                 )
+            }
+
+            sheet.kind == ContextKind.Observation -> {
+                ObservationExplanationSheetBody(sheet = sheet)
+            }
+
+            else -> {
+                if (!sheet.highlightValue.isNullOrBlank()) {
+                    Surface(
+                        shape = CandyShape.chip,
+                        color = CandyColors.primarySoft
+                    ) {
+                        Text(
+                            text = if (sheet.kind == ContextKind.Wallet) {
+                                sheet.highlightValue
+                            } else {
+                                "${sheet.highlightValue} món"
+                            },
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = CandyColors.primaryInk,
+                            modifier = Modifier.padding(
+                                horizontal = CandySpace.md,
+                                vertical = CandySpace.xs
+                            )
+                        )
+                    }
+                }
+
+                Text(
+                    text = sheet.subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = CandyColors.textSecondary
+                )
+
+                // AC-05: Hiển thị empty state theo đúng ngữ cảnh khi nhóm không có dữ liệu
+                if (sheet.isEmpty) {
+                    val emptyMessage = when (sheet.kind) {
+                        ContextKind.Hourglass -> stringResource(R.string.home_context_sheet_empty_waiting)
+                        ContextKind.Calendar -> stringResource(R.string.home_context_sheet_empty_review)
+                        ContextKind.PauseJar -> stringResource(R.string.home_context_sheet_empty_skipped)
+                        else -> sheet.subtitle
+                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(SheetItemRowRadius),
+                        color = CandyColors.primarySoft.copy(alpha = 0.35f),
+                        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+                    ) {
+                        Text(
+                            text = emptyMessage,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = CandyColors.textSecondary,
+                            modifier = Modifier.padding(CandySpace.md)
+                        )
+                    }
+                } else if (sheet.items.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        sheet.items.take(3).forEach { item ->
+                            SheetPreviewItemRow(
+                                item = item,
+                                onClick = { onItemClick(item.id) }
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        Text(
-            text = bodyText,
-            style = MaterialTheme.typography.bodyMedium,
-            color = CandyColors.textSecondary
-        )
+        val defaultCtaText = when (sheet.kind) {
+            ContextKind.Wallet -> stringResource(R.string.home_context_sheet_budget_cta)
+            ContextKind.Observation -> stringResource(R.string.home_context_sheet_observation_cta)
+            else -> stringResource(R.string.home_context_sheet_primary_cta)
+        }
+        val primaryCtaText = sheet.primaryActionLabel ?: defaultCtaText
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
         ) {
-            // S17: Primary write/navigation action is disabled when entity is missing
             Button(
                 onClick = onPrimaryAction,
-                enabled = !sheet.isEntityMissing,
+                enabled = !sheet.isEntityMissing && sheet.errorMessage == null && !sheet.isLoading,
                 shape = CandyShape.primaryButton,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CandyColors.brandPurple,
@@ -337,37 +313,153 @@ private fun ContextualSheetContent(
                     .heightIn(min = CandySize.touchTarget)
             ) {
                 Text(
-                    text = stringResource(R.string.home_context_sheet_primary_cta),
+                    text = primaryCtaText,
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.Bold
                     )
                 )
             }
 
-            val closeLabel = stringResource(R.string.home_context_sheet_close_cta)
-            Surface(
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = CandySize.touchTarget)
-                    .clip(CandyShape.primaryButton)
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = closeLabel,
-                        onClick = onDismiss
-                    ),
-                shape = CandyShape.primaryButton,
-                color = CandyColors.primarySoft
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = closeLabel,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold
+            if (sheet.kind != ContextKind.Observation) {
+                val closeLabel = stringResource(R.string.home_context_sheet_close_cta)
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = CandySize.touchTarget)
+                        .clip(CandyShape.primaryButton)
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = closeLabel,
+                            onClick = onDismiss
                         ),
-                        color = CandyColors.primaryInk
+                    shape = CandyShape.primaryButton,
+                    color = CandyColors.primarySoft
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = closeLabel,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = CandyColors.primaryInk
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ObservationExplanationSheetBody(
+    sheet: HomeSheet.Contextual
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+    ) {
+        Text(
+            text = sheet.subtitle,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = CandyColors.textPrimary
+        )
+
+        if (!sheet.explanationDetail.isNullOrBlank() && sheet.explanationDetail != sheet.subtitle) {
+            Text(
+                text = sheet.explanationDetail,
+                style = MaterialTheme.typography.bodyMedium,
+                color = CandyColors.textSecondary
+            )
+        }
+
+        if (!sheet.evidenceText.isNullOrBlank()) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(SheetItemRowRadius),
+                color = CandyColors.primarySoft.copy(alpha = 0.5f),
+                border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+            ) {
+                Row(
+                    modifier = Modifier.padding(CandySpace.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.SYS_15,
+                        contentDescription = null,
+                        size = 20.dp
+                    )
+                    Text(
+                        text = sheet.evidenceText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = CandyColors.primaryInk,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SheetPreviewItemRow(
+    item: DecisionUi,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = CandySize.touchTarget)
+            .clip(RoundedCornerShape(SheetItemRowRadius))
+            .clickable(
+                role = Role.Button,
+                onClickLabel = item.title,
+                onClick = onClick
+            ),
+        shape = RoundedCornerShape(SheetItemRowRadius),
+        color = Color.White,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = CandySpace.md, vertical = CandySpace.sm),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = CandyColors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.priceFormatted,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = CandyColors.textSecondary
+                )
+            }
+
+            Spacer(modifier = Modifier.width(CandySpace.sm))
+
+            ChankoIcon(
+                id = ChankoIconId.ACT_18,
+                contentDescription = null,
+                size = 16.dp
+            )
         }
     }
 }
