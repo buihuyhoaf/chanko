@@ -8,5 +8,4 @@ sealed interface HomeUiEffect {
     data class NavigateToDecisionDetail(val id: String) : HomeUiEffect
     data object NavigateToAllDecisions : HomeUiEffect
     data class OpenObservationExplanation(val id: String) : HomeUiEffect
-    data class OpenDraftFlow(val id: String) : HomeUiEffect
 }

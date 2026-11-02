@@ -4,8 +4,6 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.screens.home.ContextKind
 import com.hoabh.chanko.presentation.screens.home.DialogueTone
 import com.hoabh.chanko.presentation.screens.home.DialogueUi
-import com.hoabh.chanko.presentation.screens.home.DraftSyncState
-import com.hoabh.chanko.presentation.screens.home.DraftUi
 import com.hoabh.chanko.presentation.screens.home.GreetingPeriod
 import com.hoabh.chanko.presentation.screens.home.HeaderUiModel
 import com.hoabh.chanko.presentation.screens.home.HomeSheet
@@ -24,7 +22,7 @@ import com.hoabh.chanko.presentation.screens.home.domain.RawDecisionCandidate
 import javax.inject.Inject
 
 /**
- * Đầy đủ 22 kịch bản dữ liệu giả lập xác định (S01–S22) khớp 100% với `fixtures/home-scenarios.json`.
+ * Kịch bản dữ liệu Home S01–S22; chỉ báo nháp đã được loại theo chính sách không lưu nháp.
  */
 enum class HomeScenario(val id: String) {
     S01("S01"),
@@ -107,7 +105,6 @@ class HomeFakeDataSource @Inject constructor() {
                     decisionsSection = SectionState.Content(ranking.topDecisions),
                     totalAttentionCount = ranking.totalValidCount,
                     observation = null,
-                    draft = null
                 )
             }
 
@@ -175,7 +172,6 @@ class HomeFakeDataSource @Inject constructor() {
                 decisionsSection = SectionState.Empty("Chưa có món đồ nào đang chờ"),
                 totalAttentionCount = 0,
                 observation = null,
-                draft = null
             )
 
             HomeScenario.S06 -> baseS21.copy(
@@ -218,14 +214,6 @@ class HomeFakeDataSource @Inject constructor() {
                     text = "Bạn thường mua các món công nghệ vào cuối tuần.",
                     evidence = "3 trong 5 món gần đây được mua vào Thứ 7 hoặc Chủ nhật."
                 ),
-                draft = DraftUi(
-                    id = "D1",
-                    title = "Bản nháp tai nghe",
-                    priceMinor = 1_250_000L,
-                    priceFormatted = HomeCurrencyFormatter.formatVnd(1_250_000L),
-                    updatedLabel = "Vừa lưu trên máy",
-                    syncState = DraftSyncState.LocalDraft
-                )
             )
 
             HomeScenario.S10 -> baseS21.copy(
@@ -235,20 +223,11 @@ class HomeFakeDataSource @Inject constructor() {
                     text = "Nội dung minh họa.",
                     evidence = "3 trong 5 món gần đây được mua vào Thứ 7 hoặc Chủ nhật."
                 ),
-                draft = null
             )
 
             HomeScenario.S11 -> baseS21.copy(
                 scenarioId = "S11",
                 observation = null,
-                draft = DraftUi(
-                    id = "D1",
-                    title = "Bản nháp",
-                    priceMinor = null,
-                    priceFormatted = null,
-                    updatedLabel = "Đã lưu cục bộ",
-                    syncState = DraftSyncState.LocalDraft
-                )
             )
 
             HomeScenario.S12 -> {
@@ -278,7 +257,6 @@ class HomeFakeDataSource @Inject constructor() {
                 ),
                 decisionsSection = SectionState.Loading,
                 observation = null,
-                draft = null
             )
 
             HomeScenario.S14, HomeScenario.OFFLINE_CACHE -> {
@@ -290,14 +268,6 @@ class HomeFakeDataSource @Inject constructor() {
                     budgetSection = SectionState.Content(cachedBudget, isFromCache = true),
                     decisionsSection = SectionState.Content(cachedDecisions, isFromCache = true),
                     observation = null,
-                    draft = DraftUi(
-                        id = "D1",
-                        title = "Bản nháp ngoại tuyến",
-                        priceMinor = 550_000L,
-                        priceFormatted = HomeCurrencyFormatter.formatVnd(550_000L),
-                        updatedLabel = "Đang chờ đồng bộ",
-                        syncState = DraftSyncState.PendingSync
-                    )
                 )
             }
 
@@ -469,7 +439,6 @@ class HomeFakeDataSource @Inject constructor() {
                 text = "Bạn thường mua các món công nghệ vào cuối tuần.",
                 evidence = "3 trong 5 món gần đây được mua vào Thứ 7 hoặc Chủ nhật."
             ),
-            draft = null,
             activeSheet = null,
             selectedTab = HomeTab.Home
         )

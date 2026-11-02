@@ -62,7 +62,6 @@ class HomeViewModelTest {
         val decisions = (state.decisionsSection as SectionState.Content).data
         assertEquals(listOf("J1", "H1", "K1"), decisions.map { it.id })
         assertNotNull(state.observation)
-        assertNull(state.draft)
         assertNull(state.activeSheet)
     }
 
@@ -72,7 +71,6 @@ class HomeViewModelTest {
         val s01 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
         assertEquals(listOf("R1", "R2", "W1"), s01.map { it.id })
         assertFalse(viewModel.uiState.value.isObservationVisible)
-        assertFalse(viewModel.uiState.value.isLocalDraftVisible)
 
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S02))
         val s02 = (viewModel.uiState.value.decisionsSection as SectionState.Content).data
@@ -119,19 +117,15 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun scenarios_S09_S10_S11_controlOptionalObservationAndDraftSections() = runTest(testDispatcher) {
+    fun scenarios_S09_S10_S11_controlOptionalObservationSection() = runTest(testDispatcher) {
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S09))
         assertTrue(viewModel.uiState.value.isObservationVisible)
-        assertTrue(viewModel.uiState.value.isLocalDraftVisible)
-        assertEquals("D1", viewModel.uiState.value.draft?.id)
 
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S10))
         assertTrue(viewModel.uiState.value.isObservationVisible)
-        assertFalse(viewModel.uiState.value.isLocalDraftVisible)
 
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.S11))
         assertFalse(viewModel.uiState.value.isObservationVisible)
-        assertTrue(viewModel.uiState.value.isLocalDraftVisible)
     }
 
     @Test

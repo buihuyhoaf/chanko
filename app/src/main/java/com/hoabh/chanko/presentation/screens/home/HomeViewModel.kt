@@ -82,12 +82,6 @@ class HomeViewModel @Inject constructor(
                 updateState { it.copy(observation = null) }
             }
 
-            is HomeUiEvent.ResumeDraftTapped -> {
-                if (uiState.value.capabilities.canResumeDraft) {
-                    sendEffect(HomeUiEffect.OpenDraftFlow(event.id))
-                }
-            }
-
             HomeUiEvent.GlobalAddTapped -> {
                 // S16: Single active sheet policy, preserve selectedTab
                 updateState { it.copy(activeSheet = HomeSheet.Global) }
@@ -139,8 +133,7 @@ class HomeViewModel @Inject constructor(
                         HomeSection.LivingRoom -> current.copy(
                             livingRoom = baseline.livingRoom
                         )
-                        HomeSection.Observation,
-                        HomeSection.Draft -> current
+                        HomeSection.Observation -> current
                     }
                 }
             }
