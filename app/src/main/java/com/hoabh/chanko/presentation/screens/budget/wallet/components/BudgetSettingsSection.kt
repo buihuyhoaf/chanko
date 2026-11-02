@@ -67,15 +67,15 @@ fun BudgetSettingsSection(
         (spentMinor.toFloat() / budgetMinor.toFloat()).coerceIn(0f, 1f)
     } else 0f
 
-    val purplePrimary = Color(0xFF7447FF)
-    val textPrimary = Color(0xFF24183E)
-    val textMuted = Color(0xFF7E7694)
+    val purplePrimary = CandyColors.Wallet.purplePrimary
+    val textPrimary = CandyColors.Wallet.textPrimary
+    val textMuted = CandyColors.Wallet.textMuted
     val cycleRangeText = selectedCycle?.dateRangeText ?: stringResource(R.string.budget_cycle_selection_empty)
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(24.dp), spotColor = Color(0x14000000)),
+            .shadow(6.dp, RoundedCornerShape(24.dp), spotColor = CandyColors.Wallet.shadowSpot),
         shape = RoundedCornerShape(24.dp),
         color = Color.White
     ) {
@@ -93,7 +93,7 @@ fun BudgetSettingsSection(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFFFDE8F3)),
+                        .background(CandyColors.Wallet.cycleIconBg),
                     contentAlignment = Alignment.Center
                 ) {
                     ChankoIcon(
@@ -202,7 +202,7 @@ fun BudgetSettingsSection(
                                 .weight(1f)
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFFF0ECF8))
+                                .background(CandyColors.Wallet.progressTrack)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -213,7 +213,7 @@ fun BudgetSettingsSection(
                                         if (isOver) {
                                             Brush.horizontalGradient(listOf(CandyColors.overBudget, CandyColors.overBudget))
                                         } else {
-                                            Brush.horizontalGradient(listOf(Color(0xFF8B5CF6), purplePrimary))
+                                            Brush.horizontalGradient(listOf(CandyColors.Wallet.progressGradientStart, purplePrimary))
                                         }
                                     )
                             )

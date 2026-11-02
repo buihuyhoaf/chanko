@@ -49,6 +49,7 @@ import com.hoabh.chanko.domain.budget.model.CreditCard
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.budget.wallet.components.CardPreview
+import com.hoabh.chanko.ui.theme.CandyColors
 
 /**
  * Modal Dialog Đổi tên thẻ tín dụng (C07) theo chuẩn v2.1.
@@ -72,10 +73,10 @@ fun RenameCreditCardDialog(
 
     val focusManager = LocalFocusManager.current
     val graphemeCount = CreditCard.graphemeCount(draftName)
-    val purplePrimary = Color(0xFF7447FF)
-    val textPrimary = Color(0xFF24183E)
-    val textMuted = Color(0xFF6C657E)
-    val dialogBg = Color(0xFFFAF7F5)
+    val purplePrimary = CandyColors.Wallet.purplePrimary
+    val textPrimary = CandyColors.Wallet.textPrimary
+    val textMuted = CandyColors.Wallet.textMutedAlt
+    val dialogBg = CandyColors.Wallet.dialogBg
 
     Dialog(
         onDismissRequest = {
@@ -185,7 +186,7 @@ fun RenameCreditCardDialog(
                             text = " *",
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF4D4F)
+                                color = CandyColors.Wallet.deleteErrorText
                             )
                         )
                     }
@@ -224,7 +225,7 @@ fun RenameCreditCardDialog(
                                 } else if (isLegacyOverLimit && graphemeCount > CreditCard.UI_MAX_NAME_LENGTH) {
                                     Text(
                                         text = "Tên hiện tại vượt giới hạn mới. Rút gọn còn tối đa 30 ký tự để lưu.",
-                                        color = Color(0xFFD46B08),
+                                        color = CandyColors.Wallet.warningText,
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 } else {
@@ -258,7 +259,7 @@ fun RenameCreditCardDialog(
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White.copy(alpha = 0.6f),
                             focusedBorderColor = purplePrimary,
-                            unfocusedBorderColor = Color(0xFFE2DDEC)
+                            unfocusedBorderColor = CandyColors.Wallet.unfocusedBorder
                         )
                     )
 
@@ -319,7 +320,7 @@ fun RenameCreditCardDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF0ECF8))
+                            .background(CandyColors.Wallet.iconContainerBgAlt)
                             .padding(12.dp),
                         verticalAlignment = Alignment.Top
                     ) {
