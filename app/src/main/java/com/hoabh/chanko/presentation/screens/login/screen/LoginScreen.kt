@@ -48,10 +48,11 @@ import androidx.navigation.compose.composable
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiEffect
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiState
 import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginViewModel
+import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import com.hoabh.chanko.ui.theme.Nunito
 
-private val LoginPlum = Color(0xFF4D2939)
+private val LoginPlum = CandyColors.Auth.loginPlum
 
 fun NavGraphBuilder.loginDestination(
     loginContent: @Composable (() -> Unit) -> Unit = { LoginRoute(it) },
@@ -173,8 +174,8 @@ fun LoginScreen(
                     onClick = onGoogleLoginClick,
                     enabled = !uiState.isLoading && !uiState.isLoginSuccess,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
-                    shape = RoundedCornerShape(50), border = BorderStroke(1.dp, Color(0xFF747775)),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF1F1F1F)),
+                    shape = RoundedCornerShape(50), border = BorderStroke(1.dp, CandyColors.Auth.googleButtonBorder),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = CandyColors.Auth.googleButtonText),
                     contentPadding = PaddingValues(horizontal = CandySpace.lg, vertical = CandySpace.md),
                 ) {
                     Image(painterResource(R.drawable.ic_google), null, Modifier.size(22.dp))
@@ -195,7 +196,7 @@ fun LoginScreen(
                         modifier = Modifier.padding(top = CandySpace.md).semantics { liveRegion = LiveRegionMode.Polite })
                 }
                 Spacer(Modifier.height(CandySpace.lg))
-                Text(stringResource(R.string.login_legal_intro), color = Color(0xFF6B6570),
+                Text(stringResource(R.string.login_legal_intro), color = CandyColors.Auth.legalText,
                     style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                 LegalLinks(onTermsClick, onPrivacyClick)
                 Spacer(Modifier.height(CandySpace.md))
@@ -209,11 +210,11 @@ fun LoginScreen(
 private fun LegalLinks(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         TextButton(onClick = onTermsClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = CandySpace.sm)) {
-            Text(stringResource(R.string.login_terms), color = Color(0xFF6B6570), fontSize = 12.sp,
+            Text(stringResource(R.string.login_terms), color = CandyColors.Auth.legalText, fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
         }
         TextButton(onClick = onPrivacyClick, contentPadding = PaddingValues(horizontal = 6.dp, vertical = CandySpace.sm)) {
-            Text(stringResource(R.string.login_privacy), color = Color(0xFF6B6570), fontSize = 12.sp,
+            Text(stringResource(R.string.login_privacy), color = CandyColors.Auth.legalText, fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline, textAlign = TextAlign.Center)
         }
     }

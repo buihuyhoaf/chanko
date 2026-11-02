@@ -10,12 +10,13 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.hoabh.chanko.ui.theme.CandyColors
 
 // Screen-scoped visual reference colors and shapes from the reviewed mockup; DS PV-01 stays open.
-internal val Ink = Color(0xFF30233E)
-internal val Secondary = Color(0xFF62596D)
-internal val OnPurple = Color(0xFF15131D)
-internal val StepDotInactive = Color(0xFFD9D1E4)
+internal val Ink = CandyColors.Auth.ink
+internal val Secondary = CandyColors.Auth.secondary
+internal val OnPurple = CandyColors.Auth.onPurple
+internal val StepDotInactive = CandyColors.Auth.stepDotInactive
 internal val SetupButtonShape = RoundedCornerShape(18.dp)
 
 /**
