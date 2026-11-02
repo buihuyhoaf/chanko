@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 
 /**
  * Trạng thái độc lập của từng khu vực dữ liệu trên màn hình Home (Section-aware Data State).
- * Lỗi ở một section không làm toàn bộ Home chuyển sang màn hình lỗi (S13).
+ * Lỗi ở một section không làm toàn bộ Home chuyển sang màn hình lỗi (AC-15, HOME-EDGE-02).
  */
 @Immutable
 sealed interface SectionState<out T> {
@@ -48,13 +48,14 @@ enum class GreetingPeriod {
 }
 
 /**
- * Mô hình trạng thái cho HOME-01 — Header.
+ * Mô hình trạng thái cho Khu vực 1 — Header (AC-03, AC-16, HOME-EDGE-05).
  */
 @Immutable
 data class HeaderUiModel(
     val userName: String = "",
     val greetingPeriod: GreetingPeriod = GreetingPeriod.MORNING,
     val isOffline: Boolean = false,
+    val lastSyncedAtText: String? = null,
     val customGreeting: String? = null,
     val customSubtitle: String? = null
 ) {
@@ -73,7 +74,11 @@ data class HeaderUiModel(
 }
 
 /**
- * Bốn vật thể tương tác trong Compact Living Room (HOME-02).
+ * Bốn vật thể tương tác trong Little Room (AC-04, HOME-REV-03):
+ * - Hourglass ("Đang chờ")
+ * - Calendar ("Cần xem lại")
+ * - Wallet ("Ngân sách")
+ * - PauseJar ("Đã bỏ qua")
  */
 enum class RoomPropKind {
     Hourglass,
@@ -87,7 +92,8 @@ data class RoomPropUi(
     val kind: RoomPropKind,
     val label: String,
     val summaryText: String,
-    val badgeText: String? = null
+    val badgeText: String? = null,
+    val itemCount: Int = 0
 )
 
 enum class DialogueTone {
@@ -99,7 +105,7 @@ enum class DialogueTone {
 }
 
 /**
- * Bong bóng thoại bên trong Compact Living Room (z = 6).
+ * Bong bóng thoại ngắn bên trong Little Room (HOME-GAP-05).
  */
 @Immutable
 data class DialogueUi(
@@ -109,7 +115,7 @@ data class DialogueUi(
 )
 
 /**
- * Mô hình trạng thái cho HOME-02 — Compact Living Room.
+ * Mô hình trạng thái cho Khu vực 2 — Little Room.
  */
 @Immutable
 data class LivingRoomUi(
@@ -120,7 +126,7 @@ data class LivingRoomUi(
 )
 
 /**
- * Phân loại trạng thái ngân sách (HOME-04).
+ * Phân loại trạng thái ngân sách (AC-11).
  */
 enum class BudgetStateKind {
     Normal,
@@ -137,6 +143,7 @@ data class BudgetUi(
     val spentMinor: Long?,
     val limitMinor: Long?,
     val remainingMinor: Long?,
+    val overMinor: Long? = null,
     val ratio: Float?,
     val percentageInt: Int?,
     val visualProgress: Float,
@@ -152,23 +159,35 @@ data class BudgetUi(
 }
 
 /**
- * Bốn trạng thái hợp lệ cho Your Decisions theo thứ tự ưu tiên:
- * Ready (0) -> Waiting (1) -> Considering (2) -> Saved (3)
+ * Nhận định gốc của món đồ — không tự động đổi thành BUY khi hết hạn cooling-off (AC-07).
+ */
+enum class DecisionVerdict {
+    WAIT,
+    BUY,
+    SKIP,
+    NEUTRAL
+}
+
+/**
+ * Trạng thái phân nhóm món đồ:
+ * Ready (0: Cần xem lại / Vừa hết thời gian chờ) -> Waiting (1: Đang chờ) -> Considering (2) -> Saved (3) -> Skipped (4: Đã bỏ qua)
  */
 enum class DecisionStatus(val priorityRank: Int) {
     Ready(0),
     Waiting(1),
     Considering(2),
-    Saved(3)
+    Saved(3),
+    Skipped(4)
 }
 
 @Immutable
 data class DecisionUi(
     val id: String,
     val title: String,
-    val priceMinor: Long,
+    val priceMinor: Long?,
     val priceFormatted: String,
     val status: DecisionStatus,
+    val verdict: DecisionVerdict = DecisionVerdict.WAIT,
     val statusLabel: String,
     val secondaryText: String? = null,
     val remainingSeconds: Long? = null,
@@ -177,44 +196,58 @@ data class DecisionUi(
 )
 
 /**
- * HOME-06 — Observation (Góc nhìn hôm nay).
+ * Khu vực 5 — Observation ("Góc nhìn từ Chanko" — AC-14, HOME-REV-05, HOME-OBS-01).
  */
 @Immutable
 data class ObservationUi(
     val id: String,
     val text: String,
-    val evidence: String
+    val evidence: String,
+    val detailedExplanation: String = "",
+    val hasSufficientData: Boolean = true
 )
 
 /**
- * HOME-08 — Bottom Sheet (tối đa 1 sheet mở tại một thời điểm).
+ * Ngữ cảnh của Contextual Bottom Sheet (AC-04, AC-05, AC-06).
  */
 enum class ContextKind {
     Hourglass,
     Calendar,
     Wallet,
     PauseJar,
+    Observation,
     Decision
 }
 
 @Immutable
 sealed interface HomeSheet {
-    data object Global : HomeSheet
-
     data class Contextual(
         val kind: ContextKind,
         val entityId: String? = null,
         val title: String,
         val subtitle: String,
         val highlightValue: String? = null,
+        val items: List<DecisionUi> = emptyList(),
+        val explanationDetail: String? = null,
+        val evidenceText: String? = null,
+        val primaryActionLabel: String? = null,
+        val errorMessage: String? = null,
+        val isLoading: Boolean = false,
         val isEntityMissing: Boolean = false
-    ) : HomeSheet
+    ) : HomeSheet {
+        val isEmpty: Boolean
+            get() = !isLoading &&
+                errorMessage == null &&
+                !isEntityMissing &&
+                items.isEmpty() &&
+                kind in setOf(ContextKind.Hourglass, ContextKind.Calendar, ContextKind.PauseJar)
+    }
 }
 
 enum class HomeTab {
     Home,
     Items,
-    Budget,
+    Chat,
     Insights
 }
 
@@ -224,26 +257,34 @@ data class HomeCapabilities(
     val canOpenBudgetDetails: Boolean = true,
     val canOpenViewAll: Boolean = true,
     val canOpenObservationExplain: Boolean = true,
-    val canHideObservation: Boolean = true,
+    val canHideObservation: Boolean = true
 )
 
 /**
- * Trạng thái tổng thể của màn hình Home theo Spec v2.0 (Image-Aligned).
+ * Trạng thái tổng thể của màn hình Home theo Chanko Home Design Handoff v1.0 (Candy Pop 3D).
+ * Thứ tự 5 khu vực: Header -> Little Room -> Những món cần chú ý -> Budget -> Observation (AC-01, AC-02).
  */
 @Immutable
 data class HomeUiState(
     val scenarioId: String = "S21",
     val header: HeaderUiModel = HeaderUiModel(),
     val livingRoom: SectionState<LivingRoomUi> = SectionState.Content(LivingRoomUi()),
-    val budgetSection: SectionState<BudgetUi> = SectionState.Loading,
     val decisionsSection: SectionState<List<DecisionUi>> = SectionState.Loading,
+    val budgetSection: SectionState<BudgetUi> = SectionState.Loading,
+    val waitingItems: List<DecisionUi> = emptyList(),
+    val reviewItems: List<DecisionUi> = emptyList(),
+    val skippedItems: List<DecisionUi> = emptyList(),
     val totalAttentionCount: Int = 0,
     val observation: ObservationUi? = null,
-    val activeSheet: HomeSheet? = null,
+    val hiddenInsightIds: Set<String> = emptySet(),
+    val activeSheet: HomeSheet.Contextual? = null,
     val selectedTab: HomeTab = HomeTab.Home,
+    val isReducedMotionEnabled: Boolean = false,
     val capabilities: HomeCapabilities = HomeCapabilities()
 ) {
-    val isObservationVisible: Boolean
-        get() = observation != null
+    val visibleObservation: ObservationUi?
+        get() = observation?.takeIf { it.hasSufficientData && it.id !in hiddenInsightIds }
 
+    val isObservationVisible: Boolean
+        get() = visibleObservation != null
 }
