@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,6 +95,7 @@ fun BudgetCreditCard(
                 title = stringResource(R.string.home_budget_offline_no_cache_title),
                 subtitle = stringResource(R.string.home_budget_offline_no_cache_subtitle),
                 actionLabel = null,
+                onCardClick = onCardClick,
                 onActionClick = onCardClick,
                 modifier = modifier
             )
@@ -106,6 +108,7 @@ fun BudgetCreditCard(
                 },
                 subtitle = stringResource(R.string.home_budget_offline_no_cache_subtitle),
                 actionLabel = stringResource(R.string.home_section_retry),
+                onCardClick = onCardClick,
                 onActionClick = onRetryClick,
                 modifier = modifier
             )
@@ -116,6 +119,7 @@ fun BudgetCreditCard(
                 title = stringResource(R.string.home_budget_no_budget_title),
                 subtitle = stringResource(R.string.home_budget_no_budget_subtitle),
                 actionLabel = stringResource(R.string.home_budget_no_budget_cta),
+                onCardClick = onCardClick,
                 onActionClick = onCardClick,
                 modifier = modifier
             )
@@ -128,6 +132,7 @@ fun BudgetCreditCard(
                     title = stringResource(R.string.home_budget_no_budget_title),
                     subtitle = stringResource(R.string.home_budget_no_budget_subtitle),
                     actionLabel = stringResource(R.string.home_budget_no_budget_cta),
+                    onCardClick = onCardClick,
                     onActionClick = onCardClick,
                     modifier = modifier
                 )
@@ -163,14 +168,16 @@ private fun BudgetCreditCardContent(
     }
     val cardCd = stringResource(R.string.home_cd_budget_card, fullSummaryDescription)
 
-    val cardBrush = Brush.linearGradient(
-        colors = listOf(
-            CandyColors.HomeV2.candyOrange,
-            CandyColors.HomeV2.candyOrangeShadow
-        ),
-        start = Offset(0f, 0f),
-        end = Offset(900f, 650f)
-    )
+    val cardBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                CandyColors.HomeV2.candyOrange,
+                CandyColors.HomeV2.candyOrangeShadow
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(900f, 650f)
+        )
+    }
 
     Surface(
         modifier = modifier
@@ -526,15 +533,18 @@ private fun BudgetCreditCardStatusFrame(
     title: String,
     subtitle: String,
     actionLabel: String?,
+    onCardClick: () -> Unit,
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardBrush = Brush.linearGradient(
-        colors = listOf(
-            CandyColors.HomeV2.candyOrange,
-            CandyColors.HomeV2.candyOrangeShadow
+    val cardBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                CandyColors.HomeV2.candyOrange,
+                CandyColors.HomeV2.candyOrangeShadow
+            )
         )
-    )
+    }
 
     Surface(
         modifier = modifier
@@ -542,7 +552,7 @@ private fun BudgetCreditCardStatusFrame(
             .heightIn(min = CreditCardMinHeight)
             .shadow(elevation = 6.dp, shape = CreditCardCornerShape)
             .clip(CreditCardCornerShape)
-            .clickable(role = Role.Button, onClick = onActionClick),
+            .clickable(role = Role.Button, onClick = onCardClick),
         shape = CreditCardCornerShape,
         color = CandyColors.HomeV2.candyOrange,
         border = BorderStroke(1.5.dp, CandyColors.HomeV2.candyOrangeHighlight)

@@ -314,7 +314,5 @@ class HomeViewModel @Inject constructor(
         if (isNavigationInProgress) return
         isNavigationInProgress = true
         sendEffect(effect)
-        // Cho phép điều hướng tiếp theo sau khi sự kiện đã gửi vào SharedFlow
-        isNavigationInProgress = false
     }
 }

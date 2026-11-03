@@ -111,12 +111,12 @@ fun HomeRoute(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .then(if (savedAnchorItemId != null) Modifier else Modifier)
+        modifier = modifier.fillMaxSize()
     ) {
         HomeScreen(
-            state = state,
+            state = state.copy(
+                scrollAnchorItemId = state.scrollAnchorItemId ?: savedAnchorItemId.ifEmpty { null }
+            ),
             onEvent = viewModel::onEvent,
             listState = listState,
             modifier = Modifier.fillMaxSize()
@@ -144,12 +144,14 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
-    val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(
-            CandyColors.homeScreenBackgroundTop,
-            CandyColors.homeScreenBackgroundBottom
+    val backgroundBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                CandyColors.homeScreenBackgroundTop,
+                CandyColors.homeScreenBackgroundBottom
+            )
         )
-    )
+    }
 
     val statusBarTopPadding = WindowInsets.statusBars
         .asPaddingValues()

@@ -73,16 +73,25 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `AC-04 BudgetCardTap emits NavigateToBudgetDetails`() = runTest {
+    fun `AC-04 BudgetCardTap emits NavigateToBudgetDetails and blocks rapid double-tap until NavigationCompleted`() = runTest {
         val effects = mutableListOf<HomeUiEffect>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.effect.collect { effects.add(it) }
         }
 
+        // Nhấn liên tiếp 2 lần trước khi điều hướng hoàn tất -> chỉ phát đúng 1 hiệu ứng (AC-04)
+        viewModel.onEvent(HomeUiEvent.BudgetCardTap)
         viewModel.onEvent(HomeUiEvent.BudgetCardTap)
         advanceUntilIdle()
 
         assertEquals(listOf(HomeUiEffect.NavigateToBudgetDetails), effects)
+
+        // Sau khi NavigationCompleted -> cho phép điều hướng lần tiếp theo
+        viewModel.onEvent(HomeUiEvent.NavigationCompleted)
+        viewModel.onEvent(HomeUiEvent.BudgetCardTap)
+        advanceUntilIdle()
+
+        assertEquals(2, effects.size)
         job.cancel()
     }
 

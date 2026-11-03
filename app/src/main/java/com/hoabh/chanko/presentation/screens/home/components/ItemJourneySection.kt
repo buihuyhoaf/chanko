@@ -53,8 +53,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -289,6 +291,7 @@ private fun ItemJourneyZigZagCanvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(totalHeight)
+                .semantics { isTraversalGroup = true }
         ) {
             // 1. Lớp nền Canvas: Vẽ n - 1 đoạn đường nối nét đứt màu lavender từ biên node i tới biên node i+1 (AC-12, AC-13)
             if (visibleNodes.size >= 2) {
@@ -367,6 +370,7 @@ private fun ItemJourneyZigZagCanvas(
                     JourneyProductNode(
                         node = node,
                         diameter = nodeDiameter,
+                        traversalOrder = index.toFloat(),
                         onGestureStart = { onNodeGestureStart(node.itemId) },
                         onGestureEnd = onNodeGestureEnd,
                         onClick = { onNodeClick(node.itemId) },
@@ -389,6 +393,7 @@ private fun ItemJourneyZigZagCanvas(
 private fun JourneyProductNode(
     node: JourneyNodeUi,
     diameter: Dp,
+    traversalOrder: Float,
     onGestureStart: () -> Unit,
     onGestureEnd: () -> Unit,
     onClick: () -> Unit,
@@ -422,6 +427,7 @@ private fun JourneyProductNode(
             .semantics(mergeDescendants = true) {
                 contentDescription = nodeCd
                 role = Role.Button
+                traversalIndex = traversalOrder
             },
         contentAlignment = Alignment.Center
     ) {
