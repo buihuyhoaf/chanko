@@ -145,7 +145,7 @@ private fun JourneyStepRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = step.title,
+                    text = step.titleUiText.asString(),
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
@@ -162,7 +162,7 @@ private fun JourneyStepRow(
             }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = step.description,
+                text = step.descriptionUiText.asString(),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 12.sp,
                     lineHeight = 16.sp

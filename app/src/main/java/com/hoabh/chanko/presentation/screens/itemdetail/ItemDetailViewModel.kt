@@ -3,11 +3,13 @@ package com.hoabh.chanko.presentation.screens.itemdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.model.PurchaseTransaction
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
+import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,6 +74,16 @@ class ItemDetailViewModel @Inject constructor(
                     ItemStatus.PASSED -> ItemDisplayStatus.Skipped
                 }
 
+                val speechUiText = when (displayStatus) {
+                    ItemDisplayStatus.CoolingOff -> UiText.StringResource(R.string.item_detail_speech_cooling_off)
+                    ItemDisplayStatus.ReadyForReview -> UiText.StringResource(R.string.item_detail_speech_ready)
+                    ItemDisplayStatus.Purchased -> UiText.StringResource(R.string.item_detail_speech_purchased)
+                    ItemDisplayStatus.Skipped -> UiText.StringResource(R.string.item_detail_speech_skipped)
+                    ItemDisplayStatus.Saved -> UiText.StringResource(R.string.item_detail_speech_saved)
+                    ItemDisplayStatus.Considering -> UiText.StringResource(R.string.item_detail_speech_considering)
+                    ItemDisplayStatus.Postponed -> UiText.StringResource(R.string.item_detail_speech_postponed)
+                }
+
                 val speechText = when (displayStatus) {
                     ItemDisplayStatus.CoolingOff -> "Bạn vẫn có quyền quyết định sau khi thời gian chờ kết thúc."
                     ItemDisplayStatus.ReadyForReview -> "Bạn còn muốn món này không? Hãy cùng xem lại nhu cầu nhé."
@@ -80,6 +92,14 @@ class ItemDetailViewModel @Inject constructor(
                     ItemDisplayStatus.Saved -> "Cứ để ở đây, bạn có thể cân nhắc sau."
                     ItemDisplayStatus.Considering -> "Cùng suy nghĩ thêm một chút xem sao nhé."
                     ItemDisplayStatus.Postponed -> "Món đồ đang được tạm hoãn để đánh giá thêm."
+                }
+
+                val ctaUiText = when (displayStatus) {
+                    ItemDisplayStatus.ReadyForReview -> UiText.StringResource(R.string.item_detail_cta_ready)
+                    ItemDisplayStatus.CoolingOff -> UiText.StringResource(R.string.item_detail_cta_cooling_off)
+                    ItemDisplayStatus.Purchased -> UiText.StringResource(R.string.item_detail_cta_purchased)
+                    ItemDisplayStatus.Skipped -> UiText.StringResource(R.string.item_detail_cta_skipped)
+                    else -> UiText.StringResource(R.string.item_detail_cta_default)
                 }
 
                 val ctaText = when (displayStatus) {
@@ -91,6 +111,7 @@ class ItemDetailViewModel @Inject constructor(
                 }
 
                 val remMillis = item.remainingMillis(now)
+                val remainingUiText = if (remMillis > 0) formatRemainingTimeUiText(remMillis) else UiText.StringResource(R.string.item_status_cooldown_finished)
                 val remainingText = if (remMillis > 0) formatRemainingTime(remMillis) else "Đã hết thời gian chờ"
 
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
@@ -103,7 +124,9 @@ class ItemDetailViewModel @Inject constructor(
                         DecisionJourneyStepUi(
                             title = "Đã thêm vào danh sách",
                             description = "Bắt đầu thời gian hạ nhiệt ${durationDays} ngày.",
-                            formattedTimestamp = addedDateStr
+                            formattedTimestamp = addedDateStr,
+                            titleUiText = UiText.StringResource(R.string.item_detail_journey_added_title),
+                            descriptionUiText = UiText.StringResource(R.string.item_detail_journey_added_desc, durationDays)
                         )
                     )
                     if (item.status == ItemStatus.COOLING_DOWN && item.canDecide(now)) {
@@ -111,7 +134,9 @@ class ItemDetailViewModel @Inject constructor(
                             DecisionJourneyStepUi(
                                 title = "Đã hoàn thành thời gian chờ",
                                 description = "Món đồ đã sẵn sàng để bạn đưa ra quyết định.",
-                                formattedTimestamp = dateFormat.format(Date(item.addedTimestamp + item.cooldownDurationMillis))
+                                formattedTimestamp = dateFormat.format(Date(item.addedTimestamp + item.cooldownDurationMillis)),
+                                titleUiText = UiText.StringResource(R.string.item_detail_journey_cooling_finished_title),
+                                descriptionUiText = UiText.StringResource(R.string.item_detail_journey_cooling_finished_desc)
                             )
                         )
                     }
@@ -120,7 +145,9 @@ class ItemDetailViewModel @Inject constructor(
                             DecisionJourneyStepUi(
                                 title = "Đã ghi nhận mua hàng",
                                 description = "Giao dịch đã được lưu vào hệ thống.",
-                                formattedTimestamp = dateFormat.format(Date(now))
+                                formattedTimestamp = dateFormat.format(Date(now)),
+                                titleUiText = UiText.StringResource(R.string.item_detail_journey_bought_title),
+                                descriptionUiText = UiText.StringResource(R.string.item_detail_journey_bought_desc)
                             )
                         )
                     } else if (item.status == ItemStatus.PASSED) {
@@ -128,7 +155,9 @@ class ItemDetailViewModel @Inject constructor(
                             DecisionJourneyStepUi(
                                 title = "Đã bỏ qua món đồ",
                                 description = "Quyết định không mua món đồ này.",
-                                formattedTimestamp = dateFormat.format(Date(now))
+                                formattedTimestamp = dateFormat.format(Date(now)),
+                                titleUiText = UiText.StringResource(R.string.item_detail_journey_passed_title),
+                                descriptionUiText = UiText.StringResource(R.string.item_detail_journey_passed_desc)
                             )
                         )
                     }
@@ -163,7 +192,11 @@ class ItemDetailViewModel @Inject constructor(
                         speechBubbleText = speechText,
                         primaryCtaText = ctaText,
                         decisionJourney = journey,
-                        purchaseHistory = mappedPurchases
+                        purchaseHistory = mappedPurchases,
+                        speechBubbleUiText = speechUiText,
+                        primaryCtaUiText = ctaUiText,
+                        remainingFormattedUiText = remainingUiText,
+                        cooldownDurationUiText = UiText.StringResource(R.string.item_detail_duration_days, durationDays)
                     )
                 }
             }
@@ -200,8 +233,10 @@ class ItemDetailViewModel @Inject constructor(
                             it.copy(
                                 remainingMillis = 0L,
                                 remainingFormatted = "Đã kết thúc thời gian chờ",
+                                remainingFormattedUiText = UiText.StringResource(R.string.item_status_cooldown_finished),
                                 displayStatus = ItemDisplayStatus.ReadyForReview,
-                                speechBubbleText = "Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định."
+                                speechBubbleText = "Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định.",
+                                speechBubbleUiText = UiText.StringResource(R.string.item_detail_speech_decision_time)
                             )
                         }
                     }
@@ -220,13 +255,13 @@ class ItemDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isRecordPurchaseSheetOpen = false) }
                 viewModelScope.launch {
                     purchaseRepository.recordPurchase(event.purchase)
-                    _effect.emit(ItemDetailUiEffect.ShowToast("Đã ghi nhận giao dịch"))
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.StringResource(R.string.purchase_record_success)))
                 }
             }
             is ItemDetailUiEvent.RequestArchiveItem -> {
                 _uiState.update { it.copy(isMoreOptionsSheetOpen = false) }
                 viewModelScope.launch {
-                    _effect.emit(ItemDetailUiEffect.ShowToast("Đã lưu trữ món đồ"))
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.StringResource(R.string.archived_items_restore_success)))
                     _effect.emit(ItemDetailUiEffect.NavigateBack)
                 }
             }
@@ -235,6 +270,19 @@ class ItemDetailViewModel @Inject constructor(
                     _effect.emit(ItemDetailUiEffect.OpenTransactionDetail(event.purchaseId))
                 }
             }
+        }
+    }
+
+    private fun formatRemainingTimeUiText(remainingMillis: Long): UiText {
+        val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
+        val hours = TimeUnit.MILLISECONDS.toHours(remainingMillis) % 24
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMillis) % 60
+
+        return when {
+            days > 0 -> UiText.StringResource(R.string.item_remaining_days_hours, days, hours)
+            hours > 0 -> UiText.StringResource(R.string.item_remaining_hours_minutes, hours, minutes)
+            minutes > 0 -> UiText.StringResource(R.string.item_remaining_minutes, minutes)
+            else -> UiText.StringResource(R.string.item_remaining_less_than_one_minute)
         }
     }
 

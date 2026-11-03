@@ -1,5 +1,7 @@
 package com.hoabh.chanko.presentation.screens.itemdetail
 
+import com.hoabh.chanko.presentation.base.UiText
+
 sealed interface ItemDetailUiEvent {
     data object OpenMoreOptions : ItemDetailUiEvent
     data object DismissMoreOptions : ItemDetailUiEvent
@@ -18,5 +20,7 @@ sealed interface ItemDetailUiEffect {
     data object NavigateBack : ItemDetailUiEffect
     data class OpenRecordPurchaseSheet(val itemId: Int) : ItemDetailUiEffect
     data class OpenTransactionDetail(val purchaseId: String) : ItemDetailUiEffect
-    data class ShowToast(val message: String) : ItemDetailUiEffect
+    data class ShowToast(val message: UiText) : ItemDetailUiEffect {
+        constructor(text: String) : this(UiText.DynamicString(text))
+    }
 }

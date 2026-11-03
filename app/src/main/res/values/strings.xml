@@ -273,4 +273,29 @@
     <string name="item_remaining_under_one_minute">Còn dưới 1 phút</string>
     <string name="item_remaining_less_than_one_minute">Dưới 1 phút</string>
     <string name="item_archived_status_secondary">Đang lưu trữ</string>
+    <!-- Item Detail Strings -->
+    <string name="item_detail_speech_cooling_off">Bạn vẫn có quyền quyết định sau khi thời gian chờ kết thúc.</string>
+    <string name="item_detail_speech_ready">Bạn còn muốn món này không? Hãy cùng xem lại nhu cầu nhé.</string>
+    <string name="item_detail_speech_purchased">Lịch sử mua được lưu ở bên dưới.</string>
+    <string name="item_detail_speech_skipped">Bạn đã tiết kiệm được một khoản tiền nhờ quyết định dừng lại.</string>
+    <string name="item_detail_speech_saved">Cứ để ở đây, bạn có thể cân nhắc sau.</string>
+    <string name="item_detail_speech_considering">Cùng suy nghĩ thêm một chút xem sao nhé.</string>
+    <string name="item_detail_speech_postponed">Món đồ đang được tạm hoãn để đánh giá thêm.</string>
+    <string name="item_detail_speech_decision_time">Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định.</string>
+
+    <string name="item_detail_cta_cooling_off">Đang trong thời gian chờ</string>
+    <string name="item_detail_cta_default">Xem lại quyết định</string>
+
+    <string name="item_detail_no_reason">Không có lý do được ghi lại.</string>
+    <string name="item_detail_duration_days">%1$d ngày</string>
+    <string name="item_detail_journey_added_title">Đã thêm vào danh sách</string>
+    <string name="item_detail_journey_added_desc">Bắt đầu thời gian hạ nhiệt %1$d ngày.</string>
+    <string name="item_detail_journey_cooling_finished_title">Đã hoàn thành thời gian chờ</string>
+    <string name="item_detail_journey_cooling_finished_desc">Món đồ đã sẵn sàng để bạn đưa ra quyết định.</string>
+    <string name="item_detail_journey_bought_title">Đã ghi nhận mua hàng</string>
+    <string name="item_detail_journey_bought_desc">Giao dịch đã được lưu vào hệ thống.</string>
+    <string name="item_detail_journey_passed_title">Đã bỏ qua món đồ</string>
+    <string name="item_detail_journey_passed_desc">Quyết định không mua món đồ này.</string>
+
+    <string name="purchase_history_price_quantity">%1$s × %2$d</string>
 </resources>
