@@ -251,4 +251,19 @@ class HomeDomainLogicTest {
             assertTrue(containerWidth - layout.mascotSize >= rightmostNodeEdge)
         }
     }
+
+    // =========================================================================
+    // 6. Sticky Collapsing Header Helper
+    // =========================================================================
+
+    @Test
+    fun `calculateCollapseFraction clamps fraction between 0 and 1 correctly`() {
+        val maxScroll = 100f
+        assertEquals(0f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(0, maxScroll), 0.001f)
+        assertEquals(0.5f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(50, maxScroll), 0.001f)
+        assertEquals(1f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(100, maxScroll), 0.001f)
+        assertEquals(1f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(250, maxScroll), 0.001f)
+        assertEquals(0f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(-10, maxScroll), 0.001f)
+        assertEquals(0f, com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction(50, 0f), 0.001f)
+    }
 }

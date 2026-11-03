@@ -428,6 +428,8 @@ object CandyColors {
         val lavenderConnector = CandyPalette.Lavender350
         val chipGold = CandyPalette.Gold300
         val chipGoldStroke = CandyPalette.Gold500
+        val headerFrostedSurface = CandyPalette.Purple20
+        val headerBorderDivider = CandyPalette.Lavender110
 
         // 6 Journey Node Statuses (Ring + Badge + Label Ink)
         val statusSavedInk = CandyPalette.Slate610

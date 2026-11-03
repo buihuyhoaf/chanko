@@ -14,6 +14,7 @@
     <string name="home_header_subtitle">Hôm nay mình cùng cân nhắc nhé!</string>
     <string name="home_header_offline_badge">Đang ngoại tuyến · Hiển thị dữ liệu đã lưu</string>
     <string name="home_header_offline_badge_with_sync">Đang ngoại tuyến · %1$s</string>
+    <string name="home_header_offline_compact">Ngoại tuyến</string>
     <string name="home_cd_profile">Mở hồ sơ và cài đặt</string>
 
     <!-- Budget Credit Card v2.0 (AC-03..AC-09, AC-18..AC-22) -->
