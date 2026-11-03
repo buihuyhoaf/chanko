@@ -116,7 +116,7 @@ fun MyItemCard(
                 if (item.secondaryInfoText.isNotBlank()) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = item.secondaryInfoText,
+                        text = item.secondaryInfoUiText.asString(),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 12.sp
                         ),
@@ -142,7 +142,7 @@ private fun ItemStatusBadge(
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = status.labelText,
+            text = stringResource(status.labelRes),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 11.sp

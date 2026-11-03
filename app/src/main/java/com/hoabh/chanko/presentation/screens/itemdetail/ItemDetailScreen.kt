@@ -355,7 +355,7 @@ private fun DetailStatusBadge(
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(
-            text = status.labelText,
+            text = stringResource(status.labelRes),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp

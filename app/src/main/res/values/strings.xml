@@ -155,7 +155,6 @@
     <string name="archived_items_empty_desc">Các món đồ bạn tạm gác lại hoặc lưu trữ sẽ xuất hiện tại đây.</string>
     <string name="archived_items_restore_btn">Khôi phục</string>
     <string name="archived_items_restore_success">Đã khôi phục món đồ</string>
-
     <!-- Budget UI v2.0 Strings (C01–C13) -->
     <string name="budget_title">Ngân sách</string>
     <string name="budget_settings_action">Thiết lập ví</string>
@@ -254,4 +253,24 @@
     <string name="budget_history_increase_short">Tăng</string>
     <string name="budget_history_decrease_short">Giảm</string>
     <string name="budget_history_amount_change">%1$s → %2$s</string>
+
+    <!-- Item Display Status Strings -->
+    <string name="item_status_saved">Đã lưu</string>
+    <string name="item_status_considering">Đang cân nhắc</string>
+    <string name="item_status_cooling_off">Đang hạ nhiệt</string>
+    <string name="item_status_ready_for_review">Đến lúc xem lại</string>
+    <string name="item_status_postponed">Đã hoãn</string>
+    <string name="item_status_purchased">Đã mua</string>
+    <string name="item_status_skipped">Đã bỏ qua</string>
+
+    <!-- Item Status Decision & Countdown Strings -->
+    <string name="item_status_cooldown_finished">Đã hết thời gian chờ</string>
+    <string name="item_status_decided_buy">Đã quyết định mua</string>
+    <string name="item_status_decided_skip">Đã bỏ qua món đồ này</string>
+    <string name="item_remaining_days_hours">Còn %1$d ngày %2$d giờ</string>
+    <string name="item_remaining_hours_minutes">Còn %1$d giờ %2$d phút</string>
+    <string name="item_remaining_minutes">Còn %1$d phút</string>
+    <string name="item_remaining_under_one_minute">Còn dưới 1 phút</string>
+    <string name="item_remaining_less_than_one_minute">Dưới 1 phút</string>
+    <string name="item_archived_status_secondary">Đang lưu trữ</string>
 </resources>
