@@ -496,7 +496,6 @@ private fun JourneyProductNode(
                     onGestureEnd()
                 }
             }
-            .clip(CircleShape)
             .clickable(
                 role = Role.Button,
                 onClick = onClick
