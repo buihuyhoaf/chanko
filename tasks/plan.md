@@ -1,20 +1,19 @@
-# Implementation Plan: Chanko Home UI v1.0 (Candy Pop 3D)
+# Implementation Plan: Chanko Home UI v2.0 (Budget Credit Card & Item Journey)
 
-> **Spec tham chiếu:** [SPEC-home-ui-v1.md](../SPEC-home-ui-v1.md) · [docs/features/home-ui-v1-spec.md](../docs/features/home-ui-v1-spec.md)  
-> **Nguồn bàn giao:** `Chanko-Home-Design-Handoff-v1.0` (22 Frozen Decisions · 22 Acceptance Criteria)  
-> **Danh sách công việc (Task List Target):** [tasks/todo.md](todo.md) & [docs/tasks/home-ui-v1-tasks.md](../docs/tasks/home-ui-v1-tasks.md)
+> **Spec tham chiếu:** [SPEC-home-ui-v2.md](../SPEC-home-ui-v2.md) · [docs/features/home-ui-v2-spec.md](../docs/features/home-ui-v2-spec.md)  
+> **Nguồn bàn giao:** `Chanko_Home_v2.0_Handoff` (31 Acceptance Criteria `AC-01`..`AC-31` · 23 State Matrix rows · `reference/home-v2-approved.png`)  
+> **Task List Target:** [tasks/todo.md](todo.md) & [docs/tasks/home-ui-v2-tasks.md](../docs/tasks/home-ui-v2-tasks.md)
 
 ---
 
 ## 1. Overview
 
-Triển khai bản nâng cấp toàn diện màn hình **`HomeScreen`** theo chuẩn thiết kế **Candy Pop 3D v1.0** và 22 quyết định UX đã đóng băng (`HOME-REV-01`..`HOME-GAP-05`) cùng 22 tiêu chí nghiệm thu (`AC-01`..`AC-22`). Trọng tâm bao gồm:
-1. Sắp xếp lại đúng thứ tự 5 khu vực nội dung (`Header → Little Room → Những món cần chú ý → Budget → Observation`) và **gỡ bỏ hoàn toàn 2 thẻ Quick Actions cũ** (`AC-01`, `AC-02`).
-2. Chuẩn hóa **Little Room** với 4 vật thể tương tác (*Đang chờ*, *Cần xem lại*, *Ngân sách*, *Đã bỏ qua*), bóng thoại ngắn gọn và **Contextual Bottom Sheet** hiển thị đúng ngữ cảnh (bao gồm cả giải thích chi tiết cho *Góc nhìn từ Chanko* khi nhấn *"Giải thích thêm"*).
-3. Đồng bộ hóa logic phân nhóm giữa Little Room và *Những món cần chú ý*: món hết hạn `Cooling-off` tự động chuyển sang nhóm *Cần xem lại* mà **không tự đổi verdict thành `BUY`** và **không đếm trùng `itemId`** (`AC-07`, `AC-08`).
-4. Bọc khu vực *Những món cần chú ý* trong khung card sáng bo tròn lớn theo mockup mới, hiển thị tối đa 3 món ưu tiên cần hành động, xử lý giá thiếu `"Chưa có giá"` (`AC-09`, `AC-10`, `HOME-EDGE-04`).
-5. Đặt `Budget Card` sau Attention với toàn bộ vùng chạm mở `BudgetScreen` và tự động cập nhật khi đổi chu kỳ (`AC-11`..`AC-13`).
-6. Đảm bảo cô lập lỗi từng khu vực (`AC-15`), chế độ Offline hiển thị cache kèm thời điểm đồng bộ và chặn nút `+` không mở Add Item / không tạo draft (`AC-16`, `AC-17`), giữ vị trí cuộn khi quay lại (`AC-18`), không tự mở lại sheet sau process death (`AC-19`), đạt chuẩn trợ năng `48dp` + TalkBack (`AC-20`), tôn trọng Reduced Motion (`AC-21`) và không gây áp lực mua sắm (`AC-22`).
+Triển khai toàn diện màn hình **HomeScreen v2.0** theo đặc tả đã phê duyệt tại [docs/features/home-ui-v2-spec.md](../docs/features/home-ui-v2-spec.md), thay thế hoàn toàn kiến trúc Little Room + 4 vật thể + Contextual Sheet + danh sách *Những món cần chú ý* của v1.0 bằng cấu trúc **4 khu vực cuộn (`Header → Budget Credit Card → Item Journey → Observation`)**:
+1. **`HomeHeader`**: Lời chào theo buổi + phụ đề *"Hôm nay mình cùng cân nhắc nhé!"* + nút Avatar tròn mở `Profile & Settings` gộp + huy hiệu Offline kèm `syncedAt` (`AC-02`, `AC-20`).
+2. **`BudgetCreditCard`**: Thẻ tín dụng mua sắm **3D Candy Orange (`#FFB665` / `#F59145`)** với logo dấu chân + `CHANKO SHOPPING BUDGET`, chip vàng, sóng contactless, mèo trắng ló đầu trang trí, số tiền *Ngân sách còn lại* `32sp ExtraBold`, thanh tiến trình capsule (`0..1`) + pill `%`, dòng *Đã chi / tổng ngân sách* (bao gồm cả `Pay Now` & `Credit`) và khoảng ngày chu kỳ; giữ nền cam khi vượt hạn mức kèm cảnh báo màu **Coral (`#B83248`)**; hỗ trợ đầy đủ `NoBudget`, `MissingPrice` (*"Chưa đủ dữ liệu giá"*), `Skeleton`, `Error + Retry cục bộ`, `OfflineCache` và `OfflineNoCache` (`AC-03`..`AC-09`, `AC-18`..`AC-22`).
+3. **`ItemJourneySection` (*"Món đồ gần đây"*)**: Hiển thị $\min(n, 5)$ món đồ mới nhất sau khi lọc bỏ `Archived` (`createdAt DESC`, tie-break `itemId ASC`, đổi `status` không đổi thứ tự — `AC-10`, `AC-11`, `AC-12`); các node tròn `80–96dp` xếp ziczac dọc bên trái nối bằng $n - 1$ đoạn nét đứt lavender (`#BDA8EB`), mỗi node có ảnh sản phẩm + viền màu + badge icon góc trên phải cho đủ **6 trạng thái** (`Saved`, `Considering`, `Waiting`, `Ready`, `Purchased`, `Skipped` — `AC-13`, `AC-14`); chạm node mở trực tiếp `ItemDetailScreen(itemId)` (`AC-15`), chạm *"Xem tất cả ›"* mở `MyItems` mặc định (`AC-16`); 1 mascot Chanko canonical đứng bên phải cuộn cùng Journey (`AC-17`).
+4. **`ObservationCard` (*"Góc nhìn từ Chanko"*)**: Thẻ có mèo Chanko góc trái dưới + icon bóng đèn + nhận xét + nút mũi tên `>` mở `InsightExplanationDialog` + nút ẩn bền vững theo `insightId`; bỏ hoàn toàn vùng và khoảng trống khi không có dữ liệu (`AC-26`, `AC-27`).
+5. **Điều hướng, Đồng bộ Gesture-Safe & Trợ năng (`AC-23`..`AC-25`, `AC-28`..`AC-31`)**: Khóa snapshot `itemId` từ `pointer-down` đến `click/cancel`, bảo toàn vị trí cuộn & anchor hợp lệ qua back/process death, chặn nút `+` khi offline, và đảm bảo tương thích `320dp`, `fontScale = 2.0f`, TalkBack và Reduced Motion.
 
 ---
 
@@ -22,61 +21,59 @@ Triển khai bản nâng cấp toàn diện màn hình **`HomeScreen`** theo chu
 
 ```mermaid
 graph TD
-    D["Module 1: home-domain-reconcile<br/>(Cooling-off -> Review reconcile, Deduplication, Null Price, State Models)"]
-    R["Module 2: home-layout-header-room<br/>(HomeHeader + Little Room 4 Props + Short Speech Bubble)"]
-    A["Module 4: home-attention-budget-obs<br/>(Enclosed Attention Card + Full-click BudgetCard + ObservationCard)"]
-    S["Module 3: home-contextual-sheet<br/>(4 Room Props Sheet + Observation Explanation Sheet + Process Death Guard)"]
-    N["Module 5: home-shell-navigation-a11y<br/>(5-Section HomeScreen, MyItems Filter Routing, Offline + Gate, Previews & Tests)"]
+    T["Task 1: Color Tokens & Domain Logic<br/>(Color.kt, HomeDomainLogic.kt: JourneySelector + BudgetV2Calculator)"]
+    S["Task 2: State Model, Gesture Lock & ViewModel<br/>(HomeUiState, HomeUiEvent, HomeUiEffect, HomeFakeDataSource, HomeViewModel)"]
+    B["Task 3: BudgetCreditCard Component<br/>(3D Candy Orange Card, Normal/Over/NoBudget/MissingPrice/Skeleton/Error)"]
+    J["Task 4: ItemJourneySection Component<br/>(Zig-zag 1..5 Nodes, Dashed Lavender Connector, 6 Status Badges, Mascot)"]
+    H["Task 5: HomeHeader, ObservationCard + Dialog & HomeScreen v2.0<br/>(4-Section Layout, Remove v1 LivingRoom/Sheet/Decisions)"]
+    N["Task 6: MainNavigation, Previews & Full 31-AC Verification<br/>(MyItems Default Route, Online/Offline +, Anchor Restore, Unit Tests)"]
 
-    D --> R
-    D --> A
-    R --> S
-    A --> S
-    S --> N
+    T --> S
+    S --> B
+    S --> J
+    B --> H
+    J --> H
+    H --> N
 ```
 
 ### Các Quyết Định Kiến Trúc Cốt Lõi:
-1. **Single Source of Truth cho Phân Nhóm (`HomeGroupingEngine` / `DecisionRanker`):**
-   - Cả 4 badge/sheet của Little Room và danh sách 3 món trong *Những món cần chú ý* đều đọc từ cùng một kết quả phân nhóm đã reconcile thời gian `Cooling-off`.
-   - Khi `status == Waiting && remainingSeconds <= 0`: món đồ được phân vào nhóm `Review` (*Cần xem lại*) với nhãn phụ `"Vừa hết thời gian chờ"`, giữ nguyên `verdict` ban đầu (không chuyển thành `BUY`), đảm bảo tổng số lượng nhất quán và không bao giờ xuất hiện ở cả 2 nhóm (`AC-07`, `AC-08`).
-2. **Contextual Sheet Mở Rộng (`HomeSheet.Contextual`):**
-   - Phục vụ 5 ngữ cảnh: `Hourglass` (*Đang chờ*), `Calendar` (*Cần xem lại*), `Wallet` (*Ngân sách*), `PauseJar` (*Đã bỏ qua*), và `Observation` (*Giải thích chi tiết Góc nhìn từ Chanko*).
-   - Lưu giữ `activeSheet` thuần túy trong bộ nhớ của `HomeViewModel` (không lưu vào `SavedStateHandle` hay `rememberSaveable`), trong khi `LazyListState` của `HomeScreen` được giữ qua `rememberLazyListState()`. Nhờ đó, khi điều hướng đi và quay lại thì vị trí cuộn được bảo toàn (`AC-18`), còn khi Android hủy tiến trình (process death) thì sheet luôn đóng (`AC-19`).
-3. **Liên Kết Bộ Lọc `MyItems` Từ Home (`AC-06`):**
-   - Truyền yêu cầu lọc từ `HomeRoute` qua `MainNavigation` đến `MyItemsViewModel`:
-     - *Đang chờ* $\rightarrow$ `PrimaryFilter.ACTIVE` + `ActiveSubFilter.COOLING_OFF`
-     - *Cần xem lại* $\rightarrow$ `PrimaryFilter.ACTIVE` + `ActiveSubFilter.READY`
-     - *Đã bỏ qua* $\rightarrow$ `PrimaryFilter.SKIPPED` + `ActiveSubFilter.ALL_ACTIVE`
-     - *Tất cả ›* $\rightarrow$ `PrimaryFilter.ALL` + `ActiveSubFilter.ALL_ACTIVE`
-4. **Cổng Kiểm Soát Ngoại Tuyến (Offline Network Gate — `AC-16`, `AC-17`):**
-   - Khi `isOffline == true`, `HomeHeader` hiển thị huy hiệu ngoại tuyến kèm thời điểm đồng bộ thực tế (`lastSyncedAtText`).
-   - Nhấn nút `+` trên `ChankoBottomBar` khi offline sẽ phát thông báo yêu cầu kết nối mạng (Snackbar) và chặn hoàn toàn việc mở `AddItemViewModel::open`, tuyệt đối không tạo bản nháp (draft).
+1. **Cô lập Trạng thái Từng Khu vực (`SectionState<T>` — `AC-08`, `AC-18`..`AC-22`):**
+   - `budgetState: SectionState<BudgetCreditCardUi>` và `journeyState: SectionState<ItemJourneyUi>` hoạt động độc lập. Khi Budget lỗi, người dùng có nút `Thử lại` ngay trên khung thẻ cam trong khi `ItemJourney` vẫn hiển thị và bấm vào node bình thường (và ngược lại).
+   - Phân biệt tường minh giữa `Empty` (đã tải thành công và có 0 món), `NoBudget` (chưa thiết lập ngân sách), `OfflineCache` (mất mạng nhưng có dữ liệu cache + `syncedAt`) và `OfflineNoCache` (mất mạng và chưa có cache $\rightarrow$ hiển thị *"Chưa có dữ liệu"*, không báo 0 món hay `0đ` giả).
+2. **Định danh Ổn định & Khóa Snapshot Theo Gesture (`AC-10`, `AC-11`, `AC-23`, `AC-24`):**
+   - `JourneySelector.selectRecentNodes` loại bỏ `isArchived == true` trước, sau đó sắp xếp theo `createdAt DESC` rồi `itemId ASC`, lấy tối đa 5 phần tử. Mọi thay đổi `status` không bao giờ làm xáo trộn thứ tự các node.
+   - Khi người dùng bắt đầu chạm vào một node (`HomeUiEvent.JourneyNodeGestureStarted(itemId)`), `HomeViewModel` bật cờ `activeGestureItemId`: mọi thay đổi danh sách đến trong lúc ngón tay chưa nhấc lên (`Live add`, `Sync`, `Archive/Delete`) được giữ trong hàng đợi `pendingCandidates` và chỉ cập nhật lên UI sau khi nhận `JourneyNodeGestureEnded` hoặc `JourneyNodeClicked(itemId)`. Nếu món đang chạm vừa bị xóa trước khi click hoàn tất, click đó bị hủy an toàn thay vì mở nhầm món kế tiếp.
+3. **Vẽ Native `BudgetCreditCard` & `ItemJourneySection` bằng Compose (`AC-05`, `AC-13`, `AC-17`, `AC-31`):**
+   - `BudgetCreditCard` dùng `Surface` / `Box` với gradient cam Candy (`CandyColors.HomeV2.candyOrange` $\rightarrow$ `CandyColors.HomeV2.candyOrangeShadow`), vẽ chip EMV vàng, sóng contactless và hoạ tiết mèo trắng bằng Compose `Canvas` / vector, dùng `heightIn(min = 192.dp)` để thẻ tự giãn chiều cao khi `fontScale = 2.0f`.
+   - `ItemJourneySection` dùng `BoxWithConstraints` để tính đường kính node (`80.dp..96.dp`) và tọa độ tâm $(x_i, y_i)$ theo mẫu ziczac bên trái (`leftColumnX`, `midColumnX`), vẽ $n - 1$ đoạn đường nối nét đứt màu lavender (`#BDA8EB`) bằng `Canvas` phía sau các node (từ mép đường tròn $i$ tới mép đường tròn $i+1$, $n < 2$ không vẽ dây nối), và đặt 1 mascot Chanko (`R.drawable.img_chanko_mascot`) ở khoảng trống bên phải không chồng lên vùng chạm của bất kỳ node nào.
+4. **Thứ tự Đọc TalkBack & Reduced Motion (`AC-31`):**
+   - Mỗi node Journey dùng `semantics(mergeDescendants = true)` đọc đầy đủ: *"[Tên món], trạng thái [Nhãn trạng thái tiếng Việt], chạm đúp để mở chi tiết"*, được sắp xếp theo đúng thứ tự `createdAt DESC` trong cây Compose.
+   - Chip vàng, sóng contactless, mèo trang trí trên thẻ cam, mascot Journey và đường nối `Canvas` đều đặt `contentDescription = null` / `clearAndSetSemantics {}` để TalkBack không dừng vào các phần tử trang trí.
 
 ---
 
 ## 3. Task List
 
-### Phase 1: Foundation & Domain Reconciliation (`home-domain-reconcile`)
-- [x] **Task 1:** Nâng cấp Domain Logic, State Model & Reconcile Cooling-off (`AC-07`, `AC-08`, `AC-09`, `AC-11`, `HOME-EDGE-04`)
-- [x] **Task 2:** Cập nhật `HomeFakeDataSource`, `HomeViewModel` & Bộ Unit Test Domain/ViewModel (`AC-01`..`AC-19`)
+### Phase 1: Foundation, Tokens & Domain/State Engine (`home-v2-domain-state`)
+- [x] **Task 1:** Bổ sung Semantic Color Tokens v2.0 (`Color.kt`), Strings (`strings_home.xml`) & Domain Logic (`JourneySelector` + `BudgetV2Calculator` trong `HomeDomainLogic.kt`) (`AC-03`, `AC-06`..`AC-12`, `AC-25`)
+- [x] **Task 2:** Nâng cấp `HomeUiState`, `HomeUiEvent`, `HomeUiEffect`, `HomeFakeDataSource` & `HomeViewModel` (SectionState độc lập, Gesture Snapshot Lock, Offline Cache/NoCache, Insight Hide) + Unit Tests (`AC-08`, `AC-18`..`AC-27`, `AC-30`)
 
-### Checkpoint 1: Foundation & Domain
-- [x] Toàn bộ unit tests cho `HomeDomainLogicTest` và `HomeViewModelTest` chạy PASS (`./gradlew :app:testDevDebugUnitTest`).
+### Checkpoint 1: Foundation & Domain/ViewModel Tests
+- [x] Toàn bộ unit tests cho `HomeDomainLogicTest`, `HomeViewModelTest` và `ColorArchitectureTest` chạy PASS (`./gradlew :app:testDevDebugUnitTest`).
 
-### Phase 2: Core UI Components & Contextual Sheet (`home-layout-header-room`, `home-attention-budget-obs`, `home-contextual-sheet`)
-- [x] **Task 3:** Cập nhật `HomeHeader`, `CompactLivingRoom` & Strings theo chuẩn Candy Pop 3D v1.0 (`AC-03`, `AC-04`, `AC-16`, `AC-20`, `AC-21`)
-- [x] **Task 4:** Cập nhật `YourDecisionsSection` (Khung Card Bao Ngoài), `BudgetCard` & `ObservationCard` (`AC-09`..`AC-14`, `AC-22`)
-- [x] **Task 5:** Cập nhật `HomeSheetHost` (Contextual Sheet 4 Vật Thể + Giải Thích Insight) & Tái cấu trúc `HomeScreen` 5 Khu Vực (`AC-01`, `AC-02`, `AC-05`, `AC-06`, `AC-19`)
+### Phase 2: Core v2.0 UI Components (`home-v2-budget-credit-card`, `home-v2-item-journey`)
+- [x] **Task 3:** Xây dựng `BudgetCreditCard.kt` 3D Candy Orange với đầy đủ trạng thái (`Normal`, `OverBudget` Coral, `NoBudget`, `MissingPrice`, `Skeleton`, `Error + Retry`, `OfflineNoCache`) (`AC-03`..`AC-09`, `AC-18`..`AC-22`, `AC-31`)
+- [x] **Task 4:** Xây dựng `ItemJourneySection.kt` (*"Món đồ gần đây"*): Ziczac 1..5 Nodes tròn `80–96dp`, Đường nối nét đứt Lavender, 6 Status Badges, Mascot bên phải & Gesture-Safe Touch (`AC-10`..`AC-17`, `AC-23`, `AC-24`, `AC-31`)
 
-### Checkpoint 2: Core UI Components
-- [x] Mã nguồn UI biên dịch thành công (`./gradlew :app:compileDevDebugKotlin`), không còn `QuickActionsRow`, thứ tự 5 khu vực khớp tuyệt đối với AC-01.
+### Checkpoint 2: Core v2.0 Components
+- [x] Các component mới biên dịch sạch sẽ (`./gradlew :app:compileDevDebugKotlin`), tuân thủ tuyệt đối `ColorArchitectureTest`.
 
-### Phase 3: Navigation Shell, Offline Gate & Verification (`home-shell-navigation-a11y`)
-- [x] **Task 6:** Kết nối Điều hướng `HomeRoute`, `MainNavigation` (Bộ lọc `MyItems`, `ItemDetail`) & Chặn Nút `+` Khi Offline (`AC-06`, `AC-10`, `AC-17`, `AC-18`)
-- [x] **Task 7:** Hoàn thiện Responsive Previews & Chạy Kiểm Thử Toàn Diện Nghiệm Thu 22 AC (`AC-01`..`AC-22`)
+### Phase 3: Header, Observation, HomeScreen Assembly & Navigation (`home-v2-header-observation-shell`)
+- [x] **Task 5:** Cập nhật `HomeHeader.kt`, `ObservationCard.kt` (kèm `InsightExplanationDialog`), lắp ghép `HomeScreen.kt` 4 khu vực chuẩn v2.0 và xóa bỏ `CompactLivingRoom.kt`, `YourDecisionsSection.kt`, `HomeSheetHost.kt`, `BudgetCard.kt` cũ (`AC-01`, `AC-02`, `AC-26`, `AC-27`)
+- [x] **Task 6:** Kết nối `MainNavigation.kt`, Hoàn thiện bộ Responsive Previews v2.0 & Kiểm thử Nghiệm thu Toàn diện 31 AC (`AC-15`, `AC-16`, `AC-28`..`AC-31`)
 
-### Checkpoint 3: Complete
-- [x] Tất cả 22 Acceptance Criteria (`AC-01`..`AC-22`) vượt qua kiểm thử, build `assembleDevDebug` và `testDevDebugUnitTest` xanh 100%.
+### Checkpoint 3: Complete & Ready for Review
+- [x] Tất cả 31 Acceptance Criteria (`AC-01`..`AC-31`) vượt qua kiểm thử, `./gradlew :app:testDevDebugUnitTest` và `./gradlew :app:assembleDevDebug` xanh 100%.
 
 ---
 
@@ -84,13 +81,13 @@ graph TD
 
 | Rủi ro | Mức độ | Biện pháp giảm thiểu |
 | :--- | :---: | :--- |
-| Lệch số lượng giữa badge trong Little Room và danh sách *Những món cần chú ý* tại thời điểm hết hạn `Cooling-off` | Cao | Sử dụng duy nhất 1 hàm reconcile trong `HomeDomainLogic` tạo ra cả danh sách nhóm (`waitingItems`, `reviewItems`, `skippedItems`) và `topAttentionItems` từ cùng 1 danh sách đầu vào. |
-| TalkBack đọc lặp 2 lần trên `BudgetCard` (vừa đọc card vừa đọc nút `"Chi tiết ›"`) hoặc trên vật thể Little Room | Trung bình | Áp dụng `clickable` duy nhất ở container cha với `semantics(mergeDescendants = true)`; nút `"Chi tiết ›"` và badge số lượng chỉ là thành phần hiển thị thị giác bên trong, không gắn `clickable` riêng (`AC-12`, `AC-20`). |
-| Vùng chạm của 4 vật thể trong Little Room bị chồng lấn hoặc nhỏ hơn `48dp` trên màn hình hẹp `320dp` | Trung bình | Bố trí 4 cột hotspot độc lập (`weight(1f)`), mỗi hotspot có `sizeIn(minWidth = 48.dp, minHeight = 48.dp)` bao gồm cả hình vật thể và pill nhãn bên dưới theo hướng dẫn tại `RESPONSIVE-COMPOSE.md`. |
-| Contextual Sheet tự mở lại sau khi Android hủy tiến trình (process death) | Trung bình | Giữ `activeSheet` trong `MutableStateFlow` in-memory của `HomeViewModel` với giá trị khởi tạo `null`, không lưu vào `SavedStateHandle` hay `rememberSaveable` (`AC-19`). |
+| Mascot bên phải đè lên vùng chạm của node Journey trên màn hình hẹp `320dp` | Cao | Đo `maxWidth` bằng `BoxWithConstraints`: khi `maxWidth < 360.dp`, thu đường kính node về `80.dp`, thu nhỏ chiều rộng mascot và dịch sát lề phải; đặt các node sau mascot trong thứ tự vẽ `Box` (z-index cao hơn) và tắt pointer input trên mascot (`AC-17`, `AC-31`). |
+| Đổi `itemId` ngay dưới ngón tay khi có món mới hoặc đồng bộ nền lúc người dùng đang nhấn giữ node | Cao | Dùng `pointerInput` lắng nghe `awaitFirstDown` để phát `JourneyNodeGestureStarted(itemId)` trước khi click; `HomeViewModel` hoãn áp dụng danh sách mới cho tới khi gesture kết thúc (`AC-23`, `AC-24`). |
+| Vi phạm `ColorArchitectureTest` khi thêm màu thẻ cam, Coral, Lavender connector và 6 màu trạng thái | Trung bình | Khai báo toàn bộ mã hex một lần duy nhất trong `CandyPalette` và экспоrt qua `CandyColors.HomeV2` trong `Color.kt`. |
+| Tràn chữ trên `BudgetCreditCard` khi bật `fontScale = 2.0f` trên màn `320dp` | Trung bình | Sử dụng `heightIn(min = 192.dp)` thay vì khóa cứng `aspectRatio`, cho phép các dòng *Đã chi / tổng ngân sách* và chu kỳ tự xuống dòng (`FlowRow` / `Column`) (`AC-31`). |
 
 ---
 
 ## 5. Open Questions
 
-- Không còn câu hỏi mở (toàn bộ Capability Map, 5 giả định kỹ thuật và phương án mở Contextual Sheet cho nút *"Giải thích thêm"* đã được người dùng phê duyệt).
+- Không còn câu hỏi mở (người dùng đã phê duyệt Capability Map, Spec chi tiết và phương án mở `InsightExplanationDialog` cho *Góc nhìn từ Chanko*).
