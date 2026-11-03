@@ -29,11 +29,13 @@ class ProfileViewModel @Inject constructor(
             authRepository.session.collect { sessionState ->
                 if (sessionState is SessionState.Available) {
                     val accountValue = sessionState.account.value
+                    val emailVal = if (accountValue.contains("@")) accountValue else ""
+                    val nameVal = if (accountValue.isNotBlank()) accountValue else ""
                     updateState { currentState ->
                         currentState.copy(
                             account = ProfileAccountUiModel(
-                                displayName = if (accountValue.isNotBlank()) accountValue else "Bạn đồng hành Chanko",
-                                email = if (accountValue.contains("@")) accountValue else "user@chanko.app",
+                                displayName = nameVal,
+                                email = emailVal,
                                 isGoogleLinked = true
                             )
                         )

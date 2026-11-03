@@ -51,6 +51,7 @@
     <!-- Google Account Card -->
     <string name="profile_google_account_title">Tài khoản Google</string>
     <string name="profile_google_provider_label">Đăng nhập bằng Google</string>
+    <string name="profile_default_email">google-account@gmail.com</string>
 
     <!-- Information Rows -->
     <string name="profile_row_privacy">Điều khoản &amp; Chính sách bảo mật</string>
