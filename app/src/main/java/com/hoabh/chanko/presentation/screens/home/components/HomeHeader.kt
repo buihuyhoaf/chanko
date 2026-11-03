@@ -1,5 +1,7 @@
 package com.hoabh.chanko.presentation.screens.home.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -20,6 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -27,6 +34,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
@@ -37,14 +45,14 @@ import com.hoabh.chanko.ui.theme.CandyShape
 import com.hoabh.chanko.ui.theme.CandySize
 import com.hoabh.chanko.ui.theme.CandySpace
 
-private val HeaderControlVisualSize = 42.dp
+private val HeaderAvatarVisualSize = 52.dp
 
 /**
- * Khu vực 1 — Header (AC-03, AC-16, HOME-EDGE-05):
- * - Lời chào theo buổi kèm biểu tượng mặt trời/mặt trăng (`"Chào buổi sáng, Hoa ☀️"`).
- * - Phụ đề ấm áp (`"Hôm nay mình cùng Chanko mua sắm có suy nghĩ nhé 💜"`).
- * - Nút Avatar tròn tím (`CandyColors.brandPurple`) mở Profile & Settings, vùng chạm >= 48dp.
- * - Khi offline: hiển thị badge ngoại tuyến kèm thời điểm đồng bộ thực tế (`lastSyncedAtText`).
+ * Khu vực 1 — Header (Home v2.0 — AC-02, AC-20, AC-31):
+ * - Dòng lời chào theo buổi ở trên ("Chào buổi tối 🌙").
+ * - Tiêu đề lớn bên dưới ("Hôm nay mình cùng cân nhắc nhé!").
+ * - Nút Avatar tròn có viền tím bên phải mở Profile & Settings gộp (không có nút Settings riêng — AC-02).
+ * - Khi offline: hiển thị badge ngoại tuyến kèm thời điểm đồng bộ (`lastSyncedAtText` — AC-20).
  */
 @Composable
 fun HomeHeader(
@@ -69,29 +77,32 @@ fun HomeHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = CandySize.touchTarget),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .semantics(mergeDescendants = true) { heading() },
-                verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
                     text = "$greetingText$greetingEmoji",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
                     ),
-                    color = CandyColors.textPrimary,
+                    color = CandyColors.HomeV2.textSecondary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = subtitleText,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
+                        lineHeight = 30.sp
                     ),
-                    color = CandyColors.textSecondary,
+                    color = CandyColors.HomeV2.textPrimary,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -99,33 +110,38 @@ fun HomeHeader(
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
-            // Profile Avatar Button in Purple Circle (Touch target >= 48dp, AC-03 & AC-20)
+            // Profile & Settings Avatar Button (Touch target >= 48dp, AC-02 & AC-31)
             if (canOpenProfile) {
                 val profileCd = stringResource(R.string.home_cd_profile)
-                Box(
+                Surface(
                     modifier = Modifier
-                        .size(CandySize.touchTarget)
+                        .size(HeaderAvatarVisualSize)
+                        .shadow(elevation = 4.dp, shape = CircleShape)
                         .clip(CircleShape)
                         .clickable(
                             role = Role.Button,
                             onClickLabel = profileCd,
                             onClick = onProfileClick
                         ),
-                    contentAlignment = Alignment.Center
+                    shape = CircleShape,
+                    color = CandyColors.primarySoft,
+                    border = BorderStroke(2.5.dp, Color.White)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(HeaderControlVisualSize)
+                            .fillMaxSize()
+                            .padding(3.dp)
                             .clip(CircleShape)
                             .background(CandyColors.brandPurple),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = header.avatarInitial,
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.ExtraBold
-                            ),
-                            color = CandyColors.onReadyAction
+                        Image(
+                            painter = painterResource(id = R.drawable.cat_mascot),
+                            contentDescription = profileCd,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 4.dp)
                         )
                     }
                 }

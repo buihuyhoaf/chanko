@@ -1,0 +1,727 @@
+package com.hoabh.chanko.presentation.screens.home.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
+import com.hoabh.chanko.presentation.screens.home.ItemJourneyUi
+import com.hoabh.chanko.presentation.screens.home.JourneyNodeStatus
+import com.hoabh.chanko.presentation.screens.home.JourneyNodeUi
+import com.hoabh.chanko.presentation.screens.home.SectionState
+import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.CandySpace
+import kotlin.math.hypot
+import kotlin.math.roundToInt
+
+private val JourneyCardCornerShape = RoundedCornerShape(24.dp)
+
+/**
+ * Cấu hình thị giác (viền màu + màu nền badge) cho đủ 6 trạng thái của Node trên Item Journey (AC-14).
+ * Không bao giờ chỉ dựa vào màu sắc đơn thuần: mỗi trạng thái có một ký hiệu hình học/icon riêng biệt trên badge.
+ */
+data class JourneyNodeVisualStyle(
+    val ringColor: Color,
+    val badgeColor: Color
+)
+
+fun resolveJourneyNodeStyle(status: JourneyNodeStatus): JourneyNodeVisualStyle = when (status) {
+    JourneyNodeStatus.Saved -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusSavedRing,
+        badgeColor = CandyColors.HomeV2.statusSavedRing
+    )
+    JourneyNodeStatus.Considering -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusConsideringRing,
+        badgeColor = CandyColors.HomeV2.statusConsideringInk
+    )
+    JourneyNodeStatus.Waiting -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusWaitingRing,
+        badgeColor = CandyColors.HomeV2.statusWaitingRing
+    )
+    JourneyNodeStatus.Ready -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusReadyRing,
+        badgeColor = CandyColors.HomeV2.statusReadyRing
+    )
+    JourneyNodeStatus.Purchased -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusPurchasedRing,
+        badgeColor = CandyColors.HomeV2.statusPurchasedInk
+    )
+    JourneyNodeStatus.Skipped -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusSkippedRing,
+        badgeColor = CandyColors.HomeV2.statusSkippedRing
+    )
+}
+
+/**
+ * Khu vực 3 — Item Journey ("Món đồ gần đây" — Home v2.0 — AC-10..AC-17, AC-18..AC-24, AC-31):
+ * - Hiển thị tối đa `min(n, 5)` node tròn (`80–96dp`) theo thứ tự `createdAt DESC` (đã lọc bỏ `Archived`).
+ * - 1 node không có đường nối; 2–5 node xếp ziczac dọc bên trái nối bằng `n - 1` đoạn nét đứt màu lavender (#BDA8EB).
+ * - Mỗi node có ảnh sản phẩm ở giữa (hoặc placeholder khi lỗi ảnh), viền màu và badge trạng thái góc trên phải.
+ * - Không hiển thị tên món thường trực bên cạnh node nhưng TalkBack đọc đầy đủ tên + trạng thái + giá (AC-31).
+ * - Chạm node mở `ItemDetailScreen(itemId)` trực tiếp không qua bottom sheet (AC-15).
+ * - Chạm "Xem tất cả ›" mở `MyItems` thông thường, không lọc actionable (AC-16).
+ * - 1 mascot Chanko canonical đứng bên phải cuộn cùng Journey, không che vùng chạm của các node (AC-17).
+ */
+@Composable
+fun ItemJourneySection(
+    journeyState: SectionState<ItemJourneyUi>,
+    onNodeGestureStart: (String) -> Unit,
+    onNodeGestureEnd: () -> Unit,
+    onNodeClick: (String) -> Unit,
+    onSeeAllClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+    ) {
+        // 1. Section Header: Icon túi mua sắm + "Món đồ gần đây" + "Xem tất cả ›"
+        ItemJourneyHeader(onSeeAllClick = onSeeAllClick)
+
+        // 2. Nội dung theo SectionState độc lập
+        when (journeyState) {
+            SectionState.Loading -> {
+                ItemJourneyLoadingState()
+            }
+
+            is SectionState.OfflineNoCache -> {
+                ItemJourneyMessageCard(
+                    title = stringResource(R.string.home_journey_offline_no_cache_title),
+                    subtitle = stringResource(R.string.home_journey_offline_no_cache_subtitle),
+                    actionLabel = null,
+                    onActionClick = {}
+                )
+            }
+
+            is SectionState.Error -> {
+                ItemJourneyMessageCard(
+                    title = journeyState.message.ifBlank {
+                        stringResource(R.string.home_section_error_journey)
+                    },
+                    subtitle = stringResource(R.string.home_journey_offline_no_cache_subtitle),
+                    actionLabel = stringResource(R.string.home_section_retry),
+                    onActionClick = onRetryClick
+                )
+            }
+
+            is SectionState.Empty -> {
+                ItemJourneyEmptyState()
+            }
+
+            is SectionState.Content -> {
+                val nodes = journeyState.data.nodes
+                if (nodes.isEmpty()) {
+                    ItemJourneyEmptyState()
+                } else {
+                    ItemJourneyZigZagCanvas(
+                        nodes = nodes,
+                        onNodeGestureStart = onNodeGestureStart,
+                        onNodeGestureEnd = onNodeGestureEnd,
+                        onNodeClick = onNodeClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemJourneyHeader(
+    onSeeAllClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs),
+            modifier = Modifier.weight(1f)
+        ) {
+            ChankoIcon(
+                id = ChankoIconId.ITM_01,
+                contentDescription = null,
+                size = 24.dp
+            )
+            Text(
+                text = stringResource(R.string.home_journey_title),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp
+                ),
+                color = CandyColors.HomeV2.textPrimary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(
+                    role = Role.Button,
+                    onClick = onSeeAllClick
+                )
+                .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Text(
+                text = "${stringResource(R.string.home_journey_see_all)} ›",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                ),
+                color = CandyColors.brandPurple
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemJourneyZigZagCanvas(
+    nodes: List<JourneyNodeUi>,
+    onNodeGestureStart: (String) -> Unit,
+    onNodeGestureEnd: () -> Unit,
+    onNodeClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val visibleNodes = nodes.take(5)
+    val density = LocalDensity.current
+    val connectorColor = CandyColors.HomeV2.lavenderConnector
+
+    BoxWithConstraints(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        val isCompactWidth = maxWidth < 360.dp
+        // Đường kính node clamp trong 80..96dp theo đúng DESIGN-TOKENS.json & AC-13
+        val nodeDiameter: Dp = when {
+            isCompactWidth -> 80.dp
+            maxWidth < 400.dp -> 88.dp
+            else -> 92.dp
+        }
+        val nodeRadius: Dp = nodeDiameter / 2
+        val verticalStep: Dp = if (isCompactWidth) 74.dp else 80.dp
+        val topPadding: Dp = 8.dp
+        val bottomPadding: Dp = 12.dp
+
+        // Tọa độ tâm X ziczac ở nửa bên trái (nhường khoảng trống bên phải cho mascot Chanko — AC-13, AC-17):
+        // Node chẵn (0, 2, 4) nằm ở cột giữa-trái; Node lẻ (1, 3) nằm ở cột sát trái.
+        val farLeftCenterX: Dp = nodeRadius + 10.dp
+        val midLeftCenterX: Dp = (maxWidth * if (isCompactWidth) 0.44f else 0.46f)
+            .coerceAtLeast(farLeftCenterX + nodeDiameter * 0.72f)
+
+        val nodeCentersDp: List<Pair<Dp, Dp>> = visibleNodes.indices.map { index ->
+            val centerX = if (index % 2 == 0) midLeftCenterX else farLeftCenterX
+            val centerY = topPadding + nodeRadius + (verticalStep * index)
+            centerX to centerY
+        }
+
+        val lastNodeBottom = (nodeCentersDp.lastOrNull()?.second ?: nodeRadius) + nodeRadius + bottomPadding
+        val mascotSize: Dp = when {
+            isCompactWidth -> 108.dp
+            visibleNodes.size == 1 -> 112.dp
+            else -> 144.dp
+        }
+        val totalHeight: Dp = maxOf(lastNodeBottom, mascotSize + 24.dp)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(totalHeight)
+        ) {
+            // 1. Lớp nền Canvas: Vẽ n - 1 đoạn đường nối nét đứt màu lavender từ biên node i tới biên node i+1 (AC-12, AC-13)
+            if (visibleNodes.size >= 2) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clearAndSetSemantics {}
+                ) {
+                    val radiusPx = nodeRadius.toPx()
+                    val dashEffect = PathEffect.dashPathEffect(
+                        intervals = floatArrayOf(6.dp.toPx(), 6.dp.toPx()),
+                        phase = 0f
+                    )
+                    for (i in 0 until nodeCentersDp.size - 1) {
+                        val (x1Dp, y1Dp) = nodeCentersDp[i]
+                        val (x2Dp, y2Dp) = nodeCentersDp[i + 1]
+                        val p1 = Offset(x1Dp.toPx(), y1Dp.toPx())
+                        val p2 = Offset(x2Dp.toPx(), y2Dp.toPx())
+                        val dx = p2.x - p1.x
+                        val dy = p2.y - p1.y
+                        val dist = hypot(dx, dy)
+                        if (dist > radiusPx * 2f) {
+                            val ux = dx / dist
+                            val uy = dy / dist
+                            val start = Offset(p1.x + ux * radiusPx, p1.y + uy * radiusPx)
+                            val end = Offset(p2.x - ux * radiusPx, p2.y - uy * radiusPx)
+                            drawLine(
+                                color = connectorColor,
+                                start = start,
+                                end = end,
+                                strokeWidth = 3.dp.toPx(),
+                                cap = StrokeCap.Round,
+                                pathEffect = dashEffect
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 2. Mascot Chanko canonical xuất hiện đúng 1 lần bên phải, cuộn cùng Journey và không nhận pointer (AC-17, AC-31)
+            val mascotTopOffset = if (visibleNodes.size <= 2) {
+                (totalHeight - mascotSize) / 2
+            } else {
+                totalHeight * 0.30f
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(y = mascotTopOffset)
+                    .padding(end = if (isCompactWidth) 0.dp else 4.dp)
+                    .clearAndSetSemantics {}
+            ) {
+                // Đế bóng elip tím nhạt dưới chân mascot
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .size(width = mascotSize * 0.72f, height = 16.dp)
+                        .clip(CircleShape)
+                        .background(CandyColors.primarySoft)
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.cat_mascot),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(mascotSize)
+                )
+            }
+
+            // 3. Các Node tròn (80–96dp) theo đúng thứ tự createdAt DESC để TalkBack đọc chuẩn xác (AC-13..AC-15, AC-23, AC-24, AC-31)
+            visibleNodes.forEachIndexed { index, node ->
+                key(node.itemId) {
+                    val (centerX, centerY) = nodeCentersDp[index]
+                    val topLeftX = centerX - nodeRadius
+                    val topLeftY = centerY - nodeRadius
+
+                    JourneyProductNode(
+                        node = node,
+                        diameter = nodeDiameter,
+                        onGestureStart = { onNodeGestureStart(node.itemId) },
+                        onGestureEnd = onNodeGestureEnd,
+                        onClick = { onNodeClick(node.itemId) },
+                        modifier = Modifier.offset {
+                            with(density) {
+                                IntOffset(
+                                    x = topLeftX.toPx().roundToInt(),
+                                    y = topLeftY.toPx().roundToInt()
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun JourneyProductNode(
+    node: JourneyNodeUi,
+    diameter: Dp,
+    onGestureStart: () -> Unit,
+    onGestureEnd: () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val style = resolveJourneyNodeStyle(node.status)
+    val nodeCd = stringResource(
+        R.string.home_cd_journey_node,
+        node.title,
+        node.statusLabel,
+        node.priceFormatted
+    )
+
+    Box(
+        modifier = modifier
+            .size(diameter)
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .pointerInput(node.itemId) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    onGestureStart()
+                    waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                    onGestureEnd()
+                }
+            }
+            .clip(CircleShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = nodeCd
+                role = Role.Button
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        // Vòng tròn chính của Node với viền màu theo trạng thái (AC-13, AC-14)
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(3.dp)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = CircleShape,
+                    ambientColor = style.ringColor,
+                    spotColor = style.ringColor
+                ),
+            shape = CircleShape,
+            color = Color.White,
+            border = BorderStroke(3.5.dp, style.ringColor)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(6.dp)
+                    .clip(CircleShape)
+                    .background(CandyColors.HomeV2.background),
+                contentAlignment = Alignment.Center
+            ) {
+                if (node.thumbnailResId != null && !node.imageLoadFailed) {
+                    Image(
+                        painter = painterResource(id = node.thumbnailResId),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                } else {
+                    // Placeholder an toàn khi thiếu ảnh hoặc tải ảnh lỗi (STATE-MATRIX: image_failure)
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_01,
+                        contentDescription = null,
+                        size = 32.dp
+                    )
+                }
+            }
+        }
+
+        // Huy hiệu trạng thái góc trên phải (không chỉ dùng màu — AC-14)
+        JourneyStatusBadge(
+            status = node.status,
+            badgeColor = style.badgeColor,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-2).dp, y = 2.dp)
+        )
+    }
+}
+
+@Composable
+private fun JourneyStatusBadge(
+    status: JourneyNodeStatus,
+    badgeColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(26.dp)
+            .shadow(elevation = 2.dp, shape = CircleShape)
+            .clip(CircleShape)
+            .background(badgeColor)
+            .border(width = 2.dp, color = Color.White, shape = CircleShape)
+            .clearAndSetSemantics {},
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(12.dp)) {
+            val w = size.width
+            val h = size.height
+            val stroke = Stroke(
+                width = 2.dp.toPx(),
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+            when (status) {
+                JourneyNodeStatus.Saved -> {
+                    // Hình Bookmark trắng
+                    val path = Path().apply {
+                        moveTo(w * 0.22f, h * 0.12f)
+                        lineTo(w * 0.78f, h * 0.12f)
+                        lineTo(w * 0.78f, h * 0.88f)
+                        lineTo(w * 0.50f, h * 0.66f)
+                        lineTo(w * 0.22f, h * 0.88f)
+                        close()
+                    }
+                    drawPath(path = path, color = Color.White)
+                }
+
+                JourneyNodeStatus.Waiting -> {
+                    // Hình Đồng hồ cát trắng
+                    val path = Path().apply {
+                        moveTo(w * 0.20f, h * 0.14f)
+                        lineTo(w * 0.80f, h * 0.14f)
+                        lineTo(w * 0.50f, h * 0.50f)
+                        close()
+                        moveTo(w * 0.50f, h * 0.50f)
+                        lineTo(w * 0.80f, h * 0.86f)
+                        lineTo(w * 0.20f, h * 0.86f)
+                        close()
+                    }
+                    drawPath(path = path, color = Color.White, style = stroke)
+                }
+
+                JourneyNodeStatus.Ready -> {
+                    // Hình Dấu tích ✓ trắng
+                    val path = Path().apply {
+                        moveTo(w * 0.16f, h * 0.54f)
+                        lineTo(w * 0.42f, h * 0.78f)
+                        lineTo(w * 0.84f, h * 0.24f)
+                    }
+                    drawPath(path = path, color = Color.White, style = stroke)
+                }
+
+                JourneyNodeStatus.Skipped -> {
+                    // Hình Dấu trừ − trắng
+                    drawLine(
+                        color = Color.White,
+                        start = Offset(w * 0.20f, h * 0.50f),
+                        end = Offset(w * 0.80f, h * 0.50f),
+                        strokeWidth = 2.4.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+                }
+
+                JourneyNodeStatus.Considering -> {
+                    // Hình Dấu hỏi ? trắng
+                    val path = Path().apply {
+                        moveTo(w * 0.28f, h * 0.30f)
+                        cubicTo(
+                            w * 0.28f, h * 0.08f,
+                            w * 0.76f, h * 0.08f,
+                            w * 0.72f, h * 0.36f
+                        )
+                        cubicTo(
+                            w * 0.70f, h * 0.50f,
+                            w * 0.50f, h * 0.50f,
+                            w * 0.50f, h * 0.64f
+                        )
+                    }
+                    drawPath(path = path, color = Color.White, style = stroke)
+                    drawCircle(
+                        color = Color.White,
+                        radius = 1.4.dp.toPx(),
+                        center = Offset(w * 0.50f, h * 0.86f)
+                    )
+                }
+
+                JourneyNodeStatus.Purchased -> {
+                    // Hình Túi mua sắm nhỏ trắng
+                    drawRoundRect(
+                        color = Color.White,
+                        topLeft = Offset(w * 0.18f, h * 0.34f),
+                        size = androidx.compose.ui.geometry.Size(w * 0.64f, h * 0.54f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx(), 2.dp.toPx()),
+                        style = stroke
+                    )
+                    drawArc(
+                        color = Color.White,
+                        startAngle = 180f,
+                        sweepAngle = 180f,
+                        useCenter = false,
+                        topLeft = Offset(w * 0.32f, h * 0.14f),
+                        size = androidx.compose.ui.geometry.Size(w * 0.36f, h * 0.36f),
+                        style = stroke
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemJourneyEmptyState(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = JourneyCardCornerShape,
+        color = CandyColors.homeCardSurface,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CandySpace.lg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.cat_mascot),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(96.dp)
+                    .clearAndSetSemantics {}
+            )
+            Text(
+                text = stringResource(R.string.home_journey_empty_title),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = CandyColors.HomeV2.textPrimary,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = stringResource(R.string.home_journey_empty_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = CandyColors.HomeV2.textSecondary,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemJourneyLoadingState(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 160.dp),
+        shape = JourneyCardCornerShape,
+        color = CandyColors.homeCardSurface,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CandySpace.lg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                color = CandyColors.brandPurple,
+                strokeWidth = 3.dp,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.height(CandySpace.sm))
+            Text(
+                text = stringResource(R.string.home_section_loading),
+                style = MaterialTheme.typography.bodyMedium,
+                color = CandyColors.HomeV2.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemJourneyMessageCard(
+    title: String,
+    subtitle: String,
+    actionLabel: String?,
+    onActionClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = JourneyCardCornerShape,
+        color = CandyColors.homeCardSurface,
+        border = BorderStroke(1.dp, CandyColors.homeCardBorder)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CandySpace.lg),
+            verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = CandyColors.HomeV2.textPrimary
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = CandyColors.HomeV2.textSecondary
+            )
+            if (actionLabel != null) {
+                Button(
+                    onClick = onActionClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CandyColors.brandPurple,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.heightIn(min = 48.dp)
+                ) {
+                    Text(
+                        text = actionLabel,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
