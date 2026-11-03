@@ -46,9 +46,8 @@ private val HeaderAvatarVisualSize = 52.dp
 
 /**
  * Khu vực 1 — Header (Home v2.0 — AC-02, AC-20, AC-31):
- * - Dòng lời chào theo buổi ở trên ("Chào buổi tối 🌙").
- * - Tiêu đề lớn bên dưới ("Hôm nay mình cùng cân nhắc nhé!").
- * - Nút Avatar tròn có viền tím bên phải mở Profile & Settings gộp (không có nút Settings riêng — AC-02).
+ * - Dòng lời chào theo buổi ("Chào buổi tối 🌙").
+ * - Nút Profile tròn bên phải dùng icon chuẩn `SYS_03` mở Profile & Settings gộp (AC-02).
  * - Khi offline: hiển thị badge ngoại tuyến kèm thời điểm đồng bộ (`lastSyncedAtText` — AC-20).
  */
 @Composable
@@ -64,7 +63,6 @@ fun HomeHeader(
         GreetingPeriod.AFTERNOON -> " 🌤️"
         GreetingPeriod.EVENING -> " 🌙"
     }
-    val subtitleText = header.customSubtitle ?: stringResource(R.string.home_header_subtitle)
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -76,35 +74,20 @@ fun HomeHeader(
                 .heightIn(min = CandySize.touchTarget),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
+            Text(
+                text = "$greetingText$greetingEmoji",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    lineHeight = 30.sp
+                ),
+                color = CandyColors.HomeV2.textPrimary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
-                    .semantics(mergeDescendants = true) { heading() },
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = "$greetingText$greetingEmoji",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp,
-                        lineHeight = 28.sp
-                    ),
-                    color = CandyColors.primaryInk,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitleText,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
-                        lineHeight = 26.sp
-                    ),
-                    color = CandyColors.HomeV2.textPrimary,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+                    .semantics { heading() }
+            )
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
