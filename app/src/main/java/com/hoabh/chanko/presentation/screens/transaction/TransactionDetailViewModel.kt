@@ -3,9 +3,11 @@ package com.hoabh.chanko.presentation.screens.transaction
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.PurchaseTransaction
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
+import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,7 +70,8 @@ class TransactionDetailViewModel @Inject constructor(
                         formattedUnitPrice = HomeCurrencyFormatter.formatVnd(tx.actualUnitPrice),
                         paymentType = tx.paymentType,
                         formattedPurchasedDate = dateFormat.format(Date(tx.purchasedTimestamp)),
-                        note = tx.note
+                        note = tx.note,
+                        itemNameUiText = item?.name?.let { UiText.DynamicString(it) } ?: UiText.StringResource(R.string.transaction_detail_default_item_name)
                     )
                 }
             }
@@ -92,7 +95,7 @@ class TransactionDetailViewModel @Inject constructor(
                     )
                     purchaseRepository.updatePurchase(updated)
                     _uiState.update { it.copy(isEditMode = false) }
-                    _effect.emit(TransactionDetailUiEffect.ShowToast("Đã lưu thay đổi giao dịch"))
+                    _effect.emit(TransactionDetailUiEffect.ShowToast(UiText.StringResource(R.string.transaction_detail_save_success)))
                 }
             }
             is TransactionDetailUiEvent.RequestDelete -> {
@@ -105,7 +108,7 @@ class TransactionDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isDeleteDialogOpen = false) }
                 viewModelScope.launch {
                     purchaseRepository.deletePurchase(purchaseId)
-                    _effect.emit(TransactionDetailUiEffect.ShowToast("Đã xóa giao dịch nhập sai"))
+                    _effect.emit(TransactionDetailUiEffect.ShowToast(UiText.StringResource(R.string.transaction_detail_delete_success)))
                     _effect.emit(TransactionDetailUiEffect.NavigateBack)
                 }
             }

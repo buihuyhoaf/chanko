@@ -144,7 +144,7 @@ fun RecordPurchaseBottomSheet(
                         color = CandyColors.textPrimary
                     )
                     Text(
-                        text = "Giá dự kiến: ${HomeCurrencyFormatter.formatVnd(estimatedPrice)}",
+                        text = stringResource(R.string.purchase_record_estimated_price, HomeCurrencyFormatter.formatVnd(estimatedPrice)),
                         style = MaterialTheme.typography.labelSmall,
                         color = CandyColors.textSecondary
                     )
@@ -209,13 +209,13 @@ fun RecordPurchaseBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
             ) {
                 PaymentChip(
-                    label = "Trả ngay",
+                    label = stringResource(R.string.payment_type_pay_now),
                     isSelected = selectedPaymentType == PaymentType.PAY_NOW,
                     onClick = { selectedPaymentType = PaymentType.PAY_NOW },
                     modifier = Modifier.weight(1f)
                 )
                 PaymentChip(
-                    label = "Thẻ tín dụng",
+                    label = stringResource(R.string.payment_type_credit),
                     isSelected = selectedPaymentType == PaymentType.CREDIT,
                     onClick = { selectedPaymentType = PaymentType.CREDIT },
                     modifier = Modifier.weight(1f)

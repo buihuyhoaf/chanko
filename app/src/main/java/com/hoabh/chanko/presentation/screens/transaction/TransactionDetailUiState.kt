@@ -2,6 +2,7 @@ package com.hoabh.chanko.presentation.screens.transaction
 
 import androidx.compose.runtime.Immutable
 import com.hoabh.chanko.domain.model.PaymentType
+import com.hoabh.chanko.presentation.base.UiText
 
 @Immutable
 data class TransactionDetailUiState(
@@ -19,7 +20,8 @@ data class TransactionDetailUiState(
     val formattedPurchasedDate: String = "",
     val note: String = "",
     val isEditMode: Boolean = false,
-    val isDeleteDialogOpen: Boolean = false
+    val isDeleteDialogOpen: Boolean = false,
+    val itemNameUiText: UiText = UiText.DynamicString(itemName)
 )
 
 sealed interface TransactionDetailUiEvent {
@@ -32,5 +34,7 @@ sealed interface TransactionDetailUiEvent {
 
 sealed interface TransactionDetailUiEffect {
     data object NavigateBack : TransactionDetailUiEffect
-    data class ShowToast(val message: String) : TransactionDetailUiEffect
+    data class ShowToast(val message: UiText) : TransactionDetailUiEffect {
+        constructor(text: String) : this(UiText.DynamicString(text))
+    }
 }

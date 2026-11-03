@@ -298,4 +298,13 @@
     <string name="item_detail_journey_passed_desc">Quyết định không mua món đồ này.</string>
 
     <string name="purchase_history_price_quantity">%1$s × %2$d</string>
+    <!-- Payment & Purchase Strings -->
+    <string name="payment_type_pay_now">Trả ngay</string>
+    <string name="payment_type_credit">Thẻ tín dụng</string>
+    <string name="purchase_record_estimated_price">Giá dự kiến: %1$s</string>
+    <string name="transaction_detail_label_unit_price">Đơn giá thực tế</string>
+    <string name="transaction_detail_label_note">Ghi chú</string>
+    <string name="transaction_detail_default_item_name">Món đồ</string>
+    <string name="transaction_detail_save_success">Đã lưu thay đổi giao dịch</string>
+    <string name="transaction_detail_delete_success">Đã xóa giao dịch nhập sai</string>
 </resources>

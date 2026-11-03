@@ -179,7 +179,7 @@ fun TransactionDetailScreen(
                         Spacer(modifier = Modifier.width(CandySpace.md))
                         Column {
                             Text(
-                                text = uiState.itemName,
+                                text = uiState.itemNameUiText.asString(),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
@@ -208,25 +208,25 @@ fun TransactionDetailScreen(
                             verticalArrangement = Arrangement.spacedBy(CandySpace.md)
                         ) {
                             InfoRow(
-                                label = "Tổng thanh toán",
+                                label = stringResource(R.string.purchase_record_total_label),
                                 value = uiState.formattedTotalAmount,
                                 isPrimary = true
                             )
                             InfoRow(
-                                label = "Đơn giá thực tế",
+                                label = stringResource(R.string.transaction_detail_label_unit_price),
                                 value = uiState.formattedUnitPrice
                             )
                             InfoRow(
-                                label = "Số lượng",
+                                label = stringResource(R.string.purchase_record_qty_label),
                                 value = "${uiState.quantity}"
                             )
                             InfoRow(
-                                label = "Phương thức thanh toán",
-                                value = if (uiState.paymentType == PaymentType.PAY_NOW) "Trả ngay" else "Thẻ tín dụng"
+                                label = stringResource(R.string.purchase_record_payment_type),
+                                value = if (uiState.paymentType == PaymentType.PAY_NOW) stringResource(R.string.payment_type_pay_now) else stringResource(R.string.payment_type_credit)
                             )
                             if (uiState.note.isNotBlank()) {
                                 InfoRow(
-                                    label = "Ghi chú",
+                                    label = stringResource(R.string.transaction_detail_label_note),
                                     value = uiState.note
                                 )
                             }
