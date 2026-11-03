@@ -168,6 +168,26 @@ private object CandyPalette {
     val Lavender240 = Color(0xFFD9D1E4)
     val White = Color(0xFFFFFFFF)
     val BlackShadow14 = Color(0x14000000)
+
+    // Home v2.0 Palette (DESIGN-TOKENS.json & reference/home-v2-approved.png)
+    val CandyOrange400 = Color(0xFFFFB665)
+    val CandyOrange600 = Color(0xFFF59145)
+    val CandyOrange200 = Color(0xFFFFD49A)
+    val CandyOrange100 = Color(0xFFFDE3BE)
+    val CandyOrange800 = Color(0xFFC96A22)
+    val Coral700 = Color(0xFFB83248)
+    val Lavender350 = Color(0xFFBDA8EB)
+    val Gold300 = Color(0xFFF4CF71)
+    val Gold500 = Color(0xFFD9A940)
+    val Ink810 = Color(0xFF30213F)
+    val Slate610 = Color(0xFF665A75)
+    val Purple850 = Color(0xFF6740B3)
+    val Amber950 = Color(0xFF855200)
+    val Orange450 = Color(0xFFFFA940)
+    val Mint850 = Color(0xFF246B55)
+    val Mint500 = Color(0xFF4CD195)
+    val Teal800 = Color(0xFF24627A)
+    val Slate400 = Color(0xFF9E97AD)
 }
 
 // UI-02 approved signal colors. Do not use as small text on white.
@@ -391,5 +411,36 @@ object CandyColors {
         val postponedText = CandyPalette.Orange800
         val purchasedText = CandyPalette.Blue900
         val skippedText = CandyPalette.Green850
+    }
+
+    /** Home v2.0 Semantic Tokens (Budget Credit Card, Item Journey & Observation — DESIGN-TOKENS.json) */
+    object HomeV2 {
+        val background = CandyPalette.Purple30
+        val textPrimary = CandyPalette.Ink810
+        val textSecondary = CandyPalette.Slate610
+        val candyOrange = CandyPalette.CandyOrange400
+        val candyOrangeShadow = CandyPalette.CandyOrange600
+        val candyOrangeHighlight = CandyPalette.CandyOrange200
+        val candyOrangeTrack = CandyPalette.CandyOrange100
+        val candyOrangeProgressFill = CandyPalette.CandyOrange800
+        val coral = CandyPalette.Coral700
+        val coralSoft = CandyPalette.Rose100
+        val lavenderConnector = CandyPalette.Lavender350
+        val chipGold = CandyPalette.Gold300
+        val chipGoldStroke = CandyPalette.Gold500
+
+        // 6 Journey Node Statuses (Ring + Badge + Label Ink)
+        val statusSavedInk = CandyPalette.Slate610
+        val statusSavedRing = CandyPalette.Purple500
+        val statusConsideringInk = CandyPalette.Purple850
+        val statusConsideringRing = CandyPalette.Purple400
+        val statusWaitingInk = CandyPalette.Amber950
+        val statusWaitingRing = CandyPalette.Orange450
+        val statusReadyInk = CandyPalette.Mint850
+        val statusReadyRing = CandyPalette.Mint500
+        val statusPurchasedInk = CandyPalette.Teal800
+        val statusPurchasedRing = CandyPalette.Blue500
+        val statusSkippedInk = CandyPalette.Slate610
+        val statusSkippedRing = CandyPalette.Slate400
     }
 }

@@ -1,212 +1,231 @@
 package com.hoabh.chanko.presentation.screens.home
 
-import com.hoabh.chanko.presentation.screens.home.domain.BudgetCalculator
-import com.hoabh.chanko.presentation.screens.home.domain.CalendarDateResolver
-import com.hoabh.chanko.presentation.screens.home.domain.DecisionRanker
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
-import com.hoabh.chanko.presentation.screens.home.domain.RawDecisionCandidate
+import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
+import com.hoabh.chanko.presentation.screens.home.domain.JourneySelector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Bộ kiểm thử đơn vị cho Domain Logic của Home v2.0 (AC-03, AC-06..AC-12, AC-25).
+ */
 class HomeDomainLogicTest {
 
+    // =========================================================================
+    // 1. HomeCurrencyFormatter & Missing Price (AC-09)
+    // =========================================================================
+
     @Test
-    fun `DecisionRanker AC-09 ranks Ready then Waiting then Considering then Saved and takes top 3`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            listOf(
-                RawDecisionCandidate("S1", "Món đồ minh họa S1", 680_000L, "Saved"),
-                RawDecisionCandidate("W1", "Món đồ minh họa W1", 680_000L, "Waiting", remainingSeconds = 3600L),
-                RawDecisionCandidate("R1", "Món đồ minh họa R1", 680_000L, "Ready"),
-                RawDecisionCandidate("C1", "Món đồ minh họa C1", 680_000L, "Considering"),
-                RawDecisionCandidate("R2", "Món đồ minh họa R2", 680_000L, "Ready")
-            )
+    fun `formatNullableVnd returns Chua co gia when price is null and 0d when zero`() {
+        assertEquals("Chưa có giá", HomeCurrencyFormatter.formatNullableVnd(null, compactUnit = true))
+        assertEquals("0đ", HomeCurrencyFormatter.formatNullableVnd(0L, compactUnit = true))
+        assertEquals("2.350.000đ", HomeCurrencyFormatter.formatVnd(2_350_000L, compactUnit = true))
+        assertEquals("-650.000đ", HomeCurrencyFormatter.formatVnd(-650_000L, compactUnit = true))
+    }
+
+    // =========================================================================
+    // 2. BudgetV2Calculator (AC-03, AC-06, AC-07, AC-09, AC-25)
+    // =========================================================================
+
+    @Test
+    fun `AC-03 BudgetV2Calculator combines Pay Now and Credit into consistent remaining and percentage`() {
+        val budget = BudgetV2Calculator.compute(
+            cycleLabel = "01/11 – 30/11",
+            payNowSpentMinor = 2_000_000L,
+            creditSpentMinor = 650_000L,
+            limitMinor = 5_000_000L
         )
 
-        assertEquals(listOf("R1", "R2", "W1"), result.topDecisions.map { it.id })
-        assertEquals(5, result.totalValidCount)
-        assertEquals(2, result.reviewCount)
-        assertEquals(1, result.waitingCount)
+        assertEquals(BudgetStateKind.Normal, budget.stateKind)
+        assertEquals(2_650_000L, budget.spentMinor)
+        assertEquals(5_000_000L, budget.limitMinor)
+        assertEquals(2_350_000L, budget.remainingMinor)
+        assertEquals(53, budget.percentageInt)
+        assertEquals(0.53f, budget.visualProgress, 0.001f)
+        assertEquals("2.350.000đ", budget.remainingFormatted)
+        assertEquals("2.650.000đ", budget.spentFormatted)
+        assertEquals("5.000.000đ", budget.limitFormatted)
+        assertEquals("53%", budget.progressPercentText)
+        assertNull(budget.overWarningFormatted)
     }
 
     @Test
-    fun `DecisionRanker AC-09 preserves upstream order when all items are Ready and caps at 3`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            (1..5).map { idx ->
-                RawDecisionCandidate("R$idx", "Món đồ R$idx", 680_000L, "Ready")
-            }
+    fun `AC-06 OverBudget keeps negative remaining, computes Coral over warning, and clamps progress to 0_1`() {
+        val budget = BudgetV2Calculator.compute(
+            cycleLabel = "01/11 – 30/11",
+            payNowSpentMinor = 4_200_000L,
+            creditSpentMinor = 1_450_000L,
+            limitMinor = 5_000_000L
         )
 
-        assertEquals(listOf("R1", "R2", "R3"), result.topDecisions.map { it.id })
-        assertEquals(5, result.totalValidCount)
-        assertEquals(5, result.reviewCount)
-    }
-
-    @Test
-    fun `DecisionRanker AC-07 and AC-08 moves expired cooling-off item to Review without changing verdict to BUY and without double counting`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            listOf(
-                RawDecisionCandidate(
-                    id = "W_EXPIRED",
-                    title = "Bình giữ nhiệt 500ml",
-                    priceMinor = 350_000L,
-                    statusRaw = "Waiting",
-                    remainingSeconds = 0L,
-                    verdict = DecisionVerdict.WAIT
-                ),
-                RawDecisionCandidate(
-                    id = "W_ACTIVE",
-                    title = "Bàn phím cơ",
-                    priceMinor = 1_850_000L,
-                    statusRaw = "Waiting",
-                    remainingSeconds = 3600L,
-                    verdict = DecisionVerdict.WAIT
-                )
-            )
-        )
-
-        // AC-07: Chuyển sang nhóm Cần xem lại (Ready), nhãn "Vừa hết thời gian chờ", nhưng verdict giữ nguyên WAIT (không thành BUY)
-        val expiredItem = result.topDecisions.first { it.id == "W_EXPIRED" }
-        assertEquals(DecisionStatus.Ready, expiredItem.status)
-        assertEquals("Vừa hết thời gian chờ", expiredItem.statusLabel)
-        assertEquals(DecisionVerdict.WAIT, expiredItem.verdict)
-        assertFalse(expiredItem.verdict == DecisionVerdict.BUY)
-        assertTrue(expiredItem.isTimerExpiredLocally)
-
-        // AC-08: Không tính trùng itemId giữa nhóm Đang chờ (Waiting) và Cần xem lại (Review)
-        assertEquals(listOf("W_EXPIRED"), result.reviewItems.map { it.id })
-        assertEquals(listOf("W_ACTIVE"), result.waitingItems.map { it.id })
-        assertEquals(1, result.reviewCount)
-        assertEquals(1, result.waitingCount)
-        assertTrue(result.reviewItems.map { it.id }.intersect(result.waitingItems.map { it.id }.toSet()).isEmpty())
-    }
-
-    @Test
-    fun `DecisionRanker HOME-EDGE-04 formats null price as Chua co gia and 0 price as 0 VND`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            listOf(
-                RawDecisionCandidate("NULL_PRICE", "Món chưa có giá", null, "Ready"),
-                RawDecisionCandidate("ZERO_PRICE", "Quà tặng 0đ", 0L, "Ready")
-            )
-        )
-
-        val nullPriceItem = result.topDecisions.first { it.id == "NULL_PRICE" }
-        assertNull(nullPriceItem.priceMinor)
-        assertEquals("Chưa có giá", nullPriceItem.priceFormatted)
-
-        val zeroPriceItem = result.topDecisions.first { it.id == "ZERO_PRICE" }
-        assertEquals(0L, zeroPriceItem.priceMinor)
-        assertEquals("0 ₫", zeroPriceItem.priceFormatted)
-    }
-
-    @Test
-    fun `DecisionRanker separates Skipped items into PauseJar group and excludes them from active Attention top 3`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            listOf(
-                RawDecisionCandidate("R1", "Tai nghe", 1_290_000L, "Ready"),
-                RawDecisionCandidate("SK1", "Ốp lưng đã bỏ qua", 150_000L, "Skipped"),
-                RawDecisionCandidate("SK2", "Đèn bàn đã bỏ qua", 420_000L, "Skipped")
-            )
-        )
-
-        assertEquals(listOf("R1"), result.topDecisions.map { it.id })
-        assertEquals(1, result.totalValidCount)
-        assertEquals(2, result.skippedCount)
-        assertEquals(listOf("SK1", "SK2"), result.skippedItems.map { it.id })
-    }
-
-    @Test
-    fun `DecisionRanker S18 deduplicates by ID keeping first occurrence and drops unknown statuses`() {
-        val result = DecisionRanker.rankAndSelectTop(
-            listOf(
-                RawDecisionCandidate("X", "Món đồ minh họa X", 680_000L, "Ready"),
-                RawDecisionCandidate("X", "Món đồ minh họa X bản sao", 680_000L, "Waiting"),
-                RawDecisionCandidate("U", "Món đồ minh họa U", 680_000L, "Unknown"),
-                RawDecisionCandidate("   ", "ID rỗng", 680_000L, "Ready"),
-                RawDecisionCandidate("V1", "   ", 680_000L, "Ready")
-            )
-        )
-
-        assertEquals(listOf("X"), result.topDecisions.map { it.id })
-        assertEquals(DecisionStatus.Ready, result.topDecisions.single().status)
-        assertEquals(1, result.totalValidCount)
-    }
-
-    @Test
-    fun `BudgetCalculator AC-11 computes remaining and Da chi percentage label`() {
-        val budget = BudgetCalculator.compute(
-            cycleLabel = "01/10 – 31/10 (còn 12 ngày)",
-            spentMinor = 2_400_000L,
-            limitMinor = 3_000_000L
-        )
-
-        assertEquals(600_000L, budget.remainingMinor)
-        assertEquals(0L, budget.overMinor)
-        assertEquals(80, budget.percentageInt)
-        assertEquals(0.8f, budget.visualProgress, 0.001f)
-        assertEquals(BudgetStateKind.Warning, budget.stateKind)
-        assertEquals("2.400.000 ₫", budget.spentFormatted)
-        assertEquals("3.000.000 ₫", budget.limitFormatted)
-        assertEquals("600.000 ₫", budget.remainingFormatted)
-        assertEquals("Đã chi 80%", budget.progressRightLabel)
-    }
-
-    @Test
-    fun `BudgetCalculator AC-11 handles OverBudget with explicit over amount and clamped progress`() {
-        val budget = BudgetCalculator.compute(
-            cycleLabel = "01/10 – 31/10 (còn 12 ngày)",
-            spentMinor = 3_600_000L,
-            limitMinor = 3_000_000L
-        )
-
-        assertEquals(-600_000L, budget.remainingMinor)
-        assertEquals(600_000L, budget.overMinor)
-        assertEquals(120, budget.percentageInt)
-        assertEquals(1.0f, budget.visualProgress, 0.001f)
-        assertEquals(BudgetStateKind.OverBudget, budget.stateKind)
-        assertEquals("Đã chi 120%", budget.progressRightLabel)
-        assertTrue(budget.badgeText.contains("Vượt hạn mức"))
         assertTrue(budget.isOverBudget)
+        assertEquals(BudgetStateKind.OverBudget, budget.stateKind)
+        assertEquals(-650_000L, budget.remainingMinor)
+        assertEquals(650_000L, budget.overMinor)
+        assertEquals("-650.000đ", budget.remainingFormatted)
+        assertEquals("Vượt ngân sách 650.000đ", budget.overWarningFormatted)
+        // Progress clamp về 0..1 chỉ cho thanh tiến trình
+        assertEquals(1.0f, budget.visualProgress, 0.0001f)
+        assertEquals("113%", budget.progressPercentText)
     }
 
     @Test
-    fun `BudgetCalculator S07 and S08 guard against zero and null limits without dividing by zero`() {
-        val s07 = BudgetCalculator.compute(
-            cycleLabel = "01/10 – 31/10",
-            spentMinor = 100_000L,
-            limitMinor = 0L
-        )
-        assertEquals(-100_000L, s07.remainingMinor)
-        assertNull(s07.ratio)
-        assertEquals(BudgetStateKind.Zero, s07.stateKind)
-
-        val s08 = BudgetCalculator.compute(
-            cycleLabel = "01/10 – 31/10",
-            spentMinor = null,
+    fun `AC-07 NoBudget when limit is null or zero does not divide by zero or report fake 0d`() {
+        val nullBudget = BudgetV2Calculator.compute(
+            cycleLabel = "01/11 – 30/11",
+            payNowSpentMinor = null,
+            creditSpentMinor = null,
             limitMinor = null
         )
-        assertNull(s08.remainingMinor)
-        assertNull(s08.ratio)
-        assertEquals(BudgetStateKind.Unknown, s08.stateKind)
-        assertFalse(s08.spentFormatted.contains("0 ₫"))
-    }
+        assertFalse(nullBudget.isConfigured)
+        assertEquals(BudgetStateKind.NoBudget, nullBudget.stateKind)
+        assertNull(nullBudget.remainingMinor)
+        assertEquals("Chưa thiết lập", nullBudget.remainingFormatted)
 
-    @Test
-    fun `CalendarDateResolver S19 respects injected timezone boundary`() {
-        val (month, day) = CalendarDateResolver.resolve(
-            nowIso = "2026-10-24T17:30:00Z",
-            zoneIdString = "Asia/Ho_Chi_Minh"
+        val zeroLimitBudget = BudgetV2Calculator.compute(
+            cycleLabel = "01/11 – 30/11",
+            payNowSpentMinor = 500_000L,
+            creditSpentMinor = 0L,
+            limitMinor = 0L
         )
-        assertEquals("OCT", month)
-        assertEquals("25", day)
+        assertFalse(zeroLimitBudget.isConfigured)
+        assertEquals(BudgetStateKind.NoBudget, zeroLimitBudget.stateKind)
+        assertEquals(0f, zeroLimitBudget.visualProgress, 0.0001f)
     }
 
     @Test
-    fun `HomeCurrencyFormatter never truncates large VND amounts and handles null as Chua co gia`() {
-        assertEquals("12.345.678 ₫", HomeCurrencyFormatter.formatVnd(12_345_678L))
-        assertEquals("Chưa có giá", HomeCurrencyFormatter.formatNullableVnd(null))
-        assertEquals("0 ₫", HomeCurrencyFormatter.formatNullableVnd(0L))
+    fun `AC-09 MissingPrice marks budget note without treating missing price as zero`() {
+        val budget = BudgetV2Calculator.compute(
+            cycleLabel = "01/11 – 30/11",
+            payNowSpentMinor = 2_650_000L,
+            creditSpentMinor = 0L,
+            limitMinor = 5_000_000L,
+            hasMissingPriceItems = true
+        )
+
+        assertTrue(budget.hasMissingPriceItems)
+        assertEquals("Chưa đủ dữ liệu giá", budget.missingPriceNote)
+    }
+
+    // =========================================================================
+    // 3. JourneySelector (AC-10, AC-11, AC-12, AC-14, AC-25)
+    // =========================================================================
+
+    @Test
+    fun `AC-10 Filtering excludes Archived items BEFORE taking top 5 newest`() {
+        val candidates = listOf(
+            JourneyItemCandidate("arch_newest", "Món lưu trữ mới nhất", 500_000L, "Saved", 900L, isArchived = true),
+            JourneyItemCandidate("item_1", "Món 1", 500_000L, "Saved", 800L),
+            JourneyItemCandidate("arch_second", "Món lưu trữ thứ hai", 500_000L, "Waiting", 750L, isArchived = true),
+            JourneyItemCandidate("item_2", "Món 2", 500_000L, "Waiting", 700L),
+            JourneyItemCandidate("item_3", "Món 3", 500_000L, "Ready", 600L),
+            JourneyItemCandidate("item_4", "Món 4", 500_000L, "Considering", 500L),
+            JourneyItemCandidate("item_5", "Món 5", 500_000L, "Purchased", 400L),
+            JourneyItemCandidate("item_6", "Món 6", 500_000L, "Skipped", 300L)
+        )
+
+        val journey = JourneySelector.selectRecentJourney(candidates)
+
+        assertEquals(5, journey.nodes.size)
+        assertEquals(6, journey.totalActiveAndHistoryCount)
+        assertEquals(
+            listOf("item_1", "item_2", "item_3", "item_4", "item_5"),
+            journey.nodes.map { it.itemId }
+        )
+    }
+
+    @Test
+    fun `AC-11 Stable ordering does not reorder by status and tie-breaks equal createdAt by itemId ASC`() {
+        val sameTimestamp = 1_762_000_000_000L
+        val candidates = listOf(
+            JourneyItemCandidate("item_c", "Món C", 300_000L, "Ready", sameTimestamp),
+            JourneyItemCandidate("item_a", "Món A", 300_000L, "Skipped", sameTimestamp),
+            JourneyItemCandidate("item_b", "Món B", 300_000L, "Saved", sameTimestamp)
+        )
+
+        val initialJourney = JourneySelector.selectRecentJourney(candidates)
+        assertEquals(listOf("item_a", "item_b", "item_c"), initialJourney.nodes.map { it.itemId })
+
+        // Đổi status của item_a từ Skipped -> Ready và item_c từ Ready -> Waiting: thứ tự tuyệt đối không đổi
+        val statusChangedCandidates = candidates.map {
+            when (it.itemId) {
+                "item_a" -> it.copy(statusRaw = "Ready")
+                "item_c" -> it.copy(statusRaw = "Waiting")
+                else -> it
+            }
+        }
+        val afterStatusChange = JourneySelector.selectRecentJourney(statusChangedCandidates)
+        assertEquals(listOf("item_a", "item_b", "item_c"), afterStatusChange.nodes.map { it.itemId })
+    }
+
+    @Test
+    fun `AC-12 Count returns min(n, 5) nodes and n-1 connectors (0 connectors when n is 0 or 1)`() {
+        for (n in 0..6) {
+            val candidates = (1..n).map { idx ->
+                JourneyItemCandidate(
+                    itemId = "id_$idx",
+                    title = "Món $idx",
+                    priceMinor = 100_000L * idx,
+                    statusRaw = "Saved",
+                    createdAtEpochMillis = 1000L * idx
+                )
+            }
+            val journey = JourneySelector.selectRecentJourney(candidates)
+            val expectedNodes = n.coerceAtMost(5)
+            val expectedConnectors = (expectedNodes - 1).coerceAtLeast(0)
+            assertEquals(expectedNodes, journey.nodes.size)
+            assertEquals(expectedConnectors, journey.connectorCount)
+        }
+    }
+
+    @Test
+    fun `AC-14 All 6 valid statuses map accurately to JourneyNodeStatus`() {
+        val statuses = listOf("Saved", "Considering", "Waiting", "Ready", "Purchased", "Skipped")
+        val candidates = statuses.mapIndexed { index, status ->
+            JourneyItemCandidate(
+                itemId = "item_$index",
+                title = "Món $status",
+                priceMinor = 200_000L,
+                statusRaw = status,
+                createdAtEpochMillis = 10_000L - index
+            )
+        }
+
+        val journey = JourneySelector.selectRecentJourney(candidates, maxNodes = 6)
+        assertEquals(
+            listOf(
+                JourneyNodeStatus.Saved,
+                JourneyNodeStatus.Considering,
+                JourneyNodeStatus.Waiting,
+                JourneyNodeStatus.Ready,
+                JourneyNodeStatus.Purchased,
+                JourneyNodeStatus.Skipped
+            ),
+            journey.nodes.map { it.status }
+        )
+    }
+
+    @Test
+    fun `AC-25 Cooling-off expired transitions Waiting to Ready without auto-converting verdict to BUY`() {
+        val expiredCandidate = JourneyItemCandidate(
+            itemId = "w_exp",
+            title = "Giày chạy bộ",
+            priceMinor = 1_500_000L,
+            statusRaw = "Waiting",
+            createdAtEpochMillis = 5000L,
+            remainingSeconds = 0L,
+            verdict = DecisionVerdict.BUY // Kể cả đầu vào lệch BUY thì khi hết cooling-off cũng không tự BUY
+        )
+
+        val journey = JourneySelector.selectRecentJourney(listOf(expiredCandidate))
+        val node = journey.nodes.single()
+
+        assertEquals(JourneyNodeStatus.Ready, node.status)
+        assertTrue(node.isCoolingOffJustExpired)
+        assertEquals(DecisionVerdict.WAIT, node.verdict)
     }
 }
