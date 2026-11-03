@@ -103,26 +103,10 @@ fun HomeHeader(
     val greetingFontSize = lerp(24.sp, 18.sp, clampedFraction)
     val greetingLineHeight = lerp(30.sp, 24.sp, clampedFraction)
 
-    val surfaceAlpha = (clampedFraction * 1.25f).coerceIn(0f, 0.96f)
-    val bottomDividerAlpha = (clampedFraction * 0.8f).coerceIn(0f, 0.4f)
     val verticalSpacing = lerp(CandySpace.xs, 0.dp, clampedFraction)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = CandyColors.HomeV2.headerFrostedSurface.copy(alpha = surfaceAlpha)
-            )
-            .drawBehind {
-                if (bottomDividerAlpha > 0f) {
-                    drawLine(
-                        color = CandyColors.HomeV2.headerBorderDivider.copy(alpha = bottomDividerAlpha),
-                        start = androidx.compose.ui.geometry.Offset(0f, size.height),
-                        end = androidx.compose.ui.geometry.Offset(size.width, size.height),
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-            },
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(verticalSpacing)
     ) {
         Row(
