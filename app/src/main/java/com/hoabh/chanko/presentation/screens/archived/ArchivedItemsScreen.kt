@@ -257,7 +257,7 @@ private fun ArchivedItemRow(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Đã lưu trữ",
+                    text = item.secondaryInfoUiText.asString(),
                     style = MaterialTheme.typography.labelSmall,
                     color = CandyColors.textSecondary
                 )

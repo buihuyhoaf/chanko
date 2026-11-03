@@ -2,9 +2,11 @@ package com.hoabh.chanko.presentation.screens.archived
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 import com.hoabh.chanko.presentation.screens.myitems.MyItemCardUi
@@ -70,7 +72,7 @@ class ArchivedItemsViewModel @Inject constructor(
             is ArchivedItemsUiEvent.RestoreItem -> {
                 viewModelScope.launch {
                     itemRepository.setArchived(event.itemId, isArchived = false)
-                    _effect.emit(ArchivedItemsUiEffect.ShowToast("Đã khôi phục món đồ"))
+                    _effect.emit(ArchivedItemsUiEffect.ShowToast(UiText.StringResource(R.string.archived_items_restore_success)))
                 }
             }
             is ArchivedItemsUiEvent.ItemClicked -> {
@@ -97,7 +99,8 @@ class ArchivedItemsViewModel @Inject constructor(
             imageUri = imageUri,
             displayStatus = displayStatus,
             secondaryInfoText = "Đang lưu trữ",
-            addedTimestamp = addedTimestamp
+            addedTimestamp = addedTimestamp,
+            secondaryInfoUiText = UiText.StringResource(R.string.item_archived_status_secondary)
         )
     }
 }
