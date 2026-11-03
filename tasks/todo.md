@@ -85,14 +85,14 @@ Tái cấu trúc bố cục trong `HomeScreen.kt`:
 - Đảm bảo cơ chế bảo toàn anchor cuộn (`scrollAnchorItemId` qua `rememberSaveable`) vẫn hoạt động chính xác sau process death (`AC-30`).
 
 **Acceptance criteria:**
-- [ ] `HomeHeader` luôn ghim cố định ở đỉnh màn hình khi cuộn `LazyColumn` xuống các card bên dưới.
-- [ ] Khi cuộn từ đỉnh xuống, Header co lại mượt mà từ dạng mở rộng sang dạng thu gọn; khi cuộn ngược lại đỉnh, Header mở rộng trở lại trơn tru.
-- [ ] Các thẻ (`BudgetCreditCard`, `ItemJourneySection`, `ObservationCard`) trượt mượt mà phía dưới Header với nền kính mờ che chắn, không bị đè chữ hay lộ khoảng trống lỗi.
-- [ ] Cơ chế khôi phục vị trí cuộn / anchor `scrollAnchorItemId` không bị ảnh hưởng.
+- [x] `HomeHeader` luôn ghim cố định ở đỉnh màn hình khi cuộn `LazyColumn` xuống các card bên dưới.
+- [x] Khi cuộn từ đỉnh xuống, Header co lại mượt mà từ dạng mở rộng sang dạng thu gọn; khi cuộn ngược lại đỉnh, Header mở rộng trở lại trơn tru.
+- [x] Các thẻ (`BudgetCreditCard`, `ItemJourneySection`, `ObservationCard`) trượt mượt mà phía dưới Header với nền kính mờ che chắn, không bị đè chữ hay lộ khoảng trống lỗi.
+- [x] Cơ chế khôi phục vị trí cuộn / anchor `scrollAnchorItemId` không bị ảnh hưởng.
 
 **Verification:**
-- [ ] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
-- [ ] Unit tests pass: `./gradlew :app:testDevDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.*" --no-configuration-cache`
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+- [x] Unit tests pass: `./gradlew :app:testDevDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.*" --no-configuration-cache`
 
 **Dependencies:** Task 2
 
@@ -112,15 +112,15 @@ Hoàn thiện kiểm thử nghiệm thu:
 - Chạy toàn bộ test suite và build release check để đảm bảo không phát sinh regression với 31 AC của Home v2.0.
 
 **Acceptance criteria:**
-- [ ] Có đầy đủ `@Preview` phản ánh trạng thái mở rộng và thu gọn trên `HomeScreen`.
-- [ ] Màn hình hẹp `320dp` và `fontScale = 2.0f` hiển thị cân đối, không tràn màn hình hay che khuất Avatar.
-- [ ] Toàn bộ unit tests `./gradlew :app:testDevDebugUnitTest` PASS 100%.
-- [ ] Build thành công: `./gradlew :app:assembleDevDebug --no-configuration-cache`.
-- [ ] Tuân thủ nghiêm ngặt quy tắc `AGENTS.md`: không cài đặt hay chạy trên thiết bị vật lý hoặc emulator.
+- [x] Có đầy đủ `@Preview` phản ánh trạng thái mở rộng và thu gọn trên `HomeScreen`.
+- [x] Màn hình hẹp `320dp` và `fontScale = 2.0f` hiển thị cân đối, không tràn màn hình hay che khuất Avatar.
+- [x] Toàn bộ unit tests `./gradlew :app:testDevDebugUnitTest` PASS 100%.
+- [x] Build thành công: `./gradlew :app:assembleDevDebug --no-configuration-cache`.
+- [x] Tuân thủ nghiêm ngặt quy tắc `AGENTS.md`: không cài đặt hay chạy trên thiết bị vật lý hoặc emulator.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --no-configuration-cache`
-- [ ] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --no-configuration-cache`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
 
 **Dependencies:** Task 3
 
@@ -133,7 +133,7 @@ Hoàn thiện kiểm thử nghiệm thu:
 ---
 
 ## Checkpoint 2: Hoàn tất & Sẵn sàng Review
-- [ ] Header luôn ghim cố định và co giãn mượt mà khi cuộn trên `HomeScreen`.
-- [ ] Thẻ Budget Card và Item Journey cuộn êm bên dưới lớp kính mờ.
-- [ ] Hiển thị đầy đủ trạng thái offline ở cả 2 chế độ.
-- [ ] Unit tests và build `assembleDevDebug` xanh 100%.
+- [x] Header luôn ghim cố định và co giãn mượt mà khi cuộn trên `HomeScreen`.
+- [x] Thẻ Budget Card và Item Journey cuộn êm bên dưới lớp kính mờ.
+- [x] Hiển thị đầy đủ trạng thái offline ở cả 2 chế độ.
+- [x] Unit tests và build `assembleDevDebug` xanh 100%.

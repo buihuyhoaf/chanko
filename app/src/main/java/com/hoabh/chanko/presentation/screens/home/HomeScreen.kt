@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,15 +22,22 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -38,9 +46,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.screens.home.components.BudgetCreditCard
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
+import com.hoabh.chanko.presentation.screens.home.components.HomeHeaderTokens
 import com.hoabh.chanko.presentation.screens.home.components.InsightExplanationDialog
 import com.hoabh.chanko.presentation.screens.home.components.ItemJourneySection
 import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
+import com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -157,6 +167,26 @@ fun HomeScreen(
         .asPaddingValues()
         .calculateTopPadding()
 
+    val density = LocalDensity.current
+    val maxScrollRangePx = with(density) { HomeHeaderTokens.CollapseScrollRange.toPx() }
+
+    val collapseFraction by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex > 0) {
+                1f
+            } else {
+                calculateCollapseFraction(listState.firstVisibleItemScrollOffset, maxScrollRangePx)
+            }
+        }
+    }
+
+    var expandedHeaderHeightPx by remember { mutableIntStateOf(0) }
+    val expandedHeaderHeightDp = if (expandedHeaderHeightPx > 0) {
+        with(density) { expandedHeaderHeightPx.toDp() }
+    } else {
+        statusBarTopPadding + (if (state.header.isOffline) 100.dp else 68.dp)
+    }
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -169,6 +199,51 @@ fun HomeScreen(
             else -> CandySpace.lg
         }
 
+        // 1. Pinned Sticky & Collapsing Header (AC-01, AC-02, AC-20)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .zIndex(1f)
+                .background(
+                    color = CandyColors.HomeV2.headerFrostedSurface.copy(
+                        alpha = (collapseFraction * 1.25f).coerceIn(0f, 0.96f)
+                    )
+                )
+                .drawBehind {
+                    val dividerAlpha = (collapseFraction * 0.8f).coerceIn(0f, 0.4f)
+                    if (dividerAlpha > 0f) {
+                        drawLine(
+                            color = CandyColors.HomeV2.headerBorderDivider.copy(alpha = dividerAlpha),
+                            start = androidx.compose.ui.geometry.Offset(0f, size.height),
+                            end = androidx.compose.ui.geometry.Offset(size.width, size.height),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                }
+                .onGloballyPositioned { coordinates ->
+                    if (collapseFraction == 0f || coordinates.size.height > expandedHeaderHeightPx) {
+                        expandedHeaderHeightPx = coordinates.size.height
+                    }
+                },
+            contentAlignment = Alignment.TopCenter
+        ) {
+            HomeHeader(
+                header = state.header,
+                onProfileClick = { onEvent(HomeUiEvent.AvatarTap) },
+                collapseFraction = collapseFraction,
+                modifier = Modifier
+                    .widthIn(max = MaxContentWidthDp)
+                    .fillMaxWidth()
+                    .padding(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        top = statusBarTopPadding + CandySpace.xs,
+                        bottom = CandySpace.xs
+                    )
+            )
+        }
+
+        // 2. Danh sách cuộn LazyColumn (các card cuộn ngầm phía sau Header)
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -178,19 +253,11 @@ fun HomeScreen(
             contentPadding = PaddingValues(
                 start = horizontalPadding,
                 end = horizontalPadding,
-                top = statusBarTopPadding + CandySpace.md,
+                top = expandedHeaderHeightDp + CandySpace.sm,
                 bottom = BottomNavClearanceHeight
             ),
             verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
         ) {
-            // 1. Header (AC-01, AC-02, AC-20)
-            item(key = "section_header") {
-                HomeHeader(
-                    header = state.header,
-                    onProfileClick = { onEvent(HomeUiEvent.AvatarTap) }
-                )
-            }
-
             // 2. Budget Credit Card 3D Candy Orange (AC-01, AC-03..AC-09, AC-18..AC-22)
             item(key = "section_budget_credit_card") {
                 BudgetCreditCard(
@@ -375,6 +442,28 @@ private fun HomeScreenV2PartialErrorPreview() {
         HomeScreen(
             state = fakeDataSource.getStateForScenario(HomeScenario.BUDGET_ERROR),
             onEvent = {}
+        )
+    }
+}
+
+@Preview(
+    name = "8. Scrolled Down — Collapsed Sticky Header",
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 915
+)
+@Composable
+private fun HomeScreenV2ScrolledCollapsedPreview() {
+    val fakeDataSource = remember { HomeFakeDataSource() }
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 1,
+        initialFirstVisibleItemScrollOffset = 100
+    )
+    ChankoTheme {
+        HomeScreen(
+            state = fakeDataSource.getStateForScenario(HomeScenario.DEFAULT_FIVE_NODES),
+            onEvent = {},
+            listState = listState
         )
     }
 }
