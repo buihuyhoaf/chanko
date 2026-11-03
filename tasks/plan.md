@@ -1,20 +1,18 @@
-# Implementation Plan: Chanko Home UI v1.0 (Candy Pop 3D)
+# Implementation Plan: Sticky & Collapsing Home Header
 
-> **Spec tham chiếu:** [SPEC-home-ui-v1.md](../SPEC-home-ui-v1.md) · [docs/features/home-ui-v1-spec.md](../docs/features/home-ui-v1-spec.md)  
-> **Nguồn bàn giao:** `Chanko-Home-Design-Handoff-v1.0` (22 Frozen Decisions · 22 Acceptance Criteria)  
-> **Danh sách công việc (Task List Target):** [tasks/todo.md](todo.md) & [docs/tasks/home-ui-v1-tasks.md](../docs/tasks/home-ui-v1-tasks.md)
+> **Spec & Ý tưởng tham chiếu:** [docs/ideas/sticky-collapsing-home-header.md](../docs/ideas/sticky-collapsing-home-header.md)  
+> **Nguồn baseline:** `HomeScreen.kt` & `HomeHeader.kt` (Chanko Home v2.0 · `AC-01`, `AC-02`, `AC-20`, `AC-31`)  
+> **Task List Target:** [tasks/todo.md](todo.md) & [docs/tasks/sticky-collapsing-home-header-tasks.md](../docs/tasks/sticky-collapsing-home-header-tasks.md)
 
 ---
 
 ## 1. Overview
 
-Triển khai bản nâng cấp toàn diện màn hình **`HomeScreen`** theo chuẩn thiết kế **Candy Pop 3D v1.0** và 22 quyết định UX đã đóng băng (`HOME-REV-01`..`HOME-GAP-05`) cùng 22 tiêu chí nghiệm thu (`AC-01`..`AC-22`). Trọng tâm bao gồm:
-1. Sắp xếp lại đúng thứ tự 5 khu vực nội dung (`Header → Little Room → Những món cần chú ý → Budget → Observation`) và **gỡ bỏ hoàn toàn 2 thẻ Quick Actions cũ** (`AC-01`, `AC-02`).
-2. Chuẩn hóa **Little Room** với 4 vật thể tương tác (*Đang chờ*, *Cần xem lại*, *Ngân sách*, *Đã bỏ qua*), bóng thoại ngắn gọn và **Contextual Bottom Sheet** hiển thị đúng ngữ cảnh (bao gồm cả giải thích chi tiết cho *Góc nhìn từ Chanko* khi nhấn *"Giải thích thêm"*).
-3. Đồng bộ hóa logic phân nhóm giữa Little Room và *Những món cần chú ý*: món hết hạn `Cooling-off` tự động chuyển sang nhóm *Cần xem lại* mà **không tự đổi verdict thành `BUY`** và **không đếm trùng `itemId`** (`AC-07`, `AC-08`).
-4. Bọc khu vực *Những món cần chú ý* trong khung card sáng bo tròn lớn theo mockup mới, hiển thị tối đa 3 món ưu tiên cần hành động, xử lý giá thiếu `"Chưa có giá"` (`AC-09`, `AC-10`, `HOME-EDGE-04`).
-5. Đặt `Budget Card` sau Attention với toàn bộ vùng chạm mở `BudgetScreen` và tự động cập nhật khi đổi chu kỳ (`AC-11`..`AC-13`).
-6. Đảm bảo cô lập lỗi từng khu vực (`AC-15`), chế độ Offline hiển thị cache kèm thời điểm đồng bộ và chặn nút `+` không mở Add Item / không tạo draft (`AC-16`, `AC-17`), giữ vị trí cuộn khi quay lại (`AC-18`), không tự mở lại sheet sau process death (`AC-19`), đạt chuẩn trợ năng `48dp` + TalkBack (`AC-20`), tôn trọng Reduced Motion (`AC-21`) và không gây áp lực mua sắm (`AC-22`).
+Nâng cấp trải nghiệm cuộn tại màn hình chính (`HomeScreen`) của Chanko:
+Hiện tại `HomeHeader` nằm bên trong `LazyColumn` nên khi người dùng cuộn xem thẻ ngân sách (`BudgetCreditCard`) và hành trình món đồ (`ItemJourneySection`), phần Header bị cuộn trôi mất.
+Kế hoạch này tách `HomeHeader` ra thành một thanh điều hướng cố định phía trên (`Sticky Top Bar`), áp dụng hiệu ứng **Collapsing mượt mà (co giãn theo scroll offset)** kết hợp **nền kính mờ (Frosted glass)** và **duy trì chỉ báo ngoại tuyến (Offline Indicator)** ở cả hai trạng thái mở rộng và thu gọn:
+- **Expanded (Đỉnh trang):** Lời chào buổi + Subtitle + Avatar kích thước chuẩn 52dp + Banner ngoại tuyến đầy đủ (khi offline).
+- **Collapsed (Khi cuộn xuống):** Header co gọn thành thanh mỏng (~56dp + status bar), mờ dần subtitle, giữ lời chào ngắn gọn + Avatar thu nhỏ (~38dp) + chỉ báo ngoại tuyến mini, nền kính mờ chống rối chữ khi các card trôi ngầm bên dưới.
 
 ---
 
@@ -22,61 +20,52 @@ Triển khai bản nâng cấp toàn diện màn hình **`HomeScreen`** theo chu
 
 ```mermaid
 graph TD
-    D["Module 1: home-domain-reconcile<br/>(Cooling-off -> Review reconcile, Deduplication, Null Price, State Models)"]
-    R["Module 2: home-layout-header-room<br/>(HomeHeader + Little Room 4 Props + Short Speech Bubble)"]
-    A["Module 4: home-attention-budget-obs<br/>(Enclosed Attention Card + Full-click BudgetCard + ObservationCard)"]
-    S["Module 3: home-contextual-sheet<br/>(4 Room Props Sheet + Observation Explanation Sheet + Process Death Guard)"]
-    N["Module 5: home-shell-navigation-a11y<br/>(5-Section HomeScreen, MyItems Filter Routing, Offline + Gate, Previews & Tests)"]
+    T1["Task 1: Design Tokens & Collapsing State Engine<br/>(CandyColors Frosted Glass, HomeHeader UiModel / Dimensions & Collapse State)"]
+    T2["Task 2: Refactor HomeHeader Component<br/>(Support collapseFraction, Compact Greeting, Scale Avatar, Compact Offline Badge)"]
+    T3["Task 3: Refactor HomeScreen Layout & Scroll Interception<br/>(Box Layering, LazyColumn ContentPadding, derivedStateOf Offset, Anchor Safety)"]
+    T4["Task 4: Previews, Accessibility & Full Verification<br/>(Expanded/Collapsed Previews, 320dp/FontScale 2.0, TalkBack, Unit Tests & Build)"]
 
-    D --> R
-    D --> A
-    R --> S
-    A --> S
-    S --> N
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
 ```
 
 ### Các Quyết Định Kiến Trúc Cốt Lõi:
-1. **Single Source of Truth cho Phân Nhóm (`HomeGroupingEngine` / `DecisionRanker`):**
-   - Cả 4 badge/sheet của Little Room và danh sách 3 món trong *Những món cần chú ý* đều đọc từ cùng một kết quả phân nhóm đã reconcile thời gian `Cooling-off`.
-   - Khi `status == Waiting && remainingSeconds <= 0`: món đồ được phân vào nhóm `Review` (*Cần xem lại*) với nhãn phụ `"Vừa hết thời gian chờ"`, giữ nguyên `verdict` ban đầu (không chuyển thành `BUY`), đảm bảo tổng số lượng nhất quán và không bao giờ xuất hiện ở cả 2 nhóm (`AC-07`, `AC-08`).
-2. **Contextual Sheet Mở Rộng (`HomeSheet.Contextual`):**
-   - Phục vụ 5 ngữ cảnh: `Hourglass` (*Đang chờ*), `Calendar` (*Cần xem lại*), `Wallet` (*Ngân sách*), `PauseJar` (*Đã bỏ qua*), và `Observation` (*Giải thích chi tiết Góc nhìn từ Chanko*).
-   - Lưu giữ `activeSheet` thuần túy trong bộ nhớ của `HomeViewModel` (không lưu vào `SavedStateHandle` hay `rememberSaveable`), trong khi `LazyListState` của `HomeScreen` được giữ qua `rememberLazyListState()`. Nhờ đó, khi điều hướng đi và quay lại thì vị trí cuộn được bảo toàn (`AC-18`), còn khi Android hủy tiến trình (process death) thì sheet luôn đóng (`AC-19`).
-3. **Liên Kết Bộ Lọc `MyItems` Từ Home (`AC-06`):**
-   - Truyền yêu cầu lọc từ `HomeRoute` qua `MainNavigation` đến `MyItemsViewModel`:
-     - *Đang chờ* $\rightarrow$ `PrimaryFilter.ACTIVE` + `ActiveSubFilter.COOLING_OFF`
-     - *Cần xem lại* $\rightarrow$ `PrimaryFilter.ACTIVE` + `ActiveSubFilter.READY`
-     - *Đã bỏ qua* $\rightarrow$ `PrimaryFilter.SKIPPED` + `ActiveSubFilter.ALL_ACTIVE`
-     - *Tất cả ›* $\rightarrow$ `PrimaryFilter.ALL` + `ActiveSubFilter.ALL_ACTIVE`
-4. **Cổng Kiểm Soát Ngoại Tuyến (Offline Network Gate — `AC-16`, `AC-17`):**
-   - Khi `isOffline == true`, `HomeHeader` hiển thị huy hiệu ngoại tuyến kèm thời điểm đồng bộ thực tế (`lastSyncedAtText`).
-   - Nhấn nút `+` trên `ChankoBottomBar` khi offline sẽ phát thông báo yêu cầu kết nối mạng (Snackbar) và chặn hoàn toàn việc mở `AddItemViewModel::open`, tuyệt đối không tạo bản nháp (draft).
+
+1. **Tách Header khỏi `LazyColumn` qua cơ chế Box Layering:**
+   - Đặt `HomeScreen` trong một `BoxWithConstraints` (hoặc `Box`), trong đó `LazyColumn` nằm ở lớp nền (`zIndex = 0`) và `HomeHeader` nổi ở lớp trên (`zIndex = 1f`, `Alignment.TopCenter`).
+   - `LazyColumn` có `clipToPadding = false` để khi người dùng cuộn nội dung lên, các card trượt ngầm phía sau Header và tràn lên vùng status bar mà không bị cắt cụt đột ngột.
+   - `contentPadding.top` của `LazyColumn` được tính bằng `statusBarTopPadding + expandedHeaderHeight + CandySpace.md`, đảm bảo ở vị trí đỉnh (`scrollOffset == 0`), thẻ đầu tiên nằm ngay sát mép dưới của Header.
+
+2. **Tính toán `collapseFraction` không gây Recomposition bão hòa (`derivedStateOf`):**
+   - Sử dụng `derivedStateOf` lắng nghe `listState.firstVisibleItemIndex` và `listState.firstVisibleItemScrollOffset` để chuẩn hóa tỷ lệ co giãn $f \in [0.0, 1.0]$.
+   - Mọi biến đổi về `alpha`, `scale`, `translationY` được thực hiện qua `graphicsLayer` để chạy trên RenderThread, tránh kích hoạt recomposition toàn màn hình khi người dùng vuốt nhanh.
+
+3. **Bảo toàn khả năng đọc & Trợ năng (Accessibility & Legibility):**
+   - Khi $f > 0.0$, nền Header kích hoạt màu kính mờ (`CandyColors.homeScreenBackgroundTop` có alpha $\approx 0.92..0.96$) kết hợp đổ bóng mỏng hoặc border divider mảnh để thẻ màu cam đậm `BudgetCreditCard` không làm rối chữ trên Header.
+   - Huy hiệu ngoại tuyến khi thu gọn co thành badge/icon cạnh Avatar, nhưng TalkBack semantics vẫn đọc rõ ràng: *"Trạng thái: Ngoại tuyến, chạm để xem chi tiết đồng bộ"*.
+   - Khả năng bấm Avatar để mở Profile & Settings (`HomeUiEvent.AvatarTap`) hoạt động ổn định và chính xác ở cả 2 trạng thái.
 
 ---
 
 ## 3. Task List
 
-### Phase 1: Foundation & Domain Reconciliation (`home-domain-reconcile`)
-- [x] **Task 1:** Nâng cấp Domain Logic, State Model & Reconcile Cooling-off (`AC-07`, `AC-08`, `AC-09`, `AC-11`, `HOME-EDGE-04`)
-- [x] **Task 2:** Cập nhật `HomeFakeDataSource`, `HomeViewModel` & Bộ Unit Test Domain/ViewModel (`AC-01`..`AC-19`)
+### Phase 1: Foundation & Header Component
+- [x] **Task 1:** Bổ sung Design Tokens kính mờ, kích thước chuẩn & hàm tính toán `collapseFraction`
+- [x] **Task 2:** Tái cấu trúc `HomeHeader.kt` hỗ trợ trạng thái co giãn (`collapseFraction`), thu nhỏ Avatar và chỉ báo Offline mini
 
-### Checkpoint 1: Foundation & Domain
-- [x] Toàn bộ unit tests cho `HomeDomainLogicTest` và `HomeViewModelTest` chạy PASS (`./gradlew :app:testDevDebugUnitTest`).
+### Checkpoint 1: Header Foundation
+- [x] `HomeHeader` render độc lập mượt mà ở cả 2 trạng thái `collapseFraction = 0f` và `1f` trong Compose Preview.
+- [x] Kiểm thử biên dịch `./gradlew :app:compileDevDebugKotlin` sạch sẽ.
 
-### Phase 2: Core UI Components & Contextual Sheet (`home-layout-header-room`, `home-attention-budget-obs`, `home-contextual-sheet`)
-- [x] **Task 3:** Cập nhật `HomeHeader`, `CompactLivingRoom` & Strings theo chuẩn Candy Pop 3D v1.0 (`AC-03`, `AC-04`, `AC-16`, `AC-20`, `AC-21`)
-- [x] **Task 4:** Cập nhật `YourDecisionsSection` (Khung Card Bao Ngoài), `BudgetCard` & `ObservationCard` (`AC-09`..`AC-14`, `AC-22`)
-- [x] **Task 5:** Cập nhật `HomeSheetHost` (Contextual Sheet 4 Vật Thể + Giải Thích Insight) & Tái cấu trúc `HomeScreen` 5 Khu Vực (`AC-01`, `AC-02`, `AC-05`, `AC-06`, `AC-19`)
+### Phase 2: HomeScreen Layering & Responsive Verification
+- [x] **Task 3:** Cập nhật `HomeScreen.kt` để ghim Header cố định, kết nối `derivedStateOf` cuộn và đệm lề an toàn
+- [x] **Task 4:** Bổ sung Previews mở rộng/thu gọn, kiểm thử trợ năng TalkBack, FontScale 2.0f và chạy Full Verification
 
-### Checkpoint 2: Core UI Components
-- [x] Mã nguồn UI biên dịch thành công (`./gradlew :app:compileDevDebugKotlin`), không còn `QuickActionsRow`, thứ tự 5 khu vực khớp tuyệt đối với AC-01.
-
-### Phase 3: Navigation Shell, Offline Gate & Verification (`home-shell-navigation-a11y`)
-- [x] **Task 6:** Kết nối Điều hướng `HomeRoute`, `MainNavigation` (Bộ lọc `MyItems`, `ItemDetail`) & Chặn Nút `+` Khi Offline (`AC-06`, `AC-10`, `AC-17`, `AC-18`)
-- [x] **Task 7:** Hoàn thiện Responsive Previews & Chạy Kiểm Thử Toàn Diện Nghiệm Thu 22 AC (`AC-01`..`AC-22`)
-
-### Checkpoint 3: Complete
-- [x] Tất cả 22 Acceptance Criteria (`AC-01`..`AC-22`) vượt qua kiểm thử, build `assembleDevDebug` và `testDevDebugUnitTest` xanh 100%.
+### Checkpoint 2: Hoàn tất & Nghiệm thu
+- [x] Header ghim cố định và co giãn mượt mà khi cuộn trên `HomeScreen`.
+- [x] Thẻ Budget Card và Item Journey cuộn êm bên dưới lớp kính mờ.
+- [x] Toàn bộ unit tests `./gradlew :app:testDevDebugUnitTest` PASS và `./gradlew :app:assembleDevDebug` BUILD SUCCESSFUL.
 
 ---
 
@@ -84,13 +73,13 @@ graph TD
 
 | Rủi ro | Mức độ | Biện pháp giảm thiểu |
 | :--- | :---: | :--- |
-| Lệch số lượng giữa badge trong Little Room và danh sách *Những món cần chú ý* tại thời điểm hết hạn `Cooling-off` | Cao | Sử dụng duy nhất 1 hàm reconcile trong `HomeDomainLogic` tạo ra cả danh sách nhóm (`waitingItems`, `reviewItems`, `skippedItems`) và `topAttentionItems` từ cùng 1 danh sách đầu vào. |
-| TalkBack đọc lặp 2 lần trên `BudgetCard` (vừa đọc card vừa đọc nút `"Chi tiết ›"`) hoặc trên vật thể Little Room | Trung bình | Áp dụng `clickable` duy nhất ở container cha với `semantics(mergeDescendants = true)`; nút `"Chi tiết ›"` và badge số lượng chỉ là thành phần hiển thị thị giác bên trong, không gắn `clickable` riêng (`AC-12`, `AC-20`). |
-| Vùng chạm của 4 vật thể trong Little Room bị chồng lấn hoặc nhỏ hơn `48dp` trên màn hình hẹp `320dp` | Trung bình | Bố trí 4 cột hotspot độc lập (`weight(1f)`), mỗi hotspot có `sizeIn(minWidth = 48.dp, minHeight = 48.dp)` bao gồm cả hình vật thể và pill nhãn bên dưới theo hướng dẫn tại `RESPONSIVE-COMPOSE.md`. |
-| Contextual Sheet tự mở lại sau khi Android hủy tiến trình (process death) | Trung bình | Giữ `activeSheet` trong `MutableStateFlow` in-memory của `HomeViewModel` với giá trị khởi tạo `null`, không lưu vào `SavedStateHandle` hay `rememberSaveable` (`AC-19`). |
+| Tụt khung hình (Jank/FPS drop) khi cuộn do recomposition liên tục tại Header | Cao | Sử dụng `derivedStateOf` với ngưỡng làm tròn hợp lý hoặc dùng `graphicsLayer` lambda (`alpha = { ... }`, `translationY = { ... }`) để render biến đổi trên RenderNode thay vì re-layout. |
+| Chiều cao Header bị cố định cứng làm tràn chữ khi người dùng phóng to font (`fontScale = 2.0f`) | Trung bình | Sử dụng `heightIn` linh hoạt hoặc đo kích thước động bằng `onGloballyPositioned` để xác định chiều cao mở rộng thực tế trước khi nội suy `collapseFraction`. |
+| Danh sách `LazyColumn` bị che mất phần đầu hoặc giật nảy khi chuyển trạng thái | Trung bình | Đặt `contentPadding.top` chuẩn xác theo chiều cao mở rộng; không chèn Spacer động làm thay đổi chiều dài danh sách của LazyColumn. |
+| Mất chỉ báo ngoại tuyến khi thu gọn làm người dùng nhầm lẫn về dữ liệu | Thấp | Tích hợp badge offline mini có màu cảnh báo ngay cạnh nút Avatar trong thanh thu gọn. |
 
 ---
 
-## 5. Open Questions
-
-- Không còn câu hỏi mở (toàn bộ Capability Map, 5 giả định kỹ thuật và phương án mở Contextual Sheet cho nút *"Giải thích thêm"* đã được người dùng phê duyệt).
+## 5. Open Questions & Resolutions
+- **Q:** Khi click vào badge ngoại tuyến ở thanh thu gọn thì thế nào?  
+  **A:** Hiển thị Snackbar hoặc mở thông báo nhắc nhở thời điểm đồng bộ lần cuối như ở bản đầy đủ.

@@ -158,7 +158,7 @@ fun MainNavigation(
                     val homeViewModel: HomeViewModel = hiltViewModel()
                     DisposableEffect(homeViewModel) {
                         homeGlobalAddHandler = {
-                            homeViewModel.onEvent(HomeUiEvent.GlobalAddTapped)
+                            homeViewModel.onEvent(HomeUiEvent.PlusTap)
                         }
                         onDispose {
                             homeGlobalAddHandler = null

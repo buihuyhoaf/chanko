@@ -1,29 +1,27 @@
 package com.hoabh.chanko.presentation.screens.home.domain
 
 import androidx.annotation.DrawableRes
+import com.hoabh.chanko.presentation.screens.home.BudgetCreditCardUi
 import com.hoabh.chanko.presentation.screens.home.BudgetStateKind
-import com.hoabh.chanko.presentation.screens.home.BudgetUi
-import com.hoabh.chanko.presentation.screens.home.DecisionStatus
-import com.hoabh.chanko.presentation.screens.home.DecisionUi
 import com.hoabh.chanko.presentation.screens.home.DecisionVerdict
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.TextStyle
-import java.util.Locale
+import com.hoabh.chanko.presentation.screens.home.ItemJourneyUi
+import com.hoabh.chanko.presentation.screens.home.JourneyNodeStatus
+import com.hoabh.chanko.presentation.screens.home.JourneyNodeUi
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
  * Định dạng tiền tệ VND xác định (Deterministic VND Formatter):
- * - Sử dụng dấu chấm phân tách hàng nghìn theo chuẩn hiển thị tiếng Việt (`2.350.000 ₫`).
- * - Giá thiếu (`null`) hiển thị đúng `"Chưa có giá"`, không bao giờ coi là `0 ₫` (HOME-EDGE-04).
- * - Hỗ trợ số âm (`-600.000 ₫`) cho trường hợp vượt ngân sách.
+ * - Sử dụng dấu chấm phân tách hàng nghìn (`2.350.000đ` hoặc `2.350.000 ₫`).
+ * - Giá thiếu (`null`) hiển thị đúng `"Chưa có giá"`, không bao giờ ngầm coi là `0đ` (AC-09).
+ * - Hỗ trợ số âm (`-600.000đ`) cho trường hợp vượt ngân sách (AC-06).
  */
 object HomeCurrencyFormatter {
     const val MISSING_PRICE_TEXT = "Chưa có giá"
+    const val MISSING_BUDGET_PRICE_NOTE = "Chưa đủ dữ liệu giá"
 
-    fun formatVnd(amountMinor: Long): String {
+    fun formatVnd(amountMinor: Long, compactUnit: Boolean = false): String {
         val isNegative = amountMinor < 0L
         val absValue = abs(amountMinor)
         val digits = absValue.toString()
@@ -35,93 +33,89 @@ object HomeCurrencyFormatter {
                 append(ch)
             }
         }
-        return if (isNegative) "-$grouped ₫" else "$grouped ₫"
+        val suffix = if (compactUnit) "đ" else " ₫"
+        return if (isNegative) "-$grouped$suffix" else "$grouped$suffix"
     }
 
-    fun formatNullableVnd(amountMinor: Long?): String {
-        return amountMinor?.let(::formatVnd) ?: MISSING_PRICE_TEXT
+    fun formatNullableVnd(amountMinor: Long?, compactUnit: Boolean = false): String {
+        return amountMinor?.let { formatVnd(it, compactUnit) } ?: MISSING_PRICE_TEXT
     }
 }
 
 /**
- * Bộ tính toán ngân sách thuần Kotlin (AC-11, AC-13):
- * - Tính số còn lại, số vượt, phần trăm đã chi và thanh tiến trình.
- * - Không chia cho 0 khi hạn mức <= 0; không bịa 0 ₫ khi chưa thiết lập ngân sách.
+ * Bộ tính toán ngân sách cho Budget Credit Card v2.0 (UX-SPEC.md, AC-03..AC-09, AC-25):
+ * - Gộp cả `payNowSpentMinor` và `creditSpentMinor` theo quy tắc Budget hiện hành (AC-03).
+ * - `remaining = limit - spent` khi dữ liệu đầy đủ; khi vượt giữ số âm và giải thích số vượt bằng Coral (AC-06).
+ * - `visualProgress` clamp về `0f..1f` chỉ cho thanh tiến trình, không clamp số tiền (AC-06).
+ * - `limit <= 0` hoặc `limit == null` chuyển sang `BudgetStateKind.NoBudget`, không chia cho 0, không báo `0đ` giả (AC-07).
+ * - Khi `hasMissingPriceItems == true`: đính kèm chú thích `"Chưa đủ dữ liệu giá"`, không tự coi giá thiếu là `0đ` (AC-09).
  */
-object BudgetCalculator {
-    private const val UNKNOWN_TEXT = "Chưa thiết lập"
-    private const val ZERO_LIMIT_BADGE = "Chưa đặt hạn mức"
-    private const val UNKNOWN_BADGE = "Chưa thiết lập ngân sách"
+object BudgetV2Calculator {
+    private const val UNCONFIGURED_TEXT = "Chưa thiết lập"
 
     fun compute(
         cycleLabel: String,
-        spentMinor: Long?,
-        limitMinor: Long?
-    ): BudgetUi {
-        if (spentMinor == null || limitMinor == null) {
-            return BudgetUi(
+        payNowSpentMinor: Long?,
+        creditSpentMinor: Long? = 0L,
+        limitMinor: Long?,
+        hasMissingPriceItems: Boolean = false
+    ): BudgetCreditCardUi {
+        val totalSpentMinor = if (payNowSpentMinor == null && creditSpentMinor == null) {
+            null
+        } else {
+            (payNowSpentMinor ?: 0L) + (creditSpentMinor ?: 0L)
+        }
+
+        val missingNote = if (hasMissingPriceItems) {
+            HomeCurrencyFormatter.MISSING_BUDGET_PRICE_NOTE
+        } else {
+            null
+        }
+
+        if (totalSpentMinor == null || limitMinor == null || limitMinor <= 0L) {
+            return BudgetCreditCardUi(
                 cycleLabel = cycleLabel,
-                spentMinor = spentMinor,
+                spentMinor = totalSpentMinor,
                 limitMinor = limitMinor,
                 remainingMinor = null,
                 overMinor = null,
                 ratio = null,
                 percentageInt = null,
                 visualProgress = 0f,
-                stateKind = BudgetStateKind.Unknown,
-                spentFormatted = spentMinor?.let(HomeCurrencyFormatter::formatVnd) ?: UNKNOWN_TEXT,
-                limitFormatted = limitMinor?.let(HomeCurrencyFormatter::formatVnd) ?: UNKNOWN_TEXT,
-                remainingFormatted = UNKNOWN_TEXT,
-                badgeText = UNKNOWN_BADGE,
-                progressRightLabel = "--%"
+                stateKind = BudgetStateKind.NoBudget,
+                hasMissingPriceItems = hasMissingPriceItems,
+                missingPriceNote = missingNote,
+                spentFormatted = totalSpentMinor?.let { HomeCurrencyFormatter.formatVnd(it, compactUnit = true) }
+                    ?: UNCONFIGURED_TEXT,
+                limitFormatted = UNCONFIGURED_TEXT,
+                remainingFormatted = UNCONFIGURED_TEXT,
+                overWarningFormatted = null,
+                progressPercentText = "--%"
             )
         }
 
-        if (limitMinor <= 0L) {
-            val remaining = -spentMinor
-            return BudgetUi(
-                cycleLabel = cycleLabel,
-                spentMinor = spentMinor,
-                limitMinor = limitMinor,
-                remainingMinor = remaining,
-                overMinor = max(spentMinor, 0L),
-                ratio = null,
-                percentageInt = null,
-                visualProgress = 0f,
-                stateKind = BudgetStateKind.Zero,
-                spentFormatted = HomeCurrencyFormatter.formatVnd(spentMinor),
-                limitFormatted = HomeCurrencyFormatter.formatVnd(0L),
-                remainingFormatted = HomeCurrencyFormatter.formatVnd(remaining),
-                badgeText = ZERO_LIMIT_BADGE,
-                progressRightLabel = "Đã chi 0%"
-            )
-        }
-
-        val remainingMinor = limitMinor - spentMinor
-        val overMinor = max(spentMinor - limitMinor, 0L)
-        val rawRatio = spentMinor.toDouble() / limitMinor.toDouble()
+        val remainingMinor = limitMinor - totalSpentMinor
+        val overMinor = max(totalSpentMinor - limitMinor, 0L)
+        val rawRatio = totalSpentMinor.toDouble() / limitMinor.toDouble()
         val percentageInt = (rawRatio * 100.0).roundToInt()
         val visualProgress = rawRatio.toFloat().coerceIn(0f, 1f)
 
         val stateKind = when {
-            spentMinor > limitMinor -> BudgetStateKind.OverBudget
-            spentMinor == limitMinor -> BudgetStateKind.Reached
+            totalSpentMinor > limitMinor -> BudgetStateKind.OverBudget
+            totalSpentMinor == limitMinor -> BudgetStateKind.Reached
             rawRatio >= 0.80 -> BudgetStateKind.Warning
             else -> BudgetStateKind.Normal
         }
 
-        val badgeText = when (stateKind) {
-            BudgetStateKind.Normal,
-            BudgetStateKind.Warning -> "Đã chi $percentageInt%"
-            BudgetStateKind.Reached -> "Chạm hạn mức 100%"
-            BudgetStateKind.OverBudget -> "Vượt hạn mức ${HomeCurrencyFormatter.formatVnd(overMinor)}"
-            BudgetStateKind.Zero -> ZERO_LIMIT_BADGE
-            BudgetStateKind.Unknown -> UNKNOWN_BADGE
+        val overWarning = if (stateKind == BudgetStateKind.OverBudget) {
+            "Vượt ngân sách ${HomeCurrencyFormatter.formatVnd(overMinor, compactUnit = true)}"
+        } else {
+            null
         }
 
-        return BudgetUi(
+        return BudgetCreditCardUi(
             cycleLabel = cycleLabel,
-            spentMinor = spentMinor,
+            spentMinor = totalSpentMinor,
             limitMinor = limitMinor,
             remainingMinor = remainingMinor,
             overMinor = overMinor,
@@ -129,210 +123,116 @@ object BudgetCalculator {
             percentageInt = percentageInt,
             visualProgress = visualProgress,
             stateKind = stateKind,
-            spentFormatted = HomeCurrencyFormatter.formatVnd(spentMinor),
-            limitFormatted = HomeCurrencyFormatter.formatVnd(limitMinor),
-            remainingFormatted = HomeCurrencyFormatter.formatVnd(remainingMinor),
-            badgeText = badgeText,
-            progressRightLabel = "Đã chi $percentageInt%"
+            hasMissingPriceItems = hasMissingPriceItems,
+            missingPriceNote = missingNote,
+            spentFormatted = HomeCurrencyFormatter.formatVnd(totalSpentMinor, compactUnit = true),
+            limitFormatted = HomeCurrencyFormatter.formatVnd(limitMinor, compactUnit = true),
+            remainingFormatted = HomeCurrencyFormatter.formatVnd(remainingMinor, compactUnit = true),
+            overWarningFormatted = overWarning,
+            progressPercentText = "$percentageInt%"
         )
     }
 }
 
 /**
- * Dữ liệu đầu vào thô của một món đồ trước khi qua bộ phân nhóm & xếp hạng (AC-07, AC-08, AC-09, HOME-EDGE-04).
+ * Ứng viên đầu vào cho hành trình món đồ gần đây (Item Journey v2.0 — AC-10..AC-15, AC-23..AC-25).
  */
-data class RawDecisionCandidate(
-    val id: String?,
+data class JourneyItemCandidate(
+    val itemId: String?,
     val title: String?,
     val priceMinor: Long?,
     val statusRaw: String?,
+    val createdAtEpochMillis: Long,
+    val isArchived: Boolean = false,
     val remainingSeconds: Long? = null,
     val verdict: DecisionVerdict = DecisionVerdict.WAIT,
-    val customSecondaryText: String? = null,
-    @param:DrawableRes val thumbnailResId: Int? = null
+    @param:DrawableRes val thumbnailResId: Int? = null,
+    val imageLoadFailed: Boolean = false
 )
 
 /**
- * Bộ phân nhóm đồng nhất và xếp hạng quyết định mua sắm (AC-07, AC-08, AC-09, HOME-GAP-01, HOME-EDGE-01, HOME-EDGE-04):
- * - Loại bỏ ứng viên có id rỗng, title rỗng hoặc status không hợp lệ.
- * - Khử trùng lặp theo `id`, giữ lần xuất hiện đầu tiên để một món không bao giờ bị tính trùng (AC-08).
- * - Khi món `Waiting` có `remainingSeconds <= 0` (hết hạn cooling-off), tự động chuyển sang nhóm `Ready` ("Cần xem lại")
- *   với nhãn `"Vừa hết thời gian chờ"` nhưng KHÔNG tự động đổi `verdict` thành `BUY` (AC-07).
- * - Ưu tiên chọn tối đa 3 món cần hành động cho khu vực "Những món cần chú ý" (AC-09).
+ * Bộ chọn & sắp xếp ổn định cho Item Journey v2.0 (UX-SPEC.md, ANDROID-COMPOSE-GUIDE.md, AC-10..AC-14, AC-25):
+ * 1. Loại bỏ các món có `isArchived == true` TRƯỚC KHI sort và lấy tối đa 5 món (AC-10).
+ * 2. Khử trùng lặp theo `itemId` (giữ bản ghi hợp lệ mới nhất của cùng `itemId`).
+ * 3. Reconcile hết hạn `Cooling-off` (`status == Waiting && remainingSeconds <= 0`) sang `Ready` ("Sẵn sàng xem lại")
+ *    mà KHÔNG tự động chuyển `verdict` sang `BUY` (AC-25).
+ * 4. Sắp xếp theo `createdAtEpochMillis DESC`, khi trùng `createdAt` thì tie-break ổn định theo `itemId ASC`;
+ *    thay đổi `status` tuyệt đối KHÔNG làm thay đổi thứ tự các node (AC-11).
+ * 5. Lấy tối đa 5 món (`min(n, 5)`) — không tạo node giả cho đủ 5 (AC-12).
  */
-object DecisionRanker {
-    private const val MAX_VISIBLE_DECISIONS = 3
+object JourneySelector {
+    const val MAX_JOURNEY_NODES = 5
 
-    fun rankAndSelectTop(
-        candidates: List<RawDecisionCandidate>,
-        maxCount: Int = MAX_VISIBLE_DECISIONS
-    ): DecisionRankingResult {
-        val validUniqueCandidates = LinkedHashMap<String, ReconciledCandidate>()
+    fun selectRecentJourney(
+        candidates: List<JourneyItemCandidate>,
+        maxNodes: Int = MAX_JOURNEY_NODES
+    ): ItemJourneyUi {
+        val uniqueNonArchived = LinkedHashMap<String, JourneyNodeUi>()
 
         for (candidate in candidates) {
-            val cleanId = candidate.id?.trim().orEmpty()
-            val cleanTitle = candidate.title?.trim().orEmpty()
-            val rawStatus = parseStatus(candidate.statusRaw)
+            if (candidate.isArchived) continue
 
-            if (cleanId.isEmpty() || cleanTitle.isEmpty() || rawStatus == null) {
+            val cleanId = candidate.itemId?.trim().orEmpty()
+            val cleanTitle = candidate.title?.trim().orEmpty()
+            val parsedStatus = parseStatus(candidate.statusRaw)
+
+            if (cleanId.isEmpty() || cleanTitle.isEmpty() || parsedStatus == null) {
                 continue
             }
 
-            if (!validUniqueCandidates.containsKey(cleanId)) {
-                val isCoolingOffExpired = rawStatus == DecisionStatus.Waiting &&
-                    candidate.remainingSeconds != null &&
-                    candidate.remainingSeconds <= 0L
+            val isCoolingExpired = parsedStatus == JourneyNodeStatus.Waiting &&
+                candidate.remainingSeconds != null &&
+                candidate.remainingSeconds <= 0L
 
-                // AC-07 & HOME-EDGE-01: Món hết cooling-off tự chuyển sang nhóm Cần xem lại (Ready),
-                // nhưng giữ nguyên verdict gốc (không tự đổi thành BUY).
-                val effectiveStatus = if (isCoolingOffExpired) {
-                    DecisionStatus.Ready
-                } else {
-                    rawStatus
-                }
-
-                val preservedVerdict = if (isCoolingOffExpired && candidate.verdict == DecisionVerdict.BUY) {
-                    DecisionVerdict.WAIT
-                } else {
-                    candidate.verdict
-                }
-
-                validUniqueCandidates[cleanId] = ReconciledCandidate(
-                    id = cleanId,
-                    title = cleanTitle,
-                    priceMinor = candidate.priceMinor,
-                    effectiveStatus = effectiveStatus,
-                    verdict = preservedVerdict,
-                    remainingSeconds = candidate.remainingSeconds,
-                    customSecondaryText = candidate.customSecondaryText,
-                    thumbnailResId = candidate.thumbnailResId,
-                    isCoolingOffJustExpired = isCoolingOffExpired
-                )
+            val effectiveStatus = if (isCoolingExpired) {
+                JourneyNodeStatus.Ready
+            } else {
+                parsedStatus
             }
+
+            val preservedVerdict = if (isCoolingExpired && candidate.verdict == DecisionVerdict.BUY) {
+                DecisionVerdict.WAIT
+            } else {
+                candidate.verdict
+            }
+
+            uniqueNonArchived[cleanId] = JourneyNodeUi(
+                itemId = cleanId,
+                title = cleanTitle,
+                priceMinor = candidate.priceMinor,
+                priceFormatted = HomeCurrencyFormatter.formatNullableVnd(
+                    amountMinor = candidate.priceMinor,
+                    compactUnit = true
+                ),
+                status = effectiveStatus,
+                statusLabel = effectiveStatus.vietnameseLabel,
+                verdict = preservedVerdict,
+                createdAtEpochMillis = candidate.createdAtEpochMillis,
+                remainingSeconds = candidate.remainingSeconds,
+                thumbnailResId = candidate.thumbnailResId,
+                imageLoadFailed = candidate.imageLoadFailed,
+                isCoolingOffJustExpired = isCoolingExpired
+            )
         }
 
-        val allReconciled = validUniqueCandidates.values.map(::toDecisionUi)
+        val sortedAll = uniqueNonArchived.values.sortedWith(
+            compareByDescending<JourneyNodeUi> { it.createdAtEpochMillis }
+                .thenBy { it.itemId }
+        )
 
-        // Phân tách các nhóm độc lập cho Little Room & Contextual Sheet (AC-08: không trùng itemId)
-        val reviewItems = allReconciled.filter { it.status == DecisionStatus.Ready }
-        val waitingItems = allReconciled.filter { it.status == DecisionStatus.Waiting }
-        val skippedItems = allReconciled.filter { it.status == DecisionStatus.Skipped }
-
-        // Khu vực "Những món cần chú ý" chỉ hiển thị các món đang hoạt động (không lấy Skipped),
-        // ưu tiên món cần hành động (Ready / Cần xem lại lên đầu) và giới hạn tối đa 3 món (AC-09).
-        val actionableCandidates = allReconciled
-            .filter { it.status != DecisionStatus.Skipped }
-            .sortedBy { it.status.priorityRank }
-
-        val topItems = actionableCandidates.take(maxCount)
-
-        return DecisionRankingResult(
-            topDecisions = topItems,
-            totalValidCount = actionableCandidates.size,
-            waitingItems = waitingItems,
-            reviewItems = reviewItems,
-            skippedItems = skippedItems
+        return ItemJourneyUi(
+            nodes = sortedAll.take(maxNodes),
+            totalActiveAndHistoryCount = sortedAll.size
         )
     }
 
-    private fun parseStatus(raw: String?): DecisionStatus? = when (raw?.trim()) {
-        "Ready", "Review" -> DecisionStatus.Ready
-        "Waiting", "CoolingOff" -> DecisionStatus.Waiting
-        "Considering" -> DecisionStatus.Considering
-        "Saved" -> DecisionStatus.Saved
-        "Skipped" -> DecisionStatus.Skipped
+    fun parseStatus(raw: String?): JourneyNodeStatus? = when (raw?.trim()) {
+        "Saved" -> JourneyNodeStatus.Saved
+        "Considering" -> JourneyNodeStatus.Considering
+        "Waiting", "CoolingOff" -> JourneyNodeStatus.Waiting
+        "Ready", "Review" -> JourneyNodeStatus.Ready
+        "Purchased", "Bought" -> JourneyNodeStatus.Purchased
+        "Skipped", "Passed" -> JourneyNodeStatus.Skipped
         else -> null
-    }
-
-    private fun toDecisionUi(item: ReconciledCandidate): DecisionUi {
-        val statusLabel = when {
-            item.isCoolingOffJustExpired -> "Vừa hết thời gian chờ"
-            item.effectiveStatus == DecisionStatus.Ready -> "Đến hạn xem lại"
-            item.effectiveStatus == DecisionStatus.Waiting -> "Đang chờ"
-            item.effectiveStatus == DecisionStatus.Considering -> "Đang cân nhắc"
-            item.effectiveStatus == DecisionStatus.Saved -> "Đã lưu"
-            item.effectiveStatus == DecisionStatus.Skipped -> "Đã bỏ qua"
-            else -> "Đến hạn xem lại"
-        }
-
-        val secondaryText = item.customSecondaryText ?: when {
-            item.isCoolingOffJustExpired -> "Vừa hết thời gian chờ"
-            item.effectiveStatus == DecisionStatus.Waiting -> item.remainingSeconds?.let(::formatRemainingDuration)
-            else -> null
-        }
-
-        return DecisionUi(
-            id = item.id,
-            title = item.title,
-            priceMinor = item.priceMinor,
-            priceFormatted = HomeCurrencyFormatter.formatNullableVnd(item.priceMinor),
-            status = item.effectiveStatus,
-            verdict = item.verdict,
-            statusLabel = statusLabel,
-            secondaryText = secondaryText,
-            remainingSeconds = item.remainingSeconds,
-            thumbnailResId = item.thumbnailResId,
-            isTimerExpiredLocally = item.isCoolingOffJustExpired
-        )
-    }
-
-    fun formatRemainingDuration(remainingSeconds: Long): String {
-        if (remainingSeconds <= 0L) {
-            return "Vừa hết thời gian chờ"
-        }
-        val hours = remainingSeconds / 3600L
-        val minutes = (remainingSeconds % 3600L) / 60L
-        return when {
-            hours > 0L && minutes > 0L -> "Còn $hours giờ $minutes phút"
-            hours > 0L -> "Còn $hours giờ"
-            else -> "Còn ${minutes.coerceAtLeast(1L)} phút"
-        }
-    }
-
-    private data class ReconciledCandidate(
-        val id: String,
-        val title: String,
-        val priceMinor: Long?,
-        val effectiveStatus: DecisionStatus,
-        val verdict: DecisionVerdict,
-        val remainingSeconds: Long?,
-        val customSecondaryText: String?,
-        val thumbnailResId: Int?,
-        val isCoolingOffJustExpired: Boolean
-    )
-}
-
-data class DecisionRankingResult(
-    val topDecisions: List<DecisionUi>,
-    val totalValidCount: Int,
-    val waitingItems: List<DecisionUi> = emptyList(),
-    val reviewItems: List<DecisionUi> = emptyList(),
-    val skippedItems: List<DecisionUi> = emptyList()
-) {
-    val waitingCount: Int get() = waitingItems.size
-    val reviewCount: Int get() = reviewItems.size
-    val skippedCount: Int get() = skippedItems.size
-}
-
-/**
- * Tính toán nhãn tháng/ngày động cho tờ lịch (S19).
- */
-object CalendarDateResolver {
-    fun resolve(
-        nowIso: String,
-        zoneIdString: String
-    ): Pair<String, String> {
-        return try {
-            val instant = Instant.parse(nowIso)
-            val zoneId = ZoneId.of(zoneIdString)
-            val zonedDateTime = instant.atZone(zoneId)
-            val month = zonedDateTime.month
-                .getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
-                .uppercase(Locale.ENGLISH)
-            val day = zonedDateTime.dayOfMonth.toString()
-            month to day
-        } catch (_: Exception) {
-            "OCT" to "24"
-        }
     }
 }

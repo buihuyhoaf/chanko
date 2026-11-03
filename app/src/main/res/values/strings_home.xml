@@ -1,80 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Navigation (HOME-REV-04, AC-17) -->
+    <!-- Navigation (AC-20, AC-28, AC-29) -->
     <string name="home_cd_add_item">Thêm món đồ mới</string>
     <string name="home_offline_add_blocked">Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thêm món đồ mới.</string>
+    <string name="home_offline_refresh_blocked">Bạn đang ngoại tuyến. Dữ liệu được giữ từ lần đồng bộ gần nhất.</string>
 
-    <!-- Header (AC-03, AC-16) -->
+    <!-- Header (AC-02, AC-20) -->
     <string name="home_greeting_morning_named">Chào buổi sáng, %1$s</string>
     <string name="home_greeting_afternoon_named">Chào buổi chiều, %1$s</string>
     <string name="home_greeting_evening_named">Chào buổi tối, %1$s</string>
-    <string name="home_greeting_morning_anonymous">Chào buổi sáng!</string>
-    <string name="home_greeting_afternoon_anonymous">Chào buổi chiều!</string>
-    <string name="home_greeting_evening_anonymous">Chào buổi tối!</string>
-    <string name="home_header_subtitle">Hôm nay mình cùng Chanko mua sắm có suy nghĩ nhé 💜</string>
+    <string name="home_greeting_morning_anonymous">Chào buổi sáng</string>
+    <string name="home_greeting_afternoon_anonymous">Chào buổi chiều</string>
+    <string name="home_greeting_evening_anonymous">Chào buổi tối</string>
+    <string name="home_header_subtitle">Hôm nay mình cùng cân nhắc nhé!</string>
     <string name="home_header_offline_badge">Đang ngoại tuyến · Hiển thị dữ liệu đã lưu</string>
     <string name="home_header_offline_badge_with_sync">Đang ngoại tuyến · %1$s</string>
-    <string name="home_cd_settings">Mở cài đặt</string>
+    <string name="home_header_offline_compact">Ngoại tuyến</string>
     <string name="home_cd_profile">Mở hồ sơ và cài đặt</string>
 
-    <!-- Little Room & Props (AC-04, HOME-REV-03) -->
-    <string name="home_cd_prop_hourglass">Đang chờ: %1$s</string>
-    <string name="home_cd_prop_calendar">Cần xem lại: %1$s</string>
-    <string name="home_cd_prop_wallet">Ngân sách: %1$s</string>
-    <string name="home_cd_prop_pause_jar">Đã bỏ qua: %1$s</string>
-    <string name="home_prop_hourglass_label">Đang chờ</string>
-    <string name="home_prop_calendar_label">Cần xem lại</string>
-    <string name="home_prop_wallet_label">Ngân sách</string>
-    <string name="home_prop_pause_jar_label">Đã bỏ qua</string>
+    <!-- Budget Credit Card v2.0 (AC-03..AC-09, AC-18..AC-22) -->
+    <string name="home_budget_brand_title">CHANKO</string>
+    <string name="home_budget_brand_subtitle">SHOPPING BUDGET</string>
+    <string name="home_budget_remaining_label">Ngân sách còn lại</string>
+    <string name="home_budget_spent_summary">Đã chi %1$s / %2$s</string>
+    <string name="home_budget_over_warning">Vượt ngân sách %1$s</string>
+    <string name="home_budget_missing_price_note">Chưa đủ dữ liệu giá</string>
+    <string name="home_budget_no_budget_title">Chưa thiết lập ngân sách mua sắm</string>
+    <string name="home_budget_no_budget_subtitle">Chạm vào thẻ để đặt hạn mức và chu kỳ chi tiêu cùng Chanko nhé!</string>
+    <string name="home_budget_no_budget_cta">Thiết lập ngân sách ›</string>
+    <string name="home_budget_offline_no_cache_title">Chưa có dữ liệu ngân sách</string>
+    <string name="home_budget_offline_no_cache_subtitle">Kết nối mạng để tải dữ liệu ngân sách mua sắm của bạn.</string>
+    <string name="home_cd_budget_card">Thẻ ngân sách mua sắm. %1$s. Chạm đúp để mở chi tiết ngân sách.</string>
 
-    <!-- Budget Snapshot (AC-11, AC-12, AC-13) -->
-    <string name="home_budget_header_title">Ngân sách mua sắm</string>
-    <string name="home_budget_details_cta">Chi tiết</string>
-    <string name="home_budget_spent_label">Đã chi</string>
-    <string name="home_budget_remaining_label">Còn lại</string>
-    <string name="home_budget_over_label">Vượt hạn mức</string>
-    <string name="home_budget_status_normal">Đã chi %1$d%%</string>
-    <string name="home_budget_status_warning">Đã chi %1$d%%</string>
-    <string name="home_budget_status_reached">Chạm hạn mức 100%%</string>
-    <string name="home_budget_status_over">Vượt hạn mức %1$d%%</string>
-    <string name="home_budget_status_zero">Chưa đặt hạn mức</string>
-    <string name="home_budget_status_unknown">Chưa thiết lập ngân sách</string>
-    <string name="home_budget_unknown_value">Chưa thiết lập</string>
+    <!-- Item Journey v2.0 ("Món đồ gần đây" — AC-10..AC-17, AC-18..AC-24) -->
+    <string name="home_journey_title">Món đồ gần đây</string>
+    <string name="home_journey_see_all">Xem tất cả</string>
+    <string name="home_journey_empty_title">Hành trình cân nhắc còn trống</string>
+    <string name="home_journey_empty_subtitle">Nhấn nút + bên dưới để thêm món đồ đầu tiên cùng Chanko nhé!</string>
+    <string name="home_journey_offline_no_cache_title">Chưa có dữ liệu món đồ</string>
+    <string name="home_journey_offline_no_cache_subtitle">Kết nối mạng để đồng bộ danh sách món đồ gần đây.</string>
+    <string name="home_journey_status_saved">Đã lưu</string>
+    <string name="home_journey_status_considering">Đang cân nhắc</string>
+    <string name="home_journey_status_waiting">Đang chờ</string>
+    <string name="home_journey_status_ready">Sẵn sàng xem lại</string>
+    <string name="home_journey_status_purchased">Đã mua</string>
+    <string name="home_journey_status_skipped">Đã bỏ qua</string>
+    <string name="home_cd_journey_node">%1$s, trạng thái %2$s, giá %3$s. Chạm đúp để mở chi tiết.</string>
 
-    <!-- Những món cần chú ý (AC-09, AC-10, HOME-STATE-01, HOME-EDGE-04) -->
-    <string name="home_decisions_title">Những món cần chú ý</string>
-    <string name="home_decisions_view_all">Xem tất cả</string>
-    <string name="home_decisions_view_all_compact">Tất cả</string>
-    <string name="home_decision_status_ready">Đến hạn xem lại</string>
-    <string name="home_decision_status_expired">Vừa hết thời gian chờ</string>
-    <string name="home_decision_status_waiting">Đang chờ</string>
-    <string name="home_decision_status_considering">Đang cân nhắc</string>
-    <string name="home_decision_status_saved">Đã lưu</string>
-    <string name="home_decision_missing_price">Chưa có giá</string>
-    <string name="home_decisions_empty_title">Chưa có món nào cần chú ý</string>
-    <string name="home_decisions_empty_subtitle">Các món đến hạn xem lại hoặc đang trong thời gian chờ sẽ xuất hiện tại đây.</string>
-
-    <!-- Observation (AC-14, HOME-REV-05, HOME-OBS-01) -->
+    <!-- Observation v2.0 ("Góc nhìn từ Chanko" — AC-26, AC-27) -->
     <string name="home_observation_header">Góc nhìn từ Chanko</string>
-    <string name="home_observation_explain_cta">Giải thích thêm</string>
+    <string name="home_observation_explain_cta">Xem giải thích</string>
     <string name="home_observation_hide_cta">Ẩn gợi ý này</string>
+    <string name="home_observation_dialog_understood">Đã hiểu</string>
+    <string name="home_cd_observation_explain">Xem giải thích góc nhìn từ Chanko</string>
     <string name="home_cd_observation_dismiss">Ẩn góc nhìn từ Chanko</string>
 
-    <!-- Contextual Sheet (AC-04, AC-05, AC-06) -->
-    <string name="home_cd_close_sheet">Đóng bảng</string>
-    <string name="home_context_sheet_missing_title">Món đồ không còn khả dụng</string>
-    <string name="home_context_sheet_missing_body">Mục này đã bị xóa hoặc cập nhật ở nơi khác. Bạn có thể đóng bảng này.</string>
-    <string name="home_context_sheet_empty_waiting">Hiện chưa có món đồ nào đang trong thời gian chờ hạ nhiệt.</string>
-    <string name="home_context_sheet_empty_review">Hiện chưa có món đồ nào đến hạn cần xem lại.</string>
-    <string name="home_context_sheet_empty_skipped">Chưa có món đồ nào trong danh sách đã bỏ qua.</string>
-    <string name="home_context_sheet_primary_cta">Xem trong Món đồ</string>
-    <string name="home_context_sheet_budget_cta">Mở chi tiết ngân sách</string>
-    <string name="home_context_sheet_observation_cta">Đã hiểu</string>
-    <string name="home_context_sheet_close_cta">Đóng</string>
-
-    <!-- Section Error / Loading Fallbacks (AC-15) -->
+    <!-- Section Error / Loading Fallbacks (AC-08, AC-18, AC-22) -->
     <string name="home_section_loading">Đang tải dữ liệu…</string>
     <string name="home_section_error_budget">Tạm thời chưa tải được ngân sách</string>
-    <string name="home_section_error_decisions">Tạm thời chưa tải được danh sách món cần chú ý</string>
+    <string name="home_section_error_journey">Tạm thời chưa tải được món đồ gần đây</string>
     <string name="home_section_retry">Thử lại</string>
 </resources>

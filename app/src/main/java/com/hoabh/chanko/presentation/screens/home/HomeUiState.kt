@@ -4,8 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Immutable
 
 /**
- * Trạng thái độc lập của từng khu vực dữ liệu trên màn hình Home (Section-aware Data State).
- * Lỗi ở một section không làm toàn bộ Home chuyển sang màn hình lỗi (AC-15, HOME-EDGE-02).
+ * Trạng thái độc lập của từng khu vực dữ liệu trên màn hình Home v2.0 (ANDROID-COMPOSE-GUIDE.md, STATE-MATRIX.csv).
+ * Lỗi ở một nguồn (Budget hoặc Journey) không xóa dữ liệu của nguồn còn lại (AC-08, AC-18..AC-22).
  */
 @Immutable
 sealed interface SectionState<out T> {
@@ -20,16 +20,20 @@ sealed interface SectionState<out T> {
         val message: String = ""
     ) : SectionState<Nothing>
 
-    data class Error(
-        val message: String,
-        val canRetry: Boolean = true
+    data class OfflineNoCache(
+        val message: String = ""
     ) : SectionState<Nothing>
+
+    data class Error<T>(
+        val message: String,
+        val cachedData: T? = null,
+        val canRetry: Boolean = true
+    ) : SectionState<T>
 }
 
 enum class HomeSection {
-    LivingRoom,
     Budget,
-    Decisions,
+    Journey,
     Observation
 }
 
@@ -48,12 +52,12 @@ enum class GreetingPeriod {
 }
 
 /**
- * Mô hình trạng thái cho Khu vực 1 — Header (AC-03, AC-16, HOME-EDGE-05).
+ * Khu vực 1 — Header (AC-02, AC-20).
  */
 @Immutable
 data class HeaderUiModel(
     val userName: String = "",
-    val greetingPeriod: GreetingPeriod = GreetingPeriod.MORNING,
+    val greetingPeriod: GreetingPeriod = GreetingPeriod.EVENING,
     val isOffline: Boolean = false,
     val lastSyncedAtText: String? = null,
     val customGreeting: String? = null,
@@ -74,71 +78,21 @@ data class HeaderUiModel(
 }
 
 /**
- * Bốn vật thể tương tác trong Little Room (AC-04, HOME-REV-03):
- * - Hourglass ("Đang chờ")
- * - Calendar ("Cần xem lại")
- * - Wallet ("Ngân sách")
- * - PauseJar ("Đã bỏ qua")
- */
-enum class RoomPropKind {
-    Hourglass,
-    Calendar,
-    Wallet,
-    PauseJar
-}
-
-@Immutable
-data class RoomPropUi(
-    val kind: RoomPropKind,
-    val label: String,
-    val summaryText: String,
-    val badgeText: String? = null,
-    val itemCount: Int = 0
-)
-
-enum class DialogueTone {
-    Ready,
-    Waiting,
-    Budget,
-    Neutral,
-    Offline
-}
-
-/**
- * Bong bóng thoại ngắn bên trong Little Room (HOME-GAP-05).
- */
-@Immutable
-data class DialogueUi(
-    val headline: String,
-    val supportingLine: String? = null,
-    val tone: DialogueTone = DialogueTone.Neutral
-)
-
-/**
- * Mô hình trạng thái cho Khu vực 2 — Little Room.
- */
-@Immutable
-data class LivingRoomUi(
-    val dialogue: DialogueUi? = null,
-    val calendarMonthText: String = "OCT",
-    val calendarDayText: String = "24",
-    val props: List<RoomPropUi> = emptyList()
-)
-
-/**
- * Phân loại trạng thái ngân sách (AC-11).
+ * Phân loại trạng thái ngân sách trên Budget Credit Card v2.0 (AC-03..AC-09).
  */
 enum class BudgetStateKind {
     Normal,
     Warning,
     Reached,
     OverBudget,
-    Zero,
-    Unknown
+    NoBudget
 }
 
+/**
+ * Khu vực 2 — Budget Credit Card 3D Candy Orange (AC-03..AC-09).
+ */
 @Immutable
-data class BudgetUi(
+data class BudgetCreditCardUi(
     val cycleLabel: String,
     val spentMinor: Long?,
     val limitMinor: Long?,
@@ -148,18 +102,23 @@ data class BudgetUi(
     val percentageInt: Int?,
     val visualProgress: Float,
     val stateKind: BudgetStateKind,
+    val hasMissingPriceItems: Boolean = false,
+    val missingPriceNote: String? = null,
     val spentFormatted: String,
     val limitFormatted: String,
     val remainingFormatted: String,
-    val badgeText: String,
-    val progressRightLabel: String
+    val overWarningFormatted: String? = null,
+    val progressPercentText: String
 ) {
+    val isConfigured: Boolean
+        get() = stateKind != BudgetStateKind.NoBudget
+
     val isOverBudget: Boolean
         get() = stateKind == BudgetStateKind.OverBudget
 }
 
 /**
- * Nhận định gốc của món đồ — không tự động đổi thành BUY khi hết hạn cooling-off (AC-07).
+ * Nhận định gốc của món đồ — không tự động đổi thành BUY khi hết hạn cooling-off (AC-25).
  */
 enum class DecisionVerdict {
     WAIT,
@@ -169,34 +128,56 @@ enum class DecisionVerdict {
 }
 
 /**
- * Trạng thái phân nhóm món đồ:
- * Ready (0: Cần xem lại / Vừa hết thời gian chờ) -> Waiting (1: Đang chờ) -> Considering (2) -> Saved (3) -> Skipped (4: Đã bỏ qua)
+ * 6 trạng thái hợp lệ của node trên Item Journey v2.0 (UX-SPEC.md, DESIGN-TOKENS.json, AC-14):
+ * - Saved ("Đã lưu")
+ * - Considering ("Đang cân nhắc")
+ * - Waiting ("Đang chờ")
+ * - Ready ("Sẵn sàng xem lại")
+ * - Purchased ("Đã mua")
+ * - Skipped ("Đã bỏ qua")
  */
-enum class DecisionStatus(val priorityRank: Int) {
-    Ready(0),
-    Waiting(1),
-    Considering(2),
-    Saved(3),
-    Skipped(4)
+enum class JourneyNodeStatus(val vietnameseLabel: String) {
+    Saved("Đã lưu"),
+    Considering("Đang cân nhắc"),
+    Waiting("Đang chờ"),
+    Ready("Sẵn sàng xem lại"),
+    Purchased("Đã mua"),
+    Skipped("Đã bỏ qua")
 }
 
+/**
+ * Một node tròn (80–96dp) trên hành trình món đồ gần đây (AC-10..AC-17).
+ */
 @Immutable
-data class DecisionUi(
-    val id: String,
+data class JourneyNodeUi(
+    val itemId: String,
     val title: String,
     val priceMinor: Long?,
     val priceFormatted: String,
-    val status: DecisionStatus,
+    val status: JourneyNodeStatus,
+    val statusLabel: String = status.vietnameseLabel,
     val verdict: DecisionVerdict = DecisionVerdict.WAIT,
-    val statusLabel: String,
-    val secondaryText: String? = null,
+    val createdAtEpochMillis: Long,
     val remainingSeconds: Long? = null,
     @param:DrawableRes val thumbnailResId: Int? = null,
-    val isTimerExpiredLocally: Boolean = false
+    val imageLoadFailed: Boolean = false,
+    val isCoolingOffJustExpired: Boolean = false
 )
 
 /**
- * Khu vực 5 — Observation ("Góc nhìn từ Chanko" — AC-14, HOME-REV-05, HOME-OBS-01).
+ * Khu vực 3 — Item Journey ("Món đồ gần đây" — AC-10..AC-17).
+ */
+@Immutable
+data class ItemJourneyUi(
+    val nodes: List<JourneyNodeUi> = emptyList(),
+    val totalActiveAndHistoryCount: Int = 0
+) {
+    val connectorCount: Int
+        get() = (nodes.size - 1).coerceAtLeast(0)
+}
+
+/**
+ * Khu vực 4 — Observation ("Góc nhìn từ Chanko" — AC-26, AC-27).
  */
 @Immutable
 data class ObservationUi(
@@ -207,43 +188,6 @@ data class ObservationUi(
     val hasSufficientData: Boolean = true
 )
 
-/**
- * Ngữ cảnh của Contextual Bottom Sheet (AC-04, AC-05, AC-06).
- */
-enum class ContextKind {
-    Hourglass,
-    Calendar,
-    Wallet,
-    PauseJar,
-    Observation,
-    Decision
-}
-
-@Immutable
-sealed interface HomeSheet {
-    data class Contextual(
-        val kind: ContextKind,
-        val entityId: String? = null,
-        val title: String,
-        val subtitle: String,
-        val highlightValue: String? = null,
-        val items: List<DecisionUi> = emptyList(),
-        val explanationDetail: String? = null,
-        val evidenceText: String? = null,
-        val primaryActionLabel: String? = null,
-        val errorMessage: String? = null,
-        val isLoading: Boolean = false,
-        val isEntityMissing: Boolean = false
-    ) : HomeSheet {
-        val isEmpty: Boolean
-            get() = !isLoading &&
-                errorMessage == null &&
-                !isEntityMissing &&
-                items.isEmpty() &&
-                kind in setOf(ContextKind.Hourglass, ContextKind.Calendar, ContextKind.PauseJar)
-    }
-}
-
 enum class HomeTab {
     Home,
     Items,
@@ -251,40 +195,48 @@ enum class HomeTab {
     Insights
 }
 
-@Immutable
-data class HomeCapabilities(
-    val canOpenProfile: Boolean = true,
-    val canOpenBudgetDetails: Boolean = true,
-    val canOpenViewAll: Boolean = true,
-    val canOpenObservationExplain: Boolean = true,
-    val canHideObservation: Boolean = true
-)
-
 /**
- * Trạng thái tổng thể của màn hình Home theo Chanko Home Design Handoff v1.0 (Candy Pop 3D).
- * Thứ tự 5 khu vực: Header -> Little Room -> Những món cần chú ý -> Budget -> Observation (AC-01, AC-02).
+ * State tổng thể của HomeScreen v2.0 (AC-01..AC-31):
+ * - Thứ tự bắt buộc 4 khu vực cuộn: Header → Budget Credit Card → Item Journey → Observation.
+ * - Không còn Living Room, 4 vật thể hay HomeSheetHost của v1.0.
  */
 @Immutable
 data class HomeUiState(
-    val scenarioId: String = "S21",
     val header: HeaderUiModel = HeaderUiModel(),
-    val livingRoom: SectionState<LivingRoomUi> = SectionState.Content(LivingRoomUi()),
-    val decisionsSection: SectionState<List<DecisionUi>> = SectionState.Loading,
-    val budgetSection: SectionState<BudgetUi> = SectionState.Loading,
-    val waitingItems: List<DecisionUi> = emptyList(),
-    val reviewItems: List<DecisionUi> = emptyList(),
-    val skippedItems: List<DecisionUi> = emptyList(),
-    val totalAttentionCount: Int = 0,
-    val observation: ObservationUi? = null,
+    val budgetState: SectionState<BudgetCreditCardUi> = SectionState.Loading,
+    val journeyState: SectionState<ItemJourneyUi> = SectionState.Loading,
+    val observationState: SectionState<ObservationUi?> = SectionState.Content(null),
     val hiddenInsightIds: Set<String> = emptySet(),
-    val activeSheet: HomeSheet.Contextual? = null,
-    val selectedTab: HomeTab = HomeTab.Home,
+    val activeInsightDialog: ObservationUi? = null,
+    val activeGestureItemId: String? = null,
+    val hasPendingJourneyUpdate: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isOffline: Boolean = false,
     val isReducedMotionEnabled: Boolean = false,
-    val capabilities: HomeCapabilities = HomeCapabilities()
+    val scrollAnchorItemId: String? = null,
+    val selectedTab: HomeTab = HomeTab.Home
 ) {
-    val visibleObservation: ObservationUi?
-        get() = observation?.takeIf { it.hasSufficientData && it.id !in hiddenInsightIds }
+    val budget: BudgetCreditCardUi?
+        get() = when (val s = budgetState) {
+            is SectionState.Content -> s.data
+            is SectionState.Error -> s.cachedData
+            else -> null
+        }
 
-    val isObservationVisible: Boolean
-        get() = visibleObservation != null
+    val journeyNodes: List<JourneyNodeUi>
+        get() = when (val s = journeyState) {
+            is SectionState.Content -> s.data.nodes
+            is SectionState.Error -> s.cachedData?.nodes.orEmpty()
+            else -> emptyList()
+        }
+
+    /**
+     * Observation chỉ hiển thị khi có đủ dữ liệu thật và chưa bị ẩn theo insightId (AC-26, AC-27).
+     */
+    val visibleObservation: ObservationUi?
+        get() = (observationState as? SectionState.Content)?.data?.takeIf { obs ->
+            obs.hasSufficientData &&
+                obs.text.isNotBlank() &&
+                obs.id !in hiddenInsightIds
+        }
 }

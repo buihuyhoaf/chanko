@@ -3,171 +3,150 @@ package com.hoabh.chanko.presentation.screens.home
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
-import com.hoabh.chanko.presentation.screens.home.domain.BudgetCalculator
-import com.hoabh.chanko.presentation.screens.home.domain.DecisionRanker
-import com.hoabh.chanko.presentation.screens.home.domain.RawDecisionCandidate
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
+import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
+import com.hoabh.chanko.presentation.screens.home.domain.JourneySelector
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val fakeDataSource: HomeFakeDataSource
 ) : BaseViewModel<HomeUiState, HomeUiEffect>(
-    initialState = fakeDataSource.getStateForScenario(HomeScenario.S21)
+    initialState = fakeDataSource.getStateForScenario(
+        scenario = HomeScenario.DEFAULT_FIVE_NODES,
+        greetingPeriod = GreetingPeriod.fromHour(LocalTime.now().hour)
+    )
 ) {
+
+    // Lưu bền vững danh sách insightId đã ẩn qua các lần refresh/select scenario (AC-26)
+    private val persistentHiddenInsightIds = LinkedHashSet<String>()
+
+    // Nguồn dữ liệu ứng viên thực tế ở tầng ViewModel (bao gồm cả món thứ 6+ để bù khi xóa/archive — AC-24)
+    private var backingCandidates: MutableList<JourneyItemCandidate> =
+        fakeDataSource.defaultCandidates().toMutableList()
+
+    // Chặn double-tap phát nhiều hiệu ứng điều hướng liên tiếp (ANDROID-COMPOSE-GUIDE.md)
+    private var isNavigationInProgress: Boolean = false
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {
-            HomeUiEvent.ProfileClick -> {
-                if (uiState.value.capabilities.canOpenProfile) {
-                    sendEffect(HomeUiEffect.NavigateToProfile)
-                }
+            HomeUiEvent.AvatarTap -> {
+                emitNavigationOnce(HomeUiEffect.NavigateToProfile)
             }
 
-            is HomeUiEvent.PropTapped -> {
-                val state = uiState.value
-                val room = (state.livingRoom as? SectionState.Content)?.data
-                val prop = room?.props?.firstOrNull { it.kind == event.kind }
-                val budget = (state.budgetSection as? SectionState.Content)?.data
-                val budgetError = (state.budgetSection as? SectionState.Error)?.message
-                val decisionsError = (state.decisionsSection as? SectionState.Error)?.message
-
-                val sheet = when (event.kind) {
-                    RoomPropKind.Hourglass -> HomeSheet.Contextual(
-                        kind = ContextKind.Hourglass,
-                        entityId = RoomPropKind.Hourglass.name,
-                        title = prop?.label ?: "Đang chờ",
-                        subtitle = prop?.summaryText ?: "Các món đang trong thời gian chờ hạ nhiệt",
-                        highlightValue = prop?.badgeText,
-                        items = state.waitingItems,
-                        primaryActionLabel = "Xem trong Món đồ",
-                        errorMessage = decisionsError,
-                        isLoading = state.decisionsSection is SectionState.Loading
-                    )
-
-                    RoomPropKind.Calendar -> HomeSheet.Contextual(
-                        kind = ContextKind.Calendar,
-                        entityId = RoomPropKind.Calendar.name,
-                        title = prop?.label ?: "Cần xem lại",
-                        subtitle = prop?.summaryText ?: "Các món đã đến hạn để xem lại nhu cầu",
-                        highlightValue = prop?.badgeText,
-                        items = state.reviewItems,
-                        primaryActionLabel = "Xem món cần xem lại",
-                        errorMessage = decisionsError,
-                        isLoading = state.decisionsSection is SectionState.Loading
-                    )
-
-                    RoomPropKind.Wallet -> HomeSheet.Contextual(
-                        kind = ContextKind.Wallet,
-                        entityId = RoomPropKind.Wallet.name,
-                        title = prop?.label ?: "Ngân sách",
-                        subtitle = prop?.summaryText ?: "Tóm tắt ngân sách chu kỳ hiện tại",
-                        highlightValue = budget?.remainingFormatted,
-                        primaryActionLabel = "Mở chi tiết ngân sách",
-                        errorMessage = budgetError,
-                        isLoading = state.budgetSection is SectionState.Loading
-                    )
-
-                    RoomPropKind.PauseJar -> HomeSheet.Contextual(
-                        kind = ContextKind.PauseJar,
-                        entityId = RoomPropKind.PauseJar.name,
-                        title = prop?.label ?: "Đã bỏ qua",
-                        subtitle = prop?.summaryText ?: "Các món bạn đã chủ động bỏ qua",
-                        highlightValue = prop?.badgeText,
-                        items = state.skippedItems,
-                        primaryActionLabel = "Xem món đã bỏ qua",
-                        errorMessage = decisionsError,
-                        isLoading = state.decisionsSection is SectionState.Loading
-                    )
-                }
-
-                updateState { it.copy(activeSheet = sheet) }
+            HomeUiEvent.BudgetCardTap -> {
+                emitNavigationOnce(HomeUiEffect.NavigateToBudgetDetails)
             }
 
-            HomeUiEvent.BudgetDetailsTapped -> {
-                if (uiState.value.capabilities.canOpenBudgetDetails) {
-                    sendEffect(HomeUiEffect.NavigateToBudgetDetails)
-                }
-            }
-
-            is HomeUiEvent.CycleChanged -> {
-                // AC-13 & HOME-GAP-04: Tự động cập nhật Budget Snapshot đồng bộ khi đổi chu kỳ
-                val updatedBudget = BudgetCalculator.compute(
+            is HomeUiEvent.CycleRollover -> {
+                val updatedBudget = BudgetV2Calculator.compute(
                     cycleLabel = event.cycleLabel,
-                    spentMinor = event.spentMinor,
-                    limitMinor = event.limitMinor
+                    payNowSpentMinor = event.payNowSpentMinor,
+                    creditSpentMinor = event.creditSpentMinor,
+                    limitMinor = event.limitMinor,
+                    hasMissingPriceItems = event.hasMissingPriceItems
                 )
-                updateState { current ->
-                    val currentRoom = (current.livingRoom as? SectionState.Content)?.data
-                    val updatedProps = currentRoom?.props?.map { prop ->
-                        if (prop.kind == RoomPropKind.Wallet) {
-                            prop.copy(
-                                summaryText = "Còn lại ${updatedBudget.remainingFormatted} trong chu kỳ ${updatedBudget.cycleLabel}"
-                            )
-                        } else {
-                            prop
-                        }
+                updateState {
+                    it.copy(budgetState = SectionState.Content(updatedBudget))
+                }
+            }
+
+            is HomeUiEvent.JourneyNodeGestureStarted -> {
+                updateState {
+                    it.copy(activeGestureItemId = event.itemId)
+                }
+            }
+
+            HomeUiEvent.JourneyNodeGestureEnded -> {
+                flushPendingJourneyIfNeeded()
+            }
+
+            is HomeUiEvent.JourneyNodeTap -> {
+                val tappedId = event.itemId
+                // Kiểm tra xem món đó có vừa bị xóa/archive trong lúc đang giữ ngón tay không (AC-24, NAVIGATION-NOTES.md)
+                val stillExistsAndNotArchived = backingCandidates.any {
+                    it.itemId == tappedId && !it.isArchived
+                }
+                flushPendingJourneyIfNeeded()
+                if (stillExistsAndNotArchived) {
+                    emitNavigationOnce(HomeUiEffect.NavigateToItemDetail(tappedId))
+                }
+            }
+
+            HomeUiEvent.SeeAllTap -> {
+                // AC-16: "Xem tất cả" mở My Items thông thường (HomeMyItemsFilter.ALL), không lọc actionable
+                emitNavigationOnce(HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.ALL))
+            }
+
+            is HomeUiEvent.LiveItemAdded -> {
+                backingCandidates.removeAll { it.itemId == event.candidate.itemId }
+                backingCandidates.add(0, event.candidate)
+                applyOrQueueJourneyUpdate()
+            }
+
+            is HomeUiEvent.ItemStatusChanged -> {
+                // AC-11: Đổi trạng thái không đổi createdAt và không đổi thứ tự node
+                backingCandidates = backingCandidates.map { candidate ->
+                    if (candidate.itemId == event.itemId) {
+                        candidate.copy(statusRaw = event.newStatusRaw)
+                    } else {
+                        candidate
                     }
-                    current.copy(
-                        budgetSection = SectionState.Content(
-                            data = updatedBudget,
-                            isFromCache = current.header.isOffline
-                        ),
-                        livingRoom = if (currentRoom != null && updatedProps != null) {
-                            SectionState.Content(
-                                data = currentRoom.copy(props = updatedProps),
-                                isFromCache = current.header.isOffline
-                            )
-                        } else {
-                            current.livingRoom
-                        }
+                }.toMutableList()
+                applyOrQueueJourneyUpdate()
+            }
+
+            is HomeUiEvent.ItemArchivedOrDeleted -> {
+                // AC-24: Loại món và bù món kế tiếp; nếu đang trong gesture thì giữ snapshot dưới ngón tay
+                backingCandidates = backingCandidates.map { candidate ->
+                    if (candidate.itemId == event.itemId) {
+                        candidate.copy(isArchived = true)
+                    } else {
+                        candidate
+                    }
+                }.toMutableList()
+                applyOrQueueJourneyUpdate()
+            }
+
+            is HomeUiEvent.ReconcileCoolingOff -> {
+                // AC-25: Khi cooling-off hết hạn -> chuyển sang Ready theo domain, không tự BUY
+                backingCandidates = backingCandidates.map { candidate ->
+                    val rem = candidate.remainingSeconds
+                    if (rem != null) {
+                        candidate.copy(remainingSeconds = rem - event.elapsedSeconds.coerceAtLeast(0L))
+                    } else {
+                        candidate
+                    }
+                }.toMutableList()
+                applyOrQueueJourneyUpdate()
+            }
+
+            is HomeUiEvent.InsightExplainTap -> {
+                val obs = currentState.visibleObservation
+                if (obs != null && obs.id == event.insightId) {
+                    updateState { it.copy(activeInsightDialog = obs) }
+                }
+            }
+
+            HomeUiEvent.DismissInsightDialog -> {
+                updateState { it.copy(activeInsightDialog = null) }
+            }
+
+            is HomeUiEvent.InsightHideTap -> {
+                persistentHiddenInsightIds.add(event.insightId)
+                updateState {
+                    it.copy(
+                        hiddenInsightIds = persistentHiddenInsightIds.toSet(),
+                        activeInsightDialog = null
                     )
                 }
             }
 
-            is HomeUiEvent.DecisionTapped -> {
-                sendEffect(HomeUiEffect.NavigateToDecisionDetail(event.id))
-            }
-
-            HomeUiEvent.ViewAllTapped -> {
-                if (uiState.value.capabilities.canOpenViewAll) {
-                    sendEffect(HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.ALL))
-                }
-            }
-
-            is HomeUiEvent.ObservationExplainTapped -> {
-                if (uiState.value.capabilities.canOpenObservationExplain) {
-                    val obs = uiState.value.visibleObservation
-                    if (obs != null && obs.id == event.id) {
-                        // Hiển thị nội dung giải thích chi tiết ngay trong Contextual Sheet tại Home
-                        updateState {
-                            it.copy(
-                                activeSheet = HomeSheet.Contextual(
-                                    kind = ContextKind.Observation,
-                                    entityId = obs.id,
-                                    title = "Góc nhìn từ Chanko",
-                                    subtitle = obs.text,
-                                    explanationDetail = obs.detailedExplanation.ifEmpty { obs.text },
-                                    evidenceText = obs.evidence,
-                                    primaryActionLabel = "Đã hiểu"
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            is HomeUiEvent.ObservationHideTapped -> {
-                hideObservation(event.id)
-            }
-
-            is HomeUiEvent.ObservationDismissTapped -> {
-                hideObservation(event.id)
-            }
-
-            HomeUiEvent.GlobalAddTapped -> {
-                // AC-17 & HOME-GAP-03: Nút + khi offline thông báo cần kết nối mạng, không mở Add Item, không tạo draft
-                if (uiState.value.header.isOffline) {
+            HomeUiEvent.PlusTap -> {
+                // AC-20 & AC-29: Online mở URLInputDialog (1 lần, không đổi tab); Offline báo cần mạng và không mở dialog
+                if (currentState.isOffline || currentState.header.isOffline) {
                     sendEffect(
                         HomeUiEffect.ShowOfflineBlockedMessage(
                             "Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thêm món đồ mới."
@@ -178,163 +157,183 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            HomeUiEvent.DismissSheet -> {
-                updateState { it.copy(activeSheet = null) }
+            is HomeUiEvent.TabTap -> {
+                updateState { it.copy(selectedTab = event.tab) }
             }
 
-            is HomeUiEvent.ContextSheetPrimaryAction -> {
-                val currentSheet = uiState.value.activeSheet
-                if (currentSheet != null && !currentSheet.isEntityMissing && currentSheet.errorMessage == null) {
-                    updateState { it.copy(activeSheet = null) }
-                    when (event.kind) {
-                        ContextKind.Hourglass -> sendEffect(
-                            HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.WAITING)
+            HomeUiEvent.RefreshHome -> {
+                // AC-19 & AC-30: Giữ nguyên nội dung và vị trí cuộn/anchor hợp lệ khi đang refresh hoặc quay lại
+                isNavigationInProgress = false
+                val currentAnchor = resolveValidAnchor(currentState.scrollAnchorItemId)
+                updateState {
+                    it.copy(
+                        isRefreshing = false,
+                        scrollAnchorItemId = currentAnchor
+                    )
+                }
+            }
+
+            HomeUiEvent.SwipeRefreshHome -> {
+                isNavigationInProgress = false
+                if (currentState.isOffline || currentState.header.isOffline) {
+                    sendEffect(
+                        HomeUiEffect.ShowOfflineBlockedMessage(
+                            "Bạn đang ngoại tuyến. Dữ liệu được giữ từ lần đồng bộ gần nhất."
                         )
-                        ContextKind.Calendar -> sendEffect(
-                            HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.REVIEW)
+                    )
+                    updateState { it.copy(isRefreshing = false) }
+                } else {
+                    rebuildJourneyStateFromBacking()
+                    val currentAnchor = resolveValidAnchor(currentState.scrollAnchorItemId)
+                    updateState {
+                        it.copy(
+                            isRefreshing = false,
+                            scrollAnchorItemId = currentAnchor
                         )
-                        ContextKind.PauseJar -> sendEffect(
-                            HomeUiEffect.NavigateToMyItems(HomeMyItemsFilter.SKIPPED)
-                        )
-                        ContextKind.Wallet -> sendEffect(HomeUiEffect.NavigateToBudgetDetails)
-                        ContextKind.Observation -> Unit
-                        ContextKind.Decision -> {
-                            event.entityId?.let { id ->
-                                sendEffect(HomeUiEffect.NavigateToDecisionDetail(id))
-                            }
-                        }
                     }
                 }
             }
 
-            is HomeUiEvent.TabSelected -> {
-                updateState { it.copy(selectedTab = event.tab) }
-            }
-
-            is HomeUiEvent.ReconcileCoolingOff -> {
-                // AC-07 & AC-08: Khi thời gian trôi qua làm hết cooling-off, tự động reconcile lại
-                // cả danh sách Attention lẫn các nhóm Little Room từ cùng 1 nguồn.
-                reconcileCoolingOff(event.elapsedSeconds)
-            }
-
-            is HomeUiEvent.SetReducedMotion -> {
-                updateState { it.copy(isReducedMotionEnabled = event.enabled) }
+            HomeUiEvent.NavigationCompleted -> {
+                isNavigationInProgress = false
             }
 
             is HomeUiEvent.RetrySection -> {
-                val currentHidden = uiState.value.hiddenInsightIds
-                val baseline = fakeDataSource.getStateForScenario(
-                    scenario = HomeScenario.S21,
-                    greetingPeriod = uiState.value.header.greetingPeriod,
-                    hiddenInsightIds = currentHidden
+                val defaultBaseline = fakeDataSource.getStateForScenario(
+                    scenario = HomeScenario.DEFAULT_FIVE_NODES,
+                    greetingPeriod = currentState.header.greetingPeriod,
+                    hiddenInsightIds = persistentHiddenInsightIds
                 )
-                updateState { current ->
-                    when (event.section) {
-                        HomeSection.Budget -> current.copy(
-                            budgetSection = SectionState.Content(
-                                BudgetCalculator.compute(
-                                    cycleLabel = HomeFakeDataSource.DEFAULT_CYCLE_LABEL,
-                                    spentMinor = 2_400_000L,
-                                    limitMinor = 3_000_000L
-                                )
-                            )
-                        )
-                        HomeSection.Decisions -> current.copy(
-                            decisionsSection = baseline.decisionsSection,
-                            waitingItems = baseline.waitingItems,
-                            reviewItems = baseline.reviewItems,
-                            skippedItems = baseline.skippedItems,
-                            totalAttentionCount = baseline.totalAttentionCount
-                        )
-                        HomeSection.LivingRoom -> current.copy(
-                            livingRoom = baseline.livingRoom
-                        )
-                        HomeSection.Observation -> current
+                when (event.section) {
+                    HomeSection.Budget -> updateState {
+                        it.copy(budgetState = defaultBaseline.budgetState)
                     }
+                    HomeSection.Journey -> {
+                        backingCandidates = fakeDataSource.defaultCandidates().toMutableList()
+                        val journey = JourneySelector.selectRecentJourney(backingCandidates)
+                        updateState { state ->
+                            state.copy(
+                                journeyState = if (journey.nodes.isEmpty()) {
+                                    SectionState.Empty("Hành trình cân nhắc còn trống")
+                                } else {
+                                    SectionState.Content(journey)
+                                },
+                                scrollAnchorItemId = resolveValidAnchor(state.scrollAnchorItemId, journey.nodes)
+                            )
+                        }
+                    }
+                    HomeSection.Observation -> updateState {
+                        it.copy(observationState = defaultBaseline.observationState)
+                    }
+                }
+            }
+
+            is HomeUiEvent.SetReducedMotion -> {
+                updateState {
+                    it.copy(isReducedMotionEnabled = event.enabled)
                 }
             }
 
             is HomeUiEvent.SelectScenario -> {
-                updateState { current ->
-                    fakeDataSource.getStateForScenario(
-                        scenario = event.scenario,
-                        greetingPeriod = current.header.greetingPeriod,
-                        hiddenInsightIds = current.hiddenInsightIds
+                isNavigationInProgress = false
+                val nextState = fakeDataSource.getStateForScenario(
+                    scenario = event.scenario,
+                    greetingPeriod = currentState.header.greetingPeriod,
+                    hiddenInsightIds = persistentHiddenInsightIds
+                )
+                backingCandidates = when (val js = nextState.journeyState) {
+                    is SectionState.Content -> js.data.nodes.map { node ->
+                        JourneyItemCandidate(
+                            itemId = node.itemId,
+                            title = node.title,
+                            priceMinor = node.priceMinor,
+                            statusRaw = node.status.name,
+                            createdAtEpochMillis = node.createdAtEpochMillis,
+                            isArchived = false,
+                            remainingSeconds = node.remainingSeconds,
+                            verdict = node.verdict,
+                            thumbnailResId = node.thumbnailResId,
+                            imageLoadFailed = node.imageLoadFailed
+                        )
+                    }.toMutableList().also { list ->
+                        if (event.scenario == HomeScenario.DEFAULT_FIVE_NODES ||
+                            event.scenario == HomeScenario.DEFAULT ||
+                            event.scenario == HomeScenario.SIX_PLUS_WITH_ARCHIVED
+                        ) {
+                            // Giữ thêm món thứ 6 dự phòng để kiểm thử bù node khi xóa/archive (AC-24)
+                            val sixth = fakeDataSource.defaultCandidates().last()
+                            if (list.none { it.itemId == sixth.itemId }) {
+                                list.add(sixth)
+                            }
+                        }
+                    }
+                    else -> mutableListOf()
+                }
+                updateState {
+                    nextState.copy(
+                        isReducedMotionEnabled = currentState.isReducedMotionEnabled,
+                        hiddenInsightIds = persistentHiddenInsightIds.toSet()
                     )
                 }
             }
         }
     }
 
-    private fun hideObservation(insightId: String) {
-        if (!uiState.value.capabilities.canHideObservation) return
-        updateState { current ->
-            val updatedHidden = current.hiddenInsightIds + insightId
-            val shouldCloseSheet = current.activeSheet?.kind == ContextKind.Observation &&
-                current.activeSheet.entityId == insightId
-            current.copy(
-                hiddenInsightIds = updatedHidden,
-                activeSheet = if (shouldCloseSheet) null else current.activeSheet
+    private fun applyOrQueueJourneyUpdate() {
+        if (currentState.activeGestureItemId != null) {
+            // Đang giữ ngón tay trên node -> xếp hàng đợi cho đến khi kết thúc gesture (AC-23, AC-24)
+            updateState { it.copy(hasPendingJourneyUpdate = true) }
+        } else {
+            rebuildJourneyStateFromBacking()
+        }
+    }
+
+    private fun flushPendingJourneyIfNeeded() {
+        val hadPending = currentState.hasPendingJourneyUpdate
+        updateState {
+            it.copy(
+                activeGestureItemId = null,
+                hasPendingJourneyUpdate = false
+            )
+        }
+        if (hadPending) {
+            rebuildJourneyStateFromBacking()
+        }
+    }
+
+    private fun rebuildJourneyStateFromBacking() {
+        val journey = JourneySelector.selectRecentJourney(backingCandidates)
+        val nextSectionState = if (journey.nodes.isEmpty()) {
+            SectionState.Empty("Hành trình cân nhắc còn trống")
+        } else {
+            SectionState.Content(
+                data = journey,
+                isFromCache = currentState.isOffline
+            )
+        }
+        val validAnchor = resolveValidAnchor(currentState.scrollAnchorItemId, journey.nodes)
+        updateState {
+            it.copy(
+                journeyState = nextSectionState,
+                scrollAnchorItemId = validAnchor
             )
         }
     }
 
-    private fun reconcileCoolingOff(elapsedSeconds: Long) {
-        val current = uiState.value
-        val allItems = current.reviewItems + current.waitingItems + current.skippedItems
-        if (allItems.isEmpty()) return
-
-        val rawCandidates = allItems.map { item ->
-            val updatedRemaining = item.remainingSeconds?.let { it - elapsedSeconds }
-            val rawStatus = when (item.status) {
-                DecisionStatus.Ready -> "Ready"
-                DecisionStatus.Waiting -> "Waiting"
-                DecisionStatus.Considering -> "Considering"
-                DecisionStatus.Saved -> "Saved"
-                DecisionStatus.Skipped -> "Skipped"
-            }
-            RawDecisionCandidate(
-                id = item.id,
-                title = item.title,
-                priceMinor = item.priceMinor,
-                statusRaw = rawStatus,
-                remainingSeconds = updatedRemaining,
-                verdict = item.verdict,
-                customSecondaryText = if (updatedRemaining != null && updatedRemaining <= 0L) {
-                    null
-                } else {
-                    item.secondaryText
-                },
-                thumbnailResId = item.thumbnailResId
-            )
+    private fun resolveValidAnchor(
+        previousAnchorId: String?,
+        nodes: List<JourneyNodeUi> = currentState.journeyNodes
+    ): String? {
+        if (nodes.isEmpty()) return null
+        if (previousAnchorId != null && nodes.any { it.itemId == previousAnchorId }) {
+            return previousAnchorId
         }
+        return nodes.first().itemId
+    }
 
-        val ranking = DecisionRanker.rankAndSelectTop(rawCandidates)
-        val currentBudget = (current.budgetSection as? SectionState.Content)?.data
-        val currentRoom = (current.livingRoom as? SectionState.Content)?.data
-
-        updateState { state ->
-            state.copy(
-                livingRoom = SectionState.Content(
-                    fakeDataSource.buildLivingRoomUi(
-                        ranking = ranking,
-                        budget = currentBudget,
-                        calendarMonth = currentRoom?.calendarMonthText ?: "OCT",
-                        calendarDay = currentRoom?.calendarDayText ?: "24",
-                        dialogue = currentRoom?.dialogue
-                    ),
-                    isFromCache = state.header.isOffline
-                ),
-                decisionsSection = if (ranking.topDecisions.isEmpty()) {
-                    SectionState.Empty("Chưa có món đồ nào cần chú ý")
-                } else {
-                    SectionState.Content(ranking.topDecisions, isFromCache = state.header.isOffline)
-                },
-                waitingItems = ranking.waitingItems,
-                reviewItems = ranking.reviewItems,
-                skippedItems = ranking.skippedItems,
-                totalAttentionCount = ranking.totalValidCount
-            )
-        }
+    private fun emitNavigationOnce(effect: HomeUiEffect) {
+        if (isNavigationInProgress) return
+        isNavigationInProgress = true
+        sendEffect(effect)
     }
 }
