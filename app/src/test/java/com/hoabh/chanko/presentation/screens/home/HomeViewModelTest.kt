@@ -270,4 +270,35 @@ class HomeViewModelTest {
         viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.DEFAULT_FIVE_NODES))
         assertNull(viewModel.uiState.value.visibleObservation)
     }
+
+    @Test
+    fun `SwipeRefreshHome online updates journey state, preserves scroll anchor, and resets isRefreshing`() {
+        val anchorBefore = viewModel.uiState.value.scrollAnchorItemId
+        assertNotNull(anchorBefore)
+
+        viewModel.onEvent(HomeUiEvent.SwipeRefreshHome)
+
+        val stateAfter = viewModel.uiState.value
+        assertFalse(stateAfter.isRefreshing)
+        assertEquals(anchorBefore, stateAfter.scrollAnchorItemId)
+    }
+
+    @Test
+    fun `SwipeRefreshHome offline emits blocked message and stops isRefreshing immediately`() = runTest {
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.OFFLINE_CACHE))
+        assertTrue(viewModel.uiState.value.isOffline)
+
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        viewModel.onEvent(HomeUiEvent.SwipeRefreshHome)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isRefreshing)
+        assertEquals(1, effects.size)
+        assertTrue(effects.single() is HomeUiEffect.ShowOfflineBlockedMessage)
+        job.cancel()
+    }
 }

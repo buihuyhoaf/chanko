@@ -3,6 +3,7 @@
     <!-- Navigation (AC-20, AC-28, AC-29) -->
     <string name="home_cd_add_item">Thêm món đồ mới</string>
     <string name="home_offline_add_blocked">Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thêm món đồ mới.</string>
+    <string name="home_offline_refresh_blocked">Bạn đang ngoại tuyến. Dữ liệu được giữ từ lần đồng bộ gần nhất.</string>
 
     <!-- Header (AC-02, AC-20) -->
     <string name="home_greeting_morning_named">Chào buổi sáng, %1$s</string>

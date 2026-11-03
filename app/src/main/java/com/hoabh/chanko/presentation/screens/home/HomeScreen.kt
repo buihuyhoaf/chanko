@@ -18,8 +18,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
@@ -147,6 +151,7 @@ fun HomeRoute(
  * 4. `ObservationCard` — "Góc nhìn từ Chanko" tùy điều kiện (AC-26, AC-27)
  * (Không còn Living Room, 4 vật thể tương tác hay HomeSheetHost của v1.0).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -243,70 +248,88 @@ fun HomeScreen(
             )
         }
 
-        // 2. Danh sách cuộn LazyColumn (các card cuộn ngầm phía sau Header)
-        LazyColumn(
-            state = listState,
+        // 2. Danh sách cuộn LazyColumn bọc trong PullToRefreshBox chuẩn Material 3
+        val pullToRefreshState = rememberPullToRefreshState()
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onEvent(HomeUiEvent.SwipeRefreshHome) },
+            state = pullToRefreshState,
             modifier = Modifier
                 .widthIn(max = MaxContentWidthDp)
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(
-                start = horizontalPadding,
-                end = horizontalPadding,
-                top = expandedHeaderHeightDp + CandySpace.sm,
-                bottom = BottomNavClearanceHeight
-            ),
-            verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
+                .fillMaxSize(),
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    state = pullToRefreshState,
+                    isRefreshing = state.isRefreshing,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = expandedHeaderHeightDp),
+                    containerColor = androidx.compose.ui.graphics.Color.White,
+                    color = CandyColors.brandPurple
+                )
+            }
         ) {
-            // 2. Budget Credit Card 3D Candy Orange (AC-01, AC-03..AC-09, AC-18..AC-22)
-            item(key = "section_budget_credit_card") {
-                BudgetCreditCard(
-                    budgetState = state.budgetState,
-                    onCardClick = { onEvent(HomeUiEvent.BudgetCardTap) },
-                    onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) }
-                )
-            }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = horizontalPadding,
+                    end = horizontalPadding,
+                    top = expandedHeaderHeightDp + CandySpace.sm,
+                    bottom = BottomNavClearanceHeight
+                ),
+                verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
+            ) {
+                // 2. Budget Credit Card 3D Candy Orange (AC-01, AC-03..AC-09, AC-18..AC-22)
+                item(key = "section_budget_credit_card") {
+                    BudgetCreditCard(
+                        budgetState = state.budgetState,
+                        onCardClick = { onEvent(HomeUiEvent.BudgetCardTap) },
+                        onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) }
+                    )
+                }
 
-            // 3. Item Journey ("Món đồ gần đây" — AC-01, AC-10..AC-17, AC-23, AC-24)
-            item(key = "section_item_journey") {
-                ItemJourneySection(
-                    journeyState = state.journeyState,
-                    onNodeGestureStart = { itemId ->
-                        onEvent(HomeUiEvent.JourneyNodeGestureStarted(itemId))
-                    },
-                    onNodeGestureEnd = {
-                        onEvent(HomeUiEvent.JourneyNodeGestureEnded)
-                    },
-                    onNodeClick = { itemId ->
-                        onEvent(HomeUiEvent.JourneyNodeTap(itemId))
-                    },
-                    onSeeAllClick = {
-                        onEvent(HomeUiEvent.SeeAllTap)
-                    },
-                    onRetryClick = {
-                        onEvent(HomeUiEvent.RetrySection(HomeSection.Journey))
-                    }
-                )
-            }
-
-            // 4. Observation ("Góc nhìn từ Chanko" — tùy điều kiện — AC-01, AC-26, AC-27)
-            val observation = state.visibleObservation
-            if (observation != null) {
-                item(key = "section_observation_${observation.id}") {
-                    ObservationCard(
-                        observation = observation,
-                        onExplainClick = {
-                            onEvent(HomeUiEvent.InsightExplainTap(observation.id))
+                // 3. Item Journey ("Món đồ gần đây" — AC-01, AC-10..AC-17, AC-23, AC-24)
+                item(key = "section_item_journey") {
+                    ItemJourneySection(
+                        journeyState = state.journeyState,
+                        onNodeGestureStart = { itemId ->
+                            onEvent(HomeUiEvent.JourneyNodeGestureStarted(itemId))
                         },
-                        onHideClick = {
-                            onEvent(HomeUiEvent.InsightHideTap(observation.id))
+                        onNodeGestureEnd = {
+                            onEvent(HomeUiEvent.JourneyNodeGestureEnded)
+                        },
+                        onNodeClick = { itemId ->
+                            onEvent(HomeUiEvent.JourneyNodeTap(itemId))
+                        },
+                        onSeeAllClick = {
+                            onEvent(HomeUiEvent.SeeAllTap)
+                        },
+                        onRetryClick = {
+                            onEvent(HomeUiEvent.RetrySection(HomeSection.Journey))
                         }
                     )
                 }
-            }
 
-            item(key = "bottom_clearance") {
-                Spacer(modifier = Modifier.height(CandySpace.sm))
+                // 4. Observation ("Góc nhìn từ Chanko" — tùy điều kiện — AC-01, AC-26, AC-27)
+                val observation = state.visibleObservation
+                if (observation != null) {
+                    item(key = "section_observation_${observation.id}") {
+                        ObservationCard(
+                            observation = observation,
+                            onExplainClick = {
+                                onEvent(HomeUiEvent.InsightExplainTap(observation.id))
+                            },
+                            onHideClick = {
+                                onEvent(HomeUiEvent.InsightHideTap(observation.id))
+                            }
+                        )
+                    }
+                }
+
+                item(key = "bottom_clearance") {
+                    Spacer(modifier = Modifier.height(CandySpace.sm))
+                }
             }
         }
 

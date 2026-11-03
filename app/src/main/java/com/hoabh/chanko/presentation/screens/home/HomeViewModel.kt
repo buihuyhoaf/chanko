@@ -173,6 +173,27 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
+            HomeUiEvent.SwipeRefreshHome -> {
+                isNavigationInProgress = false
+                if (currentState.isOffline || currentState.header.isOffline) {
+                    sendEffect(
+                        HomeUiEffect.ShowOfflineBlockedMessage(
+                            "Bạn đang ngoại tuyến. Dữ liệu được giữ từ lần đồng bộ gần nhất."
+                        )
+                    )
+                    updateState { it.copy(isRefreshing = false) }
+                } else {
+                    rebuildJourneyStateFromBacking()
+                    val currentAnchor = resolveValidAnchor(currentState.scrollAnchorItemId)
+                    updateState {
+                        it.copy(
+                            isRefreshing = false,
+                            scrollAnchorItemId = currentAnchor
+                        )
+                    }
+                }
+            }
+
             HomeUiEvent.NavigationCompleted -> {
                 isNavigationInProgress = false
             }

@@ -43,6 +43,7 @@ sealed interface HomeUiEvent {
 
     // 7. Refresh, Retry, Restoration & Accessibility (AC-08, AC-19, AC-22, AC-30, AC-31)
     data object RefreshHome : HomeUiEvent
+    data object SwipeRefreshHome : HomeUiEvent
     data object NavigationCompleted : HomeUiEvent
     data class RetrySection(val section: HomeSection) : HomeUiEvent
     data class SetReducedMotion(val enabled: Boolean) : HomeUiEvent
