@@ -100,9 +100,9 @@ fun ObservationCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
             ) {
-                // Mèo Chanko trang trí bên trái (chỉ trang trí — AC-31)
+                // Mèo Chanko trang trí bên trái lấy từ bộ resource mascot_xxx (chỉ trang trí — AC-31)
                 Image(
-                    painter = painterResource(id = R.drawable.cat_mascot),
+                    painter = painterResource(id = R.drawable.mascot_admiring),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier

@@ -1,7 +1,6 @@
 package com.hoabh.chanko.presentation.screens.home.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -87,20 +84,21 @@ fun HomeHeader(
             ) {
                 Text(
                     text = "$greetingText$greetingEmoji",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 22.sp,
+                        lineHeight = 28.sp
                     ),
-                    color = CandyColors.HomeV2.textSecondary,
+                    color = CandyColors.primaryInk,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = subtitleText,
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
-                        lineHeight = 30.sp
+                        fontSize = 20.sp,
+                        lineHeight = 26.sp
                     ),
                     color = CandyColors.HomeV2.textPrimary,
                     maxLines = 3,
@@ -110,7 +108,7 @@ fun HomeHeader(
 
             Spacer(modifier = Modifier.width(CandySpace.sm))
 
-            // Profile & Settings Avatar Button (Touch target >= 48dp, AC-02 & AC-31)
+            // Profile & Settings Button dùng icon Profile chuẩn (SYS_03) để di chuyển qua màn hình Profile (AC-02 & AC-31)
             if (canOpenProfile) {
                 val profileCd = stringResource(R.string.home_cd_profile)
                 Surface(
@@ -124,24 +122,21 @@ fun HomeHeader(
                             onClick = onProfileClick
                         ),
                     shape = CircleShape,
-                    color = CandyColors.primarySoft,
-                    border = BorderStroke(2.5.dp, Color.White)
+                    color = Color.White,
+                    border = BorderStroke(2.dp, CandyColors.homeCardBorder)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(3.dp)
+                            .padding(4.dp)
                             .clip(CircleShape)
-                            .background(CandyColors.brandPurple),
+                            .background(CandyColors.primarySoft),
                         contentAlignment = Alignment.Center
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.cat_mascot),
+                        ChankoIcon(
+                            id = ChankoIconId.SYS_03,
                             contentDescription = profileCd,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 4.dp)
+                            size = 28.dp
                         )
                     }
                 }

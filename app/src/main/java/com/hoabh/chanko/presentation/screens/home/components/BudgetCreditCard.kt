@@ -212,9 +212,15 @@ private fun BudgetCreditCardContent(
                 .background(brush = cardBrush)
                 .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
         ) {
-            // Mèo Chanko trang trí bên phải thẻ (chỉ trang trí — không nhận focus TalkBack AC-31)
+            // Mèo Chanko trang trí bên phải thẻ lấy từ bộ resource mascot_xxx (chỉ trang trí — không nhận focus TalkBack AC-31)
             Image(
-                painter = painterResource(id = R.drawable.cat_mascot),
+                painter = painterResource(
+                    id = if (budget.isOverBudget) {
+                        R.drawable.mascot_worried
+                    } else {
+                        R.drawable.mascot_happy
+                    }
+                ),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier

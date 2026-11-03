@@ -1,5 +1,7 @@
 package com.hoabh.chanko.presentation.screens.home
 
+import androidx.compose.ui.unit.dp
+import com.hoabh.chanko.presentation.screens.home.components.computeCenteredZigZagLayout
 import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
@@ -227,5 +229,26 @@ class HomeDomainLogicTest {
         assertEquals(JourneyNodeStatus.Ready, node.status)
         assertTrue(node.isCoolingOffJustExpired)
         assertEquals(DecisionVerdict.WAIT, node.verdict)
+    }
+
+    @Test
+    fun `Centered ZigZag layout keeps nodes centered and side mascots non-overlapping across 320dp to 412dp`() {
+        listOf(296.dp, 360.dp, 380.dp).forEach { containerWidth ->
+            val layout = computeCenteredZigZagLayout(maxWidth = containerWidth, nodeCount = 5)
+            val nodeRadius = layout.nodeDiameter / 2
+
+            // Đường trung tâm của cặp ziczac phải trùng với chính giữa màn hình (containerWidth / 2)
+            val minCenterX = layout.nodeCenters.minOf { it.first }
+            val maxCenterX = layout.nodeCenters.maxOf { it.first }
+            val midPoint = (minCenterX + maxCenterX) / 2
+            assertEquals(containerWidth.value / 2f, midPoint.value, 0.01f)
+
+            // Mèo bên trái (0..mascotSize) và mèo bên phải (containerWidth - mascotSize..containerWidth)
+            // không được chồng lấn vào biên ngoài của các node ziczac ở giữa
+            val leftmostNodeEdge = minCenterX - nodeRadius
+            val rightmostNodeEdge = maxCenterX + nodeRadius
+            assertTrue(layout.mascotSize <= leftmostNodeEdge)
+            assertTrue(containerWidth - layout.mascotSize >= rightmostNodeEdge)
+        }
     }
 }

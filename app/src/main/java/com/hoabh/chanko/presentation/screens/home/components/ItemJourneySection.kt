@@ -240,6 +240,78 @@ private fun ItemJourneyHeader(
     }
 }
 
+/**
+ * Kết quả tính toán bố cục đường ziczac ở GIỮA màn hình kèm 2 chú mèo hai bên trái/phải.
+ */
+data class CenteredZigZagLayoutDp(
+    val canvasCenterX: Dp,
+    val nodeDiameter: Dp,
+    val mascotSize: Dp,
+    val nodeCenters: List<Pair<Dp, Dp>>,
+    val totalHeight: Dp
+)
+
+/**
+ * Tính toán toạ độ đường ziczac nằm cân đối ở chính giữa (`maxWidth / 2`),
+ * đảm bảo 2 chú mèo bên trái và bên phải không bao giờ chồng lấn vào vùng chạm của các node.
+ */
+fun computeCenteredZigZagLayout(
+    maxWidth: Dp,
+    nodeCount: Int
+): CenteredZigZagLayoutDp {
+    val count = nodeCount.coerceIn(1, 5)
+    val isCompactWidth = maxWidth < 340.dp
+    // Đường kính node clamp trong 80..96dp theo đúng DESIGN-TOKENS.json & AC-13
+    val nodeDiameter: Dp = when {
+        isCompactWidth -> 80.dp
+        maxWidth < 390.dp -> 84.dp
+        else -> 88.dp
+    }
+    val nodeRadius: Dp = nodeDiameter / 2
+    val verticalStep: Dp = if (isCompactWidth) 74.dp else 80.dp
+    val topPadding: Dp = 8.dp
+    val bottomPadding: Dp = 12.dp
+
+    val canvasCenterX: Dp = maxWidth / 2
+    val zigZagAmplitude: Dp = when {
+        count <= 1 -> 0.dp
+        isCompactWidth -> 16.dp
+        else -> 24.dp
+    }
+    val leftCenterX: Dp = canvasCenterX - zigZagAmplitude
+    val rightCenterX: Dp = canvasCenterX + zigZagAmplitude
+
+    val nodeCenters: List<Pair<Dp, Dp>> = (0 until count).map { index ->
+        val centerX = when {
+            count <= 1 -> canvasCenterX
+            index % 2 == 0 -> rightCenterX
+            else -> leftCenterX
+        }
+        val centerY = topPadding + nodeRadius + (verticalStep * index)
+        centerX to centerY
+    }
+
+    // Khoảng trống mỗi bên từ mép màn hình tới mép ngoài của node gần nhất
+    val availableSideClearance: Dp = (leftCenterX - nodeRadius - 6.dp).coerceAtLeast(60.dp)
+    val preferredMascotSize: Dp = when {
+        isCompactWidth -> 72.dp
+        count == 1 -> 92.dp
+        else -> 96.dp
+    }
+    val mascotSize: Dp = minOf(preferredMascotSize, availableSideClearance)
+
+    val lastNodeBottom = (nodeCenters.lastOrNull()?.second ?: nodeRadius) + nodeRadius + bottomPadding
+    val totalHeight: Dp = maxOf(lastNodeBottom, mascotSize + 24.dp)
+
+    return CenteredZigZagLayoutDp(
+        canvasCenterX = canvasCenterX,
+        nodeDiameter = nodeDiameter,
+        mascotSize = mascotSize,
+        nodeCenters = nodeCenters,
+        totalHeight = totalHeight
+    )
+}
+
 @Composable
 private fun ItemJourneyZigZagCanvas(
     nodes: List<JourneyNodeUi>,
@@ -255,37 +327,15 @@ private fun ItemJourneyZigZagCanvas(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val isCompactWidth = maxWidth < 360.dp
-        // Đường kính node clamp trong 80..96dp theo đúng DESIGN-TOKENS.json & AC-13
-        val nodeDiameter: Dp = when {
-            isCompactWidth -> 80.dp
-            maxWidth < 400.dp -> 88.dp
-            else -> 92.dp
-        }
-        val nodeRadius: Dp = nodeDiameter / 2
-        val verticalStep: Dp = if (isCompactWidth) 74.dp else 80.dp
-        val topPadding: Dp = 8.dp
-        val bottomPadding: Dp = 12.dp
-
-        // Tọa độ tâm X ziczac ở nửa bên trái (nhường khoảng trống bên phải cho mascot Chanko — AC-13, AC-17):
-        // Node chẵn (0, 2, 4) nằm ở cột giữa-trái; Node lẻ (1, 3) nằm ở cột sát trái.
-        val farLeftCenterX: Dp = nodeRadius + 10.dp
-        val midLeftCenterX: Dp = (maxWidth * if (isCompactWidth) 0.44f else 0.46f)
-            .coerceAtLeast(farLeftCenterX + nodeDiameter * 0.72f)
-
-        val nodeCentersDp: List<Pair<Dp, Dp>> = visibleNodes.indices.map { index ->
-            val centerX = if (index % 2 == 0) midLeftCenterX else farLeftCenterX
-            val centerY = topPadding + nodeRadius + (verticalStep * index)
-            centerX to centerY
-        }
-
-        val lastNodeBottom = (nodeCentersDp.lastOrNull()?.second ?: nodeRadius) + nodeRadius + bottomPadding
-        val mascotSize: Dp = when {
-            isCompactWidth -> 108.dp
-            visibleNodes.size == 1 -> 112.dp
-            else -> 144.dp
-        }
-        val totalHeight: Dp = maxOf(lastNodeBottom, mascotSize + 24.dp)
+        val layout = computeCenteredZigZagLayout(
+            maxWidth = maxWidth,
+            nodeCount = visibleNodes.size
+        )
+        val nodeDiameter = layout.nodeDiameter
+        val nodeRadius = nodeDiameter / 2
+        val nodeCentersDp = layout.nodeCenters
+        val mascotSize = layout.mascotSize
+        val totalHeight = layout.totalHeight
 
         Box(
             modifier = Modifier
@@ -331,29 +381,56 @@ private fun ItemJourneyZigZagCanvas(
                 }
             }
 
-            // 2. Mascot Chanko canonical xuất hiện đúng 1 lần bên phải, cuộn cùng Journey và không nhận pointer (AC-17, AC-31)
-            val mascotTopOffset = if (visibleNodes.size <= 2) {
+            // 2. Hai chú mèo Chanko (mascot_xxx) đứng hai bên trái & phải đường ziczac ở giữa, không che vùng chạm node (AC-17, AC-31)
+            val leftMascotTopOffset = if (visibleNodes.size <= 2) {
                 (totalHeight - mascotSize) / 2
             } else {
-                totalHeight * 0.30f
+                totalHeight * 0.16f
             }
+            val rightMascotTopOffset = if (visibleNodes.size <= 2) {
+                (totalHeight - mascotSize) / 2
+            } else {
+                totalHeight * 0.52f
+            }
+
+            // Chú mèo bên trái (mascot_hopeful_upward)
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(y = mascotTopOffset)
-                    .padding(end = if (isCompactWidth) 0.dp else 4.dp)
+                    .align(Alignment.TopStart)
+                    .offset(y = leftMascotTopOffset)
                     .clearAndSetSemantics {}
             ) {
-                // Đế bóng elip tím nhạt dưới chân mascot
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .size(width = mascotSize * 0.72f, height = 16.dp)
+                        .size(width = mascotSize * 0.70f, height = 14.dp)
                         .clip(CircleShape)
                         .background(CandyColors.primarySoft)
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.cat_mascot),
+                    painter = painterResource(id = R.drawable.mascot_hopeful_upward),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(mascotSize)
+                )
+            }
+
+            // Chú mèo bên phải (mascot_playful_right)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(y = rightMascotTopOffset)
+                    .clearAndSetSemantics {}
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .size(width = mascotSize * 0.70f, height = 14.dp)
+                        .clip(CircleShape)
+                        .background(CandyColors.primarySoft)
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.mascot_playful_right),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(mascotSize)
@@ -622,7 +699,7 @@ private fun ItemJourneyEmptyState(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(CandySpace.sm)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cat_mascot),
+                painter = painterResource(id = R.drawable.mascot_curious_front),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
