@@ -541,7 +541,7 @@ private fun DecorativeContactlessWaves(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BudgetCreditCardStatusFrame(
+internal fun BudgetCreditCardStatusFrame(
     title: String,
     subtitle: String,
     actionLabel: String?,
@@ -617,7 +617,7 @@ private fun BudgetCreditCardStatusFrame(
 }
 
 @Composable
-private fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
+internal fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
