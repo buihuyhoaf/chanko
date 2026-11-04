@@ -24,6 +24,7 @@ fun BudgetRoute(
     onBackClick: () -> Unit,
     onNavigateToItemDetail: (Int) -> Unit = {},
     expandHistory: Boolean = false,
+    openCyclePicker: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: BudgetViewModel = hiltViewModel()
 ) {
@@ -33,6 +34,9 @@ fun BudgetRoute(
     val context = LocalContext.current
     LaunchedEffect(expandHistory) {
         if (expandHistory) viewModel.onEvent(BudgetUiEvent.ToggleHistoryAccordion(isExpanded = true))
+    }
+    LaunchedEffect(openCyclePicker) {
+        if (openCyclePicker) viewModel.onEvent(BudgetUiEvent.OpenCyclePicker)
     }
 
     CollectEffect(effectFlow = viewModel.effect) { effect ->

@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.hoabh.chanko.domain.budget.model.BudgetActivity
 import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
+import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.domain.budget.model.CreditCard
@@ -72,17 +73,25 @@ data class BudgetUiState(
 
     val isCurrentCycle: Boolean get() = selectedCycle?.isCurrent == true
 
+    val isUpcomingCycle: Boolean
+        get() = selectedCycle?.status == BudgetCycleStatus.UpcomingUnconfigured ||
+                selectedCycle?.status == BudgetCycleStatus.UpcomingConfigured
+
+    val isClosedCycle: Boolean
+        get() = selectedCycle?.status == BudgetCycleStatus.Closed
+
     /**
      * Quyền ghi tập trung (Centralized Reducer):
-     * Chỉ cho phép ghi khi: Đang online AND Thuộc chu kỳ hiện tại AND Không loading AND Không submitting.
+     * Cho phép ghi khi: Đang online AND (Thuộc chu kỳ hiện tại OR Chu kỳ sắp tới) AND Không loading AND Không submitting.
+     * Với chu kỳ đã đóng (Closed): Không cho phép chỉnh sửa ngân sách (ReadOnly).
      */
-    val canWrite: Boolean get() = isOnline && isCurrentCycle && !isLoading && !isSubmitting
+    val canWrite: Boolean get() = isOnline && (isCurrentCycle || isUpcomingCycle) && !isLoading && !isSubmitting
 
     /** Lý do khóa chỉnh sửa hiển thị trên C03/C04/C05/C06/C07/C08 khi !canWrite. */
     val writeDisabledReason: String?
         get() = when {
             !isOnline -> "Kết nối mạng để chỉnh sửa"
-            selectedCycle != null && !isCurrentCycle -> "Chỉ chỉnh sửa trong chu kỳ hiện tại"
+            selectedCycle != null && !isCurrentCycle && !isUpcomingCycle -> "Chỉ chỉnh sửa trong chu kỳ hiện tại"
             else -> null
         }
 

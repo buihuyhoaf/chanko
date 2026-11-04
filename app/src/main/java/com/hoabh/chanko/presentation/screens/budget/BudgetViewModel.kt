@@ -7,6 +7,7 @@ import com.hoabh.chanko.data.budget.InMemorySharedItemResolver
 import com.hoabh.chanko.domain.budget.model.BudgetActivityType
 import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
+import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.model.CardColor
 import com.hoabh.chanko.domain.budget.model.CreditCard
@@ -36,7 +37,7 @@ class BudgetViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel<BudgetUiState, BudgetUiEffect>(
     BudgetUiState(
-        selectedCycleId = savedStateHandle.get<String>(KEY_SELECTED_CYCLE_ID),
+        selectedCycleId = savedStateHandle.get<String>(KEY_SELECTED_CYCLE_ID) ?: savedStateHandle.get<String>("cycleId"),
         editBudgetDraft = savedStateHandle.get<String>(KEY_EDIT_BUDGET_DRAFT) ?: "",
         addCardDraft = savedStateHandle.get<String>(KEY_ADD_CARD_DRAFT) ?: "",
         renameCardDraft = savedStateHandle.get<String>(KEY_RENAME_CARD_DRAFT) ?: ""
@@ -104,13 +105,21 @@ class BudgetViewModel @Inject constructor(
     private fun observeAvailableCycles() {
         repository.getAvailableCycles()
             .onEach { cycles ->
+                val requestedMode = savedStateHandle.get<String>("mode")
                 val restoredCycleId = savedStateHandle.get<String>(KEY_SELECTED_CYCLE_ID)
+                    ?: savedStateHandle.get<String>("cycleId")
                     ?: currentState.selectedCycleId
                     ?: currentState.selectedCycle?.id
 
-                val selected = cycles.firstOrNull { it.id == restoredCycleId }
-                    ?: cycles.firstOrNull { it.isCurrent }
-                    ?: cycles.firstOrNull()
+                val selected = if (requestedMode == "SetupNext" && restoredCycleId == null) {
+                    cycles.firstOrNull { it.status == BudgetCycleStatus.UpcomingUnconfigured || it.status == BudgetCycleStatus.UpcomingConfigured }
+                        ?: cycles.firstOrNull { it.isCurrent }
+                        ?: cycles.firstOrNull()
+                } else {
+                    cycles.firstOrNull { it.id == restoredCycleId }
+                        ?: cycles.firstOrNull { it.isCurrent }
+                        ?: cycles.firstOrNull()
+                }
 
                 val previousCycleId = currentState.selectedCycle?.id
                 if (selected != null) {
@@ -127,6 +136,23 @@ class BudgetViewModel @Inject constructor(
 
                 if (selected != null && (selected.id != previousCycleId || currentState.snapshot == null)) {
                     loadCycleData(selected)
+                }
+
+                if (requestedMode == "SetupNext" && currentState.currentSheet == null && selected != null) {
+                    savedStateHandle["mode"] = null
+                    val currentLimit = selected.configuredLimitMinor ?: currentState.snapshot?.budgetMinor ?: 0L
+                    val initialText = if (currentLimit > 0L) MoneyVnd.formatWithoutSymbol(currentLimit) else ""
+                    savedStateHandle[KEY_EDIT_BUDGET_DRAFT] = initialText
+                    updateState {
+                        it.copy(
+                            editBudgetInitialText = initialText,
+                            editBudgetDraft = initialText,
+                            editBudgetBaseRevision = currentState.snapshot?.revision ?: 1,
+                            editBudgetInlineError = null,
+                            hasEditBudgetConflict = false
+                        )
+                    }
+                    navigateToSheet(BudgetSheetDestination.EditBudget(currentLimit))
                 }
             }
             .launchIn(viewModelScope)
@@ -565,7 +591,8 @@ class BudgetViewModel @Inject constructor(
 
     private fun submitBudgetLimit(newLimitMinor: Long) {
         val cycle = currentState.selectedCycle ?: return
-        val currentSnap = currentState.snapshot ?: return
+        val isUpcoming = cycle.status == BudgetCycleStatus.UpcomingUnconfigured ||
+                cycle.status == BudgetCycleStatus.UpcomingConfigured
 
         if (!currentState.canWrite) return
 
@@ -576,14 +603,19 @@ class BudgetViewModel @Inject constructor(
                     editBudgetInlineError = null
                 )
             }
-            val expectedRevision = currentState.editBudgetBaseRevision ?: currentSnap.revision
-            val result = repository.updateBudgetLimit(cycle.id, newLimitMinor, expectedRevision)
+            val expectedRevision = currentState.editBudgetBaseRevision ?: currentState.snapshot?.revision ?: 1
+            val result = if (isUpcoming) {
+                repository.setupNextCycleBudget(newLimitMinor)
+            } else {
+                repository.updateBudgetLimit(cycle.id, newLimitMinor, expectedRevision)
+            }
             updateState { it.copy(isSubmitting = false) }
 
             result.onSuccess {
                 clearCurrentFormDraft()
                 popSheet()
-                sendEffect(BudgetUiEffect.ShowSnackbar("Đã cập nhật ngân sách"))
+                val successMsg = if (isUpcoming) "Đã thiết lập ngân sách kỳ tới" else "Đã cập nhật ngân sách"
+                sendEffect(BudgetUiEffect.ShowSnackbar(successMsg))
             }.onFailure { error ->
                 if (error is BudgetConflictException) {
                     val conflictMsg = "Ngân sách đã thay đổi. Tải lại để chỉnh sửa."
