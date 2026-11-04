@@ -220,9 +220,9 @@ class HomeFakeDataSource @Inject constructor() {
                 val overCarousel = (base.budgetCarouselState as? SectionState.Content)?.data?.let { cur ->
                     BudgetCarouselMapper.map(
                         window = TriCycleWindow(
-                            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, 1, BudgetCycleStatus.Closed),
-                            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 2, BudgetCycleStatus.Active, 5_000_000L),
-                            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 3, BudgetCycleStatus.UpcomingUnconfigured)
+                            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, -1, BudgetCycleStatus.Closed),
+                            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, 5_000_000L),
+                            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
                         ),
                         snapshots = mapOf(
                             "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),
@@ -333,9 +333,9 @@ class HomeFakeDataSource @Inject constructor() {
         )
         val journey = JourneySelector.selectRecentJourney(defaultCandidates())
         val defaultWindow = TriCycleWindow(
-            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, 1, BudgetCycleStatus.Closed),
-            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 2, BudgetCycleStatus.Active, configuredLimitMinor = 5_000_000L),
-            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 3, BudgetCycleStatus.UpcomingUnconfigured)
+            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, -1, BudgetCycleStatus.Closed),
+            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, configuredLimitMinor = 5_000_000L),
+            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
         )
         val defaultSnapshots = mapOf(
             "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),

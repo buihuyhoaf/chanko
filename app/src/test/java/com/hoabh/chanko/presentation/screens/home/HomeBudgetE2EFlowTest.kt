@@ -122,7 +122,7 @@ class HomeBudgetE2EFlowTest {
         val configuredNext = updatedNextSlot as BudgetCardSlotUi.UpcomingConfiguredCard
         assertEquals(7_500_000L, configuredNext.limitMinor)
         assertEquals("7.500.000 ₫", configuredNext.limitFormatted)
-        assertEquals(3, configuredNext.themeOrdinal) // ordinal 3 -> floorMod(3, 12) = 3
+        assertEquals(1, configuredNext.themeOrdinal) // ordinal 1 -> floorMod(1, 12) = 1
     }
 
     @Test
@@ -145,7 +145,7 @@ class HomeBudgetE2EFlowTest {
         val activeCurrent = currentSlot as BudgetCardSlotUi.ActiveCard
         assertEquals("cycle_2026_11", activeCurrent.cycleId)
         assertEquals(6_000_000L, activeCurrent.limitMinor)
-        assertEquals(3, activeCurrent.themeOrdinal)
+        assertEquals(1, activeCurrent.themeOrdinal)
     }
 
     @Test

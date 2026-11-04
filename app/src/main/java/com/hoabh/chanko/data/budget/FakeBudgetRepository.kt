@@ -73,7 +73,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 endDate = "31/10/2026",
                 isCurrent = true,
                 anchorDay = 1,
-                ordinal = 2,
+                ordinal = 0,
                 status = BudgetCycleStatus.Active
             ),
             BudgetCycle(
@@ -83,7 +83,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 endDate = "30/09/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = 1,
+                ordinal = -1,
                 status = BudgetCycleStatus.Closed
             ),
             BudgetCycle(
@@ -93,7 +93,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 endDate = "31/08/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = 0,
+                ordinal = -2,
                 status = BudgetCycleStatus.Closed
             ),
             BudgetCycle(
@@ -103,7 +103,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 endDate = "30/11/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = 3,
+                ordinal = 1,
                 status = BudgetCycleStatus.UpcomingUnconfigured
             )
         )

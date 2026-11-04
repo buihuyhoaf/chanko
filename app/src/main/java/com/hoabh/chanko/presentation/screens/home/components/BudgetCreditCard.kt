@@ -172,12 +172,13 @@ private fun BudgetCreditCardContent(
     val cardCd = stringResource(R.string.home_cd_budget_card, fullSummaryDescription)
 
     val cardBrush = remember {
-        Brush.verticalGradient(
+        Brush.linearGradient(
             colors = listOf(
-                CandyColors.HomeV2.candyOrangeHighlight,
                 CandyColors.HomeV2.candyOrange,
                 CandyColors.HomeV2.candyOrangeShadow
-            )
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(900f, 650f)
         )
     }
 
@@ -549,12 +550,13 @@ internal fun BudgetCreditCardStatusFrame(
     modifier: Modifier = Modifier
 ) {
     val cardBrush = remember {
-        Brush.verticalGradient(
+        Brush.linearGradient(
             colors = listOf(
-                CandyColors.HomeV2.candyOrangeHighlight,
                 CandyColors.HomeV2.candyOrange,
                 CandyColors.HomeV2.candyOrangeShadow
-            )
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(900f, 650f)
         )
     }
 
@@ -755,6 +757,9 @@ private fun ActiveCardContent(
         append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
     }
 
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
     val cardBrush = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
     }
@@ -766,8 +771,8 @@ private fun ActiveCardContent(
             .shadow(
                 elevation = 8.dp,
                 shape = CreditCardCornerShape,
-                ambientColor = Color.Black.copy(alpha = 0.15f),
-                spotColor = Color.Black.copy(alpha = 0.2f)
+                ambientColor = theme.dark.copy(alpha = 0.35f),
+                spotColor = theme.dark.copy(alpha = 0.45f)
             )
             .clip(CreditCardCornerShape)
             .clickable(
@@ -783,7 +788,8 @@ private fun ActiveCardContent(
                 )
             },
         shape = CreditCardCornerShape,
-        color = Color.Transparent
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
             modifier = Modifier
@@ -952,6 +958,9 @@ private fun ClosedCardContent(
         append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
     }
 
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
     val cardBrush = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
     }
@@ -963,8 +972,8 @@ private fun ClosedCardContent(
             .shadow(
                 elevation = 6.dp,
                 shape = CreditCardCornerShape,
-                ambientColor = Color.Black.copy(alpha = 0.12f),
-                spotColor = Color.Black.copy(alpha = 0.15f)
+                ambientColor = theme.dark.copy(alpha = 0.25f),
+                spotColor = theme.dark.copy(alpha = 0.35f)
             )
             .clip(CreditCardCornerShape)
             .clickable(
@@ -980,7 +989,8 @@ private fun ClosedCardContent(
                 )
             },
         shape = CreditCardCornerShape,
-        color = Color.Transparent
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
             modifier = Modifier
@@ -988,6 +998,23 @@ private fun ClosedCardContent(
                 .background(brush = cardBrush)
                 .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
         ) {
+            Image(
+                painter = painterResource(
+                    id = if (slot.isOverBudget) {
+                        R.drawable.mascot_worried
+                    } else {
+                        R.drawable.mascot_happy
+                    }
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(96.dp)
+                    .offset(x = 6.dp, y = 4.dp)
+                    .clearAndSetSemantics {}
+            )
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
@@ -1117,6 +1144,9 @@ private fun UpcomingConfiguredCardContent(
 ) {
     val cardCd = "Thẻ ngân sách sắp tới, ${slot.cycleLabel}. Hạn mức dự kiến: ${slot.limitFormatted}. Chạm để xem hoặc chỉnh sửa."
 
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
     val cardBrush = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
     }
@@ -1128,8 +1158,8 @@ private fun UpcomingConfiguredCardContent(
             .shadow(
                 elevation = 6.dp,
                 shape = CreditCardCornerShape,
-                ambientColor = Color.Black.copy(alpha = 0.12f),
-                spotColor = Color.Black.copy(alpha = 0.15f)
+                ambientColor = theme.dark.copy(alpha = 0.25f),
+                spotColor = theme.dark.copy(alpha = 0.35f)
             )
             .clip(CreditCardCornerShape)
             .clickable(
@@ -1141,7 +1171,8 @@ private fun UpcomingConfiguredCardContent(
                 role = Role.Button
             },
         shape = CreditCardCornerShape,
-        color = Color.Transparent
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
             modifier = Modifier
@@ -1149,6 +1180,17 @@ private fun UpcomingConfiguredCardContent(
                 .background(brush = cardBrush)
                 .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.mascot_happy),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(96.dp)
+                    .offset(x = 6.dp, y = 4.dp)
+                    .clearAndSetSemantics {}
+            )
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween

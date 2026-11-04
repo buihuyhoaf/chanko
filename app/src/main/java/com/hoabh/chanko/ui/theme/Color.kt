@@ -190,10 +190,10 @@ private object CandyPalette {
     val Slate400 = Color(0xFF9E97AD)
 
     // Home v2.2 - 12 Candy Gradient Themes & Neutral Placeholder (Chanko-Home-v2.2-Implementation)
-    // 01 Tangerine
-    val TangerineLight = Color(0xFFFFCB83)
-    val TangerineMain = Color(0xFFFF963C)
-    val TangerineDark = Color(0xFFE86C25)
+    // 01 Tangerine (Signature CandyOrange: #FFD49A -> #FFB665 -> #F59145)
+    val TangerineLight = Color(0xFFFFD49A)
+    val TangerineMain = Color(0xFFFFB665)
+    val TangerineDark = Color(0xFFF59145)
 
     // 02 Lavender
     val LavenderThemeLight = Color(0xFFE2CEFF)
