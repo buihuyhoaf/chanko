@@ -552,7 +552,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             snapshotsState,
             isOnlineState,
             isOfflineUncachedState
-        ) { cycles, _, isOnline, isOfflineUncached ->
+        ) { cycles, snapshots, isOnline, isOfflineUncached ->
             if (!isOnline && isOfflineUncached) {
                 throw BudgetNoOfflineCacheException()
             }
@@ -579,6 +579,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 previous = previous,
                 current = current,
                 next = next,
+                snapshots = snapshots,
                 lastSyncedAt = initialDataTimestamp
             )
         }

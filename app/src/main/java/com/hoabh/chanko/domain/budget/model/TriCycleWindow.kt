@@ -10,6 +10,7 @@ data class TriCycleWindow(
     val previous: BudgetCycle?,
     val current: BudgetCycle,
     val next: BudgetCycle,
+    val snapshots: Map<String, BudgetSnapshot> = emptyMap(),
     val lastSyncedAt: Long? = null
 ) {
     /**

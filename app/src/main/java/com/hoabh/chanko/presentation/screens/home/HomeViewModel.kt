@@ -64,7 +64,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }
                 .collect { window ->
-                    val carousel = BudgetCarouselMapper.map(window)
+                    val carousel = BudgetCarouselMapper.map(window, window.snapshots)
                     updateState {
                         it.copy(budgetCarouselState = SectionState.Content(carousel))
                     }
