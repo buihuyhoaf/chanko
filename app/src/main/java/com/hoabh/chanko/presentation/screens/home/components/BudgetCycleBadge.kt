@@ -25,7 +25,8 @@ private val BadgeCornerShape = RoundedCornerShape(999.dp)
 @Composable
 fun BudgetCycleBadge(
     role: BudgetCardRole,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cycleLabel: String? = null
 ) {
     val (labelRes, containerColor, textColor) = when (role) {
         BudgetCardRole.Previous -> Triple(
@@ -50,6 +51,12 @@ fun BudgetCycleBadge(
         )
     }
 
+    val displayText = if (!cycleLabel.isNullOrBlank()) {
+        "$cycleLabel · ${stringResource(labelRes)}"
+    } else {
+        stringResource(labelRes)
+    }
+
     Box(
         modifier = modifier
             .clip(BadgeCornerShape)
@@ -57,13 +64,14 @@ fun BudgetCycleBadge(
             .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Text(
-            text = stringResource(labelRes),
+            text = displayText,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
                 letterSpacing = 0.5.sp
             ),
-            color = textColor
+            color = textColor,
+            maxLines = 1
         )
     }
 }

@@ -423,17 +423,18 @@ private fun CreditCardTopBar(
     ) {
         // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET + Huy hiệu trạng thái
         Row(
+            modifier = Modifier.weight(1f, fill = false),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativePawMark(modifier = Modifier.size(28.dp))
+            DecorativePawMark(modifier = Modifier.size(24.dp))
             Column {
                 Text(
                     text = stringResource(R.string.home_budget_brand_title),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        letterSpacing = 0.6.sp
+                        fontSize = 16.sp,
+                        letterSpacing = 0.5.sp
                     ),
                     color = Color.White
                 )
@@ -441,22 +442,23 @@ private fun CreditCardTopBar(
                     text = stringResource(R.string.home_budget_brand_subtitle),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.5.sp
+                        fontSize = 9.sp,
+                        letterSpacing = 0.4.sp
                     ),
-                    color = Color.White
+                    color = Color.White.copy(alpha = 0.85f)
                 )
             }
+            Spacer(modifier = Modifier.width(2.dp))
             badge?.invoke()
         }
 
         // Bên phải: Chip vàng EMV + Sóng Contactless
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativeGoldChip(modifier = Modifier.size(width = 36.dp, height = 26.dp))
-            DecorativeContactlessWaves(modifier = Modifier.size(22.dp))
+            DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
+            DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -818,7 +820,12 @@ private fun ActiveCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
-                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.Current) })
+                CreditCardTopBar(badge = {
+                    BudgetCycleBadge(
+                        role = BudgetCardRole.Current,
+                        cycleLabel = slot.cycleLabel
+                    )
+                })
 
                 Spacer(modifier = Modifier.height(CandySpace.xs))
 
@@ -893,43 +900,14 @@ private fun ActiveCardContent(
 
                 Spacer(modifier = Modifier.height(2.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_01,
-                        contentDescription = null,
-                        size = 16.dp
-                    )
-                    Text(
-                        text = spentSummaryText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_05,
-                        contentDescription = null,
-                        size = 16.dp
-                    )
-                    Text(
-                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = spentSummaryText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.9f)
+                )
             }
         }
     }
@@ -1019,7 +997,12 @@ private fun ClosedCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
-                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.Previous) })
+                CreditCardTopBar(badge = {
+                    BudgetCycleBadge(
+                        role = BudgetCardRole.Previous,
+                        cycleLabel = slot.cycleLabel
+                    )
+                })
 
                 Spacer(modifier = Modifier.height(CandySpace.xs))
 
@@ -1094,43 +1077,14 @@ private fun ClosedCardContent(
 
                 Spacer(modifier = Modifier.height(2.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_01,
-                        contentDescription = null,
-                        size = 16.dp
-                    )
-                    Text(
-                        text = spentSummaryText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_05,
-                        contentDescription = null,
-                        size = 16.dp
-                    )
-                    Text(
-                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = spentSummaryText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.9f)
+                )
             }
         }
     }
@@ -1195,7 +1149,12 @@ private fun UpcomingConfiguredCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.NextConfigured) })
+                CreditCardTopBar(badge = {
+                    BudgetCycleBadge(
+                        role = BudgetCardRole.NextConfigured,
+                        cycleLabel = slot.cycleLabel
+                    )
+                })
 
                 Spacer(modifier = Modifier.height(CandySpace.sm))
 
@@ -1222,26 +1181,7 @@ private fun UpcomingConfiguredCardContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(CandySpace.md))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_05,
-                        contentDescription = null,
-                        size = 16.dp
-                    )
-                    Text(
-                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White
-                    )
-                }
+                Spacer(modifier = Modifier.height(CandySpace.sm))
             }
         }
     }
