@@ -118,6 +118,129 @@ data class BudgetCreditCardUi(
 }
 
 /**
+ * Vai trò của từng thẻ trong Carousel (Home v2.2 - BC22-01..BC22-07).
+ */
+enum class BudgetCardRole {
+    Previous,
+    Current,
+    NextConfigured,
+    NextPlaceholder
+}
+
+/**
+ * Biến thể của các slot thẻ hiển thị trên BudgetCreditCardCarousel (Home v2.2).
+ */
+sealed interface BudgetCardSlotUi {
+    val key: String
+    val cycleId: String
+    val role: BudgetCardRole
+    val cycleLabel: String
+    val dateRangeText: String
+    val themeOrdinal: Int
+
+    /** Kỳ trước đã kết thúc (read-only, BC22-10) */
+    data class ClosedCard(
+        override val key: String,
+        override val cycleId: String,
+        override val cycleLabel: String,
+        override val dateRangeText: String,
+        override val themeOrdinal: Int,
+        val spentMinor: Long,
+        val limitMinor: Long,
+        val remainingMinor: Long,
+        val overMinor: Long? = null,
+        val clampedProgress: Float,
+        val realPercentText: String,
+        val isOverBudget: Boolean,
+        val spentFormatted: String,
+        val limitFormatted: String,
+        val remainingFormatted: String,
+        val overFormatted: String? = null
+    ) : BudgetCardSlotUi {
+        override val role: BudgetCardRole = BudgetCardRole.Previous
+    }
+
+    /** Kỳ hiện tại đang diễn ra (BC22-11) */
+    data class ActiveCard(
+        override val key: String,
+        override val cycleId: String,
+        override val cycleLabel: String,
+        override val dateRangeText: String,
+        override val themeOrdinal: Int,
+        val spentMinor: Long,
+        val limitMinor: Long,
+        val remainingMinor: Long,
+        val overMinor: Long? = null,
+        val clampedProgress: Float,
+        val realPercentText: String,
+        val isOverBudget: Boolean,
+        val spentFormatted: String,
+        val limitFormatted: String,
+        val remainingFormatted: String,
+        val overFormatted: String? = null,
+        val hasMissingPriceItems: Boolean = false,
+        val missingPriceNote: String? = null
+    ) : BudgetCardSlotUi {
+        override val role: BudgetCardRole = BudgetCardRole.Current
+    }
+
+    /** Kỳ tiếp theo đã cấu hình hạn mức dự kiến (BC22-07) */
+    data class UpcomingConfiguredCard(
+        override val key: String,
+        override val cycleId: String,
+        override val cycleLabel: String,
+        override val dateRangeText: String,
+        override val themeOrdinal: Int,
+        val limitMinor: Long,
+        val limitFormatted: String
+    ) : BudgetCardSlotUi {
+        override val role: BudgetCardRole = BudgetCardRole.NextConfigured
+    }
+
+    /** Kỳ tiếp theo chưa cấu hình - thẻ trung tính viền nét đứt (BC22-05) */
+    data class UpcomingPlaceholderCard(
+        override val key: String,
+        override val cycleId: String,
+        override val cycleLabel: String,
+        override val dateRangeText: String,
+        override val themeOrdinal: Int = 0
+    ) : BudgetCardSlotUi {
+        override val role: BudgetCardRole = BudgetCardRole.NextPlaceholder
+    }
+
+    /** Kỳ hiện tại chưa có ngân sách (Empty state) */
+    data class CurrentEmptyCard(
+        override val key: String,
+        override val cycleId: String,
+        override val cycleLabel: String,
+        override val dateRangeText: String,
+        override val themeOrdinal: Int = 0
+    ) : BudgetCardSlotUi {
+        override val role: BudgetCardRole = BudgetCardRole.Current
+    }
+}
+
+/**
+ * State của Carousel 3 vị trí trên HomeScreen v2.2 (BC22-01..BC22-20).
+ */
+@Immutable
+data class BudgetCarouselUi(
+    val slots: List<BudgetCardSlotUi>,
+    val selectedSlotKey: String,
+    val currentCycleKey: String,
+    val lastSyncedAtText: String? = null
+) {
+    val currentSlot: BudgetCardSlotUi?
+        get() = slots.firstOrNull { it.key == currentCycleKey } ?: slots.firstOrNull { it.role == BudgetCardRole.Current }
+
+    val selectedSlot: BudgetCardSlotUi?
+        get() = slots.firstOrNull { it.key == selectedSlotKey } ?: currentSlot
+
+    val hasPrevious: Boolean
+        get() = slots.any { it.role == BudgetCardRole.Previous }
+}
+
+/**
  * Nhận định gốc của món đồ — không tự động đổi thành BUY khi hết hạn cooling-off (AC-25).
  */
 enum class DecisionVerdict {
@@ -204,6 +327,7 @@ enum class HomeTab {
 data class HomeUiState(
     val header: HeaderUiModel = HeaderUiModel(),
     val budgetState: SectionState<BudgetCreditCardUi> = SectionState.Loading,
+    val budgetCarouselState: SectionState<BudgetCarouselUi> = SectionState.Loading,
     val journeyState: SectionState<ItemJourneyUi> = SectionState.Loading,
     val observationState: SectionState<ObservationUi?> = SectionState.Content(null),
     val hiddenInsightIds: Set<String> = emptySet(),
