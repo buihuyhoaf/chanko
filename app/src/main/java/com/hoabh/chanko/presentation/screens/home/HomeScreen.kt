@@ -1,10 +1,12 @@
 package com.hoabh.chanko.presentation.screens.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -13,14 +15,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -35,20 +41,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.screens.home.components.BudgetCreditCard
+import com.hoabh.chanko.presentation.screens.home.components.BudgetCreditCardCarousel
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeader
 import com.hoabh.chanko.presentation.screens.home.components.HomeHeaderTokens
 import com.hoabh.chanko.presentation.screens.home.components.InsightExplanationDialog
@@ -74,6 +87,9 @@ fun HomeRoute(
     onAddNewItemClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onBudgetDetailsClick: () -> Unit = {},
+    onNavigateToBudget: (cycleId: String?, mode: String) -> Unit = { _, _ -> },
+    onNavigateToBudgetHistory: () -> Unit = {},
+    onNavigateToBudgetSetup: (targetCycleId: String?) -> Unit = {},
     onNavigateToItemDetail: (Int) -> Unit = {},
     onNavigateToMyItems: (HomeMyItemsFilter) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
@@ -89,11 +105,12 @@ fun HomeRoute(
         state.scrollAnchorItemId.orEmpty()
     }
 
-    // Khi quay lại Home (ON_RESUME), làm mới dữ liệu liên quan và giữ nguyên scroll (AC-19, AC-30)
+    // Khi quay lại Home (ON_RESUME), làm mới dữ liệu liên quan, giữ nguyên scroll và snap carousel về Current (AC-19, AC-30, BC22-02)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onEvent(HomeUiEvent.RefreshHome)
+                viewModel.onEvent(HomeUiEvent.HomeEntered)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -112,6 +129,9 @@ fun HomeRoute(
                 }
             }
             HomeUiEffect.NavigateToBudgetDetails -> onBudgetDetailsClick()
+            is HomeUiEffect.NavigateToBudget -> onNavigateToBudget(effect.cycleId, effect.mode)
+            HomeUiEffect.NavigateToBudgetHistory -> onNavigateToBudgetHistory()
+            is HomeUiEffect.NavigateToBudgetSetup -> onNavigateToBudgetSetup(effect.targetCycleId)
             is HomeUiEffect.NavigateToItemDetail -> {
                 val numericId = effect.itemId.filter { it.isDigit() }.toIntOrNull()
                     ?: (effect.itemId.hashCode() and 0x7FFFFFFF)
@@ -273,19 +293,60 @@ fun HomeScreen(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    start = horizontalPadding,
-                    end = horizontalPadding,
                     top = expandedHeaderHeightDp + CandySpace.sm,
                     bottom = BottomNavClearanceHeight
                 ),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.lg)
             ) {
-                // 2. Budget Credit Card 3D Candy Orange (AC-01, AC-03..AC-09, AC-18..AC-22)
+                // 2. Budget Section: Header + Carousel v2.2 (BC22-01..BC22-24)
+                item(key = "section_budget_header") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.home_budget_section_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 20.sp
+                            ),
+                            color = CandyColors.HomeV2.textPrimary
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable(
+                                    role = Role.Button,
+                                    onClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) }
+                                )
+                                .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Text(
+                                text = "${stringResource(R.string.home_budget_see_all)} ›",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = CandyColors.brandPurple
+                            )
+                        }
+                    }
+                }
+
                 item(key = "section_budget_credit_card") {
-                    BudgetCreditCard(
-                        budgetState = state.budgetState,
-                        onCardClick = { onEvent(HomeUiEvent.BudgetCardTap) },
-                        onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) }
+                    BudgetCreditCardCarousel(
+                        carouselState = state.budgetCarouselState,
+                        onCardClick = { onEvent(HomeUiEvent.BudgetSlotTap(it)) },
+                        onSlotChanged = { onEvent(HomeUiEvent.BudgetSlotChanged(it)) },
+                        onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) },
+                        resetToCurrentTrigger = state.carouselResetTrigger,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
@@ -293,6 +354,7 @@ fun HomeScreen(
                 item(key = "section_item_journey") {
                     ItemJourneySection(
                         journeyState = state.journeyState,
+                        modifier = Modifier.padding(horizontal = horizontalPadding),
                         onNodeGestureStart = { itemId ->
                             onEvent(HomeUiEvent.JourneyNodeGestureStarted(itemId))
                         },
@@ -317,6 +379,7 @@ fun HomeScreen(
                     item(key = "section_observation_${observation.id}") {
                         ObservationCard(
                             observation = observation,
+                            modifier = Modifier.padding(horizontal = horizontalPadding),
                             onExplainClick = {
                                 onEvent(HomeUiEvent.InsightExplainTap(observation.id))
                             },

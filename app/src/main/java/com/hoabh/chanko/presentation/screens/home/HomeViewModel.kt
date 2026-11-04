@@ -1,18 +1,26 @@
 package com.hoabh.chanko.presentation.screens.home
 
+import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
+import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetCarouselMapper
 import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
 import com.hoabh.chanko.presentation.screens.home.domain.JourneySelector
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val fakeDataSource: HomeFakeDataSource
+    private val fakeDataSource: HomeFakeDataSource,
+    private val budgetRepository: BudgetRepository? = null
 ) : BaseViewModel<HomeUiState, HomeUiEffect>(
     initialState = fakeDataSource.getStateForScenario(
         scenario = HomeScenario.DEFAULT_FIVE_NODES,
@@ -30,14 +38,103 @@ class HomeViewModel @Inject constructor(
     // Chặn double-tap phát nhiều hiệu ứng điều hướng liên tiếp (ANDROID-COMPOSE-GUIDE.md)
     private var isNavigationInProgress: Boolean = false
 
+    private var budgetObserveJob: Job? = null
+
+    init {
+        observeBudgetRepository()
+    }
+
+    private fun observeBudgetRepository() {
+        val repo = budgetRepository ?: return
+        budgetObserveJob?.cancel()
+        budgetObserveJob = viewModelScope.launch {
+            repo.observeTriCycleWindow()
+                .catch { e ->
+                    if (e is BudgetNoOfflineCacheException) {
+                        updateState { it.copy(budgetCarouselState = SectionState.OfflineNoCache(e.message ?: "")) }
+                    } else {
+                        updateState {
+                            it.copy(
+                                budgetCarouselState = SectionState.Error(
+                                    message = e.message ?: "Tạm thời chưa tải được ngân sách",
+                                    canRetry = true
+                                )
+                            )
+                        }
+                    }
+                }
+                .collect { window ->
+                    val carousel = BudgetCarouselMapper.map(window)
+                    updateState {
+                        it.copy(budgetCarouselState = SectionState.Content(carousel))
+                    }
+                }
+        }
+    }
+
     fun onEvent(event: HomeUiEvent) {
         when (event) {
+            HomeUiEvent.HomeEntered -> {
+                isNavigationInProgress = false
+                updateState {
+                    it.copy(carouselResetTrigger = it.carouselResetTrigger + 1)
+                }
+            }
+
             HomeUiEvent.AvatarTap -> {
                 emitNavigationOnce(HomeUiEffect.NavigateToProfile)
             }
 
             HomeUiEvent.BudgetCardTap -> {
                 emitNavigationOnce(HomeUiEffect.NavigateToBudgetDetails)
+            }
+
+            HomeUiEvent.BudgetSeeAllTap -> {
+                emitNavigationOnce(HomeUiEffect.NavigateToBudgetHistory)
+            }
+
+            is HomeUiEvent.BudgetSlotTap -> {
+                when (val slot = event.slot) {
+                    is BudgetCardSlotUi.UpcomingPlaceholderCard -> {
+                        if (currentState.isOffline || currentState.header.isOffline) {
+                            sendEffect(
+                                HomeUiEffect.ShowOfflineBlockedMessage(
+                                    "Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thiết lập ngân sách."
+                                )
+                            )
+                        } else {
+                            emitNavigationOnce(HomeUiEffect.NavigateToBudgetSetup(slot.cycleId))
+                        }
+                    }
+                    is BudgetCardSlotUi.ClosedCard -> {
+                        emitNavigationOnce(HomeUiEffect.NavigateToBudget(cycleId = slot.cycleId, mode = "ReadOnly"))
+                    }
+                    is BudgetCardSlotUi.ActiveCard -> {
+                        emitNavigationOnce(HomeUiEffect.NavigateToBudget(cycleId = slot.cycleId, mode = "Active"))
+                    }
+                    is BudgetCardSlotUi.UpcomingConfiguredCard -> {
+                        emitNavigationOnce(HomeUiEffect.NavigateToBudget(cycleId = slot.cycleId, mode = "Upcoming"))
+                    }
+                    is BudgetCardSlotUi.CurrentEmptyCard -> {
+                        emitNavigationOnce(HomeUiEffect.NavigateToBudget(cycleId = slot.cycleId, mode = "Active"))
+                    }
+                }
+            }
+
+            is HomeUiEvent.BudgetSlotChanged -> {
+                updateState { state ->
+                    val currentCarousel = (state.budgetCarouselState as? SectionState.Content)?.data
+                    if (currentCarousel != null) {
+                        state.copy(
+                            budgetCarouselState = SectionState.Content(
+                                data = currentCarousel.copy(selectedSlotKey = event.slotKey),
+                                isFromCache = (state.budgetCarouselState as? SectionState.Content)?.isFromCache ?: false
+                            )
+                        )
+                    } else {
+                        state
+                    }
+                }
             }
 
             is HomeUiEvent.CycleRollover -> {
@@ -205,8 +302,17 @@ class HomeViewModel @Inject constructor(
                     hiddenInsightIds = persistentHiddenInsightIds
                 )
                 when (event.section) {
-                    HomeSection.Budget -> updateState {
-                        it.copy(budgetState = defaultBaseline.budgetState)
+                    HomeSection.Budget -> {
+                        if (budgetRepository != null) {
+                            observeBudgetRepository()
+                        } else {
+                            updateState {
+                                it.copy(
+                                    budgetState = defaultBaseline.budgetState,
+                                    budgetCarouselState = defaultBaseline.budgetCarouselState
+                                )
+                            }
+                        }
                     }
                     HomeSection.Journey -> {
                         backingCandidates = fakeDataSource.defaultCandidates().toMutableList()

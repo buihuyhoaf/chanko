@@ -338,7 +338,8 @@ data class HomeUiState(
     val isOffline: Boolean = false,
     val isReducedMotionEnabled: Boolean = false,
     val scrollAnchorItemId: String? = null,
-    val selectedTab: HomeTab = HomeTab.Home
+    val selectedTab: HomeTab = HomeTab.Home,
+    val carouselResetTrigger: Long = 0L
 ) {
     val budget: BudgetCreditCardUi?
         get() = when (val s = budgetState) {

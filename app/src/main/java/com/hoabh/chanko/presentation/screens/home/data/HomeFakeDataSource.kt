@@ -1,6 +1,10 @@
 package com.hoabh.chanko.presentation.screens.home.data
 
 import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.budget.model.BudgetCycle
+import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
+import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.TriCycleWindow
 import com.hoabh.chanko.presentation.screens.home.DecisionVerdict
 import com.hoabh.chanko.presentation.screens.home.GreetingPeriod
 import com.hoabh.chanko.presentation.screens.home.HeaderUiModel
@@ -8,6 +12,7 @@ import com.hoabh.chanko.presentation.screens.home.HomeTab
 import com.hoabh.chanko.presentation.screens.home.HomeUiState
 import com.hoabh.chanko.presentation.screens.home.ObservationUi
 import com.hoabh.chanko.presentation.screens.home.SectionState
+import com.hoabh.chanko.presentation.screens.home.domain.BudgetCarouselMapper
 import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
 import com.hoabh.chanko.presentation.screens.home.domain.JourneySelector
@@ -108,6 +113,7 @@ class HomeFakeDataSource @Inject constructor() {
 
             HomeScenario.INITIAL_LOADING -> base.copy(
                 budgetState = SectionState.Loading,
+                budgetCarouselState = SectionState.Loading,
                 journeyState = SectionState.Loading,
                 observationState = SectionState.Content(null)
             )
@@ -171,14 +177,27 @@ class HomeFakeDataSource @Inject constructor() {
                     creditSpentMinor = null,
                     limitMinor = null
                 )
+                val noBudgetCarousel = BudgetCarouselMapper.map(
+                    window = TriCycleWindow(
+                        previous = null,
+                        current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, null),
+                        next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
+                    ),
+                    snapshots = emptyMap()
+                )
                 base.copy(
-                    budgetState = SectionState.Content(noBudget)
+                    budgetState = SectionState.Content(noBudget),
+                    budgetCarouselState = SectionState.Content(noBudgetCarousel)
                 )
             }
 
             HomeScenario.BUDGET_ERROR,
             HomeScenario.PARTIAL_ERROR -> base.copy(
                 budgetState = SectionState.Error(
+                    message = "Tạm thời chưa tải được ngân sách",
+                    canRetry = true
+                ),
+                budgetCarouselState = SectionState.Error(
                     message = "Tạm thời chưa tải được ngân sách",
                     canRetry = true
                 )
@@ -198,8 +217,22 @@ class HomeFakeDataSource @Inject constructor() {
                     creditSpentMinor = 1_450_000L,
                     limitMinor = 5_000_000L
                 )
+                val overCarousel = (base.budgetCarouselState as? SectionState.Content)?.data?.let { cur ->
+                    BudgetCarouselMapper.map(
+                        window = TriCycleWindow(
+                            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, 1, BudgetCycleStatus.Closed),
+                            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 2, BudgetCycleStatus.Active, 5_000_000L),
+                            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 3, BudgetCycleStatus.UpcomingUnconfigured)
+                        ),
+                        snapshots = mapOf(
+                            "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),
+                            "c" to BudgetSnapshot("c", 5_000_000L, 5_650_000L)
+                        )
+                    )
+                }
                 base.copy(
-                    budgetState = SectionState.Content(overBudget)
+                    budgetState = SectionState.Content(overBudget),
+                    budgetCarouselState = if (overCarousel != null) SectionState.Content(overCarousel) else base.budgetCarouselState
                 )
             }
 
@@ -224,6 +257,7 @@ class HomeFakeDataSource @Inject constructor() {
 
             HomeScenario.OFFLINE_CACHE -> {
                 val cachedBudget = (base.budgetState as SectionState.Content).data
+                val cachedCarousel = (base.budgetCarouselState as? SectionState.Content)?.data
                 val cachedJourney = (base.journeyState as SectionState.Content).data
                 base.copy(
                     isOffline = true,
@@ -232,6 +266,7 @@ class HomeFakeDataSource @Inject constructor() {
                         lastSyncedAtText = "Đồng bộ lúc 21:15"
                     ),
                     budgetState = SectionState.Content(cachedBudget, isFromCache = true),
+                    budgetCarouselState = if (cachedCarousel != null) SectionState.Content(cachedCarousel, isFromCache = true) else base.budgetCarouselState,
                     journeyState = SectionState.Content(cachedJourney, isFromCache = true)
                 )
             }
@@ -243,6 +278,7 @@ class HomeFakeDataSource @Inject constructor() {
                     lastSyncedAtText = null
                 ),
                 budgetState = SectionState.OfflineNoCache("Chưa có dữ liệu ngân sách"),
+                budgetCarouselState = SectionState.OfflineNoCache("Chưa có dữ liệu ngân sách"),
                 journeyState = SectionState.OfflineNoCache("Chưa có dữ liệu món đồ"),
                 observationState = SectionState.Content(null)
             )
@@ -296,6 +332,17 @@ class HomeFakeDataSource @Inject constructor() {
             hasMissingPriceItems = false
         )
         val journey = JourneySelector.selectRecentJourney(defaultCandidates())
+        val defaultWindow = TriCycleWindow(
+            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, 1, BudgetCycleStatus.Closed),
+            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 2, BudgetCycleStatus.Active, configuredLimitMinor = 5_000_000L),
+            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 3, BudgetCycleStatus.UpcomingUnconfigured)
+        )
+        val defaultSnapshots = mapOf(
+            "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),
+            "c" to BudgetSnapshot("c", 5_000_000L, 2_650_000L)
+        )
+        val defaultCarousel = BudgetCarouselMapper.map(defaultWindow, defaultSnapshots)
+
         val observation = ObservationUi(
             id = DEFAULT_INSIGHT_ID,
             text = "Tuần này bạn đã thêm 3 món mới. Hãy cho bản thân thêm thời gian cân nhắc nhé! 💜",
@@ -312,6 +359,7 @@ class HomeFakeDataSource @Inject constructor() {
                 lastSyncedAtText = null
             ),
             budgetState = SectionState.Content(budget),
+            budgetCarouselState = SectionState.Content(defaultCarousel),
             journeyState = SectionState.Content(journey),
             observationState = SectionState.Content(observation),
             hiddenInsightIds = hiddenInsightIds,
