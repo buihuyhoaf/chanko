@@ -3,9 +3,11 @@ package com.hoabh.chanko.data.budget
 import com.hoabh.chanko.domain.budget.model.BudgetActivity
 import com.hoabh.chanko.domain.budget.model.BudgetActivityType
 import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
+import com.hoabh.chanko.domain.budget.model.BudgetCalculation
 import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
+import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
 import com.hoabh.chanko.domain.budget.model.BudgetLoadException
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
@@ -24,6 +26,7 @@ import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
 import com.hoabh.chanko.domain.budget.model.ReservedCardNameException
+import com.hoabh.chanko.domain.budget.model.TriCycleWindow
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +55,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     val currentCycleId = "cycle_2026_10"
     val pastCycleId = "cycle_2026_09"
     val pastUncachedCycleId = "cycle_2026_08"
+    val nextCycleId = "cycle_2026_11"
 
     // Default data timestamp (fixed base or current time when data was last synced)
     private val initialDataTimestamp = 1_761_708_600_000L // 2025-10-29 10:30
@@ -68,7 +72,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 startDate = "01/10/2026",
                 endDate = "31/10/2026",
                 isCurrent = true,
-                anchorDay = 1
+                anchorDay = 1,
+                ordinal = 2,
+                status = BudgetCycleStatus.Active
             ),
             BudgetCycle(
                 id = pastCycleId,
@@ -76,7 +82,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 startDate = "01/09/2026",
                 endDate = "30/09/2026",
                 isCurrent = false,
-                anchorDay = 1
+                anchorDay = 1,
+                ordinal = 1,
+                status = BudgetCycleStatus.Closed
             ),
             BudgetCycle(
                 id = pastUncachedCycleId,
@@ -84,7 +92,19 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 startDate = "01/08/2026",
                 endDate = "31/08/2026",
                 isCurrent = false,
-                anchorDay = 1
+                anchorDay = 1,
+                ordinal = 0,
+                status = BudgetCycleStatus.Closed
+            ),
+            BudgetCycle(
+                id = nextCycleId,
+                label = "Tháng 11/2026",
+                startDate = "01/11/2026",
+                endDate = "30/11/2026",
+                isCurrent = false,
+                anchorDay = 1,
+                ordinal = 3,
+                status = BudgetCycleStatus.UpcomingUnconfigured
             )
         )
     )
@@ -522,5 +542,172 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             if (it.id == cardId) it.copy(isArchived = true) else it
         }
         return Result.success(Unit)
+    }
+
+    // --- Home v2.2 Budget Carousel Integration (BC22-01..BC22-20) ---
+
+    override fun observeTriCycleWindow(): Flow<TriCycleWindow> {
+        return combine(
+            cyclesState,
+            snapshotsState,
+            isOnlineState,
+            isOfflineUncachedState
+        ) { cycles, _, isOnline, isOfflineUncached ->
+            if (!isOnline && isOfflineUncached) {
+                throw BudgetNoOfflineCacheException()
+            }
+
+            val current = cycles.firstOrNull { it.isCurrent }
+                ?: cycles.firstOrNull { it.status == BudgetCycleStatus.Active }
+                ?: cycles.first()
+
+            val previous = cycles.firstOrNull { it.ordinal == current.ordinal - 1 }
+
+            val next = cycles.firstOrNull { it.ordinal == current.ordinal + 1 }
+                ?: BudgetCycle(
+                    id = "cycle_next_${current.ordinal + 1}",
+                    label = "Chu kỳ tiếp theo",
+                    startDate = "",
+                    endDate = "",
+                    isCurrent = false,
+                    anchorDay = current.anchorDay,
+                    ordinal = current.ordinal + 1,
+                    status = BudgetCycleStatus.UpcomingUnconfigured
+                )
+
+            TriCycleWindow(
+                previous = previous,
+                current = current,
+                next = next,
+                lastSyncedAt = initialDataTimestamp
+            )
+        }
+    }
+
+    override suspend fun setupNextCycleBudget(limitMinor: Long): Result<Unit> {
+        if (!isOnlineState.value) {
+            return Result.failure(BudgetOfflineException())
+        }
+        if (limitMinor <= 0L) {
+            return Result.failure(InvalidBudgetAmountException())
+        }
+
+        val current = cyclesState.value.firstOrNull { it.isCurrent }
+            ?: return Result.failure(BudgetLoadException())
+        val nextOrdinal = current.ordinal + 1
+        val nextCycle = cyclesState.value.firstOrNull { it.ordinal == nextOrdinal }
+            ?: BudgetCycle(
+                id = nextCycleId,
+                label = "Tháng 11/2026",
+                startDate = "01/11/2026",
+                endDate = "30/11/2026",
+                isCurrent = false,
+                anchorDay = current.anchorDay,
+                ordinal = nextOrdinal,
+                status = BudgetCycleStatus.UpcomingUnconfigured
+            )
+
+        val updatedNext = nextCycle.copy(
+            status = BudgetCycleStatus.UpcomingConfigured,
+            configuredLimitMinor = limitMinor
+        )
+
+        val existingIndex = cyclesState.value.indexOfFirst { it.ordinal == nextOrdinal }
+        val newCycles = if (existingIndex >= 0) {
+            cyclesState.value.toMutableList().apply { set(existingIndex, updatedNext) }
+        } else {
+            cyclesState.value + updatedNext
+        }
+        cyclesState.value = newCycles
+
+        val updatedSnapshots = snapshotsState.value.toMutableMap().apply {
+            put(
+                updatedNext.id,
+                BudgetSnapshot(
+                    cycleId = updatedNext.id,
+                    budgetMinor = limitMinor,
+                    spentMinor = 0L,
+                    revision = 1,
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
+        }
+        snapshotsState.value = updatedSnapshots
+
+        return Result.success(Unit)
+    }
+
+    override suspend fun triggerRollover(): Result<Unit> {
+        val current = cyclesState.value.firstOrNull { it.isCurrent }
+            ?: return Result.failure(BudgetLoadException())
+        val nextOrdinal = current.ordinal + 1
+        val next = cyclesState.value.firstOrNull { it.ordinal == nextOrdinal }
+            ?: BudgetCycle(
+                id = nextCycleId,
+                label = "Tháng 11/2026",
+                startDate = "01/11/2026",
+                endDate = "30/11/2026",
+                isCurrent = false,
+                anchorDay = current.anchorDay,
+                ordinal = nextOrdinal,
+                status = BudgetCycleStatus.UpcomingUnconfigured
+            )
+
+        val oldWindow = TriCycleWindow(
+            previous = cyclesState.value.firstOrNull { it.ordinal == current.ordinal - 1 },
+            current = current,
+            next = next
+        )
+
+        val futureOrdinal = nextOrdinal + 1
+        val newNextCycle = BudgetCycle(
+            id = "cycle_future_$futureOrdinal",
+            label = "Tháng 12/2026",
+            startDate = "01/12/2026",
+            endDate = "31/12/2026",
+            isCurrent = false,
+            anchorDay = current.anchorDay,
+            ordinal = futureOrdinal,
+            status = BudgetCycleStatus.UpcomingUnconfigured
+        )
+
+        val newWindow = BudgetCalculation.performRollover(oldWindow, newNextCycle)
+
+        val updatedCycles = cyclesState.value.map { cycle ->
+            when (cycle.id) {
+                newWindow.previous?.id -> newWindow.previous!!
+                newWindow.current.id -> newWindow.current
+                else -> cycle
+            }
+        }.toMutableList()
+
+        if (updatedCycles.none { it.id == newWindow.next.id }) {
+            updatedCycles.add(newWindow.next)
+        }
+        cyclesState.value = updatedCycles
+
+        if (newWindow.current.configuredLimitMinor != null) {
+            val limit = newWindow.current.configuredLimitMinor!!
+            val newSnapshots = snapshotsState.value.toMutableMap().apply {
+                put(
+                    newWindow.current.id,
+                    BudgetSnapshot(
+                        cycleId = newWindow.current.id,
+                        budgetMinor = limit,
+                        spentMinor = 0L,
+                        revision = 1,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                )
+            }
+            snapshotsState.value = newSnapshots
+        }
+
+        return Result.success(Unit)
+    }
+
+    fun setNoPreviousCycleForTesting() {
+        val current = cyclesState.value.first { it.isCurrent }
+        cyclesState.value = cyclesState.value.filter { it.ordinal >= current.ordinal }
     }
 }

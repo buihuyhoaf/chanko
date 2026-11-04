@@ -24,17 +24,88 @@ class FakeBudgetRepositoryTest {
     }
 
     @Test
-    fun `getAvailableCycles returns current, cached past, and uncached past cycles`() = runTest {
+    fun `getAvailableCycles returns current, cached past, uncached past, and upcoming cycles`() = runTest {
         val cycles = repository.getAvailableCycles().first()
-        assertEquals(3, cycles.size)
+        assertEquals(4, cycles.size)
         assertTrue(cycles[0].isCurrent)
         assertFalse(cycles[1].isCurrent)
         assertFalse(cycles[2].isCurrent)
+        assertFalse(cycles[3].isCurrent)
 
         val cachedIds = repository.getOfflineCachedCycleIds().first()
         assertTrue(repository.currentCycleId in cachedIds)
         assertTrue(repository.pastCycleId in cachedIds)
         assertFalse(repository.pastUncachedCycleId in cachedIds)
+    }
+
+    @Test
+    fun `observeTriCycleWindow returns window with previous, current, and next slots`() = runTest {
+        val window = repository.observeTriCycleWindow().first()
+        assertTrue(window.hasPrevious)
+        assertEquals(repository.pastCycleId, window.previous?.id)
+        assertEquals(repository.currentCycleId, window.current.id)
+        assertEquals(repository.nextCycleId, window.next.id)
+        assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingUnconfigured, window.next.status)
+    }
+
+    @Test
+    fun `observeTriCycleWindow without previous cycle omits previous slot`() = runTest {
+        repository.setNoPreviousCycleForTesting()
+        val window = repository.observeTriCycleWindow().first()
+        assertFalse(window.hasPrevious)
+        org.junit.Assert.assertNull(window.previous)
+        assertEquals(2, window.slots.size)
+    }
+
+    @Test
+    fun `setupNextCycleBudget saves limit for next cycle and updates status`() = runTest {
+        val result = repository.setupNextCycleBudget(limitMinor = 7_000_000L)
+        assertTrue(result.isSuccess)
+
+        val window = repository.observeTriCycleWindow().first()
+        assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingConfigured, window.next.status)
+        assertEquals(7_000_000L, window.next.configuredLimitMinor)
+
+        val snapshot = repository.getBudgetSnapshot(window.next.id).first()
+        assertEquals(7_000_000L, snapshot.budgetMinor)
+        assertEquals(0L, snapshot.spentMinor)
+    }
+
+    @Test
+    fun `setupNextCycleBudget fails when offline or invalid amount`() = runTest {
+        repository.setNetworkOnline(false)
+        val offlineResult = repository.setupNextCycleBudget(limitMinor = 5_000_000L)
+        assertTrue(offlineResult.isFailure)
+        assertTrue(offlineResult.exceptionOrNull() is BudgetOfflineException)
+
+        repository.setNetworkOnline(true)
+        val invalidResult = repository.setupNextCycleBudget(limitMinor = 0L)
+        assertTrue(invalidResult.isFailure)
+        assertTrue(invalidResult.exceptionOrNull() is InvalidBudgetAmountException)
+    }
+
+    @Test
+    fun `triggerRollover transitions roles and retains theme identity`() = runTest {
+        // First configure next cycle
+        repository.setupNextCycleBudget(limitMinor = 8_000_000L)
+
+        // Then rollover
+        val rolloverResult = repository.triggerRollover()
+        assertTrue(rolloverResult.isSuccess)
+
+        val window = repository.observeTriCycleWindow().first()
+        // Old current (cycle_2026_10) is now previous with Closed status
+        assertEquals(repository.currentCycleId, window.previous?.id)
+        assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.Closed, window.previous?.status)
+
+        // Old next (cycle_2026_11) is now current with Active status and 8M budget
+        assertEquals(repository.nextCycleId, window.current.id)
+        assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.Active, window.current.status)
+        assertEquals(8_000_000L, window.current.configuredLimitMinor)
+
+        val newCurrentSnapshot = repository.getBudgetSnapshot(window.current.id).first()
+        assertEquals(8_000_000L, newCurrentSnapshot.budgetMinor)
+        assertEquals(0L, newCurrentSnapshot.spentMinor)
     }
 
     @Test

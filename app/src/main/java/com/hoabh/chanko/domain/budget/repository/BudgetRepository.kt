@@ -41,6 +41,22 @@ interface BudgetRepository {
 
     fun isOnlineFlow(): Flow<Boolean>
 
+    /**
+     * Quan sát cửa sổ 3 chu kỳ đại diện cho Carousel trên màn Home (Home v2.2 - BC22-01..BC22-04).
+     */
+    fun observeTriCycleWindow(): Flow<com.hoabh.chanko.domain.budget.model.TriCycleWindow>
+
+    /**
+     * Thiết lập hạn mức dự kiến cho chu kỳ tiếp theo (BC22-07).
+     * Yêu cầu kết nối mạng; trả về Result.failure(BudgetOfflineException) nếu đang ngoại tuyến.
+     */
+    suspend fun setupNextCycleBudget(limitMinor: Long): Result<Unit>
+
+    /**
+     * Kích hoạt chuyển chu kỳ (Rollover) sang kỳ mới (BC22-19, BC22-20).
+     */
+    suspend fun triggerRollover(): Result<Unit>
+
     suspend fun updateBudgetLimit(cycleId: String, newLimitMinor: Long, expectedRevision: Int): Result<Unit>
     suspend fun addCreditCard(name: String, color: CardColor = CardColor.PURPLE): Result<CreditCard>
     suspend fun renameCreditCard(cardId: String, newName: String): Result<Unit>
