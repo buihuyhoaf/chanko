@@ -172,13 +172,12 @@ private fun BudgetCreditCardContent(
     val cardCd = stringResource(R.string.home_cd_budget_card, fullSummaryDescription)
 
     val cardBrush = remember {
-        Brush.linearGradient(
+        Brush.verticalGradient(
             colors = listOf(
+                CandyColors.HomeV2.candyOrangeHighlight,
                 CandyColors.HomeV2.candyOrange,
                 CandyColors.HomeV2.candyOrangeShadow
-            ),
-            start = Offset(0f, 0f),
-            end = Offset(900f, 650f)
+            )
         )
     }
 
@@ -550,8 +549,9 @@ internal fun BudgetCreditCardStatusFrame(
     modifier: Modifier = Modifier
 ) {
     val cardBrush = remember {
-        Brush.linearGradient(
+        Brush.verticalGradient(
             colors = listOf(
+                CandyColors.HomeV2.candyOrangeHighlight,
                 CandyColors.HomeV2.candyOrange,
                 CandyColors.HomeV2.candyOrangeShadow
             )
