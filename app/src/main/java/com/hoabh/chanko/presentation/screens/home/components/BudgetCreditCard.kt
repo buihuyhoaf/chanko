@@ -58,7 +58,10 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.BudgetCreditCardUi
+import com.hoabh.chanko.presentation.screens.home.BudgetCardRole
+import com.hoabh.chanko.presentation.screens.home.BudgetCardSlotUi
 import com.hoabh.chanko.presentation.screens.home.SectionState
+import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 
@@ -408,7 +411,9 @@ private fun BudgetCreditCardContent(
 }
 
 @Composable
-private fun CreditCardTopBar() {
+private fun CreditCardTopBar(
+    badge: (@Composable () -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -416,7 +421,7 @@ private fun CreditCardTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET
+        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET + Huy hiệu trạng thái
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
@@ -442,6 +447,7 @@ private fun CreditCardTopBar() {
                     color = Color.White
                 )
             }
+            badge?.invoke()
         }
 
         // Bên phải: Chip vàng EMV + Sóng Contactless
@@ -666,6 +672,535 @@ private fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
                     .clip(PercentPillCornerShape)
                     .background(CandyColors.HomeV2.candyOrangeHighlight)
             )
+        }
+    }
+}
+
+/**
+ * Composable hiển thị từng slot thẻ trên Carousel v2.2 (Home v2.2 - BC22-01..BC22-22).
+ */
+@Composable
+fun BudgetCreditCardSlotView(
+    slot: BudgetCardSlotUi,
+    onCardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (slot) {
+        is BudgetCardSlotUi.UpcomingPlaceholderCard -> {
+            BudgetPlaceholderCard(
+                cycleLabel = slot.cycleLabel,
+                dateRangeText = slot.dateRangeText,
+                onClick = onCardClick,
+                role = slot.role,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.CurrentEmptyCard -> {
+            BudgetPlaceholderCard(
+                cycleLabel = slot.cycleLabel,
+                dateRangeText = slot.dateRangeText,
+                onClick = onCardClick,
+                role = slot.role,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.UpcomingConfiguredCard -> {
+            UpcomingConfiguredCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.ClosedCard -> {
+            ClosedCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.ActiveCard -> {
+            ActiveCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActiveCardContent(
+    slot: BudgetCardSlotUi.ActiveCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val remainingLabel = stringResource(R.string.home_budget_remaining_label)
+    val spentSummaryText = stringResource(
+        R.string.home_budget_spent_summary,
+        slot.spentFormatted,
+        slot.limitFormatted
+    )
+    val cardCd = buildString {
+        append("Thẻ ngân sách đang diễn ra, ${slot.cycleLabel}. ")
+        append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
+        if (slot.isOverBudget) {
+            append("Vượt ngân sách: ${slot.overFormatted}. ")
+        } else {
+            append("Còn lại: ${slot.remainingFormatted}. ")
+        }
+        append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
+    }
+
+    val cardBrush = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 8.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = Color.Black.copy(alpha = 0.15f),
+                spotColor = Color.Black.copy(alpha = 0.2f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = slot.clampedProgress,
+                    range = 0f..1f
+                )
+            },
+        shape = CreditCardCornerShape,
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(brush = cardBrush)
+                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+        ) {
+            Image(
+                painter = painterResource(
+                    id = if (slot.isOverBudget) {
+                        R.drawable.mascot_worried
+                    } else {
+                        R.drawable.mascot_happy
+                    }
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(96.dp)
+                    .offset(x = 6.dp, y = 4.dp)
+                    .clearAndSetSemantics {}
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+            ) {
+                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.Current) })
+
+                Spacer(modifier = Modifier.height(CandySpace.xs))
+
+                Text(
+                    text = remainingLabel,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    ),
+                    color = Color.White
+                )
+
+                Text(
+                    text = if (slot.isOverBudget) {
+                        stringResource(R.string.home_budget_over_warning, slot.overFormatted.orEmpty())
+                    } else {
+                        slot.remainingFormatted
+                    },
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = if (slot.isOverBudget) 24.sp else 32.sp,
+                        lineHeight = 36.sp
+                    ),
+                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                )
+
+                // Thanh tiến trình
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.76f)
+                        .padding(top = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(14.dp)
+                            .clip(ProgressTrackCornerShape)
+                            .background(Color.White.copy(alpha = 0.35f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(slot.clampedProgress)
+                                .clip(ProgressTrackCornerShape)
+                                .background(
+                                    if (slot.isOverBudget) {
+                                        CandyBudgetThemes.coralWarning
+                                    } else {
+                                        Color.White
+                                    }
+                                )
+                        )
+                    }
+
+                    Surface(
+                        shape = PercentPillCornerShape,
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = slot.realPercentText,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_01,
+                        contentDescription = null,
+                        size = 16.dp
+                    )
+                    Text(
+                        text = spentSummaryText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_05,
+                        contentDescription = null,
+                        size = 16.dp
+                    )
+                    Text(
+                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClosedCardContent(
+    slot: BudgetCardSlotUi.ClosedCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val remainingLabel = stringResource(R.string.home_budget_remaining_label)
+    val spentSummaryText = stringResource(
+        R.string.home_budget_spent_summary,
+        slot.spentFormatted,
+        slot.limitFormatted
+    )
+    val cardCd = buildString {
+        append("Thẻ ngân sách đã kết thúc, ${slot.cycleLabel}. ")
+        append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
+        if (slot.isOverBudget) {
+            append("Vượt ngân sách: ${slot.overFormatted}. ")
+        } else {
+            append("Còn lại: ${slot.remainingFormatted}. ")
+        }
+        append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
+    }
+
+    val cardBrush = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 6.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = Color.Black.copy(alpha = 0.12f),
+                spotColor = Color.Black.copy(alpha = 0.15f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = slot.clampedProgress,
+                    range = 0f..1f
+                )
+            },
+        shape = CreditCardCornerShape,
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(brush = cardBrush)
+                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+            ) {
+                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.Previous) })
+
+                Spacer(modifier = Modifier.height(CandySpace.xs))
+
+                Text(
+                    text = remainingLabel,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    ),
+                    color = Color.White
+                )
+
+                Text(
+                    text = if (slot.isOverBudget) {
+                        stringResource(R.string.home_budget_over_warning, slot.overFormatted.orEmpty())
+                    } else {
+                        slot.remainingFormatted
+                    },
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = if (slot.isOverBudget) 24.sp else 32.sp,
+                        lineHeight = 36.sp
+                    ),
+                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                )
+
+                // Thanh tiến trình
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.76f)
+                        .padding(top = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(14.dp)
+                            .clip(ProgressTrackCornerShape)
+                            .background(Color.White.copy(alpha = 0.35f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(slot.clampedProgress)
+                                .clip(ProgressTrackCornerShape)
+                                .background(
+                                    if (slot.isOverBudget) {
+                                        CandyBudgetThemes.coralWarning
+                                    } else {
+                                        Color.White
+                                    }
+                                )
+                        )
+                    }
+
+                    Surface(
+                        shape = PercentPillCornerShape,
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = slot.realPercentText,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_01,
+                        contentDescription = null,
+                        size = 16.dp
+                    )
+                    Text(
+                        text = spentSummaryText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_05,
+                        contentDescription = null,
+                        size = 16.dp
+                    )
+                    Text(
+                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UpcomingConfiguredCardContent(
+    slot: BudgetCardSlotUi.UpcomingConfiguredCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cardCd = "Thẻ ngân sách sắp tới, ${slot.cycleLabel}. Hạn mức dự kiến: ${slot.limitFormatted}. Chạm để xem hoặc chỉnh sửa."
+
+    val cardBrush = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 6.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = Color.Black.copy(alpha = 0.12f),
+                spotColor = Color.Black.copy(alpha = 0.15f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+            },
+        shape = CreditCardCornerShape,
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(brush = cardBrush)
+                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                CreditCardTopBar(badge = { BudgetCycleBadge(role = BudgetCardRole.NextConfigured) })
+
+                Spacer(modifier = Modifier.height(CandySpace.sm))
+
+                Column {
+                    Text(
+                        text = stringResource(R.string.home_budget_upcoming_limit_label),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp
+                        ),
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = slot.limitFormatted,
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 32.sp,
+                            lineHeight = 38.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(CandySpace.md))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ITM_05,
+                        contentDescription = null,
+                        size = 16.dp
+                    )
+                    Text(
+                        text = "${slot.cycleLabel} (${slot.dateRangeText})",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
