@@ -2,32 +2,39 @@
 
 > **Capability Map tham chiếu:** [SPEC-home-ui-v2.2-budget.md](../../SPEC-home-ui-v2.2-budget.md)  
 > **Nguồn chuẩn (Authoritative Sources):**
-> - `Chanko-Home-v2.2-Implementation.docx` (Bản chốt kỹ thuật ngày 04/11/2026)
-> - `docs/features/home-ui-v2-spec.md` (Đặc tả Home v2.0 hiện hành)
-> - `docs/features/budget-ui-v2-spec.md` & `budget-v2.1-ui-contract.md` (Đặc tả Budget hiện hành)
+> - `Chanko-Home-v2.2 2/CHANKO-HOME-v2.2-HANDOFF.md` (Bàn giao tổng hợp UX, Technical, Accessibility & QA ngày 05/11/2026)
+> - `Chanko-Home-v2.2 2/tokens/design-tokens.json` (Hệ thống Design Tokens chính thức: 12 Gradient Themes, Layout, Semantic)
+> - `Chanko-Home-v2.2 2/STATE-MATRIX.csv` (Ma trận 19 trạng thái S01..S19) & `NAVIGATION-CONTRACT.csv` (13 quy tắc điều hướng N01..N13)
+> - `Chanko-Home-v2.2 2/reference/approved-preview.png` (Visual design source of truth đã duyệt)
+> - `Chanko-Home-v2.2-Implementation.docx` (Bản chốt kỹ thuật ban đầu ngày 04/11/2026)
 > - `CODING_STANDARDS.md` (Quy chuẩn kiến trúc và Compose của dự án)
-> - Quyết định triển khai: **Fake-First** (dùng chung `FakeBudgetRepository` trong Phase 1; thiết kế Room Entity, DAO, migration được quy hoạch cho Phase tích hợp dữ liệu thật tiếp theo).
+> - Quyết định kiến trúc dữ liệu: **Fake-First** (dùng chung `FakeBudgetRepository` trong Phase hiện tại; Room Entity, DAO và migration được quy hoạch cho Phase tích hợp dữ liệu thật tiếp theo).
 
 ---
 
-## 0. Assumptions (Các giả định & Quyết định phạm vi đã chốt)
+## 0. Assumptions (Các giả định & Quyết định thẩm quyền đã chốt)
 
 1. **Nguồn dữ liệu (Fake-First Architecture):**
    - Không tạo Room Entity, DAO hay Database Migration trong giai đoạn này.
-   - Cả `HomeScreen` và `BudgetScreen` cùng quan sát một thể hiện dùng chung (shared singleton / instance) của `BudgetRepository` (thông qua `FakeBudgetRepository`) để đảm bảo: Thiết lập hạn mức kỳ sau $\to$ quay lại Home thấy ngay cập nhật; chuyển chu kỳ (rollover) giữ nguyên identity và theme.
-   - Các thuộc tính Room Entity, DAO và Database Migration được đặc tả sẵn như hợp đồng kỹ thuật cho giai đoạn kết nối backend/DB thật.
-2. **Vị trí nút "Xem tất cả":**
-   - Đặt tại Header của khu vực Ngân sách (`HomeSection.Budget`), nằm ngang hàng với tiêu đề `"Ngân sách mua sắm"` và bên ngoài vùng vuốt của `HorizontalPager`.
-   - Nút luôn hiển thị và có thể bấm được bất kể người dùng đang dừng ở thẻ nào trong carousel. Chạm nút sẽ mở danh sách toàn bộ chu kỳ từ mới nhất đến cũ nhất trên `BudgetScreen`.
-3. **Hiển thị vượt ngân sách (`spent > limit`):**
-   - Thanh tiến trình (progress bar) clamp ở `100%` (không vẽ tràn hay gây lỗi giao diện).
-   - Nhãn phần trăm hiển thị tỷ lệ thực tế (ví dụ: chi 5.500.000 đ trên hạn mức 5.000.000 đ hiển thị `110%`).
-   - Cảnh báo vượt dùng màu Coral (`#B83248` / `CandyColors.HomeV2.coral`) cùng nhãn `"Vượt ngân sách: 500.000 đ"`.
-   - Nền thẻ **giữ nguyên màu Candy Gradient** đại diện cho chu kỳ đó, không biến đổi toàn bộ màu thẻ sang đỏ.
-4. **Phạm vi Carousel 3 thẻ:**
-   - Tối đa 3 vị trí: `[Previous? - Current - Next]`.
-   - Nếu không có dữ liệu kỳ trước, slot `Previous` bị loại bỏ (carousel chỉ còn 2 thẻ `[Current - Next]`).
+   - Cả `HomeScreen` và `BudgetScreen` cùng quan sát một thể hiện dùng chung (shared singleton/instance) của `BudgetRepository` (thông qua `FakeBudgetRepository`) để đảm bảo: Thiết lập hạn mức kỳ sau $\to$ quay lại Home thấy ngay cập nhật; chuyển chu kỳ (rollover) giữ nguyên identity và theme.
+   - Các hợp đồng dữ liệu cho Room Entity, DAO và Database Migration được đặc tả sẵn cho giai đoạn kết nối backend/DB thật.
+2. **Quyết định `BC-CARD-LABEL-01` (Month Chip `MM` trên TopBar thẻ):**
+   - Mỗi thẻ đã xác định chu kỳ hiển thị một Month Chip pill chứa 2 chữ số tháng `MM` (`01`..`12`) ở góc trên bên phải (ví dụ: `09`, `10`, `11`).
+   - Năm (`2026`), khoảng ngày đầy đủ (`01/10 – 31/10`), và text badge trạng thái (`ĐANG DIỄN RA`, `ĐÃ KẾT THÚC`, `SẮP TỚI`) được **loại bỏ hoàn toàn** khỏi mặt thẻ (vẫn lưu trong domain data, TalkBack semantics và `BudgetDetailScreen`).
+   - Giữ logo thương hiệu `CHANKO` và nhãn `SHOPPING BUDGET` cùng biểu tượng contactless/chip trang trí ở góc trên bên trái.
+3. **Quyết định `BC-CARD-CONTENT-01` (Bỏ dòng "Đã chi X / Y" & Chuẩn hóa vai trò nhãn):**
+   - Dòng `"Đã chi X / Y"` được **loại bỏ hoàn toàn** khỏi mặt tất cả các thẻ.
+   - **Thẻ Previous (`ClosedCard`):** Nhãn chính là `"Còn lại cuối kỳ"`. Hiển thị số dư còn lại cuối kỳ + thanh tiến trình + nhãn tỷ lệ % chi thực tế. Mascot: `R.drawable.mascot_sleepy`.
+   - **Thẻ Current (`ActiveCard`):** Nhãn chính là `"Ngân sách còn lại"`. Nếu chi trong hạn mức: số tiền còn lại + thanh tiến trình + tỷ lệ %. Nếu vượt hạn mức: nhãn `"Vượt ngân sách"` với số tiền vượt thực tế, nhãn tỷ lệ % thật > 100%, thanh tiến trình clamp ở 100%, cảnh báo Coral (`#9C2943`), nền thẻ giữ nguyên gradient của chu kỳ. Mascot: `R.drawable.mascot_happy` (hoặc `R.drawable.mascot_worried` khi vượt ngân sách).
+   - **Thẻ Next Configured (`UpcomingConfiguredCard`):** Nhãn chính là `"Ngân sách dự kiến"`. Chỉ hiển thị số tiền hạn mức đã lập kế hoạch; **tuyệt đối không hiển thị chi tiêu hay thanh tiến trình giả định**.
+   - **Thẻ Next Unconfigured (`BudgetPlaceholderCard`):** Tiêu đề `"Chu kỳ tiếp theo"`, phụ đề `"Chưa thiết lập ngân sách"`. Nút bấm dạng pill `+ Thiết lập ngân sách` (nền tím `#6326A8`, chữ trắng). Góc trên có Month Chip `MM` của kỳ tiếp theo. Nền thẻ trắng ngà/xám pastel (`#FBF9FD`), viền nét đứt native (`dash = 6.dp, gap = 4.dp`, màu `#82758E`).
+   - **Thẻ Current Unconfigured:** Nhãn chính `"Chưa thiết lập ngân sách"`, không hiển thị 0 đ hoặc 0% giả định.
+4. **Điều khiển Carousel & Nút "Xem tất cả":**
+   - Carousel tối đa 3 vị trí: `[Previous? - Current - Next]`. Nếu không có dữ liệu kỳ trước, slot `Previous` bị loại bỏ (carousel còn 2 thẻ `[Current - Next]`).
+   - Phía dưới Carousel có thanh điều hướng gồm: Nút mũi tên trái `<`, dải chấm chỉ báo trang (indicator dots, chấm active màu tím `#6326A8`), nút mũi tên phải `>`, và liên kết `"Xem tất cả →"` (mở lịch sử ngân sách đầy đủ trên `BudgetScreen`).
    - Mặc định khi mở hoặc quay lại Home, carousel luôn snap về thẻ `Current`.
+5. **Độ tương phản và Kiểu chữ:**
+   - Text trên thẻ: màu tối `#241332` trên nền pastel theo `design-tokens.json`. Trên gradient có độ tương phản cao, chữ trắng hoặc badge nền kem (`#FFF8F2`) đảm bảo tỷ lệ tương phản WCAG AA $\ge 4.5:1$.
 
 ---
 
@@ -52,26 +59,51 @@ Nâng cấp khu vực Ngân sách trên `HomeScreen` từ thẻ đơn `BudgetCre
 
 ### 2.2. Hệ thống 12 Candy Gradient Themes (`candy-budget-tokens`)
 Mỗi chu kỳ được gán một số nguyên `ordinal` bất biến (bắt đầu từ 0). Theme màu của chu kỳ được tra cứu theo công thức:
-$$\text{themeIndex} = \text{floorMod}(\text{ordinal}, 12)$$
+$$\text{themeId} = \text{floorMod}(\text{ordinal}, 12) + 1 \quad (01..12)$$
 
-| Index | Tên Theme | Màu Chính (Main) | Màu Sáng (Light) | Màu Đậm (Dark) |
-| :---: | :--- | :---: | :---: | :---: |
-| **00** | Tangerine | `#FF963C` | `#FFCB83` | `#E86C25` |
-| **01** | Lavender | `#AC86F5` | `#E2CEFF` | `#7950C9` |
-| **02** | Mint | `#70D9B0` | `#C8F7E3` | `#299D79` |
-| **03** | Strawberry | `#F58FA9` | `#FFD1DB` | `#D9557E` |
-| **04** | Sky Blue | `#7CBDF3` | `#D0E9FF` | `#408BCE` |
-| **05** | Lemon | `#F7D55E` | `#FFF1A9` | `#D9A52E` |
-| **06** | Peach | `#FFAE8C` | `#FFE0C8` | `#E77B65` |
-| **07** | Grape | `#A184DE` | `#DCCBFA` | `#7051AE` |
-| **08** | Aqua | `#73D5DB` | `#C5F4F4` | `#319FAF` |
-| **09** | Rose | `#EBA6D0` | `#FCE0F1` | `#C36BA5` |
-| **10** | Pistachio | `#B5D57A` | `#E5F1BC` | `#779F48` |
-| **11** | Blueberry | `#929FEB` | `#D3DAFF` | `#596BBE` |
+Bảng 12 Theme theo chuẩn `design-tokens.json`:
 
-- **Hướng Gradient:** Linear Gradient theo trục chéo hoặc dọc (Sáng $\to$ Chính $\to$ Đậm).
-- **Thẻ Placeholder (Next Unconfigured):** Nền trắng ngà/xám pastel (`#F7F5FA` / `#EFEBFA`), viền nét đứt (`dash = 6.dp, gap = 4.dp`), icon `+` trung tính (`#8A7D9D`), không dùng gradient màu chu kỳ.
-- **Cảnh báo vượt mức:** Text/icon dùng Coral (`#B83248`). Đảm bảo độ tương phản text WCAG AA $\ge 4.5:1$.
+| ID | Tên Theme | Color 1 (Start 0.0) | Color 2 (Mid 0.5) | Color 3 (End 1.0) | Foreground Text |
+| :---: | :--- | :---: | :---: | :---: | :---: |
+| **01** | Tangerine | `#FFD08A` | `#FFA33F` | `#F39350` | `#241332` |
+| **02** | Lavender | `#E4D1FF` | `#B78AEF` | `#9C79D7` | `#241332` |
+| **03** | Mint | `#CEF8E8` | `#73DEC0` | `#55C8AB` | `#241332` |
+| **04** | Strawberry | `#FFD7E9` | `#F79AC3` | `#E47EAF` | `#241332` |
+| **05** | Sky | `#D7EEFF` | `#8CCBFA` | `#72B3E4` | `#241332` |
+| **06** | Lemon | `#FFF4B2` | `#FFE271` | `#EAC85F` | `#241332` |
+| **07** | Peach | `#FFE2CE` | `#FFB599` | `#EEA083` | `#241332` |
+| **08** | Grape | `#E0CBFF` | `#B386EC` | `#9E79D9` | `#241332` |
+| **09** | Aqua | `#CDF7F3` | `#7ADAD9` | `#5ABBC5` | `#241332` |
+| **10** | Rose | `#FFE1E8` | `#F8A5B9` | `#E488A5` | `#241332` |
+| **11** | Pistachio | `#F2F8C7` | `#D4E878` | `#B1CB61` | `#241332` |
+| **12** | Blueberry | `#DCE5FF` | `#98B4FB` | `#7998E9` | `#241332` |
+
+- **Hướng Gradient:** Linear Gradient `startNormalized: [0, 0]` $\to$ `endNormalized: [1, 1]` qua 3 điểm `[0.0, 0.5, 1.0]`.
+
+### 2.3. Layout & Semantic Tokens
+
+#### Layout Tokens:
+- `cardMinHeightDp`: `216.dp`
+- `cardRadiusDp`: `28.dp`
+- `contentPaddingDp`: `20.dp`
+- `pagerSpacingDp`: `16.dp`
+- `peekDp`: `16.dp`
+- `touchTargetMinDp`: `48.dp`
+- `amountSp`: `32.sp`
+- `labelSp`: `16.sp`
+- `monthSp`: `24.sp`
+- `contentMaxWidthDp`: `600.dp`
+
+#### Semantic Tokens:
+- `text`: `#241332`
+- `onBadge`: `#241332`
+- `badgeFill`: `#FFF8F2`
+- `warning`: `#9C2943` (Coral đậm cho text/icon cảnh báo vượt mức)
+- `neutralFill`: `["#FBF9FD", "#F3EFF7", "#E8E2EF"]`
+- `neutralBorder`: `#82758E` (Viền nét đứt cho Placeholder)
+- `placeholderText`: `#4C2C70`
+- `ctaFill`: `#6326A8` (Màu nền tím cho nút `+ Thiết lập ngân sách`)
+- `ctaText`: `#FFFFFF`
 
 ---
 
@@ -94,17 +126,46 @@ Mọi thao tác kiểm tra, biên dịch và chạy test sử dụng terminal:
 ```
 
 > [!IMPORTANT]
-> **Tuyệt đối không** chạy lệnh cài đặt hay khởi động máy ảo/máy thật (`adb install`, `installDebug`, AVD). Chỉ thực hiện build và unit test trên môi trường hiện tại theo quy định dự án.
+> **Tuyệt đối không** chạy lệnh cài đặt hay khởi động máy ảo/máy thật (`adb install`, `installDebug`, AVD). Chỉ thực hiện build và unit test trên môi trường hiện tại theo quy định dự án (`AGENTS.md`).
 
 ---
 
-## 4. Project Structure (Cấu trúc Thư mục & Tệp tin)
+## 4. State Matrix & Navigation Contract
+
+### 4.1. Ma trận Trạng thái (Trích xuất từ `STATE-MATRIX.csv`)
+Hệ thống xử lý đầy đủ 19 trạng thái vận hành (`S01`..`S19`):
+
+| State ID | Mô tả Trạng thái | Hiển thị Carousel | Quyền thao tác (Permissions) |
+| :---: | :--- | :--- | :--- |
+| **S01** | Full 3 slots (Prev Closed, Curr Active, Next Setup) | 3 thẻ đầy đủ `[Prev, Curr, Next]` | Prev: Xem chi tiết; Curr: Mở Budget; Next: Xem/sửa kế hoạch |
+| **S02** | Full 3 slots (Next chưa thiết lập) | `[Prev, Curr, Placeholder]` | Placeholder: Mở Setup kỳ sau |
+| **S03** | New Account (Chưa có Previous) | 2 thẻ `[Curr, Next]` | Không có slot Prev, pager chặn ở biên |
+| **S04** | Current vượt ngân sách (`spent > limit`) | Thẻ Curr cảnh báo Coral, clamp 100%, real % | Mở Budget xem chi tiêu vượt |
+| **S05** | Current chưa có ngân sách | Thẻ Curr hiển thị Empty state | Nút thiết lập kỳ hiện tại |
+| **S06** | Offline có dữ liệu Cache | Hiển thị đầy đủ thẻ kèm badge/chú thích cached | Cho phép xem chỉ đọc; chặn ghi/setup |
+| **S07** | Offline thiếu Cache | Báo lỗi ngoại tuyến cục bộ khu vực Budget | Nút "Thử lại", không ảnh hưởng Journey |
+| **S08** | Loading lần đầu (Cold Start) | 3 thẻ Skeleton loading với shimmer | Vô hiệu hóa thao tác bấm |
+| **S09** | Lỗi đồng bộ một phần | Giữ snapshot hợp lệ gần nhất và báo lỗi nhỏ | Cho phép thao tác trên snapshot cũ |
+| **S10..S19** | Rollover chu kỳ, đổi tài khoản, boundary leap, clamp ngày neo 28..31 | Đồng bộ lại cửa sổ, snap Current mới | Giữ scroll dọc và cập nhật mượt mà |
+
+### 4.2. Hợp đồng Điều hướng (Trích xuất từ `NAVIGATION-CONTRACT.csv`)
+13 quy tắc điều hướng (`N01`..`N13`):
+- **N01:** Chạm thẻ Previous $\to$ Mở `BudgetRoute(cycleId, mode = ReadOnly)`.
+- **N02:** Chạm thẻ Current $\to$ Mở `BudgetRoute(cycleId, mode = Active)`.
+- **N03:** Chạm thẻ Next đã cấu hình $\to$ Mở `BudgetRoute(cycleId, mode = ViewOrEditPlan)`.
+- **N04:** Chạm CTA `+ Thiết lập ngân sách` trên thẻ Next Placeholder $\to$ Mở `BudgetRoute(targetCycle, mode = SetupNext)`.
+- **N05:** Chạm liên kết `"Xem tất cả →"` $\to$ Mở `BudgetRoute(mode = History)`.
+- **N06..N13:** Chặn double tap khi đang điều hướng; chặn thao tác ghi khi Offline; tự động cập nhật và snap Current khi quay lại Home từ màn Setup.
+
+---
+
+## 5. Project Structure (Cấu trúc Thư mục & Tệp tin)
 
 ```
 app/src/main/java/com/hoabh/chanko/
 ├── domain/budget/
 │   ├── model/
-│   │   ├── BudgetCycle.kt                 # Bổ sung ordinal, status, cycle window
+│   │   ├── BudgetCycle.kt                 # Bổ sung ordinal, status, cycle window, labelMonth
 │   │   ├── TriCycleWindow.kt              # Model cửa sổ 3 kỳ (previous, current, next)
 │   │   ├── BudgetSnapshot.kt              # Snapshot chi tiêu nguyên tử
 │   │   └── BudgetCalculation.kt           # Tính toán chi Pay Now/Credit, clamping, % thực
@@ -113,8 +174,8 @@ app/src/main/java/com/hoabh/chanko/
 ├── data/budget/
 │   └── FakeBudgetRepository.kt            # Shared In-Memory Fake cài đặt đầy đủ logic v2.2
 ├── ui/theme/
-│   ├── Color.kt                           # Bổ sung 12 CandyTheme tokens & Neutral placeholder tokens
-│   └── CandyBudgetThemes.kt               # Mapping floorMod(ordinal, 12) -> Brush gradient
+│   ├── Color.kt                           # 12 CandyTheme tokens & Semantic/Neutral tokens
+│   └── CandyBudgetThemes.kt               # Mapping floorMod(ordinal, 12) + 1 -> ThemeBrush
 └── presentation/screens/
     ├── home/
     │   ├── HomeUiState.kt                 # BudgetCarouselUi, BudgetCardSlotUi, SectionState
@@ -123,7 +184,7 @@ app/src/main/java/com/hoabh/chanko/
     │   ├── HomeViewModel.kt               # Xử lý luồng Carousel, snapshot observer, offline check
     │   ├── HomeScreen.kt                  # Bố cục Header Section "Xem tất cả" + Carousel
     │   └── components/
-    │       ├── BudgetCreditCardCarousel.kt # HorizontalPager quản lý 1..3 slots
+    │       ├── BudgetCreditCardCarousel.kt # HorizontalPager quản lý 1..3 slots + Bottom Pager Bar
     │       ├── BudgetCreditCard.kt        # Card thực tế (Previous/Current/Next-configured)
     │       └── BudgetPlaceholderCard.kt   # Thẻ trung tính viền đứt nét + icon '+'
     └── budget/
@@ -133,91 +194,14 @@ app/src/main/java/com/hoabh/chanko/
 
 ---
 
-## 5. Code Style (Chuẩn viết Code & Triển khai Mẫu)
-
-Tuân thủ nghiêm ngặt `CODING_STANDARDS.md`: Không hardcode Color, không hardcode String tiếng Việt, Composable stateless có `modifier: Modifier = Modifier` ở đầu danh sách tham số tùy chọn.
-
-### Ví dụ mẫu chuẩn (Pattern Example):
-
-```kotlin
-/**
- * Thẻ Ngân Sách Chu Kỳ Thuộc Carousel (Home v2.2).
- */
-@Composable
-fun BudgetCreditCard(
-    uiModel: BudgetCardSlotUi.ActiveCycle,
-    onCardClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val gradientBrush = remember(uiModel.themeOrdinal) {
-        CandyBudgetThemes.getGradientBrush(uiModel.themeOrdinal)
-    }
-
-    Surface(
-        onClick = onCardClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 196.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = Color.Transparent
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(brush = gradientBrush)
-                .padding(CandySpace.lg)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // Header thẻ: Tên kỳ + Badge trạng thái
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = uiModel.cycleLabel,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
-                    )
-                    BudgetCycleStatusBadge(status = uiModel.cycleStatus)
-                }
-
-                // Số tiền & Cảnh báo Coral khi vượt hạn mức
-                if (uiModel.isOverBudget) {
-                    Text(
-                        text = stringResource(
-                            R.string.home_budget_over_amount_format,
-                            uiModel.overAmountFormatted
-                        ),
-                        color = CandyColors.HomeV2.coral,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // Tiến trình: Clamped 0f..1f, nhãn hiển thị % thật
-                BudgetProgressRow(
-                    clampedProgress = uiModel.clampedProgress,
-                    realPercentText = uiModel.realPercentText
-                )
-            }
-        }
-    }
-}
-```
-
----
-
 ## 6. Testing Strategy (Chiến lược Kiểm thử)
 
 | Tầng kiểm thử | Đối tượng kiểm thử | Phạm vi ca kiểm thử |
 | :--- | :--- | :--- |
-| **Domain Unit Tests** | `BudgetCalculationTest`, `BudgetCycleTest` | - Ranh giới ngày neo: tháng 28, 29, 30, 31 ngày; năm nhuận.<br>- Phép tính Pay Now & Credit cùng cộng vào chi tiêu theo ngày mua.<br>- Tính toán phần trăm vượt mức (ví dụ: `110%`) và clamp thanh ở `1.0f`.<br>- Ánh xạ 12 themes qua `floorMod(ordinal, 12)` (chu kỳ 0 và 12 cùng theme). |
+| **Domain Unit Tests** | `BudgetCalculationTest`, `BudgetCycleTest` | - Ranh giới ngày neo: tháng 28, 29, 30, 31 ngày; năm nhuận.<br>- Phép tính Pay Now & Credit cùng cộng vào chi tiêu theo ngày mua.<br>- Tính toán phần trăm vượt mức (ví dụ: `110%`) và clamp thanh ở `1.0f`.<br>- Ánh xạ 12 themes qua `floorMod(ordinal, 12) + 1` (chu kỳ 0 và 12 cùng theme 01). |
 | **Repository Tests** | `FakeBudgetRepositoryTest` | - Cửa sổ `TriCycleWindow`: trường hợp đủ 3 kỳ, trường hợp tài khoản mới không có `Previous`, trường hợp `Next` đã cấu hình và chưa cấu hình.<br>- Thiết lập kỳ sau lưu thành công và bảo toàn khi chuyển kỳ (rollover).<br>- Giả lập trạng thái offline có cache và offline thiếu cache. |
 | **ViewModel Tests** | `HomeViewModelTest` | - Khởi tạo hoặc vào lại Home (`HomeEntered`): Pager luôn chọn `Current`.<br>- Lỗi khu vực Budget không xóa dữ liệu Journey hoặc Header.<br>- Sự kiện `BudgetSeeAllTapped` phát effect mở màn hình lịch sử.<br>- Thao tác chạm thẻ phát navigation đúng `cycleId` và `mode`. |
-| **Compose UI Tests** | `BudgetCreditCardCarouselTest` | - Pager cuộn tối đa 1 trang mỗi cử chỉ vuốt.<br>- TalkBack đọc đầy đủ nhãn ngữ cảnh và số liệu theo thứ tự chuẩn.<br>- Thẻ Placeholder hiển thị đúng viền nét đứt và nút `+`. |
+| **Compose UI Tests** | `BudgetCreditCardCarouselTest` | - Pager cuộn tối đa 1 trang mỗi cử chỉ vuốt.<br>- TalkBack đọc đầy đủ nhãn ngữ cảnh và số liệu theo thứ tự chuẩn.<br>- Thẻ Placeholder hiển thị đúng viền nét đứt và nút `+ Thiết lập ngân sách`.<br>- Dải điều hướng bên dưới hiển thị đúng nút `<`, `>`, dots và `"Xem tất cả →"`. |
 
 ---
 
@@ -232,7 +216,7 @@ fun BudgetCreditCard(
   - Thêm bất kỳ thư viện bên thứ ba (dependency) mới nào vào `build.gradle.kts`.
   - Thay đổi kiến trúc điều hướng toàn cục ngoài phạm vi các route liên quan đến Home và Budget.
 - **NEVER (Tuyệt đối không làm):**
-  - Không cài đặt hoặc khởi chạy app trên máy ảo (AVD/Emulator) hay thiết bị thật.
+  - Không cài đặt hoặc khởi chạy app trên máy ảo (AVD/Emulator) hay thiết bị thật (`AGENTS.md`).
   - Không tạo Room Database Entity, Room Migration hay chỉnh sửa tệp SQLite trong giai đoạn này.
   - Không cho phép người dùng ghi dữ liệu / thiết lập ngân sách khi ngoại tuyến (chặn từ UI và thông báo cần mạng).
   - Không xoá hoặc làm yếu đi các bài unit test hiện hữu để đối phó pass build.
@@ -245,18 +229,18 @@ fun BudgetCreditCard(
 - [ ] **BC22-02:** Khi mở app hoặc quay lại màn Home, carousel luôn snap về vị trí thẻ Current.
 - [ ] **BC22-03:** Hướng vuốt đúng chuẩn: vuốt phải về Previous, vuốt trái sang Next; cuộn tối đa 1 trang mỗi lần vuốt.
 - [ ] **BC22-04:** Nếu tài khoản mới chưa có chu kỳ quá khứ, slot Previous tự động bị loại bỏ, pager chỉ còn 2 slot `[Current, Next]`.
-- [ ] **BC22-05:** Khi Next chưa được cấu hình, hiển thị thẻ Placeholder trung tính (nền trắng ngà/xám pastel, viền nét đứt, icon `+`).
+- [ ] **BC22-05:** Khi Next chưa được cấu hình, hiển thị thẻ Placeholder trung tính (nền trắng ngà/xám pastel, viền nét đứt native, nút `+ Thiết lập ngân sách`).
 - [ ] **BC22-06:** Thao tác vuốt qua thẻ Placeholder không tự động phát sinh ghi dữ liệu hay tạo chu kỳ rác.
-- [ ] **BC22-07:** Sau khi thiết lập ngân sách kỳ sau thành công, thẻ Next chuyển sang dạng hiển thị hạn mức với theme màu thật của kỳ đó.
-- [ ] **BC22-08:** Có đầy đủ 12 theme Candy Gradient được gán theo `floorMod(ordinal, 12)`.
+- [ ] **BC22-07:** Sau khi thiết lập ngân sách kỳ sau thành công, thẻ Next chuyển sang dạng hiển thị hạn mức với theme màu thật của kỳ đó (không có spent hay thanh progress giả).
+- [ ] **BC22-08:** Có đầy đủ 12 theme Candy Gradient được gán theo `floorMod(ordinal, 12) + 1`.
 - [ ] **BC22-09:** Màu nhận diện của một chu kỳ giữ nguyên bất biến khi chu kỳ chuyển dịch từ Sắp tới $\to$ Đang diễn ra $\to$ Đã kết thúc.
-- [ ] **BC22-10:** Thẻ Previous ở trạng thái chỉ đọc (read-only) và giữ nguyên màu gradient gốc của kỳ đó.
+- [ ] **BC22-10:** Thẻ Previous ở trạng thái chỉ đọc (read-only), hiển thị `"Còn lại cuối kỳ"`, nhãn tỷ lệ % thật và giữ nguyên màu gradient gốc của kỳ đó.
 - [ ] **BC22-11:** Số liệu trên thẻ Current phản ánh chính xác tổng chi tiêu của chu kỳ hiện tại (hợp nhất cả Pay Now và Credit theo ngày mua).
-- [ ] **BC22-12:** Thẻ Next không hiển thị số tiền đã chi hay thanh tiến trình giả định.
-- [ ] **BC22-13:** Khi vượt ngân sách (`spent > limit`), thanh tiến trình clamp ở 100%, nhãn hiển thị % thực tế (ví dụ: `110%`), chữ cảnh báo dùng màu Coral trên nền gradient của chu kỳ.
-- [ ] **BC22-14:** Nút "Xem tất cả" nằm ở Header của section Budget, bấm vào mở danh sách đầy đủ lịch sử các chu kỳ trên Budget.
-- [ ] **BC22-15:** Thao tác vuốt ngang carousel không kích hoạt sự kiện click thẻ và không làm gián đoạn cuộn dọc của màn hình Home.
-- [ ] **BC22-16:** Vị trí neo cuộn dọc của màn Home được bảo toàn khi người dùng chuyển đổi giữa các thẻ trong carousel.
+- [ ] **BC22-12:** Loại bỏ hoàn toàn dòng `"Đã chi X / Y"` trên mặt tất cả các thẻ (`BC-CARD-CONTENT-01`).
+- [ ] **BC22-13:** Mặt thẻ hiển thị Month Chip pill `MM` (01..12); loại bỏ năm, khoảng ngày và text badge trạng thái (`BC-CARD-LABEL-01`).
+- [ ] **BC22-14:** Khi vượt ngân sách (`spent > limit`), thanh tiến trình clamp ở 100%, nhãn hiển thị % thực tế (ví dụ: `110%`), chữ cảnh báo dùng màu Coral trên nền gradient của chu kỳ.
+- [ ] **BC22-15:** Dải điều hướng bên dưới Carousel hiển thị nút `<`, dải chấm chỉ báo, nút `>`, và liên kết `"Xem tất cả →"`.
+- [ ] **BC22-16:** Thao tác vuốt ngang carousel không kích hoạt sự kiện click thẻ và không làm gián đoạn cuộn dọc của màn hình Home.
 - [ ] **BC22-17:** Khi mất mạng nhưng đã có dữ liệu cache, carousel cho phép xem các thẻ kèm chú thích thời điểm đồng bộ; không tự quy đổi thành 0 đ.
 - [ ] **BC22-18:** Khi mất mạng và chạm vào thiết lập kỳ sau, ứng dụng hiển thị thông báo cần kết nối mạng và chặn thao tác ghi.
 - [ ] **BC22-19:** Cơ chế chuyển chu kỳ (rollover) đảm bảo tính duy nhất của chu kỳ Active, không có khoảng ngày chồng lấn.
@@ -268,6 +252,11 @@ fun BudgetCreditCard(
 
 ---
 
-## 9. Open Questions (Các câu hỏi còn mở)
+## 9. Open Questions & Assumptions (Các điểm xác nhận)
 
-*Hiện tại không còn câu hỏi chặn. Tất cả các quyết định phạm vi (Fake-First, Section Header "Xem tất cả", Vượt ngân sách 100% clamping + real %, và 12 Theme Ordinal) đã được người dùng chốt đầy đủ.*
+1. **Text Foreground Color trên Gradient:**
+   - Trong `design-tokens.json`, foreground token mặc định là màu tối `#241332` trên nền pastel để đạt chuẩn tương phản WCAG AA $\ge 4.5:1$. Trong ảnh `approved-preview.png`, chữ số tiền màu trắng trên nền cam Tangerine. Chúng tôi đề xuất: Trên các theme sáng/pastel dùng `#241332`, trên theme đậm hoặc khi dùng chữ trắng sẽ áp dụng hiệu ứng đổ bóng / viền tương phản cục bộ để vừa thẩm mỹ như bản duyệt vừa đạt chuẩn WCAG.
+2. **Mascot trên thẻ:**
+   - Previous dùng `mascot_sleepy`, Current dùng `mascot_happy` (hoặc `mascot_worried` khi vượt hạn mức). Placeholder dùng icon `+` trung tính.
+
+*(Tài liệu đã sẵn sàng để người dùng phê duyệt trước khi lập kế hoạch triển khai).*

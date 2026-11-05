@@ -3,36 +3,58 @@ package com.hoabh.chanko.ui.theme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Quản lý 12 Candy Gradient Themes cho chu kỳ ngân sách và thẻ trung tính (Home v2.2 - BC22-08, BC22-09, BC22-10).
- * Thẻ sử dụng dải màu Candy Pop 3D chuẩn: Main -> Dark theo góc xiên (Offset(0f, 0f) -> Offset(900f, 650f))
- * kết hợp viền sáng Light và bóng đổ ấm cùng tone màu.
+ * Theo design-tokens.json:
+ * Linear gradient sRGB 3 điểm: startNormalized: [0, 0] -> endNormalized: [1, 1], positions: [0, 0.5, 1]
+ * (Light -> Main -> Dark).
  */
 object CandyBudgetThemes {
+
+    // Layout Tokens (design-tokens.json)
+    val cardMinHeight = 216.dp
+    val cardRadius = 28.dp
+    val contentPadding = 20.dp
+    val pagerSpacing = 16.dp
+    val peek = 16.dp
+    val touchTargetMin = 48.dp
+    val amountTextSize = 32.sp
+    val labelTextSize = 16.sp
+    val monthTextSize = 24.sp
 
     fun getTheme(ordinal: Int): CandyColors.BudgetThemes.GradientTheme {
         return CandyColors.BudgetThemes.forOrdinal(ordinal)
     }
 
     /**
-     * Tạo Brush gradient góc xiên chuẩn Chanko (Offset(0f, 0f) -> Offset(900f, 650f))
-     * từ màu chính (main) sang màu đậm (dark), mang lại cảm giác mượt mà và bóng bẩy 3D.
+     * Tạo Brush gradient tuyến tính 3 điểm (Light -> Main -> Dark)
+     * chuẩn hóa theo design-tokens.json.
      */
     fun getGradientBrush(ordinal: Int): Brush {
         val theme = getTheme(ordinal)
         return Brush.linearGradient(
-            colors = listOf(theme.main, theme.dark),
+            colorStops = arrayOf(
+                0.0f to theme.light,
+                0.5f to theme.main,
+                1.0f to theme.dark
+            ),
             start = Offset(0f, 0f),
             end = Offset(900f, 650f)
         )
     }
 
-    // Neutral Placeholder Tokens (BC22-05)
+    // Neutral Placeholder Tokens (design-tokens.json)
     val placeholderBackground: Color get() = CandyColors.BudgetThemes.placeholderBg
     val placeholderBorder: Color get() = CandyColors.BudgetThemes.placeholderBorder
     val placeholderInk: Color get() = CandyColors.BudgetThemes.placeholderInk
+    val placeholderCtaFill: Color get() = CandyColors.BudgetThemes.placeholderCtaFill
+    val placeholderCtaText: Color get() = CandyColors.BudgetThemes.placeholderCtaText
 
-    // Cảnh báo vượt ngân sách (BC22-13)
+    // Semantic tokens (design-tokens.json)
+    val textDark: Color get() = CandyColors.BudgetThemes.textDark
+    val monthBadgeBg: Color get() = CandyColors.BudgetThemes.monthBadgeBg
     val coralWarning: Color get() = CandyColors.BudgetThemes.coral
 }

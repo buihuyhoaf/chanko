@@ -22,9 +22,24 @@ data class BudgetCycle(
     val anchorDay: Int = 1,
     val ordinal: Int = 0,
     val status: BudgetCycleStatus = if (isCurrent) BudgetCycleStatus.Active else BudgetCycleStatus.Closed,
-    val configuredLimitMinor: Long? = null
+    val configuredLimitMinor: Long? = null,
+    val customLabelMonth: String? = null
 ) {
+    /**
+     * Chuỗi 2 chữ số tháng MM (01..12) cho Month Chip pill trên TopBar (BC-CARD-LABEL-01).
+     */
+    val labelMonth: String
+        get() = customLabelMonth ?: run {
+            val parts = startDate.split("/")
+            if (parts.size >= 2) parts[1].padStart(2, '0') else "01"
+        }
+
     val dateRangeText: String get() = "$startDate - $endDate"
+
+    /**
+     * ID theme gradient (1..12) theo design-tokens.json: floorMod(ordinal, 12) + 1
+     */
+    val themeId: Int get() = Math.floorMod(ordinal, 12) + 1
 
     /**
      * Vị trí theme gradient (0..11) trong bảng 12 Candy Gradient Themes (BC22-08).

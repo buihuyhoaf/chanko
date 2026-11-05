@@ -189,71 +189,78 @@ private object CandyPalette {
     val Teal800 = Color(0xFF24627A)
     val Slate400 = Color(0xFF9E97AD)
 
-    // Home v2.2 - 12 Candy Gradient Themes & Neutral Placeholder (Chanko-Home-v2.2-Implementation)
-    // 01 Tangerine (Signature CandyOrange: #FFD49A -> #FFB665 -> #F59145)
-    val TangerineLight = Color(0xFFFFD49A)
-    val TangerineMain = Color(0xFFFFB665)
-    val TangerineDark = Color(0xFFF59145)
+    // Home v2.2 - 12 Candy Gradient Themes & Neutral Placeholder (design-tokens.json)
+    // 01 Tangerine
+    val TangerineLight = Color(0xFFFFD08A)
+    val TangerineMain = Color(0xFFFFA33F)
+    val TangerineDark = Color(0xFFF39350)
 
     // 02 Lavender
-    val LavenderThemeLight = Color(0xFFE2CEFF)
-    val LavenderThemeMain = Color(0xFFAC86F5)
-    val LavenderThemeDark = Color(0xFF7950C9)
+    val LavenderThemeLight = Color(0xFFE4D1FF)
+    val LavenderThemeMain = Color(0xFFB78AEF)
+    val LavenderThemeDark = Color(0xFF9C79D7)
 
     // 03 Mint
-    val MintThemeLight = Color(0xFFC8F7E3)
-    val MintThemeMain = Color(0xFF70D9B0)
-    val MintThemeDark = Color(0xFF299D79)
+    val MintThemeLight = Color(0xFFCEF8E8)
+    val MintThemeMain = Color(0xFF73DEC0)
+    val MintThemeDark = Color(0xFF55C8AB)
 
     // 04 Strawberry
-    val StrawberryLight = Color(0xFFFFD1DB)
-    val StrawberryMain = Color(0xFFF58FA9)
-    val StrawberryDark = Color(0xFFD9557E)
+    val StrawberryLight = Color(0xFFFFD7E9)
+    val StrawberryMain = Color(0xFFF79AC3)
+    val StrawberryDark = Color(0xFFE47EAF)
 
-    // 05 Sky Blue
-    val SkyBlueLight = Color(0xFFD0E9FF)
-    val SkyBlueMain = Color(0xFF7CBDF3)
-    val SkyBlueDark = Color(0xFF408BCE)
+    // 05 Sky
+    val SkyBlueLight = Color(0xFFD7EEFF)
+    val SkyBlueMain = Color(0xFF8CCBFA)
+    val SkyBlueDark = Color(0xFF72B3E4)
 
     // 06 Lemon
-    val LemonLight = Color(0xFFFFF1A9)
-    val LemonMain = Color(0xFFF7D55E)
-    val LemonDark = Color(0xFFD9A52E)
+    val LemonLight = Color(0xFFFFF4B2)
+    val LemonMain = Color(0xFFFFE271)
+    val LemonDark = Color(0xFFEAC85F)
 
     // 07 Peach
-    val PeachThemeLight = Color(0xFFFFE0C8)
-    val PeachThemeMain = Color(0xFFFFAE8C)
-    val PeachThemeDark = Color(0xFFE77B65)
+    val PeachThemeLight = Color(0xFFFFE2CE)
+    val PeachThemeMain = Color(0xFFFFB599)
+    val PeachThemeDark = Color(0xFFEEA083)
 
     // 08 Grape
-    val GrapeLight = Color(0xFFDCCBFA)
-    val GrapeMain = Color(0xFFA184DE)
-    val GrapeDark = Color(0xFF7051AE)
+    val GrapeLight = Color(0xFFE0CBFF)
+    val GrapeMain = Color(0xFFB386EC)
+    val GrapeDark = Color(0xFF9E79D9)
 
     // 09 Aqua
-    val AquaLight = Color(0xFFC5F4F4)
-    val AquaMain = Color(0xFF73D5DB)
-    val AquaDark = Color(0xFF319FAF)
+    val AquaLight = Color(0xFFCDF7F3)
+    val AquaMain = Color(0xFF7ADAD9)
+    val AquaDark = Color(0xFF5ABBC5)
 
     // 10 Rose
-    val RoseThemeLight = Color(0xFFFCE0F1)
-    val RoseThemeMain = Color(0xFFEBA6D0)
-    val RoseThemeDark = Color(0xFFC36BA5)
+    val RoseThemeLight = Color(0xFFFFE1E8)
+    val RoseThemeMain = Color(0xFFF8A5B9)
+    val RoseThemeDark = Color(0xFFE488A5)
 
     // 11 Pistachio
-    val PistachioLight = Color(0xFFE5F1BC)
-    val PistachioMain = Color(0xFFB5D57A)
-    val PistachioDark = Color(0xFF779F48)
+    val PistachioLight = Color(0xFFF2F8C7)
+    val PistachioMain = Color(0xFFD4E878)
+    val PistachioDark = Color(0xFFB1CB61)
 
     // 12 Blueberry
-    val BlueberryLight = Color(0xFFD3DAFF)
-    val BlueberryMain = Color(0xFF929FEB)
-    val BlueberryDark = Color(0xFF596BBE)
+    val BlueberryLight = Color(0xFFDCE5FF)
+    val BlueberryMain = Color(0xFF98B4FB)
+    val BlueberryDark = Color(0xFF7998E9)
 
-    // Neutral Placeholder
-    val NeutralPlaceholderBg = Color(0xFFF7F5FA)
-    val NeutralPlaceholderBorder = Color(0xFFDDD6E8)
-    val NeutralPlaceholderInk = Color(0xFF8A7D9D)
+    // Neutral Placeholder (design-tokens.json)
+    val NeutralPlaceholderBg = Color(0xFFFBF9FD)
+    val NeutralPlaceholderBorder = Color(0xFF82758E)
+    val NeutralPlaceholderInk = Color(0xFF4C2C70)
+    val NeutralPlaceholderCtaFill = Color(0xFF6326A8)
+    val NeutralPlaceholderCtaText = Color(0xFFFFFFFF)
+
+    // Semantic tokens (design-tokens.json)
+    val BudgetCardTextDark = Color(0xFF241332)
+    val BudgetMonthBadgeBg = Color(0xFFFFF8F2)
+    val BudgetWarningCoral = Color(0xFF9C2943)
 }
 
 // UI-02 approved signal colors. Do not use as small text on white.
@@ -512,31 +519,33 @@ object CandyColors {
         val statusSkippedRing = CandyPalette.Slate400
     }
 
-    /** Home v2.2 - 12 Candy Gradient Themes & Budget Carousel Semantic Tokens */
+    /** Home v2.2 - 12 Candy Gradient Themes & Budget Carousel Semantic Tokens (design-tokens.json) */
     object BudgetThemes {
         data class GradientTheme(
-            val id: Int,
+            val id: Int, // 1..12 matching design-tokens.json "01".."12"
             val name: String,
             val light: Color,
             val main: Color,
-            val dark: Color
+            val dark: Color,
+            val foreground: Color = CandyPalette.BudgetCardTextDark
         )
 
-        val Tangerine = GradientTheme(0, "Tangerine", CandyPalette.TangerineLight, CandyPalette.TangerineMain, CandyPalette.TangerineDark)
-        val Lavender = GradientTheme(1, "Lavender", CandyPalette.LavenderThemeLight, CandyPalette.LavenderThemeMain, CandyPalette.LavenderThemeDark)
-        val Mint = GradientTheme(2, "Mint", CandyPalette.MintThemeLight, CandyPalette.MintThemeMain, CandyPalette.MintThemeDark)
-        val Strawberry = GradientTheme(3, "Strawberry", CandyPalette.StrawberryLight, CandyPalette.StrawberryMain, CandyPalette.StrawberryDark)
-        val SkyBlue = GradientTheme(4, "Sky Blue", CandyPalette.SkyBlueLight, CandyPalette.SkyBlueMain, CandyPalette.SkyBlueDark)
-        val Lemon = GradientTheme(5, "Lemon", CandyPalette.LemonLight, CandyPalette.LemonMain, CandyPalette.LemonDark)
-        val Peach = GradientTheme(6, "Peach", CandyPalette.PeachThemeLight, CandyPalette.PeachThemeMain, CandyPalette.PeachThemeDark)
-        val Grape = GradientTheme(7, "Grape", CandyPalette.GrapeLight, CandyPalette.GrapeMain, CandyPalette.GrapeDark)
-        val Aqua = GradientTheme(8, "Aqua", CandyPalette.AquaLight, CandyPalette.AquaMain, CandyPalette.AquaDark)
-        val Rose = GradientTheme(9, "Rose", CandyPalette.RoseThemeLight, CandyPalette.RoseThemeMain, CandyPalette.RoseThemeDark)
-        val Pistachio = GradientTheme(10, "Pistachio", CandyPalette.PistachioLight, CandyPalette.PistachioMain, CandyPalette.PistachioDark)
-        val Blueberry = GradientTheme(11, "Blueberry", CandyPalette.BlueberryLight, CandyPalette.BlueberryMain, CandyPalette.BlueberryDark)
+        val Tangerine = GradientTheme(1, "Tangerine", CandyPalette.TangerineLight, CandyPalette.TangerineMain, CandyPalette.TangerineDark)
+        val Lavender = GradientTheme(2, "Lavender", CandyPalette.LavenderThemeLight, CandyPalette.LavenderThemeMain, CandyPalette.LavenderThemeDark)
+        val Mint = GradientTheme(3, "Mint", CandyPalette.MintThemeLight, CandyPalette.MintThemeMain, CandyPalette.MintThemeDark)
+        val Strawberry = GradientTheme(4, "Strawberry", CandyPalette.StrawberryLight, CandyPalette.StrawberryMain, CandyPalette.StrawberryDark)
+        val Sky = GradientTheme(5, "Sky", CandyPalette.SkyBlueLight, CandyPalette.SkyBlueMain, CandyPalette.SkyBlueDark)
+        val SkyBlue = Sky
+        val Lemon = GradientTheme(6, "Lemon", CandyPalette.LemonLight, CandyPalette.LemonMain, CandyPalette.LemonDark)
+        val Peach = GradientTheme(7, "Peach", CandyPalette.PeachThemeLight, CandyPalette.PeachThemeMain, CandyPalette.PeachThemeDark)
+        val Grape = GradientTheme(8, "Grape", CandyPalette.GrapeLight, CandyPalette.GrapeMain, CandyPalette.GrapeDark)
+        val Aqua = GradientTheme(9, "Aqua", CandyPalette.AquaLight, CandyPalette.AquaMain, CandyPalette.AquaDark)
+        val Rose = GradientTheme(10, "Rose", CandyPalette.RoseThemeLight, CandyPalette.RoseThemeMain, CandyPalette.RoseThemeDark)
+        val Pistachio = GradientTheme(11, "Pistachio", CandyPalette.PistachioLight, CandyPalette.PistachioMain, CandyPalette.PistachioDark)
+        val Blueberry = GradientTheme(12, "Blueberry", CandyPalette.BlueberryLight, CandyPalette.BlueberryMain, CandyPalette.BlueberryDark)
 
         val allThemes = listOf(
-            Tangerine, Lavender, Mint, Strawberry, SkyBlue, Lemon,
+            Tangerine, Lavender, Mint, Strawberry, Sky, Lemon,
             Peach, Grape, Aqua, Rose, Pistachio, Blueberry
         )
 
@@ -545,12 +554,16 @@ object CandyColors {
             return allThemes[index]
         }
 
-        // Neutral Placeholder Tokens
+        // Neutral Placeholder Tokens (design-tokens.json)
         val placeholderBg = CandyPalette.NeutralPlaceholderBg
         val placeholderBorder = CandyPalette.NeutralPlaceholderBorder
         val placeholderInk = CandyPalette.NeutralPlaceholderInk
+        val placeholderCtaFill = CandyPalette.NeutralPlaceholderCtaFill
+        val placeholderCtaText = CandyPalette.NeutralPlaceholderCtaText
 
-        // OverBudget Semantic Coral
-        val coral = CandyPalette.Coral700
+        // Semantic tokens (design-tokens.json)
+        val textDark = CandyPalette.BudgetCardTextDark
+        val monthBadgeBg = CandyPalette.BudgetMonthBadgeBg
+        val coral = CandyPalette.BudgetWarningCoral
     }
 }

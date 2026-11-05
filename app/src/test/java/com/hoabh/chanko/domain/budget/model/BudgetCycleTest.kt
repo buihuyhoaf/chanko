@@ -21,14 +21,18 @@ class BudgetCycleTest {
             status = BudgetCycleStatus.Active
         )
         assertEquals(0, cycle0.themeIndex)
+        assertEquals(1, cycle0.themeId) // 1-based themeId 01 Tangerine
+        assertEquals("10", cycle0.labelMonth) // MM from startDate
         assertEquals("01/10/2026 - 31/10/2026", cycle0.dateRangeText)
         assertEquals(BudgetCycleStatus.Active, cycle0.status)
 
         val cycle12 = cycle0.copy(id = "c12", ordinal = 12)
         assertEquals(0, cycle12.themeIndex)
+        assertEquals(1, cycle12.themeId)
 
         val cycle13 = cycle0.copy(id = "c13", ordinal = 13)
         assertEquals(1, cycle13.themeIndex)
+        assertEquals(2, cycle13.themeId) // 02 Lavender
     }
 
     @Test
@@ -60,6 +64,7 @@ class BudgetCycleTest {
         val boundary = BudgetCycleBoundaryCalculator.calculateBoundary(year = 2026, month = 10, anchorDay = 1)
         assertEquals("01/10/2026", boundary.startDateText)
         assertEquals("31/10/2026", boundary.endDateText)
+        assertEquals("10", boundary.labelMonth)
     }
 
     @Test

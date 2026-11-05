@@ -16,7 +16,8 @@ object BudgetCycleBoundaryCalculator {
         val startDateText: String,
         val endDateText: String,
         val startLocalDate: LocalDate,
-        val endInclusiveLocalDate: LocalDate
+        val endInclusiveLocalDate: LocalDate,
+        val labelMonth: String = startLocalDate.monthValue.toString().padStart(2, '0')
     )
 
     fun calculateBoundary(year: Int, month: Int, anchorDay: Int): CycleBoundary {

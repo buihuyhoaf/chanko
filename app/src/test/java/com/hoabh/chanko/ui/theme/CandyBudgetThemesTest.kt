@@ -1,5 +1,7 @@
 package com.hoabh.chanko.ui.theme
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -10,23 +12,26 @@ class CandyBudgetThemesTest {
     fun verify_all_12_themes_exist_with_correct_names_and_ids() {
         assertEquals(12, CandyColors.BudgetThemes.allThemes.size)
         val expectedNames = listOf(
-            "Tangerine", "Lavender", "Mint", "Strawberry", "Sky Blue", "Lemon",
+            "Tangerine", "Lavender", "Mint", "Strawberry", "Sky", "Lemon",
             "Peach", "Grape", "Aqua", "Rose", "Pistachio", "Blueberry"
         )
         CandyColors.BudgetThemes.allThemes.forEachIndexed { index, theme ->
-            assertEquals(index, theme.id)
+            assertEquals(index + 1, theme.id) // 1..12
             assertEquals(expectedNames[index], theme.name)
             assertNotNull(theme.light)
             assertNotNull(theme.main)
             assertNotNull(theme.dark)
+            assertEquals(CandyBudgetThemes.textDark, theme.foreground)
         }
     }
 
     @Test
     fun verify_floorMod_theme_cycling() {
-        // Ordinal 0 -> Tangerine, 11 -> Blueberry, 12 -> Tangerine
+        // Ordinal 0 -> Tangerine (ID 1), 11 -> Blueberry (ID 12), 12 -> Tangerine (ID 1)
         assertEquals("Tangerine", CandyBudgetThemes.getTheme(0).name)
+        assertEquals(1, CandyBudgetThemes.getTheme(0).id)
         assertEquals("Blueberry", CandyBudgetThemes.getTheme(11).name)
+        assertEquals(12, CandyBudgetThemes.getTheme(11).id)
         assertEquals("Tangerine", CandyBudgetThemes.getTheme(12).name)
         assertEquals("Lavender", CandyBudgetThemes.getTheme(13).name)
 
@@ -36,11 +41,28 @@ class CandyBudgetThemesTest {
     }
 
     @Test
-    fun verify_placeholder_and_coral_tokens() {
+    fun verify_placeholder_and_semantic_tokens() {
         assertNotNull(CandyBudgetThemes.placeholderBackground)
         assertNotNull(CandyBudgetThemes.placeholderBorder)
         assertNotNull(CandyBudgetThemes.placeholderInk)
+        assertNotNull(CandyBudgetThemes.placeholderCtaFill)
+        assertNotNull(CandyBudgetThemes.placeholderCtaText)
         assertNotNull(CandyBudgetThemes.coralWarning)
+        assertNotNull(CandyBudgetThemes.textDark)
+        assertNotNull(CandyBudgetThemes.monthBadgeBg)
+    }
+
+    @Test
+    fun verify_layout_tokens() {
+        assertEquals(216.dp, CandyBudgetThemes.cardMinHeight)
+        assertEquals(28.dp, CandyBudgetThemes.cardRadius)
+        assertEquals(20.dp, CandyBudgetThemes.contentPadding)
+        assertEquals(16.dp, CandyBudgetThemes.pagerSpacing)
+        assertEquals(16.dp, CandyBudgetThemes.peek)
+        assertEquals(48.dp, CandyBudgetThemes.touchTargetMin)
+        assertEquals(32.sp, CandyBudgetThemes.amountTextSize)
+        assertEquals(16.sp, CandyBudgetThemes.labelTextSize)
+        assertEquals(24.sp, CandyBudgetThemes.monthTextSize)
     }
 
     @Test
