@@ -60,39 +60,39 @@ Nâng cấp khu vực Ngân sách trên `HomeScreen` từ thẻ đơn `BudgetCre
 ## 4. Task List & Checkpoints
 
 ### Phase 1: Foundation (Tokens & Domain Model)
-- [ ] **Task 1:** Cập nhật 12 Candy Gradient Themes & Semantic Tokens theo `design-tokens.json` (`candy-budget-tokens`)
-- [ ] **Task 2:** Bổ sung `labelMonth` & Ánh xạ Theme Formula vào Domain Cycle (`budget-cycle-domain`)
+- [x] **Task 1:** Cập nhật 12 Candy Gradient Themes & Semantic Tokens theo `design-tokens.json` (`candy-budget-tokens`)
+- [x] **Task 2:** Bổ sung `labelMonth` & Ánh xạ Theme Formula vào Domain Cycle (`budget-cycle-domain`)
 
 ### Checkpoint 1: Foundation Verification
-- [ ] Chạy kiểm thử Token & Domain: `./gradlew testDebugUnitTest --tests "*BudgetCycle*" --tests "*CandyBudget*"`
-- [ ] Biên dịch mã nguồn: `./gradlew compileDebugKotlin`
+- [x] Chạy kiểm thử Token & Domain: `./gradlew testDebugUnitTest --tests "*BudgetCycle*" --tests "*CandyBudget*"`
+- [x] Biên dịch mã nguồn: `./gradlew compileDebugKotlin`
 
 ### Phase 2: Shared Data Contract & UI State Models
-- [ ] **Task 3:** Cập nhật `BudgetCardSlotUi` State Models theo `BC-CARD-LABEL-01` & `BC-CARD-CONTENT-01` (`budget-ui-models`)
-- [ ] **Task 4:** Cập nhật `FakeBudgetRepository` dùng chung & Hợp đồng Cửa sổ Chu kỳ (`budget-data-contract`)
+- [x] **Task 3:** Cập nhật `BudgetCardSlotUi` State Models theo `BC-CARD-LABEL-01` & `BC-CARD-CONTENT-01` (`budget-ui-models`)
+- [x] **Task 4:** Cập nhật `FakeBudgetRepository` dùng chung & Hợp đồng Cửa sổ Chu kỳ (`budget-data-contract`)
 
 ### Checkpoint 2: Contract Verification
-- [ ] Kiểm thử Repository & State Mapping: `./gradlew testDebugUnitTest --tests "*FakeBudgetRepositoryTest*" --tests "*HomeDomainLogicTest*"`
-- [ ] Biên dịch mã nguồn: `./gradlew compileDebugKotlin`
+- [x] Kiểm thử Repository & State Mapping: `./gradlew testDebugUnitTest --tests "*FakeBudgetRepositoryTest*" --tests "*HomeDomainLogicTest*"`
+- [x] Biên dịch mã nguồn: `./gradlew compileDebugKotlin`
 
 ### Phase 3: Carousel UI Components (`budget-carousel-ui`)
-- [ ] **Task 5:** Tái cấu trúc Composable Mặt Thẻ `BudgetCreditCard` v2.2 (`BC-CARD-LABEL-01` & `BC-CARD-CONTENT-01`)
-- [ ] **Task 6:** Tái cấu trúc Composable Thẻ Placeholder `BudgetPlaceholderCard` v2.2
-- [ ] **Task 7:** Xây dựng Thanh Điều khiển Pager & Nâng cấp `BudgetCreditCardCarousel`
+- [x] **Task 5:** Tái cấu trúc Composable Mặt Thẻ `BudgetCreditCard` v2.2 (`BC-CARD-LABEL-01` & `BC-CARD-CONTENT-01`)
+- [x] **Task 6:** Tái cấu trúc Composable Thẻ Placeholder `BudgetPlaceholderCard` v2.2
+- [x] **Task 7:** Xây dựng Thanh Điều khiển Pager & Nâng cấp `BudgetCreditCardCarousel`
 
 ### Checkpoint 3: UI Component Verification
-- [ ] Previews compile & render chính xác các thẻ và trạng thái.
-- [ ] Build biên dịch sạch: `./gradlew assembleDebug`
+- [x] Previews compile & render chính xác các thẻ và trạng thái.
+- [x] Build biên dịch sạch: `./gradlew assembleDebug`
 
 ### Phase 4: Integration, Navigation & Verification (`budget-home-integration`)
-- [ ] **Task 8:** Tích hợp Carousel & Thanh Điều khiển Pager vào `HomeScreen` & `HomeViewModel`
-- [ ] **Task 9:** Mở rộng Điều hướng `BudgetRoute` & Tích hợp Luồng Thiết lập Ngân sách Kỳ sau
-- [ ] **Task 10:** Kiểm thử Xuyên Suốt (End-to-End Verification) & Kiểm tra Hồi quy (BC22-01..BC22-24)
+- [x] **Task 8:** Tích hợp Carousel & Thanh Điều khiển Pager vào `HomeScreen` & `HomeViewModel`
+- [x] **Task 9:** Mở rộng Điều hướng `BudgetRoute` & Tích hợp Luồng Thiết lập Ngân sách Kỳ sau
+- [x] **Task 10:** Kiểm thử Xuyên Suốt (End-to-End Verification) & Kiểm tra Hồi quy (BC22-01..BC22-24)
 
 ### Checkpoint 4: Final Sign-off
-- [ ] Toàn bộ unit tests trong toàn bộ ứng dụng pass: `./gradlew testDebugUnitTest`
-- [ ] Biên dịch Debug APK thành công: `./gradlew assembleDebug`
-- [ ] 24 tiêu chí nghiệm thu BC22-01..BC22-24 đạt yêu cầu.
+- [x] Toàn bộ unit tests trong toàn bộ ứng dụng pass: `./gradlew testDebugUnitTest`
+- [x] Biên dịch Debug APK thành công: `./gradlew assembleDebug`
+- [x] 24 tiêu chí nghiệm thu BC22-01..BC22-24 đạt yêu cầu.
 
 ---
 

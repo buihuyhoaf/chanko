@@ -33,4 +33,4 @@ Bản nâng cấp **Chanko Home v2.2** chuyển đổi thẻ ngân sách đơn t
 - [x] **Phase 1: Specify** (Đặc tả chi tiết tại [docs/features/home-ui-v2.2-budget-spec.md](docs/features/home-ui-v2.2-budget-spec.md))
 - [x] **Phase 2: Plan** (Kế hoạch kiến trúc tại [tasks/plan.md](tasks/plan.md))
 - [x] **Phase 3: Tasks** (Danh sách 10 công việc chi tiết tại [tasks/todo.md](tasks/todo.md))
-- [ ] **Phase 4: Implement** (Sẵn sàng thực thi từng task theo TDD)
+- [x] **Phase 4: Implement** (Đã hoàn thành toàn bộ 4 phases & 24 tiêu chí nghiệm thu BC22-01..BC22-24)

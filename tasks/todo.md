@@ -248,13 +248,13 @@ Nâng cấp `BudgetCreditCardCarousel.kt`:
   + Kiểm tra trạng thái ngoại tuyến: Nếu mất mạng và bấm thiết lập kỳ sau $\to$ hiển thị snackbar tiếng Việt thông báo cần kết nối mạng và chặn mở màn setup.
 
 **Acceptance criteria:**
-- [ ] Mở hoặc quay lại Home luôn snap về thẻ `Current`.
-- [ ] Bấm `"Xem tất cả →"` hoặc chạm các thẻ phát đúng effect điều hướng.
-- [ ] Chạm nút thiết lập kỳ sau khi mất mạng bị chặn và hiển thị snackbar thông báo.
-- [ ] Lỗi ở khu vực Budget (nếu có) được cô lập hoàn toàn, không ảnh hưởng đến Header hay Item Journey.
+- [x] Mở hoặc quay lại Home luôn snap về thẻ `Current`.
+- [x] Bấm `"Xem tất cả →"` hoặc chạm các thẻ phát đúng effect điều hướng.
+- [x] Chạm nút thiết lập kỳ sau khi mất mạng bị chặn và hiển thị snackbar thông báo.
+- [x] Lỗi ở khu vực Budget (nếu có) được cô lập hoàn toàn, không ảnh hưởng đến Header hay Item Journey.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.HomeViewModelTest"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.HomeViewModelTest"`
 
 **Dependencies:** Task 4, Task 7
 
@@ -281,12 +281,12 @@ Nâng cấp `BudgetCreditCardCarousel.kt`:
 - Đảm bảo `BudgetViewModel` và `HomeViewModel` cùng inject một instance `FakeBudgetRepository` singleton. Sau khi người dùng lưu hạn mức kỳ sau thành công trên màn Setup $\to$ quay lại Home, thẻ Next lập tức đổi sang trạng thái `UpcomingConfigured` với theme màu thật.
 
 **Acceptance criteria:**
-- [ ] `BudgetRoute` nhận và xử lý đầy đủ các mode điều hướng.
-- [ ] Dữ liệu đồng bộ tức thì hai chiều giữa Home và Budget.
-- [ ] Thẻ Previous mở ở chế độ chỉ đọc, bảo toàn tính bất biến của lịch sử.
+- [x] `BudgetRoute` nhận và xử lý đầy đủ các mode điều hướng.
+- [x] Dữ liệu đồng bộ tức thì hai chiều giữa Home và Budget.
+- [x] Thẻ Previous mở ở chế độ chỉ đọc, bảo toàn tính bất biến của lịch sử.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.budget.BudgetViewModelTest"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.budget.BudgetViewModelTest"`
 
 **Dependencies:** Task 4, Task 8
 
@@ -310,13 +310,13 @@ Viết bộ kiểm thử xuyên suốt luồng người dùng (E2E Integration T
 - Tạo báo cáo nghiệm thu chi tiết tại `docs/tasks/home-v2.2-budget-verification-report.md`.
 
 **Acceptance criteria:**
-- [ ] 100% các ca kiểm thử trong `HomeBudgetE2EFlowTest` chạy pass.
-- [ ] Toàn bộ 24 tiêu chí `BC22-01`..`BC22-24` đạt yêu cầu.
-- [ ] Báo cáo nghiệm thu hoàn chỉnh tại `docs/tasks/home-v2.2-budget-verification-report.md`.
+- [x] 100% các ca kiểm thử trong `HomeBudgetE2EFlowTest` chạy pass.
+- [x] Toàn bộ 24 tiêu chí `BC22-01`..`BC22-24` đạt yêu cầu.
+- [x] Báo cáo nghiệm thu hoàn chỉnh tại `docs/tasks/home-v2.2-budget-verification-report.md`.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest`
-- [ ] Build succeeds: `./gradlew assembleDebug`
+- [x] Tests pass: `./gradlew testDebugUnitTest`
+- [x] Build succeeds: `./gradlew assembleDebug`
 
 **Dependencies:** Task 8, Task 9
 
@@ -329,6 +329,6 @@ Viết bộ kiểm thử xuyên suốt luồng người dùng (E2E Integration T
 ---
 
 ## Checkpoint 4: Complete Integration & Final Sign-off
-- [ ] Toàn bộ unit tests trong toàn bộ ứng dụng pass: `./gradlew testDebugUnitTest`
-- [ ] Biên dịch Debug APK thành công: `./gradlew assembleDebug`
-- [ ] 24/24 tiêu chí nghiệm thu hoàn thành.
+- [x] Toàn bộ unit tests trong toàn bộ ứng dụng pass: `./gradlew testDebugUnitTest`
+- [x] Biên dịch Debug APK thành công: `./gradlew assembleDebug`
+- [x] 24/24 tiêu chí nghiệm thu hoàn thành.

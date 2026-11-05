@@ -6,6 +6,7 @@ import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -211,5 +212,148 @@ class HomeBudgetE2EFlowTest {
         val initialResetTrigger = viewModel.uiState.value.carouselResetTrigger
         viewModel.onEvent(HomeUiEvent.HomeEntered)
         assertEquals(initialResetTrigger + 1, viewModel.uiState.value.carouselResetTrigger)
+    }
+
+    @Test
+    fun `BC22-05 BC22-06 Placeholder has target monthLabel, setup CTA, and swiping past it does not mutate repository state`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+
+        val initialData = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        val placeholder = initialData.slots[2] as BudgetCardSlotUi.UpcomingPlaceholderCard
+
+        // Month chip is 2-digit MM for next month
+        assertEquals("11", placeholder.monthLabel)
+        assertEquals("cycle_2026_11", placeholder.cycleId)
+
+        // Swiping across placeholder slot does not mutate repository or create garbage cycle
+        viewModel.onEvent(HomeUiEvent.BudgetSlotChanged(placeholder.key))
+        advanceUntilIdle()
+
+        val windowAfterSwipe = fakeRepository.observeTriCycleWindow().first()
+        assertEquals(BudgetCycleStatus.UpcomingUnconfigured, windowAfterSwipe.next?.status)
+        assertEquals(null, windowAfterSwipe.next?.configuredLimitMinor)
+    }
+
+    @Test
+    fun `BC22-08 12 Candy gradient themes map strictly to floorMod ordinal, 12 + 1`() {
+        for (ordinal in -24..36) {
+            val expectedId = Math.floorMod(ordinal, 12) + 1
+            val theme = com.hoabh.chanko.ui.theme.CandyBudgetThemes.getTheme(ordinal)
+            assertEquals("Ordinal $ordinal should map to theme ID $expectedId", expectedId, theme.id)
+            assertTrue("Theme ID must be 1..12", theme.id in 1..12)
+        }
+    }
+
+    @Test
+    fun `BC22-10 BC22-12 BC-CARD-CONTENT-01 Previous card has role Previous, monthLabel, and read-only navigation`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+
+        val data = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        val prevSlot = data.slots[0] as BudgetCardSlotUi.ClosedCard
+
+        assertEquals(BudgetCardRole.Previous, prevSlot.role)
+        assertEquals("09", prevSlot.monthLabel)
+        assertEquals("cycle_2026_09", prevSlot.cycleId)
+        assertTrue(prevSlot.remainingMinor >= 0)
+
+        // Navigate on Previous card emits ReadOnly mode
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(prevSlot))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudget(prevSlot.cycleId, mode = "ReadOnly")), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-11 BC22-13 BC-CARD-LABEL-01 Current card displays 2-digit MM monthLabel and reflects combined spending`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+
+        val data = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        val currentSlot = data.slots[1] as BudgetCardSlotUi.ActiveCard
+
+        // Month chip is 2-digit MM
+        assertEquals("10", currentSlot.monthLabel)
+        assertEquals(2, currentSlot.monthLabel.length)
+        assertTrue(currentSlot.monthLabel.toInt() in 1..12)
+
+        // Combined spending: limit = 5_000_000, spent = 3_000_000, remaining = 2_000_000 (60%)
+        assertEquals(5_000_000L, currentSlot.limitMinor)
+        assertEquals(3_000_000L, currentSlot.spentMinor)
+        assertEquals(2_000_000L, currentSlot.remainingMinor)
+        assertEquals("60%", currentSlot.realPercentText)
+    }
+
+    @Test
+    fun `BC22-17 Offline with cache preserves carousel data without zeroing out to 0`() = runTest(testDispatcher) {
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.OFFLINE_CACHE))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isOffline)
+        val carouselState = viewModel.uiState.value.budgetCarouselState
+        assertTrue("Budget carousel must still be Content when cached offline", carouselState is SectionState.Content)
+        val data = (carouselState as SectionState.Content).data
+        val current = data.slots.first { it.role == BudgetCardRole.Current } as BudgetCardSlotUi.ActiveCard
+
+        // Preserves snapshot data, never reverts to 0 đ
+        assertTrue(current.limitMinor > 0)
+        assertTrue(current.spentMinor > 0)
+        assertTrue(current.remainingMinor > 0)
+    }
+
+    @Test
+    fun `BC22-23 Partial error in Budget is isolated and does not affect Journey nodes`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.BUDGET_ERROR))
+
+        // Budget is in Error state
+        assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Error)
+
+        // Journey remains fully functional in Content state with 5 nodes
+        assertTrue(viewModel.uiState.value.journeyState is SectionState.Content)
+        assertEquals(5, viewModel.uiState.value.journeyNodes.size)
+
+        // Recovery via retry restores Content
+        viewModel.onEvent(HomeUiEvent.RetrySection(HomeSection.Budget))
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Content)
+    }
+
+    @Test
+    fun `BC22-24 Full end-to-end flow from setup budget to home reflect and rollover`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+
+        // 1. Initial: Next slot is Placeholder
+        val initialData = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        assertEquals(BudgetCardRole.NextPlaceholder, initialData.slots[2].role)
+
+        // 2. User sets up budget for next cycle (8_000_000 đ)
+        val setupResult = fakeRepository.setupNextCycleBudget(8_000_000L)
+        assertTrue(setupResult.isSuccess)
+        advanceUntilIdle()
+
+        // 3. Home carousel immediately reflects UpcomingConfiguredCard with limit 8.000.000 đ
+        val configuredData = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        val configuredNext = configuredData.slots[2] as BudgetCardSlotUi.UpcomingConfiguredCard
+        assertEquals(8_000_000L, configuredNext.limitMinor)
+        assertEquals("8.000.000 ₫", configuredNext.limitFormatted)
+
+        // 4. Rollover: next becomes current, keeps theme and configured limit
+        val rolloverResult = fakeRepository.triggerRollover()
+        assertTrue(rolloverResult.isSuccess)
+        advanceUntilIdle()
+
+        val postRolloverData = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
+        val newCurrent = postRolloverData.slots.first { it.role == BudgetCardRole.Current } as BudgetCardSlotUi.ActiveCard
+        assertEquals("cycle_2026_11", newCurrent.cycleId)
+        assertEquals(8_000_000L, newCurrent.limitMinor)
+        assertEquals(configuredNext.themeOrdinal, newCurrent.themeOrdinal)
+
+        // Previous cycle now contains October 2026 as closed
+        val newPrev = postRolloverData.slots.first { it.role == BudgetCardRole.Previous } as BudgetCardSlotUi.ClosedCard
+        assertEquals("cycle_2026_10", newPrev.cycleId)
     }
 }
