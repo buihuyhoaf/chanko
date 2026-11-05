@@ -22,7 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -134,7 +133,6 @@ fun BudgetCreditCardCarousel(
                 initialPage = selectedIndex,
                 pageCount = { slots.size }
             )
-            val coroutineScope = rememberCoroutineScope()
 
             // Khi resetToCurrentTrigger thay đổi (ví dụ: vào lại Home hoặc Rollover), snap về Current (BC22-02)
             LaunchedEffect(resetToCurrentTrigger) {
@@ -154,145 +152,21 @@ fun BudgetCreditCardCarousel(
                     }
             }
 
-            Column(modifier = modifier.fillMaxWidth()) {
-                HorizontalPager(
-                    state = pagerState,
-                    contentPadding = PaddingValues(horizontal = CandyBudgetThemes.peek),
-                    pageSpacing = CandyBudgetThemes.pagerSpacing,
-                    beyondViewportPageCount = 1,
+            // Carousel dạng vuốt ngang tự nhiên (không còn dải nút <>, chấm chỉ báo hay Xem tất cả bên dưới)
+            HorizontalPager(
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = CandyBudgetThemes.peek),
+                pageSpacing = CandyBudgetThemes.pagerSpacing,
+                beyondViewportPageCount = 1,
+                modifier = modifier.fillMaxWidth()
+            ) { page ->
+                val slot = slots[page]
+                BudgetCreditCardSlotView(
+                    slot = slot,
+                    onCardClick = { onCardClick(slot) },
                     modifier = Modifier.fillMaxWidth()
-                ) { page ->
-                    val slot = slots[page]
-                    BudgetCreditCardSlotView(
-                        slot = slot,
-                        onCardClick = { onCardClick(slot) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                // Dải điều khiển bên dưới Carousel (BC22-15)
-                if (slots.size > 1) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    BudgetPagerBottomBar(
-                        currentPage = pagerState.currentPage,
-                        pageCount = slots.size,
-                        onPreviousClick = {
-                            if (pagerState.currentPage > 0) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            }
-                        },
-                        onNextClick = {
-                            if (pagerState.currentPage < slots.size - 1) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-                        },
-                        onSeeAllClick = onSeeAllClick
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Thanh điều khiển dưới Carousel: Nút < + Indicator dots + Nút > + "Xem tất cả →" (BC22-15).
- */
-@Composable
-fun BudgetPagerBottomBar(
-    currentPage: Int,
-    pageCount: Int,
-    onPreviousClick: () -> Unit,
-    onNextClick: () -> Unit,
-    onSeeAllClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val prevCd = stringResource(R.string.home_budget_pager_prev_cd)
-    val nextCd = stringResource(R.string.home_budget_pager_next_cd)
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = CandySpace.xs),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Bên trái: Nút < và > chuyển trang (loại bỏ hoàn toàn indicator dots theo yêu cầu)
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-        ) {
-            // Nút Prev <
-            Surface(
-                onClick = onPreviousClick,
-                enabled = currentPage > 0,
-                shape = CircleShape,
-                color = if (currentPage > 0) Color.White else Color.Transparent,
-                shadowElevation = if (currentPage > 0) 1.dp else 0.dp,
-                modifier = Modifier
-                    .size(36.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = prevCd
-                    }
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "‹",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = if (currentPage > 0) CandyBudgetThemes.textDark else CandyBudgetThemes.placeholderBorder.copy(alpha = 0.5f)
-                    )
-                }
-            }
-
-            // Nút Next >
-            Surface(
-                onClick = onNextClick,
-                enabled = currentPage < pageCount - 1,
-                shape = CircleShape,
-                color = if (currentPage < pageCount - 1) Color.White else Color.Transparent,
-                shadowElevation = if (currentPage < pageCount - 1) 1.dp else 0.dp,
-                modifier = Modifier
-                    .size(36.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = nextCd
-                    }
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "›",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = if (currentPage < pageCount - 1) CandyBudgetThemes.textDark else CandyBudgetThemes.placeholderBorder.copy(alpha = 0.5f)
-                    )
-                }
-            }
-        }
-
-        // Bên phải: Liên kết "Xem tất cả →"
-        Text(
-            text = stringResource(R.string.home_budget_see_all_with_arrow),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            ),
-            color = CandyBudgetThemes.placeholderCtaFill,
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(
-                    role = Role.Button,
-                    onClick = onSeeAllClick
                 )
-                .padding(horizontal = 8.dp, vertical = 6.dp)
-        )
+            }
+        }
     }
 }

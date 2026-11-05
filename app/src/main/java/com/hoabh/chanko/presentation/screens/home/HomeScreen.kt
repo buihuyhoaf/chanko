@@ -300,43 +300,17 @@ fun HomeScreen(
             ) {
                 // 2. Budget Section: Header + Carousel v2.2 (BC22-01..BC22-24)
                 item(key = "section_budget_header") {
-                    Row(
+                    Text(
+                        text = stringResource(R.string.home_budget_section_title),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 20.sp
+                        ),
+                        color = CandyColors.HomeV2.textPrimary,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.home_budget_section_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp
-                            ),
-                            color = CandyColors.HomeV2.textPrimary
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable(
-                                    role = Role.Button,
-                                    onClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) }
-                                )
-                                .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Text(
-                                text = "${stringResource(R.string.home_budget_see_all)} ›",
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                ),
-                                color = CandyColors.brandPurple
-                            )
-                        }
-                    }
+                            .padding(horizontal = horizontalPadding)
+                    )
                 }
 
                 item(key = "section_budget_credit_card") {
@@ -345,7 +319,6 @@ fun HomeScreen(
                         onCardClick = { onEvent(HomeUiEvent.BudgetSlotTap(it)) },
                         onSlotChanged = { onEvent(HomeUiEvent.BudgetSlotChanged(it)) },
                         onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) },
-                        onSeeAllClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) },
                         resetToCurrentTrigger = state.carouselResetTrigger,
                         modifier = Modifier.fillMaxWidth()
                     )
