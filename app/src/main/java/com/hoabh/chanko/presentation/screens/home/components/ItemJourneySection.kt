@@ -1,5 +1,11 @@
 package com.hoabh.chanko.presentation.screens.home.components
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -32,7 +38,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +53,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -131,7 +141,8 @@ fun ItemJourneySection(
     onNodeClick: (String) -> Unit,
     onSeeAllClick: () -> Unit,
     onRetryClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isReducedMotionEnabled: Boolean = false
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -179,7 +190,8 @@ fun ItemJourneySection(
                         nodes = nodes,
                         onNodeGestureStart = onNodeGestureStart,
                         onNodeGestureEnd = onNodeGestureEnd,
-                        onNodeClick = onNodeClick
+                        onNodeClick = onNodeClick,
+                        isReducedMotionEnabled = isReducedMotionEnabled
                     )
                 }
             }
@@ -318,7 +330,8 @@ private fun ItemJourneyZigZagCanvas(
     onNodeGestureStart: (String) -> Unit,
     onNodeGestureEnd: () -> Unit,
     onNodeClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isReducedMotionEnabled: Boolean = false
 ) {
     val visibleNodes = nodes.take(5)
     val density = LocalDensity.current
@@ -451,6 +464,7 @@ private fun ItemJourneyZigZagCanvas(
                         onGestureStart = { onNodeGestureStart(node.itemId) },
                         onGestureEnd = onNodeGestureEnd,
                         onClick = { onNodeClick(node.itemId) },
+                        isReducedMotionEnabled = isReducedMotionEnabled,
                         modifier = Modifier.offset {
                             with(density) {
                                 IntOffset(
@@ -474,7 +488,8 @@ private fun JourneyProductNode(
     onGestureStart: () -> Unit,
     onGestureEnd: () -> Unit,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isReducedMotionEnabled: Boolean = false
 ) {
     val style = resolveJourneyNodeStyle(node.status)
     val nodeCd = stringResource(
@@ -483,6 +498,23 @@ private fun JourneyProductNode(
         node.statusLabel,
         node.priceFormatted
     )
+
+    // Chỉ áp dụng xoay cho item Waiting (đang đếm ngược) hoặc Considering (đang cân nhắc) khi không bật Reduced Motion
+    val isAnimated = (node.status == JourneyNodeStatus.Waiting || node.status == JourneyNodeStatus.Considering) && !isReducedMotionEnabled
+    val infiniteTransition = rememberInfiniteTransition(label = "orbit_ring_transition_${node.itemId}")
+    val rotationAngle by if (isAnimated) {
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 8000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "orbit_rotation_${node.itemId}"
+        )
+    } else {
+        remember { mutableFloatStateOf(0f) }
+    }
 
     Box(
         modifier = modifier
@@ -507,25 +539,57 @@ private fun JourneyProductNode(
             },
         contentAlignment = Alignment.Center
     ) {
-        // Vòng tròn chính của Node với viền màu theo trạng thái (AC-13, AC-14)
+        // 1. Vòng quỹ đạo ngoài (Orbit Ring) tách rời lõi item
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .clearAndSetSemantics {}
+        ) {
+            val strokeWidth = 2.5.dp.toPx()
+            val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
+            if (isAnimated) {
+                val dash = 8.dp.toPx()
+                val gap = 6.dp.toPx()
+                rotate(degrees = rotationAngle, pivot = center) {
+                    drawCircle(
+                        color = style.ringColor,
+                        radius = orbitRadius,
+                        center = center,
+                        style = Stroke(
+                            width = strokeWidth,
+                            cap = StrokeCap.Round,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, gap), 0f)
+                        )
+                    )
+                }
+            } else {
+                drawCircle(
+                    color = style.ringColor,
+                    radius = orbitRadius,
+                    center = center,
+                    style = Stroke(width = strokeWidth)
+                )
+            }
+        }
+
+        // 2. Vòng tròn lõi vật phẩm bên trong với khoảng hở 5dp so với vòng quỹ đạo
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(3.dp)
+                .padding(7.dp)
                 .shadow(
-                    elevation = 6.dp,
+                    elevation = 4.dp,
                     shape = CircleShape,
-                    ambientColor = style.ringColor,
-                    spotColor = style.ringColor
+                    ambientColor = style.ringColor.copy(alpha = 0.35f),
+                    spotColor = style.ringColor.copy(alpha = 0.45f)
                 ),
             shape = CircleShape,
-            color = Color.White,
-            border = BorderStroke(3.5.dp, style.ringColor)
+            color = Color.White
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(6.dp)
+                    .padding(3.dp)
                     .clip(CircleShape)
                     .background(CandyColors.HomeV2.background),
                 contentAlignment = Alignment.Center
@@ -550,7 +614,7 @@ private fun JourneyProductNode(
             }
         }
 
-        // Huy hiệu trạng thái góc trên phải (không chỉ dùng màu — AC-14)
+        // 3. Huy hiệu trạng thái góc trên phải (không bị xoay)
         JourneyStatusBadge(
             status = node.status,
             badgeColor = style.badgeColor,

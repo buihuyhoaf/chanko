@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.screens.home
 
+import com.hoabh.chanko.data.budget.FakeBudgetRepository
 import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
 import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
@@ -300,5 +301,197 @@ class HomeViewModelTest {
         assertEquals(1, effects.size)
         assertTrue(effects.single() is HomeUiEffect.ShowOfflineBlockedMessage)
         job.cancel()
+    }
+
+    // =========================================================================
+    // Home v2.2 Budget Carousel Integration Tests (BC22-01..BC22-24)
+    // =========================================================================
+
+    @Test
+    fun `BC22-02 HomeEntered increments carouselResetTrigger and clears navigationInProgress`() = runTest {
+        val initialTrigger = viewModel.uiState.value.carouselResetTrigger
+        viewModel.onEvent(HomeUiEvent.HomeEntered)
+        assertEquals(initialTrigger + 1, viewModel.uiState.value.carouselResetTrigger)
+    }
+
+    @Test
+    fun `BC22-14 BudgetSeeAllTap emits NavigateToBudgetHistory`() = runTest {
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        viewModel.onEvent(HomeUiEvent.BudgetSeeAllTap)
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudgetHistory), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-12 BudgetSlotChanged updates selectedSlotKey in budgetCarouselState`() {
+        val slotKey = "cycle_next_test"
+        viewModel.onEvent(HomeUiEvent.BudgetSlotChanged(slotKey))
+
+        val carousel = (viewModel.uiState.value.budgetCarouselState as? SectionState.Content)?.data
+        assertNotNull(carousel)
+        assertEquals(slotKey, carousel?.selectedSlotKey)
+    }
+
+    @Test
+    fun `BC22-07 BudgetSlotTap on UpcomingPlaceholderCard when online emits NavigateToBudgetSetup`() = runTest {
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        val placeholder = BudgetCardSlotUi.UpcomingPlaceholderCard(
+            key = "cycle_next",
+            cycleId = "cycle_next",
+            cycleLabel = "Tháng 11/2026",
+            dateRangeText = "01/11/2026 - 30/11/2026"
+        )
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(placeholder))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudgetSetup("cycle_next")), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-13 BudgetSlotTap on UpcomingPlaceholderCard when offline emits ShowOfflineBlockedMessage`() = runTest {
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.OFFLINE_CACHE))
+        assertTrue(viewModel.uiState.value.isOffline)
+
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        val placeholder = BudgetCardSlotUi.UpcomingPlaceholderCard(
+            key = "cycle_next",
+            cycleId = "cycle_next",
+            cycleLabel = "Tháng 11/2026",
+            dateRangeText = "01/11/2026 - 30/11/2026"
+        )
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(placeholder))
+        advanceUntilIdle()
+
+        assertEquals(1, effects.size)
+        val effect = effects.single() as HomeUiEffect.ShowOfflineBlockedMessage
+        assertTrue(effect.message.contains("ngoại tuyến"))
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-06 BudgetSlotTap on ActiveCard emits NavigateToBudget with Active mode`() = runTest {
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        val activeCard = BudgetCardSlotUi.ActiveCard(
+            key = "c_active",
+            cycleId = "c_active",
+            cycleLabel = "Tháng 10/2026",
+            dateRangeText = "01/10/2026 - 31/10/2026",
+            themeOrdinal = 2,
+            spentMinor = 2_000_000L,
+            limitMinor = 5_000_000L,
+            remainingMinor = 3_000_000L,
+            clampedProgress = 0.4f,
+            realPercentText = "40%",
+            isOverBudget = false,
+            spentFormatted = "2.000.000 đ",
+            limitFormatted = "5.000.000 đ",
+            remainingFormatted = "3.000.000 đ"
+        )
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(activeCard))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudget("c_active", mode = "Active")), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-04 BudgetSlotTap on ClosedCard emits NavigateToBudget with ReadOnly mode`() = runTest {
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        val closedCard = BudgetCardSlotUi.ClosedCard(
+            key = "p_closed",
+            cycleId = "p_closed",
+            cycleLabel = "Tháng 09/2026",
+            dateRangeText = "01/09/2026 - 30/09/2026",
+            themeOrdinal = 1,
+            spentMinor = 4_000_000L,
+            limitMinor = 4_500_000L,
+            remainingMinor = 500_000L,
+            clampedProgress = 0.88f,
+            realPercentText = "88%",
+            isOverBudget = false,
+            spentFormatted = "4.000.000 đ",
+            limitFormatted = "4.500.000 đ",
+            remainingFormatted = "500.000 đ"
+        )
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(closedCard))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudget("p_closed", mode = "ReadOnly")), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-07 BudgetSlotTap on UpcomingConfiguredCard emits NavigateToBudget with Upcoming mode`() = runTest {
+        val effects = mutableListOf<HomeUiEffect>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effect.collect { effects.add(it) }
+        }
+
+        val upcomingCard = BudgetCardSlotUi.UpcomingConfiguredCard(
+            key = "n_upcoming",
+            cycleId = "n_upcoming",
+            cycleLabel = "Tháng 11/2026",
+            dateRangeText = "01/11/2026 - 30/11/2026",
+            themeOrdinal = 3,
+            limitMinor = 6_000_000L,
+            limitFormatted = "6.000.000 đ"
+        )
+        viewModel.onEvent(HomeUiEvent.BudgetSlotTap(upcomingCard))
+        advanceUntilIdle()
+
+        assertEquals(listOf(HomeUiEffect.NavigateToBudget("n_upcoming", mode = "Upcoming")), effects)
+        job.cancel()
+    }
+
+    @Test
+    fun `BC22-10 HomeViewModel with injected FakeBudgetRepository observes TriCycleWindow`() = runTest {
+        val fakeRepo = FakeBudgetRepository()
+        val vm = HomeViewModel(
+            fakeDataSource = HomeFakeDataSource(),
+            budgetRepository = fakeRepo
+        )
+        advanceUntilIdle()
+
+        val carouselState = vm.uiState.value.budgetCarouselState
+        assertTrue(carouselState is SectionState.Content)
+        val data = (carouselState as SectionState.Content).data
+        assertEquals(3, data.slots.size)
+        assertEquals("cycle_2026_10", data.currentCycleKey)
+    }
+
+    @Test
+    fun `BC22-22 Budget error isolates error to budgetCarouselState and Retry recovers`() = runTest {
+        viewModel.onEvent(HomeUiEvent.SelectScenario(HomeScenario.BUDGET_ERROR))
+
+        assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Error)
+        // Journey và Observation vẫn nguyên vẹn
+        assertTrue(viewModel.uiState.value.journeyState is SectionState.Content)
+
+        // Retry
+        viewModel.onEvent(HomeUiEvent.RetrySection(HomeSection.Budget))
+        assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Content)
     }
 }

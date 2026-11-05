@@ -38,6 +38,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -58,14 +59,17 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.BudgetCreditCardUi
+import com.hoabh.chanko.presentation.screens.home.BudgetCardRole
+import com.hoabh.chanko.presentation.screens.home.BudgetCardSlotUi
 import com.hoabh.chanko.presentation.screens.home.SectionState
+import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 
-private val CreditCardCornerShape = RoundedCornerShape(24.dp)
+private val CreditCardCornerShape = RoundedCornerShape(CandyBudgetThemes.cardRadius)
 private val ProgressTrackCornerShape = RoundedCornerShape(999.dp)
 private val PercentPillCornerShape = RoundedCornerShape(999.dp)
-private val CreditCardMinHeight = 196.dp
+private val CreditCardMinHeight = CandyBudgetThemes.cardMinHeight
 
 /**
  * Khu vực 2 — Budget Credit Card 3D Candy Orange (Home v2.0 — AC-03..AC-09, AC-18..AC-22, AC-31):
@@ -407,8 +411,119 @@ private fun BudgetCreditCardContent(
     }
 }
 
+/**
+ * Nền hữu cơ 3D với 12 theme màu ngân sách (Home v2.2 - BC22-08, theme-01..12):
+ * - Lớp nền: 3-stop linear gradient sRGB (Light -> Main -> Dark).
+ * - Lớp sóng sau (Back organic wave): đường cong mềm mại mờ nhẹ ở phần dưới thẻ.
+ * - Lớp sóng trước (Front wave mound): đụn sóng hữu cơ đậm nét nổi lên ở góc dưới bên phải làm điểm tựa cho mascot Chanko.
+ * - Dấu chân chìm (Watermark): hình dấu chân mèo trắng chìm ở góc dưới bên phải thẻ.
+ */
 @Composable
-private fun CreditCardTopBar() {
+fun CardOrganicBackground(
+    theme: CandyColors.BudgetThemes.GradientTheme,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+
+        // 1. Base 3-stop linear gradient
+        val baseBrush = Brush.linearGradient(
+            colorStops = arrayOf(
+                0.0f to theme.light,
+                0.5f to theme.main,
+                1.0f to theme.dark
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(w, h)
+        )
+        drawRect(brush = baseBrush)
+
+        // 2. Lớp sóng sau (Back organic wave)
+        val backWavePath = Path().apply {
+            moveTo(0f, h * 0.72f)
+            cubicTo(
+                w * 0.22f, h * 0.66f,
+                w * 0.38f, h * 0.62f,
+                w * 0.58f, h * 0.70f
+            )
+            cubicTo(
+                w * 0.74f, h * 0.76f,
+                w * 0.88f, h * 0.82f,
+                w, h * 0.78f
+            )
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            path = backWavePath,
+            color = theme.light.copy(alpha = 0.35f)
+        )
+
+        // 3. Lớp sóng trước (Front wave mound - bệ đỡ cho mascot)
+        val frontWavePath = Path().apply {
+            moveTo(w * 0.40f, h)
+            cubicTo(
+                w * 0.46f, h * 0.78f,
+                w * 0.58f, h * 0.48f,
+                w * 0.80f, h * 0.48f
+            )
+            cubicTo(
+                w * 0.94f, h * 0.48f,
+                w * 1.02f, h * 0.58f,
+                w * 1.05f, h * 0.68f
+            )
+            lineTo(w * 1.05f, h)
+            lineTo(w * 0.40f, h)
+            close()
+        }
+        drawPath(
+            path = frontWavePath,
+            color = theme.dark.copy(alpha = 0.48f)
+        )
+
+        // 4. Dấu chân mèo trắng chìm (Watermark) ở góc dưới bên phải
+        val pawCenterX = w * 0.85f
+        val pawCenterY = h * 0.74f
+        val pawSize = w * 0.14f
+        val pawColor = Color.White.copy(alpha = 0.22f)
+
+        // Đệm chân chính
+        drawOval(
+            color = pawColor,
+            topLeft = Offset(pawCenterX - pawSize * 0.38f, pawCenterY - pawSize * 0.15f),
+            size = Size(pawSize * 0.76f, pawSize * 0.60f)
+        )
+        // 4 ngón chân tròn
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.15f,
+            center = Offset(pawCenterX - pawSize * 0.38f, pawCenterY - pawSize * 0.28f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.16f,
+            center = Offset(pawCenterX - pawSize * 0.14f, pawCenterY - pawSize * 0.46f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.16f,
+            center = Offset(pawCenterX + pawSize * 0.14f, pawCenterY - pawSize * 0.46f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.15f,
+            center = Offset(pawCenterX + pawSize * 0.38f, pawCenterY - pawSize * 0.28f)
+        )
+    }
+}
+
+@Composable
+private fun CreditCardTopBar(
+    monthLabel: String = "",
+    badge: (@Composable () -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -416,42 +531,56 @@ private fun CreditCardTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET
+        // Bên trái: Month Chip pill MM (01..12) + badge tuỳ chọn
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativePawMark(modifier = Modifier.size(28.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.home_budget_brand_title),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        letterSpacing = 0.6.sp
-                    ),
-                    color = Color.White
-                )
-                Text(
-                    text = stringResource(R.string.home_budget_brand_subtitle),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = Color.White
-                )
+            if (monthLabel.isNotBlank()) {
+                BudgetMonthChip(monthLabel = monthLabel)
+            }
+            if (badge != null) {
+                badge()
             }
         }
 
-        // Bên phải: Chip vàng EMV + Sóng Contactless
+        // Bên phải: Chip vàng EMV (46x32dp to rõ) + Sóng Contactless (22dp)
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.sm)
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativeGoldChip(modifier = Modifier.size(width = 36.dp, height = 26.dp))
+            DecorativeGoldChip(modifier = Modifier.size(width = 46.dp, height = 32.dp))
             DecorativeContactlessWaves(modifier = Modifier.size(22.dp))
         }
+    }
+}
+
+/**
+ * Month Chip pill MM (01..12) theo quyết định BC-CARD-LABEL-01 và design-tokens.json.
+ */
+@Composable
+fun BudgetMonthChip(
+    monthLabel: String,
+    modifier: Modifier = Modifier,
+    containerColor: Color = Color.White.copy(alpha = 0.28f),
+    contentColor: Color = Color.White
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(999.dp),
+        color = containerColor,
+        shadowElevation = 0.dp
+    ) {
+        Text(
+            text = monthLabel,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                lineHeight = 22.sp
+            ),
+            color = contentColor,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+        )
     }
 }
 
@@ -479,7 +608,7 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
     val chipFill = CandyColors.HomeV2.chipGold
     val chipStroke = CandyColors.HomeV2.chipGoldStroke
     Canvas(modifier = modifier) {
-        val corner = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+        val corner = CornerRadius(7.dp.toPx(), 7.dp.toPx())
         drawRoundRect(
             color = chipFill,
             cornerRadius = corner
@@ -487,7 +616,7 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
         drawRoundRect(
             color = chipStroke,
             cornerRadius = corner,
-            style = Stroke(width = 1.2.dp.toPx())
+            style = Stroke(width = 1.4.dp.toPx())
         )
         // Đường chia mạch chip EMV
         val w = size.width
@@ -496,19 +625,19 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
             color = chipStroke,
             start = Offset(w * 0.33f, 0f),
             end = Offset(w * 0.33f, h),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
         drawLine(
             color = chipStroke,
             start = Offset(w * 0.67f, 0f),
             end = Offset(w * 0.67f, h),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
         drawLine(
             color = chipStroke,
             start = Offset(0f, h * 0.5f),
             end = Offset(w, h * 0.5f),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
     }
 }
@@ -535,7 +664,7 @@ private fun DecorativeContactlessWaves(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BudgetCreditCardStatusFrame(
+internal fun BudgetCreditCardStatusFrame(
     title: String,
     subtitle: String,
     actionLabel: String?,
@@ -548,7 +677,9 @@ private fun BudgetCreditCardStatusFrame(
             colors = listOf(
                 CandyColors.HomeV2.candyOrange,
                 CandyColors.HomeV2.candyOrangeShadow
-            )
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(900f, 650f)
         )
     }
 
@@ -611,7 +742,7 @@ private fun BudgetCreditCardStatusFrame(
 }
 
 @Composable
-private fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
+internal fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -666,6 +797,501 @@ private fun BudgetCreditCardSkeleton(modifier: Modifier = Modifier) {
                     .clip(PercentPillCornerShape)
                     .background(CandyColors.HomeV2.candyOrangeHighlight)
             )
+        }
+    }
+}
+
+/**
+ * Composable hiển thị từng slot thẻ trên Carousel v2.2 (Home v2.2 - BC22-01..BC22-22).
+ */
+@Composable
+fun BudgetCreditCardSlotView(
+    slot: BudgetCardSlotUi,
+    onCardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (slot) {
+        is BudgetCardSlotUi.UpcomingPlaceholderCard -> {
+            BudgetPlaceholderCard(
+                monthLabel = slot.monthLabel,
+                cycleLabel = slot.cycleLabel,
+                dateRangeText = slot.dateRangeText,
+                onClick = onCardClick,
+                role = slot.role,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.CurrentEmptyCard -> {
+            BudgetPlaceholderCard(
+                monthLabel = slot.monthLabel,
+                cycleLabel = slot.cycleLabel,
+                dateRangeText = slot.dateRangeText,
+                onClick = onCardClick,
+                role = slot.role,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.UpcomingConfiguredCard -> {
+            UpcomingConfiguredCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.ClosedCard -> {
+            ClosedCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+
+        is BudgetCardSlotUi.ActiveCard -> {
+            ActiveCardContent(
+                slot = slot,
+                onClick = onCardClick,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActiveCardContent(
+    slot: BudgetCardSlotUi.ActiveCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val mainLabel = if (slot.isOverBudget) {
+        stringResource(R.string.home_budget_over_budget_label)
+    } else {
+        stringResource(R.string.home_budget_remaining_label)
+    }
+    val cardCd = buildString {
+        append("Thẻ ngân sách đang diễn ra, tháng ${slot.monthLabel}. ")
+        append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
+        if (slot.isOverBudget) {
+            append("Vượt ngân sách: ${slot.overFormatted}. ")
+        } else {
+            append("Còn lại: ${slot.remainingFormatted}. ")
+        }
+        append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
+    }
+
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 8.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = theme.dark.copy(alpha = 0.35f),
+                spotColor = theme.dark.copy(alpha = 0.45f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = slot.clampedProgress,
+                    range = 0f..1f
+                )
+            },
+        shape = CreditCardCornerShape,
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
+            // Mascot căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
+            Image(
+                painter = painterResource(
+                    id = if (slot.isOverBudget) {
+                        R.drawable.mascot_worried
+                    } else {
+                        R.drawable.mascot_happy
+                    }
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
+                    .size(104.dp)
+                    .clearAndSetSemantics {}
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = CreditCardMinHeight)
+                    .padding(
+                        start = CandyBudgetThemes.contentPadding,
+                        top = CandyBudgetThemes.contentPadding,
+                        end = CandyBudgetThemes.contentPadding,
+                        bottom = 14.dp
+                    )
+            ) {
+                // Hàng trên: TopBar
+                CreditCardTopBar(monthLabel = slot.monthLabel)
+
+                // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        Text(
+                            text = mainLabel,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                        )
+
+                        Text(
+                            text = if (slot.isOverBudget) {
+                                slot.overFormatted ?: slot.remainingFormatted
+                            } else {
+                                slot.remainingFormatted
+                            },
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                        )
+                    }
+                }
+
+                // Hàng dưới: Thanh tiến trình sát mép dưới (BC-CARD-CONTENT-01)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.66f)
+                        .padding(bottom = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(14.dp)
+                            .clip(ProgressTrackCornerShape)
+                            .background(Color.White.copy(alpha = 0.35f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(slot.clampedProgress)
+                                .clip(ProgressTrackCornerShape)
+                                .background(
+                                    if (slot.isOverBudget) {
+                                        CandyBudgetThemes.coralWarning
+                                    } else {
+                                        Color.White
+                                    }
+                                )
+                        )
+                    }
+
+                    Surface(
+                        shape = PercentPillCornerShape,
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = slot.realPercentText,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClosedCardContent(
+    slot: BudgetCardSlotUi.ClosedCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val closedLabel = stringResource(R.string.home_budget_closed_remaining_label)
+    val cardCd = buildString {
+        append("Thẻ ngân sách đã kết thúc, tháng ${slot.monthLabel}. ")
+        append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
+        if (slot.isOverBudget) {
+            append("Vượt ngân sách: ${slot.overFormatted}. ")
+        } else {
+            append("Còn lại: ${slot.remainingFormatted}. ")
+        }
+        append("Tiến độ: ${slot.realPercentText}. Chạm để xem chi tiết.")
+    }
+
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 6.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = theme.dark.copy(alpha = 0.25f),
+                spotColor = theme.dark.copy(alpha = 0.35f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = slot.clampedProgress,
+                    range = 0f..1f
+                )
+            },
+        shape = CreditCardCornerShape,
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
+            // Mascot ngủ căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
+            Image(
+                painter = painterResource(id = R.drawable.mascot_sleepy),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
+                    .size(104.dp)
+                    .clearAndSetSemantics {}
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = CreditCardMinHeight)
+                    .padding(
+                        start = CandyBudgetThemes.contentPadding,
+                        top = CandyBudgetThemes.contentPadding,
+                        end = CandyBudgetThemes.contentPadding,
+                        bottom = 14.dp
+                    )
+            ) {
+                // Hàng trên: TopBar
+                CreditCardTopBar(monthLabel = slot.monthLabel)
+
+                // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        Text(
+                            text = closedLabel,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = Color.White
+                        )
+
+                        Text(
+                            text = slot.remainingFormatted,
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
+                }
+
+                // Hàng dưới: Thanh tiến trình sát mép dưới
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.66f)
+                        .padding(bottom = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(14.dp)
+                            .clip(ProgressTrackCornerShape)
+                            .background(Color.White.copy(alpha = 0.35f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(slot.clampedProgress)
+                                .clip(ProgressTrackCornerShape)
+                                .background(Color.White)
+                        )
+                    }
+
+                    Surface(
+                        shape = PercentPillCornerShape,
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = slot.realPercentText,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp
+                            ),
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UpcomingConfiguredCardContent(
+    slot: BudgetCardSlotUi.UpcomingConfiguredCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cardCd = "Thẻ ngân sách sắp tới, tháng ${slot.monthLabel}. Hạn mức dự kiến: ${slot.limitFormatted}. Chạm để xem hoặc chỉnh sửa."
+
+    val theme = remember(slot.themeOrdinal) {
+        CandyBudgetThemes.getTheme(slot.themeOrdinal)
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = CreditCardMinHeight)
+            .shadow(
+                elevation = 6.dp,
+                shape = CreditCardCornerShape,
+                ambientColor = theme.dark.copy(alpha = 0.25f),
+                spotColor = theme.dark.copy(alpha = 0.35f)
+            )
+            .clip(CreditCardCornerShape)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = cardCd
+                role = Role.Button
+            },
+        shape = CreditCardCornerShape,
+        color = theme.main,
+        border = BorderStroke(1.5.dp, theme.light)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
+            // Mascot căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
+            Image(
+                painter = painterResource(id = R.drawable.mascot_happy),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
+                    .size(104.dp)
+                    .clearAndSetSemantics {}
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = CreditCardMinHeight)
+                    .padding(CandyBudgetThemes.contentPadding)
+            ) {
+                CreditCardTopBar(monthLabel = slot.monthLabel)
+
+                // Vùng giữa: Nhãn dự kiến & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.home_budget_upcoming_projected_label),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = Color.White
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = slot.limitFormatted,
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }

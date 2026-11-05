@@ -10,8 +10,12 @@ sealed interface HomeUiEvent {
     // 1. Header (AC-02)
     data object AvatarTap : HomeUiEvent
 
-    // 2. Budget Credit Card (AC-04, AC-08, AC-25)
+    // 2. Budget Credit Card (AC-04, AC-08, AC-25) & Carousel v2.2 (BC22-01..BC22-20)
     data object BudgetCardTap : HomeUiEvent
+    data object BudgetSeeAllTap : HomeUiEvent
+    data class BudgetSlotTap(val slot: BudgetCardSlotUi) : HomeUiEvent
+    data class BudgetSlotChanged(val slotKey: String) : HomeUiEvent
+    data object HomeEntered : HomeUiEvent
     data class CycleRollover(
         val cycleLabel: String,
         val payNowSpentMinor: Long?,

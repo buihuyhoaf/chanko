@@ -7,6 +7,7 @@ import com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetDestinatio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -312,5 +313,46 @@ class BudgetViewModelTest {
         assertEquals("6000000", viewModel.uiState.value.editBudgetDraft)
         assertEquals(1, viewModel.uiState.value.editBudgetBaseRevision)
         assertFalse(viewModel.uiState.value.isLoading)
+    }
+    @Test
+    fun `navigating with SetupNext mode auto-selects upcoming cycle and opens EditBudget sheet`() = runTest(testDispatcher) {
+        val handle = androidx.lifecycle.SavedStateHandle(mapOf("mode" to "SetupNext"))
+        val vm = BudgetViewModel(
+            repository = repository,
+            sharedItemResolver = com.hoabh.chanko.data.budget.InMemorySharedItemResolver(),
+            savedStateHandle = handle
+        )
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertEquals("cycle_2026_11", state.selectedCycle?.id)
+        assertTrue(state.isUpcomingCycle)
+        assertTrue(state.canWrite)
+        assertTrue(state.currentSheet is com.hoabh.chanko.presentation.screens.budget.sheets.BudgetSheetDestination.EditBudget)
+    }
+
+    @Test
+    fun `submitting budget for upcoming cycle delegates to setupNextCycleBudget and emits success snackbar`() = runTest(testDispatcher) {
+        val handle = androidx.lifecycle.SavedStateHandle(mapOf("mode" to "SetupNext"))
+        val vm = BudgetViewModel(
+            repository = repository,
+            sharedItemResolver = com.hoabh.chanko.data.budget.InMemorySharedItemResolver(),
+            savedStateHandle = handle
+        )
+        advanceUntilIdle()
+
+        val effects = mutableListOf<BudgetUiEffect>()
+        val job = launch(kotlinx.coroutines.test.UnconfinedTestDispatcher(testScheduler)) {
+            vm.effect.collect { effects.add(it) }
+        }
+
+        vm.onEvent(BudgetUiEvent.SubmitBudgetLimit(7_000_000L))
+        advanceUntilIdle()
+
+        assertEquals(listOf(BudgetUiEffect.ShowSnackbar("Đã thiết lập ngân sách kỳ tới")), effects)
+        val nextCycle = repository.getAvailableCycles().first().first { it.id == "cycle_2026_11" }
+        assertEquals(7_000_000L, nextCycle.configuredLimitMinor)
+        assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingConfigured, nextCycle.status)
+        job.cancel()
     }
 }

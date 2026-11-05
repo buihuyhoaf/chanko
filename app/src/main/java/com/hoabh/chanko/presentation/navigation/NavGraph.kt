@@ -165,15 +165,34 @@ fun NavGraph(
         }
 
         composable(
-            route = Screen.BudgetDetails.route
-        ) {
+            route = Screen.BudgetDetails.route,
+            arguments = listOf(
+                navArgument("cycleId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("mode") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "Active"
+                },
+                navArgument("expandHistory") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val expandHistory = backStackEntry.arguments?.getBoolean("expandHistory") ?: false
             BudgetRoute(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToItemDetail = { itemId ->
                     navController.navigate(Screen.ItemDetail.createRoute(itemId)) {
                         launchSingleTop = true
                     }
-                }
+                },
+                expandHistory = expandHistory,
+                openCyclePicker = expandHistory
             )
         }
 

@@ -169,10 +169,25 @@ fun MainNavigation(
                         onAddNewItemClick = onAddNewItemClick,
                         onProfileClick = onNavigateToProfile,
                         onBudgetDetailsClick = {
-                            controller.navigate(Screen.BudgetDetails.route) {
+                            controller.navigate(Screen.BudgetDetails.createRoute()) {
                                 launchSingleTop = true
                             }
                             onNavigateToBudgetDetails()
+                        },
+                        onNavigateToBudget = { cycleId, mode ->
+                            controller.navigate(Screen.BudgetDetails.createRoute(cycleId = cycleId, mode = mode)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToBudgetHistory = {
+                            controller.navigate(Screen.BudgetDetails.createRoute(expandHistory = true)) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToBudgetSetup = { targetCycleId ->
+                            controller.navigate(Screen.BudgetDetails.createRoute(cycleId = targetCycleId, mode = "SetupNext")) {
+                                launchSingleTop = true
+                            }
                         },
                         onNavigateToItemDetail = onNavigateToItemDetail,
                         onNavigateToMyItems = { filter ->
@@ -181,10 +196,31 @@ fun MainNavigation(
                         }
                     )
                 }
-                composable(Screen.BudgetDetails.route) {
+                composable(
+                    route = Screen.BudgetDetails.route,
+                    arguments = listOf(
+                        navArgument("cycleId") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        },
+                        navArgument("mode") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = "Active"
+                        },
+                        navArgument("expandHistory") {
+                            type = NavType.BoolType
+                            defaultValue = false
+                        }
+                    )
+                ) { backStackEntry ->
+                    val expandHistory = backStackEntry.arguments?.getBoolean("expandHistory") ?: false
                     BudgetRoute(
                         onBackClick = { controller.popBackStack() },
-                        onNavigateToItemDetail = onNavigateToItemDetail
+                        onNavigateToItemDetail = onNavigateToItemDetail,
+                        expandHistory = expandHistory,
+                        openCyclePicker = expandHistory
                     )
                 }
                 composable(
