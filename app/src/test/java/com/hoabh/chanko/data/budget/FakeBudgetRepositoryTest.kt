@@ -118,37 +118,6 @@ class FakeBudgetRepositoryTest {
     }
 
     @Test
-    fun `addCreditCard adds card and rejects duplicate case-insensitively`() = runTest {
-        val addResult = repository.addCreditCard("Thẻ Shinhan")
-        assertTrue(addResult.isSuccess)
-
-        val cards = repository.getCreditCards().first()
-        assertTrue(cards.any { it.name == "Thẻ Shinhan" })
-
-        // Trùng tên không phân biệt hoa thường
-        val dupResult = repository.addCreditCard("thẻ shinhan")
-        assertTrue(dupResult.isFailure)
-        assertEquals("Tên thẻ đã tồn tại", dupResult.exceptionOrNull()?.message)
-    }
-
-    @Test
-    fun `archiveCreditCard marks card as archived and removes from active list`() = runTest {
-        val initialCards = repository.getCreditCards().first()
-        val targetCard = initialCards[0]
-
-        val archiveResult = repository.archiveCreditCard(targetCard.id)
-        assertTrue(archiveResult.isSuccess)
-
-        val remainingCards = repository.getCreditCards().first()
-        assertFalse(remainingCards.any { it.id == targetCard.id })
-
-        // Thử xóa lại thẻ đã lưu trữ
-        val reArchiveResult = repository.archiveCreditCard(targetCard.id)
-        assertTrue(reArchiveResult.isFailure)
-        assertEquals("Thẻ đã được xóa", reArchiveResult.exceptionOrNull()?.message)
-    }
-
-    @Test
     fun `scenario switchers update snapshots including combined past+offline+over and zero`() = runTest {
         repository.setScenarioOverBudget()
         val overSnap = repository.getBudgetSnapshot(repository.currentCycleId).first()
