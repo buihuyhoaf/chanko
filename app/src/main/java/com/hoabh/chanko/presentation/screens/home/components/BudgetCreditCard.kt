@@ -38,6 +38,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -410,6 +411,114 @@ private fun BudgetCreditCardContent(
     }
 }
 
+/**
+ * Nền hữu cơ 3D với 12 theme màu ngân sách (Home v2.2 - BC22-08, theme-01..12):
+ * - Lớp nền: 3-stop linear gradient sRGB (Light -> Main -> Dark).
+ * - Lớp sóng sau (Back organic wave): đường cong mềm mại mờ nhẹ ở phần dưới thẻ.
+ * - Lớp sóng trước (Front wave mound): đụn sóng hữu cơ đậm nét nổi lên ở góc dưới bên phải làm điểm tựa cho mascot Chanko.
+ * - Dấu chân chìm (Watermark): hình dấu chân mèo trắng chìm ở góc dưới bên phải thẻ.
+ */
+@Composable
+fun CardOrganicBackground(
+    theme: CandyColors.BudgetThemes.GradientTheme,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+
+        // 1. Base 3-stop linear gradient
+        val baseBrush = Brush.linearGradient(
+            colorStops = arrayOf(
+                0.0f to theme.light,
+                0.5f to theme.main,
+                1.0f to theme.dark
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(w, h)
+        )
+        drawRect(brush = baseBrush)
+
+        // 2. Lớp sóng sau (Back organic wave)
+        val backWavePath = Path().apply {
+            moveTo(0f, h * 0.72f)
+            cubicTo(
+                w * 0.22f, h * 0.66f,
+                w * 0.38f, h * 0.62f,
+                w * 0.58f, h * 0.70f
+            )
+            cubicTo(
+                w * 0.74f, h * 0.76f,
+                w * 0.88f, h * 0.82f,
+                w, h * 0.78f
+            )
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            path = backWavePath,
+            color = theme.light.copy(alpha = 0.35f)
+        )
+
+        // 3. Lớp sóng trước (Front wave mound - bệ đỡ cho mascot)
+        val frontWavePath = Path().apply {
+            moveTo(w * 0.40f, h)
+            cubicTo(
+                w * 0.46f, h * 0.78f,
+                w * 0.58f, h * 0.48f,
+                w * 0.80f, h * 0.48f
+            )
+            cubicTo(
+                w * 0.94f, h * 0.48f,
+                w * 1.02f, h * 0.58f,
+                w * 1.05f, h * 0.68f
+            )
+            lineTo(w * 1.05f, h)
+            lineTo(w * 0.40f, h)
+            close()
+        }
+        drawPath(
+            path = frontWavePath,
+            color = theme.dark.copy(alpha = 0.48f)
+        )
+
+        // 4. Dấu chân mèo trắng chìm (Watermark) ở góc dưới bên phải
+        val pawCenterX = w * 0.85f
+        val pawCenterY = h * 0.74f
+        val pawSize = w * 0.14f
+        val pawColor = Color.White.copy(alpha = 0.22f)
+
+        // Đệm chân chính
+        drawOval(
+            color = pawColor,
+            topLeft = Offset(pawCenterX - pawSize * 0.38f, pawCenterY - pawSize * 0.15f),
+            size = Size(pawSize * 0.76f, pawSize * 0.60f)
+        )
+        // 4 ngón chân tròn
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.15f,
+            center = Offset(pawCenterX - pawSize * 0.38f, pawCenterY - pawSize * 0.28f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.16f,
+            center = Offset(pawCenterX - pawSize * 0.14f, pawCenterY - pawSize * 0.46f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.16f,
+            center = Offset(pawCenterX + pawSize * 0.14f, pawCenterY - pawSize * 0.46f)
+        )
+        drawCircle(
+            color = pawColor,
+            radius = pawSize * 0.15f,
+            center = Offset(pawCenterX + pawSize * 0.38f, pawCenterY - pawSize * 0.28f)
+        )
+    }
+}
+
 @Composable
 private fun CreditCardTopBar(
     monthLabel: String = "",
@@ -422,50 +531,26 @@ private fun CreditCardTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET
+        // Bên trái: Month Chip pill MM (01..12) + badge tuỳ chọn
         Row(
-            modifier = Modifier.weight(1f, fill = false),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativePawMark(modifier = Modifier.size(24.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.home_budget_brand_title),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.sp,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = Color.White
-                )
-                Text(
-                    text = stringResource(R.string.home_budget_brand_subtitle),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 9.sp,
-                        letterSpacing = 0.4.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.85f)
-                )
+            if (monthLabel.isNotBlank()) {
+                BudgetMonthChip(monthLabel = monthLabel)
             }
             if (badge != null) {
-                Spacer(modifier = Modifier.width(2.dp))
                 badge()
             }
         }
 
-        // Bên phải: Month Chip pill (BC-CARD-LABEL-01) hoặc Chip vàng EMV + Sóng Contactless
-        if (monthLabel.isNotBlank()) {
-            BudgetMonthChip(monthLabel = monthLabel)
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-            ) {
-                DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
-                DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
-            }
+        // Bên phải: Chip vàng EMV (34x24dp) + Sóng Contactless (20dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+        ) {
+            DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
+            DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -476,22 +561,24 @@ private fun CreditCardTopBar(
 @Composable
 fun BudgetMonthChip(
     monthLabel: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = Color.White.copy(alpha = 0.28f),
+    contentColor: Color = Color.White
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
-        color = CandyBudgetThemes.monthBadgeBg,
-        shadowElevation = 2.dp
+        color = containerColor,
+        shadowElevation = 0.dp
     ) {
         Text(
             text = monthLabel,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = CandyBudgetThemes.monthTextSize,
-                lineHeight = 28.sp
+                fontSize = 18.sp,
+                lineHeight = 22.sp
             ),
-            color = CandyBudgetThemes.textDark,
+            color = contentColor,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
         )
     }
@@ -797,9 +884,6 @@ private fun ActiveCardContent(
     val theme = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getTheme(slot.themeOrdinal)
     }
-    val cardBrush = remember(slot.themeOrdinal) {
-        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
-    }
 
     Surface(
         modifier = modifier
@@ -829,11 +913,14 @@ private fun ActiveCardContent(
         border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(brush = cardBrush)
-                .padding(CandyBudgetThemes.contentPadding)
+            modifier = Modifier.fillMaxWidth()
         ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
             Image(
                 painter = painterResource(
                     id = if (slot.isOverBudget) {
@@ -852,7 +939,9 @@ private fun ActiveCardContent(
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(CandyBudgetThemes.contentPadding),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
                 CreditCardTopBar(monthLabel = slot.monthLabel)
@@ -953,9 +1042,6 @@ private fun ClosedCardContent(
     val theme = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getTheme(slot.themeOrdinal)
     }
-    val cardBrush = remember(slot.themeOrdinal) {
-        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
-    }
 
     Surface(
         modifier = modifier
@@ -985,11 +1071,14 @@ private fun ClosedCardContent(
         border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(brush = cardBrush)
-                .padding(CandyBudgetThemes.contentPadding)
+            modifier = Modifier.fillMaxWidth()
         ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
             // Mascot ngủ cho kỳ trước đã kết thúc (BC-CARD-CONTENT-01)
             Image(
                 painter = painterResource(id = R.drawable.mascot_sleepy),
@@ -1003,7 +1092,9 @@ private fun ClosedCardContent(
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(CandyBudgetThemes.contentPadding),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
                 CreditCardTopBar(monthLabel = slot.monthLabel)
@@ -1084,9 +1175,6 @@ private fun UpcomingConfiguredCardContent(
     val theme = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getTheme(slot.themeOrdinal)
     }
-    val cardBrush = remember(slot.themeOrdinal) {
-        CandyBudgetThemes.getGradientBrush(slot.themeOrdinal)
-    }
 
     Surface(
         modifier = modifier
@@ -1112,11 +1200,14 @@ private fun UpcomingConfiguredCardContent(
         border = BorderStroke(1.5.dp, theme.light)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(brush = cardBrush)
-                .padding(CandyBudgetThemes.contentPadding)
+            modifier = Modifier.fillMaxWidth()
         ) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
             Image(
                 painter = painterResource(id = R.drawable.mascot_happy),
                 contentDescription = null,
@@ -1129,7 +1220,9 @@ private fun UpcomingConfiguredCardContent(
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(CandyBudgetThemes.contentPadding),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 CreditCardTopBar(monthLabel = slot.monthLabel)

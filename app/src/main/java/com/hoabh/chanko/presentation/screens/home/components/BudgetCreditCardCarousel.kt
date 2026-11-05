@@ -220,7 +220,7 @@ fun BudgetPagerBottomBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Bên trái: Nút < + Indicator dots + Nút >
+        // Bên trái: Nút < và > chuyển trang (loại bỏ hoàn toàn indicator dots theo yêu cầu)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
@@ -247,30 +247,6 @@ fun BudgetPagerBottomBar(
                             fontSize = 20.sp
                         ),
                         color = if (currentPage > 0) CandyBudgetThemes.textDark else CandyBudgetThemes.placeholderBorder.copy(alpha = 0.5f)
-                    )
-                }
-            }
-
-            // Indicator Dots
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .semantics {
-                        contentDescription = "Trang ${currentPage + 1} trên $pageCount"
-                    }
-            ) {
-                repeat(pageCount) { index ->
-                    val isSelected = index == currentPage
-                    Box(
-                        modifier = Modifier
-                            .height(6.dp)
-                            .width(if (isSelected) 16.dp else 6.dp)
-                            .clip(RoundedCornerShape(999.dp))
-                            .background(
-                                if (isSelected) CandyBudgetThemes.placeholderCtaFill else CandyBudgetThemes.placeholderBorder.copy(alpha = 0.35f)
-                            )
                     )
                 }
             }

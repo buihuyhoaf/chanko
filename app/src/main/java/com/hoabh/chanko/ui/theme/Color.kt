@@ -256,6 +256,8 @@ private object CandyPalette {
     val NeutralPlaceholderInk = Color(0xFF4C2C70)
     val NeutralPlaceholderCtaFill = Color(0xFF6326A8)
     val NeutralPlaceholderCtaText = Color(0xFFFFFFFF)
+    val NeutralPlaceholderWave = Color(0xFFF0EAF8)
+    val NeutralPlaceholderBadgeBg = Color(0xFFDECDEB)
 
     // Semantic tokens (design-tokens.json)
     val BudgetCardTextDark = Color(0xFF241332)
@@ -560,6 +562,8 @@ object CandyColors {
         val placeholderInk = CandyPalette.NeutralPlaceholderInk
         val placeholderCtaFill = CandyPalette.NeutralPlaceholderCtaFill
         val placeholderCtaText = CandyPalette.NeutralPlaceholderCtaText
+        val placeholderWave = CandyPalette.NeutralPlaceholderWave
+        val placeholderBadgeBg = CandyPalette.NeutralPlaceholderBadgeBg
 
         // Semantic tokens (design-tokens.json)
         val textDark = CandyPalette.BudgetCardTextDark

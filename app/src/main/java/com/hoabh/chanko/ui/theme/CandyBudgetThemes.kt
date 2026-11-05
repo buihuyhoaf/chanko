@@ -52,6 +52,8 @@ object CandyBudgetThemes {
     val placeholderInk: Color get() = CandyColors.BudgetThemes.placeholderInk
     val placeholderCtaFill: Color get() = CandyColors.BudgetThemes.placeholderCtaFill
     val placeholderCtaText: Color get() = CandyColors.BudgetThemes.placeholderCtaText
+    val placeholderWave: Color get() = CandyColors.BudgetThemes.placeholderWave
+    val placeholderBadgeBg: Color get() = CandyColors.BudgetThemes.placeholderBadgeBg
 
     // Semantic tokens (design-tokens.json)
     val textDark: Color get() = CandyColors.BudgetThemes.textDark

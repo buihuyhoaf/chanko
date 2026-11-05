@@ -47,6 +47,8 @@ class CandyBudgetThemesTest {
         assertNotNull(CandyBudgetThemes.placeholderInk)
         assertNotNull(CandyBudgetThemes.placeholderCtaFill)
         assertNotNull(CandyBudgetThemes.placeholderCtaText)
+        assertNotNull(CandyBudgetThemes.placeholderWave)
+        assertNotNull(CandyBudgetThemes.placeholderBadgeBg)
         assertNotNull(CandyBudgetThemes.coralWarning)
         assertNotNull(CandyBudgetThemes.textDark)
         assertNotNull(CandyBudgetThemes.monthBadgeBg)
