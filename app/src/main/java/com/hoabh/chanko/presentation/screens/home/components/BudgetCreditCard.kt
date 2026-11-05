@@ -544,13 +544,13 @@ private fun CreditCardTopBar(
             }
         }
 
-        // Bên phải: Chip vàng EMV (34x24dp) + Sóng Contactless (20dp)
+        // Bên phải: Chip vàng EMV (46x32dp to rõ) + Sóng Contactless (22dp)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
-            DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
-            DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
+            DecorativeGoldChip(modifier = Modifier.size(width = 46.dp, height = 32.dp))
+            DecorativeContactlessWaves(modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -608,7 +608,7 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
     val chipFill = CandyColors.HomeV2.chipGold
     val chipStroke = CandyColors.HomeV2.chipGoldStroke
     Canvas(modifier = modifier) {
-        val corner = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+        val corner = CornerRadius(7.dp.toPx(), 7.dp.toPx())
         drawRoundRect(
             color = chipFill,
             cornerRadius = corner
@@ -616,7 +616,7 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
         drawRoundRect(
             color = chipStroke,
             cornerRadius = corner,
-            style = Stroke(width = 1.2.dp.toPx())
+            style = Stroke(width = 1.4.dp.toPx())
         )
         // Đường chia mạch chip EMV
         val w = size.width
@@ -625,19 +625,19 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
             color = chipStroke,
             start = Offset(w * 0.33f, 0f),
             end = Offset(w * 0.33f, h),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
         drawLine(
             color = chipStroke,
             start = Offset(w * 0.67f, 0f),
             end = Offset(w * 0.67f, h),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
         drawLine(
             color = chipStroke,
             start = Offset(0f, h * 0.5f),
             end = Offset(w, h * 0.5f),
-            strokeWidth = 1.dp.toPx()
+            strokeWidth = 1.2.dp.toPx()
         )
     }
 }
@@ -921,6 +921,7 @@ private fun ActiveCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
+            // Mascot dịch vào trong về bên trái, ngồi trên đụn sóng
             Image(
                 painter = painterResource(
                     id = if (slot.isOverBudget) {
@@ -932,50 +933,61 @@ private fun ActiveCardContent(
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .size(96.dp)
-                    .offset(x = 6.dp, y = 4.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 22.dp, bottom = 12.dp)
+                    .size(104.dp)
                     .clearAndSetSemantics {}
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(CandyBudgetThemes.contentPadding),
-                verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    .heightIn(min = CreditCardMinHeight)
+                    .padding(
+                        start = CandyBudgetThemes.contentPadding,
+                        top = CandyBudgetThemes.contentPadding,
+                        end = CandyBudgetThemes.contentPadding,
+                        bottom = 14.dp
+                    ),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                CreditCardTopBar(monthLabel = slot.monthLabel)
+                // Nhóm trên: TopBar + Nhãn + Số tiền
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    CreditCardTopBar(monthLabel = slot.monthLabel)
 
-                Spacer(modifier = Modifier.height(CandySpace.xs))
+                    Spacer(modifier = Modifier.height(CandySpace.xs))
 
-                Text(
-                    text = mainLabel,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = CandyBudgetThemes.labelTextSize
-                    ),
-                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
-                )
+                    Text(
+                        text = mainLabel,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = CandyBudgetThemes.labelTextSize
+                        ),
+                        color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                    )
 
-                Text(
-                    text = if (slot.isOverBudget) {
-                        slot.overFormatted ?: slot.remainingFormatted
-                    } else {
-                        slot.remainingFormatted
-                    },
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = CandyBudgetThemes.amountTextSize,
-                        lineHeight = 38.sp
-                    ),
-                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
-                )
+                    Text(
+                        text = if (slot.isOverBudget) {
+                            slot.overFormatted ?: slot.remainingFormatted
+                        } else {
+                            slot.remainingFormatted
+                        },
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = CandyBudgetThemes.amountTextSize,
+                            lineHeight = 38.sp
+                        ),
+                        color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                    )
+                }
 
-                // Thanh tiến trình: clamp 100%, pill hiển thị % thật (BC-CARD-CONTENT-01)
+                // Nhóm dưới: Thanh tiến trình sát mép dưới (BC-CARD-CONTENT-01)
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.76f)
-                        .padding(top = 4.dp),
+                        .fillMaxWidth(0.66f)
+                        .padding(bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                 ) {
@@ -1079,52 +1091,63 @@ private fun ClosedCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
-            // Mascot ngủ cho kỳ trước đã kết thúc (BC-CARD-CONTENT-01)
+            // Mascot ngủ dịch vào trong về bên trái, ngồi trên đụn sóng
             Image(
                 painter = painterResource(id = R.drawable.mascot_sleepy),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .size(96.dp)
-                    .offset(x = 6.dp, y = 4.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 22.dp, bottom = 12.dp)
+                    .size(104.dp)
                     .clearAndSetSemantics {}
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(CandyBudgetThemes.contentPadding),
-                verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    .heightIn(min = CreditCardMinHeight)
+                    .padding(
+                        start = CandyBudgetThemes.contentPadding,
+                        top = CandyBudgetThemes.contentPadding,
+                        end = CandyBudgetThemes.contentPadding,
+                        bottom = 14.dp
+                    ),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                CreditCardTopBar(monthLabel = slot.monthLabel)
+                // Nhóm trên: TopBar + Nhãn + Số tiền
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    CreditCardTopBar(monthLabel = slot.monthLabel)
 
-                Spacer(modifier = Modifier.height(CandySpace.xs))
+                    Spacer(modifier = Modifier.height(CandySpace.xs))
 
-                Text(
-                    text = closedLabel,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = CandyBudgetThemes.labelTextSize
-                    ),
-                    color = Color.White
-                )
+                    Text(
+                        text = closedLabel,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = CandyBudgetThemes.labelTextSize
+                        ),
+                        color = Color.White
+                    )
 
-                Text(
-                    text = slot.remainingFormatted,
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = CandyBudgetThemes.amountTextSize,
-                        lineHeight = 38.sp
-                    ),
-                    color = Color.White
-                )
+                    Text(
+                        text = slot.remainingFormatted,
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = CandyBudgetThemes.amountTextSize,
+                            lineHeight = 38.sp
+                        ),
+                        color = Color.White
+                    )
+                }
 
-                // Thanh tiến trình
+                // Nhóm dưới: Thanh tiến trình sát mép dưới
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.76f)
-                        .padding(top = 4.dp),
+                        .fillMaxWidth(0.66f)
+                        .padding(bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                 ) {
@@ -1208,20 +1231,22 @@ private fun UpcomingConfiguredCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
+            // Mascot dịch vào trong về bên trái, ngồi trên đụn sóng
             Image(
                 painter = painterResource(id = R.drawable.mascot_happy),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .size(96.dp)
-                    .offset(x = 6.dp, y = 4.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 22.dp, bottom = 12.dp)
+                    .size(104.dp)
                     .clearAndSetSemantics {}
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = CreditCardMinHeight)
                     .padding(CandyBudgetThemes.contentPadding),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {

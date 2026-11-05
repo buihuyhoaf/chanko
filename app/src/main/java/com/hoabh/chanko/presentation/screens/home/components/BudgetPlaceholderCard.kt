@@ -141,9 +141,9 @@ fun BudgetPlaceholderCard(
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 22.dp, bottom = 14.dp)
                     .size(96.dp)
-                    .offset(x = (-8).dp, y = 6.dp)
                     .clearAndSetSemantics {}
             )
 
