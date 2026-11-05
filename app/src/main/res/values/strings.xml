@@ -208,39 +208,6 @@
     <string name="budget_edit_conflict_reload">Tải lại</string>
     <string name="budget_edit_success">Đã cập nhật ngân sách</string>
 
-    <!-- C05 Credit Card Management -->
-    <string name="budget_card_manage_title">Quản lý thẻ tín dụng</string>
-    <string name="budget_card_manage_helper">Chỉ lưu tên để phân loại chi tiêu. Không liên kết ngân hàng.</string>
-    <string name="budget_card_manage_empty">Chưa có thẻ nào</string>
-    <string name="budget_card_action_rename">Đổi tên</string>
-    <string name="budget_card_action_delete">Xóa</string>
-    <string name="budget_card_action_add">Thêm thẻ</string>
-
-    <!-- C06 Add Card -->
-    <string name="budget_card_add_title">Thêm thẻ tín dụng</string>
-    <string name="budget_card_add_field_label">Tên thẻ</string>
-    <string name="budget_card_add_field_hint">Ví dụ: Thẻ cá nhân</string>
-    <string name="budget_card_error_empty">Nhập tên thẻ</string>
-    <string name="budget_card_error_too_long">Tên thẻ tối đa 40 ký tự</string>
-    <string name="budget_card_error_duplicate">Tên thẻ đã tồn tại</string>
-    <string name="budget_card_add_error">Chưa thêm được thẻ. Vui lòng thử lại.</string>
-    <string name="budget_card_add_success">Đã thêm thẻ</string>
-
-    <!-- C07 Rename Card -->
-    <string name="budget_card_rename_title">Đổi tên thẻ</string>
-    <string name="budget_card_rename_error">Chưa đổi được tên thẻ. Vui lòng thử lại.</string>
-    <string name="budget_card_rename_unusable">Thẻ không còn khả dụng</string>
-    <string name="budget_card_rename_success">Đã đổi tên thẻ</string>
-
-    <!-- C08 Delete Card Dialog -->
-    <string name="budget_card_delete_dialog_title">Xóa thẻ?</string>
-    <string name="budget_card_delete_dialog_msg">Xóa ‘%1$s’ khỏi danh sách sử dụng. Các khoản chi đã ghi vẫn được giữ nguyên.</string>
-    <string name="budget_card_delete_confirm">Xóa thẻ</string>
-    <string name="budget_card_delete_cancel">Hủy</string>
-    <string name="budget_card_delete_error">Chưa xóa được thẻ. Vui lòng thử lại.</string>
-    <string name="budget_card_delete_success">Đã xóa thẻ</string>
-    <string name="budget_card_already_deleted">Thẻ đã được xóa</string>
-
     <!-- C09 Adjustment History -->
     <string name="budget_adjustment_history_title">Lịch sử điều chỉnh ngân sách</string>
     <string name="budget_adjustment_history_empty">Chưa có điều chỉnh ngân sách trong chu kỳ</string>
@@ -270,32 +237,10 @@
     <string name="budget_btn_retry">Thử lại</string>
     <string name="budget_btn_back">Quay lại</string>
     <string name="budget_status_saving">Đang lưu…</string>
-    <string name="budget_status_adding">Đang thêm…</string>
-    <string name="budget_status_deleting">Đang xóa…</string>
-    <string name="budget_card_add_submit">Thêm</string>
     <string name="budget_edit_preview_spoken_over">Ngân sách mới: %1$s. Đã chi: %2$s. Vượt ngân sách sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
     <string name="budget_edit_preview_spoken_remaining">Ngân sách mới: %1$s. Đã chi: %2$s. Còn lại sau thay đổi: %3$s. Tỷ lệ: %4$d phần trăm.</string>
-    <string name="budget_payment_description">Pay Now và thẻ tín dụng đều tính vào ngân sách khi xác nhận mua.</string>
-    <string name="budget_payment_description_action">Giải thích phương thức thanh toán</string>
-    <string name="budget_payment_description_ok">OK</string>
-    <string name="budget_payment_pay_now">Pay Now</string>
-    <string name="budget_payment_default">Mặc định</string>
-    <string name="budget_payment_pay_now_description">Thanh toán ngay bằng tiền mặt / ví</string>
-    <string name="budget_payment_no_cards">Chưa có thẻ tín dụng</string>
-    <string name="budget_card_color_format">Màu %1$s</string>
-    <string name="budget_card_rename_action_format">Đổi tên %1$s</string>
-    <string name="budget_card_delete_action_format">Xóa %1$s</string>
-    <string name="budget_card_color_purple">Tím</string>
-    <string name="budget_card_color_pink">Hồng</string>
-    <string name="budget_card_color_blue">Xanh dương</string>
-    <string name="budget_card_color_mint">Bạc hà</string>
-    <string name="budget_card_color_yellow">Vàng</string>
-    <string name="budget_card_color_orange">Cam</string>
     <string name="budget_cycle_selection_empty">Chưa chọn chu kỳ</string>
     <string name="budget_cycle_selection_action">Chọn chu kỳ ngân sách, %1$s</string>
-    <string name="budget_payment_credit_card_label">Thẻ tín dụng</string>
-    <string name="budget_card_error_ui_too_long">Tên thẻ tối đa 30 ký tự</string>
-    <string name="budget_card_error_reserved">Tên này dành cho Pay Now</string>
     <string name="budget_menu_options">Tùy chọn ngân sách</string>
     <string name="budget_history_expanded_description">Lịch sử điều chỉnh ngân sách, đang mở rộng</string>
     <string name="budget_history_collapsed_description">Lịch sử điều chỉnh ngân sách, đang thu gọn</string>
@@ -309,6 +254,4 @@
     <string name="budget_history_increase_short">Tăng</string>
     <string name="budget_history_decrease_short">Giảm</string>
     <string name="budget_history_amount_change">%1$s → %2$s</string>
-    <string name="budget_card_preview_description">Thẻ xem trước: %1$s, màu %2$s</string>
-    <string name="budget_card_preview_brand" translatable="false">CHANKO</string>
 </resources>

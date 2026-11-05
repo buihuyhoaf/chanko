@@ -12,18 +12,9 @@ import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
 import com.hoabh.chanko.domain.budget.model.BudgetSaveException
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
-import com.hoabh.chanko.domain.budget.model.CardColor
-import com.hoabh.chanko.domain.budget.model.CardNameValidationResult
-import com.hoabh.chanko.domain.budget.model.CreditCard
-import com.hoabh.chanko.domain.budget.model.AddCardValidationResult
-import com.hoabh.chanko.domain.budget.model.CreditCardUnavailableException
-import com.hoabh.chanko.domain.budget.model.DuplicateCardNameException
 import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
-import com.hoabh.chanko.domain.budget.model.InvalidCardNameException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.NotableItem
-import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
-import com.hoabh.chanko.domain.budget.model.ReservedCardNameException
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -116,23 +106,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         )
     )
 
-    // Payment breakdowns (cycleId -> List<PaymentMethodBreakdown>)
-    private val paymentBreakdownState = MutableStateFlow<Map<String, List<PaymentMethodBreakdown>>>(
-        mapOf(
-            currentCycleId to listOf(
-                PaymentMethodBreakdown("card_1", "Thẻ Techcombank", 1_800_000L),
-                PaymentMethodBreakdown("pm_2", "Tiền mặt", 1_200_000L)
-            ),
-            pastCycleId to listOf(
-                PaymentMethodBreakdown("card_1", "Thẻ Techcombank", 3_000_000L),
-                PaymentMethodBreakdown("pm_2", "Tiền mặt", 1_200_000L)
-            ),
-            pastUncachedCycleId to listOf(
-                PaymentMethodBreakdown("pm_2", "Tiền mặt", 3_800_000L)
-            )
-        )
-    )
-
     // Notable items (cycleId -> List<NotableItem>)
     private val notableItemsState = MutableStateFlow<Map<String, List<NotableItem>>>(
         mapOf(
@@ -172,14 +145,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         )
     )
 
-    // Credit cards
-    private val cardsState = MutableStateFlow(
-        listOf(
-            CreditCard("card_1", "Thẻ Techcombank", color = CardColor.PINK, isArchived = false),
-            CreditCard("card_2", "Thẻ VPBank Cake", color = CardColor.PURPLE, isArchived = false)
-        )
-    )
-
     // --- Scenario Switchers for Testing & Preview ---
     fun setScenarioOverBudget(cycleId: String = currentCycleId) {
         val current = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 5_500_000L)
@@ -197,7 +162,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             spentMinor = 0L,
             updatedAt = System.currentTimeMillis()
         ))
-        paymentBreakdownState.value = paymentBreakdownState.value + (cycleId to emptyList())
         activitiesState.value = activitiesState.value + (cycleId to emptyList())
     }
 
@@ -208,7 +172,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             spentMinor = 0L,
             updatedAt = System.currentTimeMillis()
         ))
-        paymentBreakdownState.value = paymentBreakdownState.value + (cycleId to emptyList())
         activitiesState.value = activitiesState.value + (cycleId to emptyList())
     }
 
@@ -285,11 +248,10 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     override fun getCycleOverview(cycleId: String): Flow<BudgetCycleOverview> {
         return combine(
             snapshotsState,
-            paymentBreakdownState,
             notableItemsState,
             activitiesState,
             adjustmentsState
-        ) { snapshots, payments, notables, activities, adjustments ->
+        ) { snapshots, notables, activities, adjustments ->
             if (simulateLoadErrorOnNextFetch) {
                 simulateLoadErrorOnNextFetch = false
                 throw BudgetLoadException()
@@ -305,7 +267,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             BudgetCycleOverview(
                 cycleId = cycleId,
                 snapshot = snap,
-                paymentMethods = payments[cycleId] ?: emptyList(),
                 notableItems = (notables[cycleId] ?: emptyList()).take(3),
                 recentActivities = (activities[cycleId] ?: emptyList()).take(3),
                 adjustments = adjustments[cycleId] ?: emptyList(),
@@ -316,12 +277,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
 
     override fun getBudgetSnapshot(cycleId: String): Flow<BudgetSnapshot> {
         return getCycleOverview(cycleId).map { it.snapshot }
-    }
-
-    override fun getPaymentBreakdown(cycleId: String): Flow<List<PaymentMethodBreakdown>> {
-        return paymentBreakdownState.map { map ->
-            map[cycleId] ?: emptyList()
-        }
     }
 
     override fun getNotableItems(cycleId: String): Flow<List<NotableItem>> {
@@ -339,12 +294,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     override fun getAdjustments(cycleId: String): Flow<List<BudgetAdjustment>> {
         return adjustmentsState.map { map ->
             map[cycleId] ?: emptyList()
-        }
-    }
-
-    override fun getCreditCards(): Flow<List<CreditCard>> {
-        return cardsState.map { list ->
-            list.filter { !it.isArchived }
         }
     }
 
@@ -423,104 +372,6 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val currentActivities = activitiesState.value[cycleId] ?: emptyList()
         activitiesState.value = activitiesState.value + (cycleId to (listOf(newActivity) + currentActivities))
 
-        return Result.success(Unit)
-    }
-
-    override suspend fun addCreditCard(name: String, color: CardColor): Result<CreditCard> {
-        if (simulatedDelayMs > 0L) delay(simulatedDelayMs)
-
-        if (!isOnlineState.value) {
-            return Result.failure(BudgetOfflineException())
-        }
-
-        val validation = CreditCard.validateAdd(name, cardsState.value.filter { !it.isArchived }.map { it.name })
-        val normalized = when (validation) {
-            is AddCardValidationResult.Valid -> validation.normalizedName
-            AddCardValidationResult.ReservedPayNow -> return Result.failure(ReservedCardNameException())
-            AddCardValidationResult.Duplicate -> return Result.failure(DuplicateCardNameException())
-            else -> return Result.failure(InvalidCardNameException())
-        }
-
-        if (simulateSaveErrorOnNextMutation) {
-            simulateSaveErrorOnNextMutation = false
-            return Result.failure(BudgetSaveException())
-        }
-
-        val newCard = CreditCard(
-            id = "card_${UUID.randomUUID()}",
-            name = normalized,
-            color = color,
-            isArchived = false
-        )
-        cardsState.value = cardsState.value + newCard
-        return Result.success(newCard)
-    }
-
-    override suspend fun renameCreditCard(cardId: String, newName: String): Result<Unit> {
-        if (simulatedDelayMs > 0L) delay(simulatedDelayMs)
-
-        if (!isOnlineState.value) {
-            return Result.failure(BudgetOfflineException())
-        }
-
-        val target = cardsState.value.firstOrNull { it.id == cardId && !it.isArchived }
-            ?: return Result.failure(CreditCardUnavailableException())
-
-        val validation = CreditCard.validateName(newName)
-        if (validation !is CardNameValidationResult.Valid) {
-            return Result.failure(InvalidCardNameException())
-        }
-
-        val normalized = validation.normalizedName
-        if (normalized.lowercase(Locale.ROOT) == CreditCard.RESERVED_PAY_NOW) {
-            return Result.failure(ReservedCardNameException())
-        }
-
-        val activeCards = cardsState.value.filter { !it.isArchived && it.id != cardId }
-        if (activeCards.any { CreditCard.isSameName(it.name, normalized) }) {
-            return Result.failure(DuplicateCardNameException())
-        }
-
-        if (simulateSaveErrorOnNextMutation) {
-            simulateSaveErrorOnNextMutation = false
-            return Result.failure(BudgetSaveException())
-        }
-
-        cardsState.value = cardsState.value.map {
-            if (it.id == cardId) it.copy(name = normalized) else it
-        }
-        // Current cycle metadata reflects renamed card; past cycles keep historical snapshot name
-        val currentBreakdown = paymentBreakdownState.value[currentCycleId]
-        if (currentBreakdown != null) {
-            paymentBreakdownState.value = paymentBreakdownState.value + (
-                currentCycleId to currentBreakdown.map {
-                    if (it.id == cardId) it.copy(name = normalized) else it
-                }
-            )
-        }
-        return Result.success(Unit)
-    }
-
-    override suspend fun archiveCreditCard(cardId: String): Result<Unit> {
-        if (simulatedDelayMs > 0L) delay(simulatedDelayMs)
-
-        if (!isOnlineState.value) {
-            return Result.failure(BudgetOfflineException())
-        }
-
-        val exists = cardsState.value.any { it.id == cardId && !it.isArchived }
-        if (!exists) {
-            return Result.failure(CreditCardUnavailableException("Thẻ đã được xóa"))
-        }
-
-        if (simulateSaveErrorOnNextMutation) {
-            simulateSaveErrorOnNextMutation = false
-            return Result.failure(BudgetSaveException())
-        }
-
-        cardsState.value = cardsState.value.map {
-            if (it.id == cardId) it.copy(isArchived = true) else it
-        }
         return Result.success(Unit)
     }
 }
