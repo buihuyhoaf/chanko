@@ -14,9 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,7 +27,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -38,36 +36,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.home.BudgetCardRole
 import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandySpace
 
-private val PlaceholderCornerShape = RoundedCornerShape(24.dp)
-private val PlaceholderMinHeight = 196.dp
+private val PlaceholderCornerShape = RoundedCornerShape(CandyBudgetThemes.cardRadius)
+private val PlaceholderMinHeight = CandyBudgetThemes.cardMinHeight
 
 /**
- * Thẻ Trung Tính Placeholder cho Chu Kỳ Tiếp Theo Chưa Cấu Hình (Home v2.2 - BC22-05, BC22-06):
- * - Nền trắng ngà/xám pastel, viền nét đứt (dash = 6dp, gap = 4dp).
- * - Icon dấu '+' trung tính, không mang màu gradient chu kỳ.
- * - CTA "+ Thiết lập ngân sách" dẫn tới luồng thiết lập target kỳ sau.
+ * Thẻ Trung Tính Placeholder cho Chu Kỳ Tiếp Theo Chưa Cấu Hình (Home v2.2 - BC22-05, BC-CARD-LABEL-01, BC-CARD-CONTENT-01):
+ * - Nền trắng ngà/xám pastel (#FBF9FD), viền nét đứt native (#82758E, dash = 6dp, gap = 4dp).
+ * - Góc trên bên phải có Month Chip pill MM (01..12).
+ * - Tiêu đề: "Chu kỳ tiếp theo", phụ đề: "Chưa thiết lập ngân sách".
+ * - Nút CTA dạng pill "+ Thiết lập ngân sách" nền tím #6326A8, chữ trắng.
  */
 @Composable
 fun BudgetPlaceholderCard(
-    cycleLabel: String,
-    dateRangeText: String,
+    monthLabel: String,
+    cycleLabel: String = "",
+    dateRangeText: String = "",
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     role: BudgetCardRole = BudgetCardRole.NextPlaceholder
 ) {
     val borderColor = CandyBudgetThemes.placeholderBorder
     val bgColor = CandyBudgetThemes.placeholderBackground
-    val inkColor = CandyBudgetThemes.placeholderInk
+    val ctaFill = CandyBudgetThemes.placeholderCtaFill
+    val ctaText = CandyBudgetThemes.placeholderCtaText
+    val titleText = stringResource(R.string.home_budget_placeholder_title)
+    val subtitleText = stringResource(R.string.home_budget_placeholder_unconfigured_subtitle)
+    val ctaLabel = stringResource(R.string.home_budget_placeholder_cta)
 
-    val cdText = stringResource(
-        R.string.home_budget_placeholder_title
-    ) + ", " + stringResource(R.string.home_budget_placeholder_cta)
+    val cardCd = buildString {
+        append("$titleText, ")
+        if (monthLabel.isNotBlank()) append("tháng $monthLabel. ")
+        append("$subtitleText. ")
+        append("Chạm để $ctaLabel.")
+    }
 
     Surface(
         modifier = modifier
@@ -79,7 +84,7 @@ fun BudgetPlaceholderCard(
                 onClick = onClick
             )
             .semantics(mergeDescendants = true) {
-                contentDescription = cdText
+                contentDescription = cardCd
                 this.role = Role.Button
             },
         shape = PlaceholderCornerShape,
@@ -88,16 +93,17 @@ fun BudgetPlaceholderCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(CandySpace.lg)
+                .padding(CandyBudgetThemes.contentPadding)
         ) {
-            // Viền nét đứt vẽ trên Canvas (không hardcode màu)
+            // Viền nét đứt native Compose (dash = 6.dp, gap = 4.dp, radius = 28.dp)
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val strokeWidth = 2.dp.toPx()
-                val dash = 8.dp.toPx()
-                val gap = 6.dp.toPx()
+                val dash = 6.dp.toPx()
+                val gap = 4.dp.toPx()
+                val radiusPx = CandyBudgetThemes.cardRadius.toPx()
                 drawRoundRect(
                     color = borderColor,
-                    cornerRadius = CornerRadius(24.dp.toPx(), 24.dp.toPx()),
+                    cornerRadius = CornerRadius(radiusPx, radiusPx),
                     style = Stroke(
                         width = strokeWidth,
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, gap), 0f)
@@ -108,68 +114,93 @@ fun BudgetPlaceholderCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(CandySpace.sm),
+                    .padding(CandySpace.xs),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header: Tên chu kỳ + Huy hiệu
+                // 1. TopBar: Brand trang trí bên trái + Month Chip pill bên phải
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = cycleLabel.ifBlank { stringResource(R.string.home_budget_placeholder_title) },
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            ),
-                            color = inkColor
-                        )
-                        if (dateRangeText.isNotBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        Column {
                             Text(
-                                text = dateRangeText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = inkColor.copy(alpha = 0.75f)
+                                text = stringResource(R.string.home_budget_brand_title),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 16.sp,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = CandyBudgetThemes.textDark
+                            )
+                            Text(
+                                text = stringResource(R.string.home_budget_brand_subtitle),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 9.sp,
+                                    letterSpacing = 0.4.sp
+                                ),
+                                color = CandyBudgetThemes.placeholderBorder
                             )
                         }
                     }
-                    BudgetCycleBadge(role = role)
+
+                    if (monthLabel.isNotBlank()) {
+                        BudgetMonthChip(monthLabel = monthLabel)
+                    }
                 }
 
-                // Trung tâm: Icon '+' tròn
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(inkColor.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ACT_01,
-                        contentDescription = null,
-                        size = 24.dp
-                    )
-                }
-
-                // Footer CTA: Button giả lập touch target >= 48dp
-                Box(
+                // 2. Nội dung trung tâm: Tiêu đề + phụ đề
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 44.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(inkColor.copy(alpha = 0.14f)),
-                    contentAlignment = Alignment.Center
+                        .padding(vertical = CandySpace.xs)
                 ) {
                     Text(
-                        text = stringResource(R.string.home_budget_placeholder_cta),
+                        text = titleText,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 20.sp
+                        ),
+                        color = CandyBudgetThemes.textDark
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = subtitleText,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Medium,
                             fontSize = 14.sp
                         ),
-                        color = inkColor
+                        color = CandyBudgetThemes.placeholderBorder
                     )
+                }
+
+                // 3. Nút CTA dạng pill tím #6326A8, chữ trắng (BC-CARD-CONTENT-01)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(999.dp),
+                    color = ctaFill,
+                    shadowElevation = 2.dp
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = ctaLabel,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            ),
+                            color = ctaText
+                        )
+                    }
                 }
             }
         }

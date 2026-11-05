@@ -65,10 +65,10 @@ import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 
-private val CreditCardCornerShape = RoundedCornerShape(24.dp)
+private val CreditCardCornerShape = RoundedCornerShape(CandyBudgetThemes.cardRadius)
 private val ProgressTrackCornerShape = RoundedCornerShape(999.dp)
 private val PercentPillCornerShape = RoundedCornerShape(999.dp)
-private val CreditCardMinHeight = 196.dp
+private val CreditCardMinHeight = CandyBudgetThemes.cardMinHeight
 
 /**
  * Khu vực 2 — Budget Credit Card 3D Candy Orange (Home v2.0 — AC-03..AC-09, AC-18..AC-22, AC-31):
@@ -412,6 +412,7 @@ private fun BudgetCreditCardContent(
 
 @Composable
 private fun CreditCardTopBar(
+    monthLabel: String = "",
     badge: (@Composable () -> Unit)? = null
 ) {
     Row(
@@ -421,7 +422,7 @@ private fun CreditCardTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET + Huy hiệu trạng thái
+        // Bên trái: Dấu chân trắng + CHANKO / SHOPPING BUDGET
         Row(
             modifier = Modifier.weight(1f, fill = false),
             verticalAlignment = Alignment.CenterVertically,
@@ -448,18 +449,51 @@ private fun CreditCardTopBar(
                     color = Color.White.copy(alpha = 0.85f)
                 )
             }
-            Spacer(modifier = Modifier.width(2.dp))
-            badge?.invoke()
+            if (badge != null) {
+                Spacer(modifier = Modifier.width(2.dp))
+                badge()
+            }
         }
 
-        // Bên phải: Chip vàng EMV + Sóng Contactless
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
-        ) {
-            DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
-            DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
+        // Bên phải: Month Chip pill (BC-CARD-LABEL-01) hoặc Chip vàng EMV + Sóng Contactless
+        if (monthLabel.isNotBlank()) {
+            BudgetMonthChip(monthLabel = monthLabel)
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+            ) {
+                DecorativeGoldChip(modifier = Modifier.size(width = 34.dp, height = 24.dp))
+                DecorativeContactlessWaves(modifier = Modifier.size(20.dp))
+            }
         }
+    }
+}
+
+/**
+ * Month Chip pill MM (01..12) theo quyết định BC-CARD-LABEL-01 và design-tokens.json.
+ */
+@Composable
+fun BudgetMonthChip(
+    monthLabel: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(999.dp),
+        color = CandyBudgetThemes.monthBadgeBg,
+        shadowElevation = 2.dp
+    ) {
+        Text(
+            text = monthLabel,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = CandyBudgetThemes.monthTextSize,
+                lineHeight = 28.sp
+            ),
+            color = CandyBudgetThemes.textDark,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+        )
     }
 }
 
@@ -692,6 +726,7 @@ fun BudgetCreditCardSlotView(
     when (slot) {
         is BudgetCardSlotUi.UpcomingPlaceholderCard -> {
             BudgetPlaceholderCard(
+                monthLabel = slot.monthLabel,
                 cycleLabel = slot.cycleLabel,
                 dateRangeText = slot.dateRangeText,
                 onClick = onCardClick,
@@ -702,6 +737,7 @@ fun BudgetCreditCardSlotView(
 
         is BudgetCardSlotUi.CurrentEmptyCard -> {
             BudgetPlaceholderCard(
+                monthLabel = slot.monthLabel,
                 cycleLabel = slot.cycleLabel,
                 dateRangeText = slot.dateRangeText,
                 onClick = onCardClick,
@@ -742,14 +778,13 @@ private fun ActiveCardContent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val remainingLabel = stringResource(R.string.home_budget_remaining_label)
-    val spentSummaryText = stringResource(
-        R.string.home_budget_spent_summary,
-        slot.spentFormatted,
-        slot.limitFormatted
-    )
+    val mainLabel = if (slot.isOverBudget) {
+        stringResource(R.string.home_budget_over_budget_label)
+    } else {
+        stringResource(R.string.home_budget_remaining_label)
+    }
     val cardCd = buildString {
-        append("Thẻ ngân sách đang diễn ra, ${slot.cycleLabel}. ")
+        append("Thẻ ngân sách đang diễn ra, tháng ${slot.monthLabel}. ")
         append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
         if (slot.isOverBudget) {
             append("Vượt ngân sách: ${slot.overFormatted}. ")
@@ -797,7 +832,7 @@ private fun ActiveCardContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(brush = cardBrush)
-                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+                .padding(CandyBudgetThemes.contentPadding)
         ) {
             Image(
                 painter = painterResource(
@@ -820,43 +855,38 @@ private fun ActiveCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
-                CreditCardTopBar(badge = {
-                    BudgetCycleBadge(
-                        role = BudgetCardRole.Current,
-                        cycleLabel = slot.cycleLabel
-                    )
-                })
+                CreditCardTopBar(monthLabel = slot.monthLabel)
 
                 Spacer(modifier = Modifier.height(CandySpace.xs))
 
                 Text(
-                    text = remainingLabel,
+                    text = mainLabel,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontSize = CandyBudgetThemes.labelTextSize
                     ),
-                    color = Color.White
+                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
                 )
 
                 Text(
                     text = if (slot.isOverBudget) {
-                        stringResource(R.string.home_budget_over_warning, slot.overFormatted.orEmpty())
+                        slot.overFormatted ?: slot.remainingFormatted
                     } else {
                         slot.remainingFormatted
                     },
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = if (slot.isOverBudget) 24.sp else 32.sp,
-                        lineHeight = 36.sp
+                        fontSize = CandyBudgetThemes.amountTextSize,
+                        lineHeight = 38.sp
                     ),
                     color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
                 )
 
-                // Thanh tiến trình
+                // Thanh tiến trình: clamp 100%, pill hiển thị % thật (BC-CARD-CONTENT-01)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.76f)
-                        .padding(top = 2.dp),
+                        .padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                 ) {
@@ -897,17 +927,6 @@ private fun ActiveCardContent(
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = spentSummaryText,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.9f)
-                )
             }
         }
     }
@@ -919,14 +938,9 @@ private fun ClosedCardContent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val remainingLabel = stringResource(R.string.home_budget_remaining_label)
-    val spentSummaryText = stringResource(
-        R.string.home_budget_spent_summary,
-        slot.spentFormatted,
-        slot.limitFormatted
-    )
+    val closedLabel = stringResource(R.string.home_budget_closed_remaining_label)
     val cardCd = buildString {
-        append("Thẻ ngân sách đã kết thúc, ${slot.cycleLabel}. ")
+        append("Thẻ ngân sách đã kết thúc, tháng ${slot.monthLabel}. ")
         append("Hạn mức: ${slot.limitFormatted}, đã chi: ${slot.spentFormatted}. ")
         if (slot.isOverBudget) {
             append("Vượt ngân sách: ${slot.overFormatted}. ")
@@ -974,16 +988,11 @@ private fun ClosedCardContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(brush = cardBrush)
-                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+                .padding(CandyBudgetThemes.contentPadding)
         ) {
+            // Mascot ngủ cho kỳ trước đã kết thúc (BC-CARD-CONTENT-01)
             Image(
-                painter = painterResource(
-                    id = if (slot.isOverBudget) {
-                        R.drawable.mascot_worried
-                    } else {
-                        R.drawable.mascot_happy
-                    }
-                ),
+                painter = painterResource(id = R.drawable.mascot_sleepy),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -997,43 +1006,34 @@ private fun ClosedCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
-                CreditCardTopBar(badge = {
-                    BudgetCycleBadge(
-                        role = BudgetCardRole.Previous,
-                        cycleLabel = slot.cycleLabel
-                    )
-                })
+                CreditCardTopBar(monthLabel = slot.monthLabel)
 
                 Spacer(modifier = Modifier.height(CandySpace.xs))
 
                 Text(
-                    text = remainingLabel,
+                    text = closedLabel,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontSize = CandyBudgetThemes.labelTextSize
                     ),
                     color = Color.White
                 )
 
                 Text(
-                    text = if (slot.isOverBudget) {
-                        stringResource(R.string.home_budget_over_warning, slot.overFormatted.orEmpty())
-                    } else {
-                        slot.remainingFormatted
-                    },
+                    text = slot.remainingFormatted,
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = if (slot.isOverBudget) 24.sp else 32.sp,
-                        lineHeight = 36.sp
+                        fontSize = CandyBudgetThemes.amountTextSize,
+                        lineHeight = 38.sp
                     ),
-                    color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                    color = Color.White
                 )
 
                 // Thanh tiến trình
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.76f)
-                        .padding(top = 2.dp),
+                        .padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                 ) {
@@ -1049,13 +1049,7 @@ private fun ClosedCardContent(
                                 .fillMaxHeight()
                                 .fillMaxWidth(slot.clampedProgress)
                                 .clip(ProgressTrackCornerShape)
-                                .background(
-                                    if (slot.isOverBudget) {
-                                        CandyBudgetThemes.coralWarning
-                                    } else {
-                                        Color.White
-                                    }
-                                )
+                                .background(Color.White)
                         )
                     }
 
@@ -1069,22 +1063,11 @@ private fun ClosedCardContent(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 13.sp
                             ),
-                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White,
+                            color = Color.White,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = spentSummaryText,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.9f)
-                )
             }
         }
     }
@@ -1096,7 +1079,7 @@ private fun UpcomingConfiguredCardContent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardCd = "Thẻ ngân sách sắp tới, ${slot.cycleLabel}. Hạn mức dự kiến: ${slot.limitFormatted}. Chạm để xem hoặc chỉnh sửa."
+    val cardCd = "Thẻ ngân sách sắp tới, tháng ${slot.monthLabel}. Hạn mức dự kiến: ${slot.limitFormatted}. Chạm để xem hoặc chỉnh sửa."
 
     val theme = remember(slot.themeOrdinal) {
         CandyBudgetThemes.getTheme(slot.themeOrdinal)
@@ -1132,7 +1115,7 @@ private fun UpcomingConfiguredCardContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(brush = cardBrush)
-                .padding(horizontal = CandySpace.lg, vertical = CandySpace.md)
+                .padding(CandyBudgetThemes.contentPadding)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.mascot_happy),
@@ -1149,21 +1132,16 @@ private fun UpcomingConfiguredCardContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                CreditCardTopBar(badge = {
-                    BudgetCycleBadge(
-                        role = BudgetCardRole.NextConfigured,
-                        cycleLabel = slot.cycleLabel
-                    )
-                })
+                CreditCardTopBar(monthLabel = slot.monthLabel)
 
                 Spacer(modifier = Modifier.height(CandySpace.sm))
 
                 Column {
                     Text(
-                        text = stringResource(R.string.home_budget_upcoming_limit_label),
+                        text = stringResource(R.string.home_budget_upcoming_projected_label),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 15.sp
+                            fontSize = CandyBudgetThemes.labelTextSize
                         ),
                         color = Color.White
                     )
@@ -1174,7 +1152,7 @@ private fun UpcomingConfiguredCardContent(
                         text = slot.limitFormatted,
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 32.sp,
+                            fontSize = CandyBudgetThemes.amountTextSize,
                             lineHeight = 38.sp
                         ),
                         color = Color.White

@@ -32,20 +32,27 @@
     <string name="home_budget_offline_no_cache_subtitle">Kết nối mạng để tải dữ liệu ngân sách mua sắm của bạn.</string>
     <string name="home_cd_budget_card">Thẻ ngân sách mua sắm. %1$s. Chạm đúp để mở chi tiết ngân sách.</string>
 
-    <!-- Budget Carousel v2.2 (BC22-01..BC22-24) -->
+    <!-- Budget Carousel v2.2 (BC22-01..BC22-24, BC-CARD-LABEL-01, BC-CARD-CONTENT-01) -->
     <string name="home_budget_section_title">Ngân sách mua sắm</string>
     <string name="home_budget_see_all">Xem tất cả</string>
+    <string name="home_budget_see_all_with_arrow">Xem tất cả →</string>
     <string name="home_budget_status_closed">ĐÃ KẾT THÚC</string>
     <string name="home_budget_status_active">ĐANG DIỄN RA</string>
     <string name="home_budget_status_upcoming">SẮP TỚI</string>
+    <string name="home_budget_closed_remaining_label">Còn lại cuối kỳ</string>
+    <string name="home_budget_upcoming_projected_label">Ngân sách dự kiến</string>
     <string name="home_budget_upcoming_limit_label">Hạn mức dự kiến</string>
+    <string name="home_budget_over_budget_label">Vượt ngân sách</string>
     <string name="home_budget_placeholder_title">Chu kỳ tiếp theo</string>
     <string name="home_budget_placeholder_subtitle">Lên kế hoạch hạn mức mua sắm cho chu kỳ tới</string>
+    <string name="home_budget_placeholder_unconfigured_subtitle">Chưa thiết lập ngân sách</string>
     <string name="home_budget_placeholder_cta">+ Thiết lập ngân sách</string>
     <string name="home_budget_offline_setup_blocked">Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thiết lập ngân sách kỳ tới.</string>
     <string name="home_budget_action_view_detail">Xem chi tiết</string>
     <string name="home_budget_action_view_budget">Xem ngân sách</string>
     <string name="home_budget_action_edit_budget">Xem/chỉnh sửa</string>
+    <string name="home_budget_pager_prev_cd">Chu kỳ trước</string>
+    <string name="home_budget_pager_next_cd">Chu kỳ sau</string>
 
     <!-- Item Journey v2.0 ("Món đồ gần đây" — AC-10..AC-17, AC-18..AC-24) -->
     <string name="home_journey_title">Món đồ gần đây</string>

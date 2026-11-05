@@ -345,6 +345,7 @@ fun HomeScreen(
                         onCardClick = { onEvent(HomeUiEvent.BudgetSlotTap(it)) },
                         onSlotChanged = { onEvent(HomeUiEvent.BudgetSlotChanged(it)) },
                         onRetryClick = { onEvent(HomeUiEvent.RetrySection(HomeSection.Budget)) },
+                        onSeeAllClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) },
                         resetToCurrentTrigger = state.carouselResetTrigger,
                         modifier = Modifier.fillMaxWidth()
                     )

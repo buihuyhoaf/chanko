@@ -142,15 +142,15 @@ Tái cấu trúc giao diện `BudgetCreditCard.kt`:
 - **Visual & Layout:** Chiều cao thẻ tối thiểu `216.dp`, bo góc `28.dp`, padding `20.dp`. Linear gradient sRGB nội suy qua 3 điểm `[0.0, 0.5, 1.0]`. Text màu `#241332` (hoặc màu tương phản cao đạt WCAG AA $\ge 4.5:1$).
 
 **Acceptance criteria:**
-- [ ] TopBar có Month Chip pill `MM`; không còn text badge trạng thái hay khoảng ngày/năm.
-- [ ] Bỏ hoàn toàn dòng `"Đã chi X / Y"` trên tất cả các thẻ.
-- [ ] Hiển thị chính xác các nhãn theo role: `"Còn lại cuối kỳ"`, `"Ngân sách còn lại"`, `"Ngân sách dự kiến"`.
-- [ ] Thẻ Next không có chi tiêu hay thanh tiến trình giả định.
-- [ ] Thẻ Previous dùng mascot sleepy; Current dùng happy hoặc worried.
+- [x] TopBar có Month Chip pill `MM`; không còn text badge trạng thái hay khoảng ngày/năm.
+- [x] Bỏ hoàn toàn dòng `"Đã chi X / Y"` trên tất cả các thẻ.
+- [x] Hiển thị chính xác các nhãn theo role: `"Còn lại cuối kỳ"`, `"Ngân sách còn lại"`, `"Ngân sách dự kiến"`.
+- [x] Thẻ Next không có chi tiêu hay thanh tiến trình giả định.
+- [x] Thẻ Previous dùng mascot sleepy; Current dùng happy hoặc worried.
 
 **Verification:**
-- [ ] Previews render chính xác các biến thể thẻ.
-- [ ] Build biên dịch sạch: `./gradlew compileDebugKotlin`
+- [x] Previews render chính xác các biến thể thẻ.
+- [x] Build biên dịch sạch: `./gradlew compileDebugKotlin`
 
 **Dependencies:** Task 1, Task 3
 
@@ -172,14 +172,14 @@ Tái cấu trúc `BudgetPlaceholderCard.kt`:
 - **Khung thẻ:** Nền trắng ngà/xám pastel (`#FBF9FD` / `#F3EFF7`), viền nét đứt native (`dash = 6.dp, gap = 4.dp`, màu `#82758E`, bo góc 28dp). Không dùng gradient màu chu kỳ.
 
 **Acceptance criteria:**
-- [ ] Thẻ Placeholder hiển thị đúng Month Chip `MM` của kỳ kế tiếp ở TopBar.
-- [ ] Tiêu đề `"Chu kỳ tiếp theo"`, phụ đề `"Chưa thiết lập ngân sách"`.
-- [ ] Nút CTA dạng pill `+ Thiết lập ngân sách` với nền tím `#6326A8`, chữ trắng.
-- [ ] Viền nét đứt native Compose rõ nét, nền xám pastel.
+- [x] Thẻ Placeholder hiển thị đúng Month Chip `MM` của kỳ kế tiếp ở TopBar.
+- [x] Tiêu đề `"Chu kỳ tiếp theo"`, phụ đề `"Chưa thiết lập ngân sách"`.
+- [x] Nút CTA dạng pill `+ Thiết lập ngân sách` với nền tím `#6326A8`, chữ trắng.
+- [x] Viền nét đứt native Compose rõ nét, nền xám pastel.
 
 **Verification:**
-- [ ] Previews render chính xác thẻ Placeholder.
-- [ ] Build biên dịch sạch: `./gradlew compileDebugKotlin`
+- [x] Previews render chính xác thẻ Placeholder.
+- [x] Build biên dịch sạch: `./gradlew compileDebugKotlin`
 
 **Dependencies:** Task 1, Task 3
 
@@ -205,14 +205,14 @@ Nâng cấp `BudgetCreditCardCarousel.kt`:
 - Cấu hình TalkBack accessibility: đọc đầy đủ thứ tự trang (ví dụ "Trang 2 trên 3"), đọc vai trò và nội dung thẻ.
 
 **Acceptance criteria:**
-- [ ] Pager cuộn tối đa 1 trang mỗi lần vuốt; tự động snap về `Current` khi vào hoặc quay lại Home.
-- [ ] Thanh điều khiển bên dưới hiển thị nút `<`, dải chấm chỉ báo, nút `>`, và `"Xem tất cả →"`.
-- [ ] Bấm nút `<` / `>` kích hoạt cuộn sang trang trước/sau mượt mà.
-- [ ] Nút biên bị disabled khi ở trang đầu/cuối.
+- [x] Pager cuộn tối đa 1 trang mỗi lần vuốt; tự động snap về `Current` khi vào hoặc quay lại Home.
+- [x] Thanh điều khiển bên dưới hiển thị nút `<`, dải chấm chỉ báo, nút `>`, và `"Xem tất cả →"`.
+- [x] Bấm nút `<` / `>` kích hoạt cuộn sang trang trước/sau mượt mà.
+- [x] Nút biên bị disabled khi ở trang đầu/cuối.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*BudgetCreditCardCarouselTest*"`
-- [ ] Build biên dịch sạch: `./gradlew compileDebugKotlin`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "*BudgetCreditCardCarouselTest*"`
+- [x] Build biên dịch sạch: `./gradlew compileDebugKotlin`
 
 **Dependencies:** Task 5, Task 6
 
@@ -226,8 +226,8 @@ Nâng cấp `BudgetCreditCardCarousel.kt`:
 ---
 
 ## Checkpoint 3: UI Component Verification
-- [ ] Tất cả component thẻ và carousel biên dịch sạch không lỗi: `./gradlew assembleDebug`
-- [ ] Các Compose Previews render hoàn hảo trên môi trường debug.
+- [x] Tất cả component thẻ và carousel biên dịch sạch không lỗi: `./gradlew assembleDebug`
+- [x] Các Compose Previews render hoàn hảo trên môi trường debug.
 
 ---
 
