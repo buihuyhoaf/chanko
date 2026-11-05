@@ -36,6 +36,7 @@ object BudgetCarouselMapper {
                     cycleId = prev.id,
                     cycleLabel = prev.label,
                     dateRangeText = prev.dateRangeText,
+                    monthLabel = prev.labelMonth,
                     themeOrdinal = prev.ordinal,
                     spentMinor = spent,
                     limitMinor = limit,
@@ -63,6 +64,7 @@ object BudgetCarouselMapper {
                     cycleId = current.id,
                     cycleLabel = current.label,
                     dateRangeText = current.dateRangeText,
+                    monthLabel = current.labelMonth,
                     themeOrdinal = current.ordinal
                 )
             )
@@ -74,6 +76,7 @@ object BudgetCarouselMapper {
                     cycleId = current.id,
                     cycleLabel = current.label,
                     dateRangeText = current.dateRangeText,
+                    monthLabel = current.labelMonth,
                     themeOrdinal = current.ordinal,
                     spentMinor = currentSpent,
                     limitMinor = currentLimit,
@@ -100,6 +103,7 @@ object BudgetCarouselMapper {
                     cycleId = next.id,
                     cycleLabel = next.label,
                     dateRangeText = next.dateRangeText,
+                    monthLabel = next.labelMonth,
                     themeOrdinal = next.ordinal,
                     limitMinor = limit,
                     limitFormatted = HomeCurrencyFormatter.formatVnd(limit)
@@ -112,6 +116,7 @@ object BudgetCarouselMapper {
                     cycleId = next.id,
                     cycleLabel = next.label.ifBlank { "Chu kỳ tiếp theo" },
                     dateRangeText = next.dateRangeText,
+                    monthLabel = next.labelMonth,
                     themeOrdinal = next.ordinal
                 )
             )

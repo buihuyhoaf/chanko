@@ -80,12 +80,12 @@ Cập nhật các data class con của `BudgetCardSlotUi` trong `HomeUiState.kt`
 - Thẻ `UpcomingPlaceholderCard` (Next chưa cấu hình): chứa `monthLabel` của kỳ sau, tiêu đề `"Chu kỳ tiếp theo"`, phụ đề `"Chưa thiết lập ngân sách"`.
 
 **Acceptance criteria:**
-- [ ] `BudgetCardSlotUi` có `monthLabel: String` và không chứa trường `spentSummaryText`.
-- [ ] Các nhãn chính hiển thị đúng vai trò theo quyết định `BC-CARD-CONTENT-01`.
-- [ ] Cập nhật mapper trong `HomeDomainLogic` hoặc tương đương để chuyển đổi từ `TriCycleWindow` sang các model mới.
+- [x] `BudgetCardSlotUi` có `monthLabel: String` và không chứa trường `spentSummaryText`.
+- [x] Các nhãn chính hiển thị đúng vai trò theo quyết định `BC-CARD-CONTENT-01`.
+- [x] Cập nhật mapper trong `HomeDomainLogic` hoặc tương đương để chuyển đổi từ `TriCycleWindow` sang các model mới.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.*"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.presentation.screens.home.*"`
 
 **Dependencies:** Task 1, Task 2
 
@@ -104,12 +104,12 @@ Cập nhật các data class con của `BudgetCardSlotUi` trong `HomeUiState.kt`
 Đồng bộ `FakeBudgetRepository` với các thuộc tính mới (`labelMonth`, `ordinal`, theme calculation 1..12). Đảm bảo `observeTriCycleWindow()` phát ra `TriCycleWindow` đầy đủ thông tin cho Previous (nếu có), Current và Next. Kiểm tra luồng `setupNextCycleBudget` kích hoạt cập nhật StateFlow tức thì cho các quan sát viên (cả Home và Budget).
 
 **Acceptance criteria:**
-- [ ] `FakeBudgetRepository` phát ra cửa sổ chu kỳ có `labelMonth` chính xác cho cả 3 slot.
-- [ ] Khi gọi `setupNextCycleBudget`, slot Next chuyển sang trạng thái đã cấu hình với theme ordinal chuẩn.
-- [ ] Hỗ trợ giả lập trạng thái ngoại tuyến (`isOffline = true`) có cache và thiếu cache.
+- [x] `FakeBudgetRepository` phát ra cửa sổ chu kỳ có `labelMonth` chính xác cho cả 3 slot.
+- [x] Khi gọi `setupNextCycleBudget`, slot Next chuyển sang trạng thái đã cấu hình với theme ordinal chuẩn.
+- [x] Hỗ trợ giả lập trạng thái ngoại tuyến (`isOffline = true`) có cache và thiếu cache.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.data.budget.FakeBudgetRepositoryTest"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "com.hoabh.chanko.data.budget.FakeBudgetRepositoryTest"`
 
 **Dependencies:** Task 2, Task 3
 
@@ -123,8 +123,8 @@ Cập nhật các data class con của `BudgetCardSlotUi` trong `HomeUiState.kt`
 ---
 
 ## Checkpoint 2: Contract Verification
-- [ ] Kiểm thử Repository và State mapping chạy pass: `./gradlew testDebugUnitTest --tests "*FakeBudgetRepositoryTest*" --tests "*HomeDomainLogicTest*"`
-- [ ] Biên dịch mã nguồn Kotlin thành công: `./gradlew compileDebugKotlin`
+- [x] Kiểm thử Repository và State mapping chạy pass: `./gradlew testDebugUnitTest --tests "*FakeBudgetRepositoryTest*" --tests "*HomeDomainLogicTest*"`
+- [x] Biên dịch mã nguồn Kotlin thành công: `./gradlew compileDebugKotlin`
 
 ---
 

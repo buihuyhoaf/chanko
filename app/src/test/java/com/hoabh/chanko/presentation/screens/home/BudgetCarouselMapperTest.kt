@@ -35,6 +35,7 @@ class BudgetCarouselMapperTest {
         val prevSlot = carousel.slots[0] as BudgetCardSlotUi.ClosedCard
         assertEquals(BudgetCardRole.Previous, prevSlot.role)
         assertEquals("Tháng 09/2026", prevSlot.cycleLabel)
+        assertEquals("09", prevSlot.monthLabel)
         assertEquals(1, prevSlot.themeOrdinal)
         assertFalse(prevSlot.isOverBudget)
 
@@ -42,6 +43,7 @@ class BudgetCarouselMapperTest {
         val currSlot = carousel.slots[1] as BudgetCardSlotUi.ActiveCard
         assertEquals(BudgetCardRole.Current, currSlot.role)
         assertEquals("Tháng 10/2026", currSlot.cycleLabel)
+        assertEquals("10", currSlot.monthLabel)
         assertEquals(2, currSlot.themeOrdinal)
         assertTrue(currSlot.isOverBudget)
         assertEquals(1.0f, currSlot.clampedProgress, 0.001f)
@@ -52,6 +54,7 @@ class BudgetCarouselMapperTest {
         val nextSlot = carousel.slots[2] as BudgetCardSlotUi.UpcomingPlaceholderCard
         assertEquals(BudgetCardRole.NextPlaceholder, nextSlot.role)
         assertEquals("Tháng 11/2026", nextSlot.cycleLabel)
+        assertEquals("11", nextSlot.monthLabel)
         assertEquals(3, nextSlot.themeOrdinal)
     }
 

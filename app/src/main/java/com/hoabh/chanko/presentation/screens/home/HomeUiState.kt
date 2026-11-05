@@ -128,7 +128,7 @@ enum class BudgetCardRole {
 }
 
 /**
- * Biến thể của các slot thẻ hiển thị trên BudgetCreditCardCarousel (Home v2.2).
+ * Biến thể của các slot thẻ hiển thị trên BudgetCreditCardCarousel (Home v2.2 - BC-CARD-LABEL-01, BC-CARD-CONTENT-01).
  */
 sealed interface BudgetCardSlotUi {
     val key: String
@@ -136,15 +136,17 @@ sealed interface BudgetCardSlotUi {
     val role: BudgetCardRole
     val cycleLabel: String
     val dateRangeText: String
+    val monthLabel: String
     val themeOrdinal: Int
 
-    /** Kỳ trước đã kết thúc (read-only, BC22-10) */
+    /** Kỳ trước đã kết thúc (read-only, BC22-10, BC-CARD-CONTENT-01: "Còn lại cuối kỳ") */
     data class ClosedCard(
         override val key: String,
         override val cycleId: String,
         override val cycleLabel: String,
         override val dateRangeText: String,
         override val themeOrdinal: Int,
+        override val monthLabel: String = "",
         val spentMinor: Long,
         val limitMinor: Long,
         val remainingMinor: Long,
@@ -160,13 +162,14 @@ sealed interface BudgetCardSlotUi {
         override val role: BudgetCardRole = BudgetCardRole.Previous
     }
 
-    /** Kỳ hiện tại đang diễn ra (BC22-11) */
+    /** Kỳ hiện tại đang diễn ra (BC22-11, BC-CARD-CONTENT-01: "Ngân sách còn lại" / "Vượt ngân sách") */
     data class ActiveCard(
         override val key: String,
         override val cycleId: String,
         override val cycleLabel: String,
         override val dateRangeText: String,
         override val themeOrdinal: Int,
+        override val monthLabel: String = "",
         val spentMinor: Long,
         val limitMinor: Long,
         val remainingMinor: Long,
@@ -184,26 +187,30 @@ sealed interface BudgetCardSlotUi {
         override val role: BudgetCardRole = BudgetCardRole.Current
     }
 
-    /** Kỳ tiếp theo đã cấu hình hạn mức dự kiến (BC22-07) */
+    /** Kỳ tiếp theo đã cấu hình hạn mức dự kiến (BC22-07, BC-CARD-CONTENT-01: "Ngân sách dự kiến") */
     data class UpcomingConfiguredCard(
         override val key: String,
         override val cycleId: String,
         override val cycleLabel: String,
         override val dateRangeText: String,
         override val themeOrdinal: Int,
+        override val monthLabel: String = "",
         val limitMinor: Long,
         val limitFormatted: String
     ) : BudgetCardSlotUi {
         override val role: BudgetCardRole = BudgetCardRole.NextConfigured
     }
 
-    /** Kỳ tiếp theo chưa cấu hình - thẻ trung tính viền nét đứt (BC22-05) */
+    /** Kỳ tiếp theo chưa cấu hình - thẻ trung tính viền nét đứt (BC22-05, BC-CARD-LABEL-01: monthChip, CTA "+ Thiết lập ngân sách") */
     data class UpcomingPlaceholderCard(
         override val key: String,
         override val cycleId: String,
         override val cycleLabel: String,
         override val dateRangeText: String,
-        override val themeOrdinal: Int = 0
+        override val themeOrdinal: Int = 0,
+        override val monthLabel: String = "",
+        val title: String = "Chu kỳ tiếp theo",
+        val subtitle: String = "Chưa thiết lập ngân sách"
     ) : BudgetCardSlotUi {
         override val role: BudgetCardRole = BudgetCardRole.NextPlaceholder
     }
@@ -214,7 +221,9 @@ sealed interface BudgetCardSlotUi {
         override val cycleId: String,
         override val cycleLabel: String,
         override val dateRangeText: String,
-        override val themeOrdinal: Int = 0
+        override val themeOrdinal: Int = 0,
+        override val monthLabel: String = "",
+        val title: String = "Chưa thiết lập ngân sách"
     ) : BudgetCardSlotUi {
         override val role: BudgetCardRole = BudgetCardRole.Current
     }

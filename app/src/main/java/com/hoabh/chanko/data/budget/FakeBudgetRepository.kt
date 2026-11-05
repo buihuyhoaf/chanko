@@ -567,8 +567,8 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
                 ?: BudgetCycle(
                     id = "cycle_next_${current.ordinal + 1}",
                     label = "Chu kỳ tiếp theo",
-                    startDate = "",
-                    endDate = "",
+                    startDate = "01/11/2026",
+                    endDate = "30/11/2026",
                     isCurrent = false,
                     anchorDay = current.anchorDay,
                     ordinal = current.ordinal + 1,
