@@ -5,10 +5,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
-import com.hoabh.chanko.domain.budget.model.CardColor
-import com.hoabh.chanko.domain.budget.model.CreditCard
 import com.hoabh.chanko.domain.budget.model.NotableItem
-import com.hoabh.chanko.domain.budget.model.PaymentMethodBreakdown
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -16,8 +13,8 @@ import kotlinx.coroutines.flow.Flow
  *
  * Quy ước lỗi: các hàm ghi trả [Result.failure] với một
  * [com.hoabh.chanko.domain.budget.model.BudgetException] có kiểu.
- * Các hàm ghi tự kiểm tra lại toàn bộ invariant (online, current cycle, khoảng tiền,
- * tên thẻ) — không phụ thuộc vào validation của form.
+ * Các hàm ghi tự kiểm tra lại toàn bộ invariant (online, current cycle, khoảng tiền)
+ * — không phụ thuộc vào validation của form.
  */
 interface BudgetRepository {
     fun getAvailableCycles(): Flow<List<BudgetCycle>>
@@ -33,11 +30,9 @@ interface BudgetRepository {
     fun getOfflineCachedCycleIds(): Flow<Set<String>>
 
     fun getBudgetSnapshot(cycleId: String): Flow<BudgetSnapshot>
-    fun getPaymentBreakdown(cycleId: String): Flow<List<PaymentMethodBreakdown>>
     fun getNotableItems(cycleId: String): Flow<List<NotableItem>>
     fun getRecentActivities(cycleId: String): Flow<List<BudgetActivity>>
     fun getAdjustments(cycleId: String): Flow<List<BudgetAdjustment>>
-    fun getCreditCards(): Flow<List<CreditCard>>
 
     fun isOnlineFlow(): Flow<Boolean>
 
@@ -58,8 +53,5 @@ interface BudgetRepository {
     suspend fun triggerRollover(): Result<Unit>
 
     suspend fun updateBudgetLimit(cycleId: String, newLimitMinor: Long, expectedRevision: Int): Result<Unit>
-    suspend fun addCreditCard(name: String, color: CardColor = CardColor.PURPLE): Result<CreditCard>
-    suspend fun renameCreditCard(cardId: String, newName: String): Result<Unit>
-    suspend fun archiveCreditCard(cardId: String): Result<Unit>
     suspend fun setNetworkOnline(isOnline: Boolean)
 }

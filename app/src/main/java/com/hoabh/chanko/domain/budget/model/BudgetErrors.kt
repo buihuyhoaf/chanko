@@ -26,17 +26,3 @@ class BudgetLoadException : BudgetException("Chưa tải được dữ liệu ng
 
 /** Lỗi lưu giả lập (fixture save error). */
 class BudgetSaveException : BudgetException("Yêu cầu chưa hoàn tất")
-
-/** Tên thẻ không hợp lệ (rỗng/quá giới hạn grapheme). */
-class InvalidCardNameException(message: String = "Tên thẻ không hợp lệ") : BudgetException(message)
-
-/** Tên thẻ dành riêng cho hệ thống (ví dụ Pay Now). */
-class ReservedCardNameException(message: String = "Tên này dành cho Pay Now") : BudgetException(message)
-
-/** Tên thẻ trùng (case-insensitive, sau trim/NFC). */
-class DuplicateCardNameException : BudgetException("Tên thẻ đã tồn tại")
-
-/** Thẻ đã bị archive hoặc không tồn tại. */
-class CreditCardUnavailableException(
-    message: String = "Thẻ không còn khả dụng"
-) : BudgetException(message)

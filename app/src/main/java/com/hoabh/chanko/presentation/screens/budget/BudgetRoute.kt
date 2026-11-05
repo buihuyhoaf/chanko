@@ -15,9 +15,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Route cho phân hệ Ngân sách (BudgetDetails route).
- * Hiển thị trực tiếp màn hình Ngân sách chuẩn v2.1:
- * Top app bar đồng bộ 100% phong cách Món đồ (MyItemsScreen), tích hợp trực tiếp 3 Section:
- * Ngân sách mua sắm, Phương thức thanh toán, Lịch sử điều chỉnh.
+ * Hiển thị trực tiếp màn hình Ngân sách:
+ * Top app bar đồng bộ phong cách Món đồ (MyItemsScreen), gồm các Section:
+ * Ngân sách mua sắm, Lịch sử điều chỉnh.
  */
 @Composable
 fun BudgetRoute(

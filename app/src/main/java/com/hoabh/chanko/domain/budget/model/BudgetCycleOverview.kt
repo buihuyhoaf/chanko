@@ -11,7 +11,6 @@ package com.hoabh.chanko.domain.budget.model
 data class BudgetCycleOverview(
     val cycleId: String,
     val snapshot: BudgetSnapshot,
-    val paymentMethods: List<PaymentMethodBreakdown>,
     val notableItems: List<NotableItem>,
     val recentActivities: List<BudgetActivity>,
     val adjustments: List<BudgetAdjustment>,
