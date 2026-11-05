@@ -53,6 +53,10 @@ private object CandyPalette {
     val Lavender85 = Color(0xFFF0ECF8)
     val Lavender230 = Color(0xFFE2DDEC)
     val Purple20 = Color(0xFFF6F0FF)
+    val Lavender125 = Color(0xFFF1E7FB)
+    val Pink70 = Color(0xFFFBEAF4)
+    val PurpleAmbientOrb = Color(0xFFD7C5FF)
+    val PeachAmbientOrb = Color(0xFFFFD9C4)
     val Purple30 = Color(0xFFF7F3FF)
     val Purple120 = Color(0xFFE8DFF8)
     val Purple80 = Color(0xFFEEE8F5)
@@ -244,9 +248,12 @@ object CandyColors {
     val coolingChip = CandyPalette.Lavender290
     val speechSurface = CandyPalette.Peach100
 
-    // Home v2 Image-Aligned Semantic Tokens (approved-home-user-reference.png & 11-ASSET-DELIVERY.md)
-    val homeScreenBackgroundTop = CandyPalette.Purple20
-    val homeScreenBackgroundBottom = CandyPalette.Pink20
+    // Home v2 Image-Aligned Semantic Tokens (approved-home-user-reference.png & 11-ASSET-DELIVERY.md & HOME-BG-01)
+    val homeScreenBackgroundTop = CandyPalette.Lavender120
+    val homeScreenBackgroundMiddle = CandyPalette.Lavender125
+    val homeScreenBackgroundBottom = CandyPalette.Pink70
+    val homeAmbientPurpleOrb = CandyPalette.PurpleAmbientOrb
+    val homeAmbientPeachOrb = CandyPalette.PeachAmbientOrb
     val homeCardSurface = CandyPalette.CoolWhite
     val homeCardBorder = CandyPalette.Lavender110
     val dialogueBubbleSurface = CandyPalette.WarmCream
@@ -428,7 +435,7 @@ object CandyColors {
         val lavenderConnector = CandyPalette.Lavender350
         val chipGold = CandyPalette.Gold300
         val chipGoldStroke = CandyPalette.Gold500
-        val headerFrostedSurface = CandyPalette.Purple20
+        val headerFrostedSurface = CandyPalette.Lavender120
         val headerBorderDivider = CandyPalette.Lavender110
 
         // 6 Journey Node Statuses (Ring + Badge + Label Ink)

@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -163,10 +164,13 @@ fun HomeScreen(
         Brush.verticalGradient(
             colors = listOf(
                 CandyColors.homeScreenBackgroundTop,
+                CandyColors.homeScreenBackgroundMiddle,
                 CandyColors.homeScreenBackgroundBottom
             )
         )
     }
+    val ambientPurple = CandyColors.homeAmbientPurpleOrb
+    val ambientPeach = CandyColors.homeAmbientPeachOrb
 
     val statusBarTopPadding = WindowInsets.statusBars
         .asPaddingValues()
@@ -195,7 +199,39 @@ fun HomeScreen(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(brush = backgroundBrush),
+            .background(brush = backgroundBrush)
+            .drawBehind {
+                // HOME-BG-01: Ambient Blurred Orbs (opacity 15-20%, large radius, soft falloff)
+                val topOrbRadius = size.width * 0.45f
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            ambientPurple.copy(alpha = 0.22f),
+                            ambientPurple.copy(alpha = 0.08f),
+                            androidx.compose.ui.graphics.Color.Transparent
+                        ),
+                        center = Offset(size.width * 0.90f, size.height * 0.08f),
+                        radius = topOrbRadius
+                    ),
+                    radius = topOrbRadius,
+                    center = Offset(size.width * 0.90f, size.height * 0.08f)
+                )
+
+                val bottomOrbRadius = size.width * 0.55f
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            ambientPeach.copy(alpha = 0.18f),
+                            ambientPeach.copy(alpha = 0.06f),
+                            androidx.compose.ui.graphics.Color.Transparent
+                        ),
+                        center = Offset(size.width * 0.10f, size.height * 0.85f),
+                        radius = bottomOrbRadius
+                    ),
+                    radius = bottomOrbRadius,
+                    center = Offset(size.width * 0.10f, size.height * 0.85f)
+                )
+            },
         contentAlignment = Alignment.TopCenter
     ) {
         val horizontalPadding = when {
