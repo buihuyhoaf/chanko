@@ -369,7 +369,8 @@ fun HomeScreen(
                         },
                         onRetryClick = {
                             onEvent(HomeUiEvent.RetrySection(HomeSection.Journey))
-                        }
+                        },
+                        isReducedMotionEnabled = state.isReducedMotionEnabled
                     )
                 }
 
