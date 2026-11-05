@@ -135,14 +135,14 @@ fun BudgetPlaceholderCard(
                 drawPath(wavePath, waveColor)
             }
 
-            // 3. Hình minh họa lịch với dấu chân (next_calendar.png) ở góc phải
+            // 3. Hình minh họa lịch với dấu chân (next_calendar.png) căn giữa dọc ở góc phải
             Image(
                 painter = painterResource(id = R.drawable.next_calendar),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 22.dp, bottom = 14.dp)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
                     .size(96.dp)
                     .clearAndSetSemantics {}
             )
@@ -151,8 +151,7 @@ fun BudgetPlaceholderCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(CandyBudgetThemes.contentPadding),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(CandyBudgetThemes.contentPadding)
             ) {
                 // TopBar: Month Chip pill bên trái, không chứa brand text
                 Row(
@@ -169,32 +168,33 @@ fun BudgetPlaceholderCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(CandySpace.xs))
-
-                // Nội dung trung tâm: Tiêu đề + phụ đề
-                Column(
-                    modifier = Modifier.fillMaxWidth(0.68f)
+                // Vùng giữa: Tiêu đề + phụ đề căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.68f),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(
-                        text = titleText,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 20.sp
-                        ),
-                        color = CandyBudgetThemes.textDark
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = subtitleText,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp
-                        ),
-                        color = CandyBudgetThemes.placeholderBorder
-                    )
+                    Column {
+                        Text(
+                            text = titleText,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 20.sp
+                            ),
+                            color = CandyBudgetThemes.textDark
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = subtitleText,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp
+                            ),
+                            color = CandyBudgetThemes.placeholderBorder
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(CandySpace.xs))
 
                 // Nút CTA dạng pill tím #6326A8, chữ trắng (BC-CARD-CONTENT-01)
                 Surface(

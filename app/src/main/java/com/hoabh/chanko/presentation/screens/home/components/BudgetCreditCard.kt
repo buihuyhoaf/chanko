@@ -921,7 +921,7 @@ private fun ActiveCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
-            // Mascot dịch vào trong về bên trái, ngồi trên đụn sóng
+            // Mascot căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
             Image(
                 painter = painterResource(
                     id = if (slot.isOverBudget) {
@@ -933,8 +933,8 @@ private fun ActiveCardContent(
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 22.dp, bottom = 12.dp)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
                     .size(104.dp)
                     .clearAndSetSemantics {}
             )
@@ -948,42 +948,47 @@ private fun ActiveCardContent(
                         top = CandyBudgetThemes.contentPadding,
                         end = CandyBudgetThemes.contentPadding,
                         bottom = 14.dp
-                    ),
-                verticalArrangement = Arrangement.SpaceBetween
+                    )
             ) {
-                // Nhóm trên: TopBar + Nhãn + Số tiền
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                // Hàng trên: TopBar
+                CreditCardTopBar(monthLabel = slot.monthLabel)
+
+                // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    CreditCardTopBar(monthLabel = slot.monthLabel)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        Text(
+                            text = mainLabel,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                        )
 
-                    Spacer(modifier = Modifier.height(CandySpace.xs))
-
-                    Text(
-                        text = mainLabel,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = CandyBudgetThemes.labelTextSize
-                        ),
-                        color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
-                    )
-
-                    Text(
-                        text = if (slot.isOverBudget) {
-                            slot.overFormatted ?: slot.remainingFormatted
-                        } else {
-                            slot.remainingFormatted
-                        },
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = CandyBudgetThemes.amountTextSize,
-                            lineHeight = 38.sp
-                        ),
-                        color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
-                    )
+                        Text(
+                            text = if (slot.isOverBudget) {
+                                slot.overFormatted ?: slot.remainingFormatted
+                            } else {
+                                slot.remainingFormatted
+                            },
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = if (slot.isOverBudget) CandyBudgetThemes.coralWarning else Color.White
+                        )
+                    }
                 }
 
-                // Nhóm dưới: Thanh tiến trình sát mép dưới (BC-CARD-CONTENT-01)
+                // Hàng dưới: Thanh tiến trình sát mép dưới (BC-CARD-CONTENT-01)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.66f)
@@ -1091,14 +1096,14 @@ private fun ClosedCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
-            // Mascot ngủ dịch vào trong về bên trái, ngồi trên đụn sóng
+            // Mascot ngủ căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
             Image(
                 painter = painterResource(id = R.drawable.mascot_sleepy),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 22.dp, bottom = 12.dp)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
                     .size(104.dp)
                     .clearAndSetSemantics {}
             )
@@ -1112,38 +1117,43 @@ private fun ClosedCardContent(
                         top = CandyBudgetThemes.contentPadding,
                         end = CandyBudgetThemes.contentPadding,
                         bottom = 14.dp
-                    ),
-                verticalArrangement = Arrangement.SpaceBetween
+                    )
             ) {
-                // Nhóm trên: TopBar + Nhãn + Số tiền
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                // Hàng trên: TopBar
+                CreditCardTopBar(monthLabel = slot.monthLabel)
+
+                // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    CreditCardTopBar(monthLabel = slot.monthLabel)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    ) {
+                        Text(
+                            text = closedLabel,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = Color.White
+                        )
 
-                    Spacer(modifier = Modifier.height(CandySpace.xs))
-
-                    Text(
-                        text = closedLabel,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = CandyBudgetThemes.labelTextSize
-                        ),
-                        color = Color.White
-                    )
-
-                    Text(
-                        text = slot.remainingFormatted,
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = CandyBudgetThemes.amountTextSize,
-                            lineHeight = 38.sp
-                        ),
-                        color = Color.White
-                    )
+                        Text(
+                            text = slot.remainingFormatted,
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
                 }
 
-                // Nhóm dưới: Thanh tiến trình sát mép dưới
+                // Hàng dưới: Thanh tiến trình sát mép dưới
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.66f)
@@ -1231,14 +1241,14 @@ private fun UpcomingConfiguredCardContent(
                 modifier = Modifier.matchParentSize()
             )
 
-            // Mascot dịch vào trong về bên trái, ngồi trên đụn sóng
+            // Mascot căn giữa theo chiều dọc (Center Vertical), dịch vào trong về bên trái 22dp
             Image(
                 painter = painterResource(id = R.drawable.mascot_happy),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 22.dp, bottom = 12.dp)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 22.dp)
                     .size(104.dp)
                     .clearAndSetSemantics {}
             )
@@ -1247,37 +1257,40 @@ private fun UpcomingConfiguredCardContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = CreditCardMinHeight)
-                    .padding(CandyBudgetThemes.contentPadding),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(CandyBudgetThemes.contentPadding)
             ) {
                 CreditCardTopBar(monthLabel = slot.monthLabel)
 
-                Spacer(modifier = Modifier.height(CandySpace.sm))
+                // Vùng giữa: Nhãn dự kiến & Số tiền căn giữa theo chiều dọc (Center Vertical)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(0.66f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.home_budget_upcoming_projected_label),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = CandyBudgetThemes.labelTextSize
+                            ),
+                            color = Color.White
+                        )
 
-                Column {
-                    Text(
-                        text = stringResource(R.string.home_budget_upcoming_projected_label),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = CandyBudgetThemes.labelTextSize
-                        ),
-                        color = Color.White
-                    )
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = slot.limitFormatted,
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = CandyBudgetThemes.amountTextSize,
-                            lineHeight = 38.sp
-                        ),
-                        color = Color.White
-                    )
+                        Text(
+                            text = slot.limitFormatted,
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = CandyBudgetThemes.amountTextSize,
+                                lineHeight = 38.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(CandySpace.sm))
             }
         }
     }
