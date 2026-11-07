@@ -166,13 +166,13 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     )
 
     // --- Scenario Switchers for Testing & Preview ---
-    fun recordItemExpense(
+    override suspend fun recordItemExpense(
         itemId: String,
         itemName: String,
         amountVnd: Long,
-        paymentType: com.hoabh.chanko.domain.model.PaymentType,
-        cycleId: String = currentCycleId
-    ) {
+        paymentType: com.hoabh.chanko.domain.model.PaymentType
+    ): Result<Unit> {
+        val cycleId = currentCycleId
         val currentSnapshot = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 0L)
         val newSpent = currentSnapshot.spentMinor + amountVnd
         snapshotsState.value = snapshotsState.value + (cycleId to currentSnapshot.copy(
@@ -192,12 +192,13 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             type = BudgetActivityType.PURCHASE_RECORDED
         )
         activitiesState.value = activitiesState.value + (cycleId to (listOf(newActivity) + currentActivities))
+        return Result.success(Unit)
     }
 
-    fun refundExpense(
-        amountVnd: Long,
-        cycleId: String = currentCycleId
-    ) {
+    override suspend fun refundExpense(
+        amountVnd: Long
+    ): Result<Unit> {
+        val cycleId = currentCycleId
         val currentSnapshot = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 0L)
         val newSpent = maxOf(0L, currentSnapshot.spentMinor - amountVnd)
         snapshotsState.value = snapshotsState.value + (cycleId to currentSnapshot.copy(
@@ -216,6 +217,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             type = BudgetActivityType.EXPENSE_CORRECTED
         )
         activitiesState.value = activitiesState.value + (cycleId to (listOf(newActivity) + currentActivities))
+        return Result.success(Unit)
     }
 
     fun setScenarioOverBudget(cycleId: String = currentCycleId) {

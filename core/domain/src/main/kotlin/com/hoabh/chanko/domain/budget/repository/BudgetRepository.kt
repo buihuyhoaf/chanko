@@ -6,6 +6,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.NotableItem
+import com.hoabh.chanko.domain.model.PaymentType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -54,4 +55,21 @@ interface BudgetRepository {
 
     suspend fun updateBudgetLimit(cycleId: String, newLimitMinor: Long, expectedRevision: Int): Result<Unit>
     suspend fun setNetworkOnline(isOnline: Boolean)
+
+    /**
+     * Ghi nhận chi tiêu từ sản phẩm vào chu kỳ ngân sách hiện tại.
+     */
+    suspend fun recordItemExpense(
+        itemId: String,
+        itemName: String,
+        amountVnd: Long,
+        paymentType: PaymentType
+    ): Result<Unit>
+
+    /**
+     * Hoàn tiền / khôi phục hạn mức chi tiêu trong chu kỳ hiện tại.
+     */
+    suspend fun refundExpense(
+        amountVnd: Long
+    ): Result<Unit>
 }

@@ -1,6 +1,5 @@
 package com.hoabh.chanko.domain.budget.usecase
 
-import com.hoabh.chanko.data.budget.FakeBudgetRepository
 import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import com.hoabh.chanko.domain.model.ItemStatus
@@ -41,14 +40,12 @@ class ItemPurchaseBudgetSyncUseCase(
         itemRepository.updateItemStatus(item.id, ItemStatus.BOUGHT)
 
         // 3. Ghi nhận chi tiêu vào BudgetRepository
-        if (budgetRepository is FakeBudgetRepository) {
-            budgetRepository.recordItemExpense(
-                itemId = item.id.toString(),
-                itemName = item.name,
-                amountVnd = purchase.totalAmount,
-                paymentType = purchase.paymentType
-            )
-        }
+        budgetRepository.recordItemExpense(
+            itemId = item.id.toString(),
+            itemName = item.name,
+            amountVnd = purchase.totalAmount,
+            paymentType = purchase.paymentType
+        )
 
         return Result.success(Unit)
     }
@@ -67,9 +64,7 @@ class ItemPurchaseBudgetSyncUseCase(
 
         purchaseRepository.deletePurchase(purchaseId)
 
-        if (budgetRepository is FakeBudgetRepository) {
-            budgetRepository.refundExpense(amountVnd = purchase.totalAmount)
-        }
+        budgetRepository.refundExpense(amountVnd = purchase.totalAmount)
 
         val remainingPurchases = purchaseRepository.getPurchasesByItemId(itemId).first()
         if (remainingPurchases.isEmpty()) {

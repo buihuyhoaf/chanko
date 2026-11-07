@@ -156,8 +156,8 @@ data class JourneyItemCandidate(
  * 2. Khử trùng lặp theo `itemId` (giữ bản ghi hợp lệ mới nhất của cùng `itemId`).
  * 3. Reconcile hết hạn `Cooling-off` (`status == Waiting && remainingSeconds <= 0`) sang `Ready` ("Sẵn sàng xem lại")
  *    mà KHÔNG tự động chuyển `verdict` sang `BUY` (AC-25).
- * 4. Sắp xếp theo `createdAtEpochMillis DESC`, khi trùng `createdAt` thì tie-break ổn định theo `itemId ASC`;
- *    thay đổi `status` tuyệt đối KHÔNG làm thay đổi thứ tự các node (AC-11).
+ * 4. Sắp xếp theo dòng thời gian tăng dần (`createdAtEpochMillis ASC`), tie-break ổn định theo `itemId ASC`;
+ *    lấy tối đa 5 món mới nhất theo thứ tự hành trình; thay đổi `status` tuyệt đối KHÔNG làm thay đổi thứ tự các node (AC-11).
  * 5. Lấy tối đa 5 món (`min(n, 5)`) — không tạo node giả cho đủ 5 (AC-12).
  */
 object JourneySelector {
