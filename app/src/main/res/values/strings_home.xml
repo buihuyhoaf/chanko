@@ -68,6 +68,7 @@
     <string name="home_journey_status_purchased">Đã mua</string>
     <string name="home_journey_status_skipped">Đã bỏ qua</string>
     <string name="home_cd_journey_node">%1$s, trạng thái %2$s, giá %3$s. Chạm đúp để mở chi tiết.</string>
+    <string name="home_journey_missing_price">Chưa rõ giá</string>
 
     <!-- Observation v2.0 ("Góc nhìn từ Chanko" — AC-26, AC-27) -->
     <string name="home_observation_header">Góc nhìn từ Chanko</string>

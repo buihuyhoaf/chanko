@@ -683,3 +683,87 @@ Chạy toàn bộ kiểm thử đơn vị, kiểm thử kiến trúc màu sắc 
 - [x] Không còn tàn dư trạng thái `Saved` / `Considering`.
 - [x] Viền đếm ngược tròn (Circular Progress Arc) và nhịp thở (Breathing Pulse) hoạt động hoàn hảo.
 - [x] Carousel 3 thẻ v2.2 và toàn bộ các tính năng khác giữ nguyên 100% độ ổn định.
+
+---
+
+## Phase 8: Item Journey Sub-Labels (Title & Price Display)
+
+### Task 23: Thiết kế Component Sub-Label dưới chân Node (`JourneyNodeSubLabel`)
+
+**Description:**
+Xây dựng component `JourneyNodeSubLabel` hiển thị Tên món đồ (Title) và Pill Giá tiền (Price Tag) nằm gọn gàng bên dưới vòng tròn sản phẩm:
+- Tên món đồ: tối đa 1 dòng, `12sp`, `FontWeight.SemiBold`, cắt ngắn với `TextOverflow.Ellipsis`, màu `CandyColors.HomeV2.textPrimary`.
+- Pill Giá tiền: Chip nhỏ bo tròn `RoundedCornerShape(8.dp)`, nền tím pastel nhẹ `Color(0xFFF0ECF8)` hoặc `Gray100`, text `11sp`, `FontWeight.Bold`, hiển thị `node.priceFormatted` (ví dụ `1.5M`, `350k`), trường hợp thiếu giá (`AC-09`) hiển thị `"Chưa rõ giá"`.
+
+**Acceptance criteria:**
+- [x] Component `JourneyNodeSubLabel` render rõ ràng tên và pill giá tiền.
+- [x] Xử lý an toàn khi thiếu giá hoặc tên dài.
+- [x] Độ tương phản màu chữ đạt chuẩn WCAG AA (> 4.5:1).
+
+**Verification:**
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
+
+**Estimated scope:** Small (1 file)
+
+---
+
+### Task 24: Tích hợp Sub-Label vào `JourneyProductNode` & Cân chỉnh Bố cục Ziczac
+
+**Description:**
+Tích hợp `JourneyNodeSubLabel` vào khối trạm của mỗi node trên Item Journey:
+- Gom vòng tròn chính và `JourneyNodeSubLabel` vào khối trạm dọc (`Column`, `Alignment.CenterHorizontally`).
+- Căn chỉnh tâm vòng tròn chính khớp chính xác với `nodeCentersDp` để đường nét đứt kết nối giữ nguyên tọa độ chuẩn.
+- Cập nhật `computeCenteredZigZagLayout`: Tăng bước nhảy dọc `verticalStep` từ `74dp/80dp` lên `116dp/124dp` và cập nhật `totalHeight` để nhường không gian cho text, tránh chữ bị đè hoặc chạm vào node tiếp theo.
+- Đảm bảo 2 chú mèo mascot ở 2 bên không bị che khuất hoặc xâm lấn vùng chạm của node.
+
+**Acceptance criteria:**
+- [x] Các trạm ziczac hiển thị đầy đủ Vòng tròn + Tên món + Pill Giá tiền.
+- [x] Đường nét đứt và các trạm không bị chồng chéo hay che khuất chữ.
+- [x] Vùng chạm và semantics bao trùm toàn bộ khối trạm (chạm vào tên hoặc giá tiền vẫn điều hướng mở chi tiết sản phẩm).
+
+**Verification:**
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Task 23
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
+
+**Estimated scope:** Medium (1-2 files)
+
+---
+
+### Task 25: Kiểm thử Hồi quy, Accessibility Semantics & Build Verification
+
+**Description:**
+Chạy toàn bộ test suites, kiểm tra hồi quy layout test trong `HomeDomainLogicTest.kt`, kiểm tra semantics TalkBack và biên dịch APK `assembleDevDebug`.
+
+**Acceptance criteria:**
+- [x] `HomeDomainLogicTest.kt` kiểm tra layout centered ziczac vượt qua thành công với khoảng cách mới.
+- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
+- [x] `./gradlew test` PASS 100%.
+- [x] `./gradlew assembleDevDebug` thành công 100%.
+
+**Verification:**
+- [x] Tests pass: `./gradlew test`
+- [x] Build succeeds: `./gradlew assembleDevDebug`
+
+**Dependencies:** Tasks 23, 24
+
+**Files likely touched:**
+- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
+
+**Estimated scope:** Small (1-2 files)
+
+---
+
+### Checkpoint 8: Item Journey Sub-Labels Verified
+- [x] Tên món đồ và giá tiền hiển thị rõ ràng, trực quan, thẩm mỹ theo phong cách Candy Theme.
+- [x] Trải nghiệm cuộn ziczac mượt mà, không va chạm Mascot hay đè chữ.
+- [x] 100% tests và build compilation passed.

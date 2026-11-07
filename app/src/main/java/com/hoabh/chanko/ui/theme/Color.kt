@@ -524,6 +524,10 @@ object CandyColors {
         val statusSkippedInk = CandyPalette.Slate610
         val statusSkippedRing = CandyPalette.Slate400
 
+        // Sub-label Price Pill Tokens
+        val journeyPricePillBackground = CandyPalette.Purple80
+        val journeyPricePillText = CandyPalette.Purple850
+
         // Aliases
         val statusWaitingInk = statusCoolingOffInk
         val statusWaitingRing = statusCoolingOffRing

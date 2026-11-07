@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -71,6 +73,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -275,8 +278,9 @@ fun computeCenteredZigZagLayout(
         else -> 88.dp
     }
     val nodeRadius: Dp = nodeDiameter / 2
-    val verticalStep: Dp = if (isCompactWidth) 74.dp else 80.dp
+    val verticalStep: Dp = if (isCompactWidth) 116.dp else 124.dp
     val topPadding: Dp = 8.dp
+    val subLabelHeight: Dp = 42.dp
     val bottomPadding: Dp = 12.dp
 
     val canvasCenterX: Dp = maxWidth / 2
@@ -307,7 +311,7 @@ fun computeCenteredZigZagLayout(
     }
     val mascotSize: Dp = minOf(preferredMascotSize, availableSideClearance)
 
-    val lastNodeBottom = (nodeCenters.lastOrNull()?.second ?: nodeRadius) + nodeRadius + bottomPadding
+    val lastNodeBottom = (nodeCenters.lastOrNull()?.second ?: nodeRadius) + nodeRadius + subLabelHeight + bottomPadding
     val totalHeight: Dp = maxOf(lastNodeBottom, mascotSize + 24.dp)
 
     return CenteredZigZagLayoutDp(
@@ -445,11 +449,12 @@ private fun ItemJourneyZigZagCanvas(
                 )
             }
 
-            // 3. Các Node tròn (80–96dp) theo đúng thứ tự createdAt DESC để TalkBack đọc chuẩn xác (AC-13..AC-15, AC-23, AC-24, AC-31)
+            // 3. Các Node tròn (80–96dp) kèm Sub-Label theo đúng thứ tự createdAt DESC để TalkBack đọc chuẩn xác (AC-13..AC-15, AC-23, AC-24, AC-31)
             visibleNodes.forEachIndexed { index, node ->
                 key(node.itemId) {
                     val (centerX, centerY) = nodeCentersDp[index]
-                    val topLeftX = centerX - nodeRadius
+                    val columnWidth = if (nodeDiameter < 84.dp) 96.dp else 104.dp
+                    val topLeftX = centerX - (columnWidth / 2)
                     val topLeftY = centerY - nodeRadius
 
                     JourneyProductNode(
@@ -533,10 +538,11 @@ private fun JourneyProductNode(
     val remainingFraction = (remSeconds.toFloat() / totalSeconds.toFloat()).coerceIn(0f, 1f)
     val countdownSweepAngle = 360f * remainingFraction
 
-    Box(
+    val columnWidth = if (diameter < 84.dp) 96.dp else 104.dp
+
+    Column(
         modifier = modifier
-            .size(diameter)
-            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .width(columnWidth)
             .pointerInput(node.itemId) {
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -554,121 +560,194 @@ private fun JourneyProductNode(
                 role = Role.Button
                 traversalIndex = traversalOrder
             },
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Viền Canvas bên ngoài: Cung đếm ngược (CoolingOff) hoặc Viền nhịp thở (Ready)
-        Canvas(
+        // 1. Vòng tròn sản phẩm chính
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .clearAndSetSemantics {}
+                .size(diameter)
+                .sizeIn(minWidth = 48.dp, minHeight = 48.dp),
+            contentAlignment = Alignment.Center
         ) {
-            val strokeWidth = 3.dp.toPx()
-            val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
+            // 1. Viền Canvas bên ngoài: Cung đếm ngược (CoolingOff) hoặc Viền nhịp thở (Ready)
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clearAndSetSemantics {}
+            ) {
+                val strokeWidth = 3.dp.toPx()
+                val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
 
-            when (node.status) {
-                JourneyNodeStatus.CoolingOff -> {
-                    // Rãnh nền mờ bên dưới
-                    drawCircle(
-                        color = style.ringColor.copy(alpha = 0.18f),
-                        radius = orbitRadius,
-                        center = center,
-                        style = Stroke(width = strokeWidth)
-                    )
-                    // Cung đếm ngược tròn (Circular Countdown Arc) từ 12h (-90 độ)
-                    val arcDiameter = orbitRadius * 2f
-                    val topLeftOffset = Offset(center.x - orbitRadius, center.y - orbitRadius)
-                    drawArc(
-                        color = style.ringColor,
-                        startAngle = -90f,
-                        sweepAngle = countdownSweepAngle,
-                        useCenter = false,
-                        topLeft = topLeftOffset,
-                        size = Size(arcDiameter, arcDiameter),
-                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                    )
-                }
-
-                JourneyNodeStatus.Ready -> {
-                    // Viền chính khép kín nổi bật
-                    drawCircle(
-                        color = style.ringColor,
-                        radius = orbitRadius,
-                        center = center,
-                        style = Stroke(width = strokeWidth)
-                    )
-                    // Vòng hào quang nhịp thở bên ngoài khi pulse active
-                    if (isPulseActive) {
+                when (node.status) {
+                    JourneyNodeStatus.CoolingOff -> {
+                        // Rãnh nền mờ bên dưới
                         drawCircle(
-                            color = style.ringColor.copy(alpha = pulseAlpha * 0.35f),
-                            radius = orbitRadius + 2.dp.toPx(),
+                            color = style.ringColor.copy(alpha = 0.18f),
+                            radius = orbitRadius,
                             center = center,
-                            style = Stroke(width = 1.5.dp.toPx())
+                            style = Stroke(width = strokeWidth)
+                        )
+                        // Cung đếm ngược tròn (Circular Countdown Arc) từ 12h (-90 độ)
+                        val arcDiameter = orbitRadius * 2f
+                        val topLeftOffset = Offset(center.x - orbitRadius, center.y - orbitRadius)
+                        drawArc(
+                            color = style.ringColor,
+                            startAngle = -90f,
+                            sweepAngle = countdownSweepAngle,
+                            useCenter = false,
+                            topLeft = topLeftOffset,
+                            size = Size(arcDiameter, arcDiameter),
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        )
+                    }
+
+                    JourneyNodeStatus.Ready -> {
+                        // Viền chính khép kín nổi bật
+                        drawCircle(
+                            color = style.ringColor,
+                            radius = orbitRadius,
+                            center = center,
+                            style = Stroke(width = strokeWidth)
+                        )
+                        // Vòng hào quang nhịp thở bên ngoài khi pulse active
+                        if (isPulseActive) {
+                            drawCircle(
+                                color = style.ringColor.copy(alpha = pulseAlpha * 0.35f),
+                                radius = orbitRadius + 2.dp.toPx(),
+                                center = center,
+                                style = Stroke(width = 1.5.dp.toPx())
+                            )
+                        }
+                    }
+
+                    else -> {
+                        // Purchased / Skipped: Viền nét liền tĩnh, sắc thái trung tính
+                        drawCircle(
+                            color = style.ringColor,
+                            radius = orbitRadius,
+                            center = center,
+                            style = Stroke(width = strokeWidth)
                         )
                     }
                 }
-
-                else -> {
-                    // Purchased / Skipped: Viền nét liền tĩnh, sắc thái trung tính
-                    drawCircle(
-                        color = style.ringColor,
-                        radius = orbitRadius,
-                        center = center,
-                        style = Stroke(width = strokeWidth)
-                    )
-                }
             }
-        }
 
-        // 2. Vòng tròn lõi vật phẩm bên trong
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(7.dp)
-                .shadow(
-                    elevation = if (isPulseActive) 6.dp else 4.dp,
-                    shape = CircleShape,
-                    ambientColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha * 0.7f else 0.35f),
-                    spotColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha else 0.45f)
-                ),
-            shape = CircleShape,
-            color = Color.White
-        ) {
-            Box(
+            // 2. Vòng tròn lõi vật phẩm bên trong
+            Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(3.dp)
-                    .clip(CircleShape)
-                    .background(CandyColors.HomeV2.background),
-                contentAlignment = Alignment.Center
+                    .padding(7.dp)
+                    .shadow(
+                        elevation = if (isPulseActive) 6.dp else 4.dp,
+                        shape = CircleShape,
+                        ambientColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha * 0.7f else 0.35f),
+                        spotColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha else 0.45f)
+                    ),
+                shape = CircleShape,
+                color = Color.White
             ) {
-                if (node.thumbnailResId != null && !node.imageLoadFailed) {
-                    Image(
-                        painter = painterResource(id = node.thumbnailResId),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    // Placeholder an toàn khi thiếu ảnh hoặc tải ảnh lỗi (STATE-MATRIX: image_failure)
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_01,
-                        contentDescription = null,
-                        size = 32.dp
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(CandyColors.HomeV2.background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (node.thumbnailResId != null && !node.imageLoadFailed) {
+                        Image(
+                            painter = painterResource(id = node.thumbnailResId),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        // Placeholder an toàn khi thiếu ảnh hoặc tải ảnh lỗi (STATE-MATRIX: image_failure)
+                        ChankoIcon(
+                            id = ChankoIconId.ITM_01,
+                            contentDescription = null,
+                            size = 32.dp
+                        )
+                    }
                 }
             }
+
+            // 3. Huy hiệu trạng thái góc trên phải (không bị xoay)
+            JourneyStatusBadge(
+                status = node.status,
+                badgeColor = style.badgeColor,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-2).dp, y = 2.dp)
+            )
         }
 
-        // 3. Huy hiệu trạng thái góc trên phải (không bị xoay)
-        JourneyStatusBadge(
-            status = node.status,
-            badgeColor = style.badgeColor,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = (-2).dp, y = 2.dp)
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 2. Cụm Sub-Label: Tên món đồ & Pill Giá tiền
+        JourneyNodeSubLabel(
+            title = node.title,
+            priceFormatted = node.priceFormatted
         )
+    }
+}
+
+@Composable
+private fun JourneyNodeSubLabel(
+    title: String,
+    priceFormatted: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        // Tên món đồ (1 dòng, ellipsize, chữ đậm vừa, màu Ink810)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+                lineHeight = 15.sp
+            ),
+            color = CandyColors.HomeV2.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        // Pill Giá tiền (Chip nhỏ bo tròn, nền tím phấn nhạt, chữ tím đậm)
+        val displayPrice = if (!priceFormatted.isNullOrBlank()) {
+            priceFormatted
+        } else {
+            stringResource(R.string.home_journey_missing_price)
+        }
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(CandyColors.HomeV2.journeyPricePillBackground)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = displayPrice,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 10.5.sp,
+                    lineHeight = 13.sp
+                ),
+                color = CandyColors.HomeV2.journeyPricePillText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

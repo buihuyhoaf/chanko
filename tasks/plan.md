@@ -98,6 +98,8 @@ flowchart TD
   - *Checkpoint 6:* Popup Daily Check-in, nút pill trên Header, sắp xếp item mới nhất ở dưới cùng và chúc mừng tăng Level hoạt động trơn tru, không ảnh hưởng Carousel v2.2.
 - **Phase 7: Item Journey Cooling-off Visuals & State Streamlining** (Tasks 19–22)
   - *Checkpoint 7:* Loại bỏ hoàn toàn tàn dư Saved/Considering, hiển thị Circular Progress Arc cho CoolingOff và nhịp thở cho Ready, đạt 100% test và assembleDevDebug.
+- **Phase 8: Item Journey Sub-Labels (Title & Price Display)** (Tasks 23–25)
+  - *Checkpoint 8:* Hiển thị rõ ràng Tên món và Giá tiền dạng Sub-Label dưới mỗi node tròn trên Journey; cân chỉnh bước nhảy ziczac không đè text; TalkBack semantics hoàn chỉnh và 100% test pass.
 
 ---
 
@@ -127,6 +129,19 @@ flowchart TD
     T22["Task 22: Full Regression & Verification"]
 
     T19 --> T20 --> T21 --> T22
+```
+
+---
+
+## 7. Phase 8 Task Breakdown: Item Journey Sub-Labels (Title & Price)
+
+```mermaid
+flowchart TD
+    T23["Task 23: Component JourneyNodeSubLabel (Title + Price Pill)"]
+    T24["Task 24: Integrate Sub-Labels & Adjust ZigZag Step & Heights"]
+    T25["Task 25: Full Regression, Accessibility & Build Verification"]
+
+    T23 --> T24 --> T25
 ```
 
 ---
