@@ -48,6 +48,7 @@ import com.hoabh.chanko.presentation.features.itemdetail.components.ExpandableDe
 import com.hoabh.chanko.presentation.features.itemdetail.components.ItemMoreOptionsBottomSheet
 import com.hoabh.chanko.presentation.features.itemdetail.components.ProductStageHero
 import com.hoabh.chanko.presentation.features.itemdetail.components.PurchaseHistorySection
+import com.hoabh.chanko.presentation.features.itemdetail.components.UnfreezeConfirmDialog
 import com.hoabh.chanko.presentation.features.itemdetail.components.StickyBottomActionBar
 import com.hoabh.chanko.presentation.features.myitems.ItemDisplayStatus
 import com.hoabh.chanko.presentation.features.purchase.RecordPurchaseBottomSheet
@@ -316,28 +317,15 @@ fun ItemDetailScreen(
             )
         }
 
-        // Skip Waiting Confirmation Dialog (GAP-02)
+        // Skip Waiting Confirmation Dialog (GAP-02 & Unfreeze Neutral Dialog)
         if (uiState.isSkipWaitingConfirmDialogOpen) {
-            AlertDialog(
-                onDismissRequest = { onEvent(ItemDetailUiEvent.DismissSkipWaitingDialog) },
-                title = { Text(stringResource(R.string.item_detail_dialog_skip_title)) },
-                text = { Text(stringResource(R.string.item_detail_dialog_skip_msg)) },
-                confirmButton = {
-                    TextButton(onClick = { onEvent(ItemDetailUiEvent.ConfirmSkipWaiting) }) {
-                        Text(
-                            text = stringResource(R.string.item_detail_dialog_skip_confirm),
-                            color = CandyColors.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { onEvent(ItemDetailUiEvent.DismissSkipWaitingDialog) }) {
-                        Text(stringResource(R.string.item_detail_dialog_cancel))
-                    }
-                },
-                shape = RoundedCornerShape(24.dp),
-                containerColor = Color.White
+            UnfreezeConfirmDialog(
+                hatFee = uiState.unfreezeHatFee,
+                pateFee = uiState.unfreezePateFee,
+                currentHatBalance = uiState.currentHatBalance,
+                currentPateBalance = uiState.currentPateBalance,
+                onConfirm = { onEvent(ItemDetailUiEvent.ConfirmSkipWaiting) },
+                onDismiss = { onEvent(ItemDetailUiEvent.DismissSkipWaitingDialog) }
             )
         }
     }

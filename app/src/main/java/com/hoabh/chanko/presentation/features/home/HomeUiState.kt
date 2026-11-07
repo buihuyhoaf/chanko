@@ -61,7 +61,12 @@ data class HeaderUiModel(
     val isOffline: Boolean = false,
     val lastSyncedAtText: String? = null,
     val customGreeting: String? = null,
-    val customSubtitle: String? = null
+    val customSubtitle: String? = null,
+    val hatBalance: Long = 0L,
+    val pateBalance: Long = 0L,
+    val currentLevel: Int = 1,
+    val pateProgressFraction: Float = 0f,
+    val hasCheckedInToday: Boolean = false
 ) {
     val displayName: String
         get() = userName.trim()
@@ -260,19 +265,15 @@ enum class DecisionVerdict {
 }
 
 /**
- * 6 trạng thái hợp lệ của node trên Item Journey v2.0 (UX-SPEC.md, DESIGN-TOKENS.json, AC-14):
- * - Saved ("Đã lưu")
- * - Considering ("Đang cân nhắc")
- * - Waiting ("Đang chờ")
- * - Ready ("Sẵn sàng xem lại")
+ * 4 trạng thái hợp lệ của node trên Item Journey (SPEC-cooling-off-journey-visuals.md):
+ * - CoolingOff ("Đang hạ nhiệt")
+ * - Ready ("Sẵn sàng xem xét")
  * - Purchased ("Đã mua")
  * - Skipped ("Đã bỏ qua")
  */
 enum class JourneyNodeStatus(val vietnameseLabel: String) {
-    Saved("Đã lưu"),
-    Considering("Đang cân nhắc"),
-    Waiting("Đang chờ"),
-    Ready("Sẵn sàng xem lại"),
+    CoolingOff("Đang hạ nhiệt"),
+    Ready("Sẵn sàng xem xét"),
     Purchased("Đã mua"),
     Skipped("Đã bỏ qua")
 }
@@ -346,6 +347,10 @@ data class HomeUiState(
     val isRefreshing: Boolean = false,
     val isOffline: Boolean = false,
     val isReducedMotionEnabled: Boolean = false,
+    val isResourceSheetOpen: Boolean = false,
+    val isCheckInDialogOpen: Boolean = false,
+    val showLevelUpCelebration: Boolean = false,
+    val celebratedLevel: Int = 1,
     val scrollAnchorItemId: String? = null,
     val selectedTab: HomeTab = HomeTab.Home,
     val carouselResetTrigger: Long = 0L

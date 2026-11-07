@@ -79,4 +79,13 @@
     <string name="add_item_verify_title">Kiểm tra thông tin</string>
     <string name="add_item_verify_help">Kiểm tra thông tin từ liên kết và bổ sung các trường còn thiếu trước khi cân nhắc.</string>
     <string name="add_item_exit">Thoát</string>
+    <!-- Mandatory Cooling-off Freeze strings -->
+    <string name="add_item_freeze_title">Kích hoạt Cooling-off</string>
+    <string name="add_item_freeze_badge">Chanko ấn định: %1$d ngày</string>
+    <string name="add_item_freeze_desc">Mọi sản phẩm sau Quick Check đều phải trải qua Cooling-off để làm nguội cảm xúc bốc đồng. Vượt qua thời gian này, bạn sẽ nhận được phần thưởng Hạt và Pate từ Chanko!</string>
+    <string name="add_item_freeze_locked_price">Giá đã khóa</string>
+    <string name="add_item_freeze_duration_label">Thời gian chờ bắt buộc</string>
+    <string name="add_item_freeze_reward_hint">Nhận Hạt + Pate khi hoàn thành</string>
+    <string name="add_item_freeze_cta">Kích hoạt Cooling-off</string>
+    <string name="add_item_freeze_no_skip_hint">Chanko tự ấn định thời gian; bạn không thể rút ngắn trước nhưng có thể Unfreeze sớm khi cần.</string>
 </resources>

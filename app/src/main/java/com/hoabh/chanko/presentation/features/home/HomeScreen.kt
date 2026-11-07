@@ -24,6 +24,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -63,10 +66,12 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCard
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCardCarousel
+import com.hoabh.chanko.presentation.features.home.components.DailyCheckInDialog
 import com.hoabh.chanko.presentation.features.home.components.HomeHeader
 import com.hoabh.chanko.presentation.features.home.components.HomeHeaderTokens
 import com.hoabh.chanko.presentation.features.home.components.InsightExplanationDialog
 import com.hoabh.chanko.presentation.features.home.components.ItemJourneySection
+import com.hoabh.chanko.presentation.features.home.components.LevelUpCelebrationDialog
 import com.hoabh.chanko.presentation.features.home.components.ObservationCard
 import com.hoabh.chanko.presentation.features.home.components.calculateCollapseFraction
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -289,6 +294,8 @@ fun HomeScreen(
             HomeHeader(
                 header = state.header,
                 onProfileClick = { onEvent(HomeUiEvent.AvatarTap) },
+                onResourceClick = { onEvent(HomeUiEvent.ResourcePillTap) },
+                onCheckInClick = { onEvent(HomeUiEvent.RequestCheckIn) },
                 collapseFraction = collapseFraction,
                 modifier = Modifier
                     .widthIn(max = MaxContentWidthDp)
@@ -412,6 +419,65 @@ fun HomeScreen(
                 observation = activeDialogObservation,
                 onDismiss = { onEvent(HomeUiEvent.DismissInsightDialog) },
                 onHideInsight = { id -> onEvent(HomeUiEvent.InsightHideTap(id)) }
+            )
+        }
+
+        if (state.isResourceSheetOpen) {
+            ModalBottomSheet(
+                onDismissRequest = { onEvent(HomeUiEvent.DismissResourceSheet) },
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                androidx.compose.foundation.layout.Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(CandySpace.section),
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+                ) {
+                    Text(
+                        text = "Tài nguyên & Cấp độ Chanko",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Hạt: ${state.header.hatBalance} (Dùng cho tiện ích hoặc bị trừ khi Unfreeze sớm)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Pate: ${state.header.pateBalance} (Điểm phát triển Level cho Chanko)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Cấp độ hiện tại: Level ${state.header.currentLevel}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.primary,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(CandySpace.sm))
+                    Button(
+                        onClick = { onEvent(HomeUiEvent.DismissResourceSheet) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = CandyColors.primary)
+                    ) {
+                        Text("Đóng", color = androidx.compose.ui.graphics.Color.White)
+                    }
+                }
+            }
+        }
+
+        if (state.isCheckInDialogOpen) {
+            DailyCheckInDialog(
+                onConfirm = { onEvent(HomeUiEvent.ConfirmCheckIn) },
+                onDismiss = { onEvent(HomeUiEvent.DismissCheckInDialog) }
+            )
+        }
+
+        if (state.showLevelUpCelebration) {
+            LevelUpCelebrationDialog(
+                newLevel = state.celebratedLevel,
+                onDismiss = { onEvent(HomeUiEvent.DismissLevelUpCelebration) }
             )
         }
     }

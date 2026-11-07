@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.features.home.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -29,6 +30,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -47,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -69,11 +73,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.features.home.ItemJourneyUi
@@ -97,17 +103,9 @@ data class JourneyNodeVisualStyle(
 )
 
 fun resolveJourneyNodeStyle(status: JourneyNodeStatus): JourneyNodeVisualStyle = when (status) {
-    JourneyNodeStatus.Saved -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusSavedRing,
-        badgeColor = CandyColors.HomeV2.statusSavedRing
-    )
-    JourneyNodeStatus.Considering -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusConsideringRing,
-        badgeColor = CandyColors.HomeV2.statusConsideringInk
-    )
-    JourneyNodeStatus.Waiting -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusWaitingRing,
-        badgeColor = CandyColors.HomeV2.statusWaitingRing
+    JourneyNodeStatus.CoolingOff -> JourneyNodeVisualStyle(
+        ringColor = CandyColors.HomeV2.statusCoolingOffRing,
+        badgeColor = CandyColors.HomeV2.statusCoolingOffRing
     )
     JourneyNodeStatus.Ready -> JourneyNodeVisualStyle(
         ringColor = CandyColors.HomeV2.statusReadyRing,
@@ -280,8 +278,9 @@ fun computeCenteredZigZagLayout(
         else -> 88.dp
     }
     val nodeRadius: Dp = nodeDiameter / 2
-    val verticalStep: Dp = if (isCompactWidth) 74.dp else 80.dp
+    val verticalStep: Dp = if (isCompactWidth) 116.dp else 124.dp
     val topPadding: Dp = 8.dp
+    val subLabelHeight: Dp = 42.dp
     val bottomPadding: Dp = 12.dp
 
     val canvasCenterX: Dp = maxWidth / 2
@@ -312,7 +311,7 @@ fun computeCenteredZigZagLayout(
     }
     val mascotSize: Dp = minOf(preferredMascotSize, availableSideClearance)
 
-    val lastNodeBottom = (nodeCenters.lastOrNull()?.second ?: nodeRadius) + nodeRadius + bottomPadding
+    val lastNodeBottom = (nodeCenters.lastOrNull()?.second ?: nodeRadius) + nodeRadius + subLabelHeight + bottomPadding
     val totalHeight: Dp = maxOf(lastNodeBottom, mascotSize + 24.dp)
 
     return CenteredZigZagLayoutDp(
@@ -450,11 +449,12 @@ private fun ItemJourneyZigZagCanvas(
                 )
             }
 
-            // 3. Các Node tròn (80–96dp) theo đúng thứ tự createdAt DESC để TalkBack đọc chuẩn xác (AC-13..AC-15, AC-23, AC-24, AC-31)
+            // 3. Các Node tròn (80–96dp) kèm Sub-Label theo đúng thứ tự createdAt DESC để TalkBack đọc chuẩn xác (AC-13..AC-15, AC-23, AC-24, AC-31)
             visibleNodes.forEachIndexed { index, node ->
                 key(node.itemId) {
                     val (centerX, centerY) = nodeCentersDp[index]
-                    val topLeftX = centerX - nodeRadius
+                    val columnWidth = if (nodeDiameter < 84.dp) 96.dp else 104.dp
+                    val topLeftX = centerX - (columnWidth / 2)
                     val topLeftY = centerY - nodeRadius
 
                     JourneyProductNode(
@@ -492,34 +492,57 @@ private fun JourneyProductNode(
     isReducedMotionEnabled: Boolean = false
 ) {
     val style = resolveJourneyNodeStyle(node.status)
-    val nodeCd = stringResource(
-        R.string.home_cd_journey_node,
-        node.title,
-        node.statusLabel,
-        node.priceFormatted
-    )
-
-    // Chỉ áp dụng xoay cho item Waiting (đang đếm ngược) hoặc Considering (đang cân nhắc) khi không bật Reduced Motion
-    val isAnimated = (node.status == JourneyNodeStatus.Waiting || node.status == JourneyNodeStatus.Considering) && !isReducedMotionEnabled
-    val infiniteTransition = rememberInfiniteTransition(label = "orbit_ring_transition_${node.itemId}")
-    val rotationAngle by if (isAnimated) {
-        infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 360f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 8000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "orbit_rotation_${node.itemId}"
+    val nodeCd = when (node.status) {
+        JourneyNodeStatus.CoolingOff -> {
+            val remText = node.remainingSeconds?.let { sec ->
+                val days = sec / 86400
+                val hours = (sec % 86400) / 3600
+                if (days > 0) "còn $days ngày $hours giờ" else "còn $hours giờ"
+            } ?: "đang hạ nhiệt"
+            "${node.title}, đang hạ nhiệt, $remText, giá ${node.priceFormatted}"
+        }
+        JourneyNodeStatus.Ready -> {
+            "${node.title}, đã sẵn sàng xem xét, giá ${node.priceFormatted}, chạm để quyết định"
+        }
+        else -> stringResource(
+            R.string.home_cd_journey_node,
+            node.title,
+            node.statusLabel,
+            node.priceFormatted
         )
-    } else {
-        remember { mutableFloatStateOf(0f) }
     }
 
-    Box(
+    // Hiệu ứng nhịp thở nhẹ nhàng cho món Ready (mời gọi xem xét quyết định)
+    val isPulseActive = (node.status == JourneyNodeStatus.Ready) && !isReducedMotionEnabled
+    val pulseTransition = rememberInfiniteTransition(label = "pulse_transition_${node.itemId}")
+    val pulseAlpha by if (isPulseActive) {
+        pulseTransition.animateFloat(
+            initialValue = 0.4f,
+            targetValue = 0.9f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "pulse_alpha_${node.itemId}"
+        )
+    } else {
+        remember { mutableFloatStateOf(0.4f) }
+    }
+
+    // Tính toán góc quét đếm ngược cho món CoolingOff
+    val totalSeconds = remember(node.priceMinor) {
+        val totalMillis = FreezeDurationPolicy.calculateDurationMillis(node.priceMinor ?: 0L)
+        (totalMillis / 1000L).coerceAtLeast(1L)
+    }
+    val remSeconds = (node.remainingSeconds ?: totalSeconds).coerceIn(0L, totalSeconds)
+    val remainingFraction = (remSeconds.toFloat() / totalSeconds.toFloat()).coerceIn(0f, 1f)
+    val countdownSweepAngle = 360f * remainingFraction
+
+    val columnWidth = if (diameter < 84.dp) 96.dp else 104.dp
+
+    Column(
         modifier = modifier
-            .size(diameter)
-            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .width(columnWidth)
             .pointerInput(node.itemId) {
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -537,91 +560,194 @@ private fun JourneyProductNode(
                 role = Role.Button
                 traversalIndex = traversalOrder
             },
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Vòng quỹ đạo ngoài (Orbit Ring) tách rời lõi item
-        Canvas(
+        // 1. Vòng tròn sản phẩm chính
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .clearAndSetSemantics {}
+                .size(diameter)
+                .sizeIn(minWidth = 48.dp, minHeight = 48.dp),
+            contentAlignment = Alignment.Center
         ) {
-            val strokeWidth = 2.5.dp.toPx()
-            val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
-            if (isAnimated) {
-                val dash = 8.dp.toPx()
-                val gap = 6.dp.toPx()
-                rotate(degrees = rotationAngle, pivot = center) {
-                    drawCircle(
-                        color = style.ringColor,
-                        radius = orbitRadius,
-                        center = center,
-                        style = Stroke(
-                            width = strokeWidth,
-                            cap = StrokeCap.Round,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, gap), 0f)
-                        )
-                    )
-                }
-            } else {
-                drawCircle(
-                    color = style.ringColor,
-                    radius = orbitRadius,
-                    center = center,
-                    style = Stroke(width = strokeWidth)
-                )
-            }
-        }
-
-        // 2. Vòng tròn lõi vật phẩm bên trong với khoảng hở 5dp so với vòng quỹ đạo
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(7.dp)
-                .shadow(
-                    elevation = 4.dp,
-                    shape = CircleShape,
-                    ambientColor = style.ringColor.copy(alpha = 0.35f),
-                    spotColor = style.ringColor.copy(alpha = 0.45f)
-                ),
-            shape = CircleShape,
-            color = Color.White
-        ) {
-            Box(
+            // 1. Viền Canvas bên ngoài: Cung đếm ngược (CoolingOff) hoặc Viền nhịp thở (Ready)
+            Canvas(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(3.dp)
-                    .clip(CircleShape)
-                    .background(CandyColors.HomeV2.background),
-                contentAlignment = Alignment.Center
+                    .clearAndSetSemantics {}
             ) {
-                if (node.thumbnailResId != null && !node.imageLoadFailed) {
-                    Image(
-                        painter = painterResource(id = node.thumbnailResId),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    // Placeholder an toàn khi thiếu ảnh hoặc tải ảnh lỗi (STATE-MATRIX: image_failure)
-                    ChankoIcon(
-                        id = ChankoIconId.ITM_01,
-                        contentDescription = null,
-                        size = 32.dp
-                    )
+                val strokeWidth = 3.dp.toPx()
+                val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
+
+                when (node.status) {
+                    JourneyNodeStatus.CoolingOff -> {
+                        // Rãnh nền mờ bên dưới
+                        drawCircle(
+                            color = style.ringColor.copy(alpha = 0.18f),
+                            radius = orbitRadius,
+                            center = center,
+                            style = Stroke(width = strokeWidth)
+                        )
+                        // Cung đếm ngược tròn (Circular Countdown Arc) từ 12h (-90 độ)
+                        val arcDiameter = orbitRadius * 2f
+                        val topLeftOffset = Offset(center.x - orbitRadius, center.y - orbitRadius)
+                        drawArc(
+                            color = style.ringColor,
+                            startAngle = -90f,
+                            sweepAngle = countdownSweepAngle,
+                            useCenter = false,
+                            topLeft = topLeftOffset,
+                            size = Size(arcDiameter, arcDiameter),
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        )
+                    }
+
+                    JourneyNodeStatus.Ready -> {
+                        // Viền chính khép kín nổi bật
+                        drawCircle(
+                            color = style.ringColor,
+                            radius = orbitRadius,
+                            center = center,
+                            style = Stroke(width = strokeWidth)
+                        )
+                        // Vòng hào quang nhịp thở bên ngoài khi pulse active
+                        if (isPulseActive) {
+                            drawCircle(
+                                color = style.ringColor.copy(alpha = pulseAlpha * 0.35f),
+                                radius = orbitRadius + 2.dp.toPx(),
+                                center = center,
+                                style = Stroke(width = 1.5.dp.toPx())
+                            )
+                        }
+                    }
+
+                    else -> {
+                        // Purchased / Skipped: Viền nét liền tĩnh, sắc thái trung tính
+                        drawCircle(
+                            color = style.ringColor,
+                            radius = orbitRadius,
+                            center = center,
+                            style = Stroke(width = strokeWidth)
+                        )
+                    }
                 }
             }
+
+            // 2. Vòng tròn lõi vật phẩm bên trong
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(7.dp)
+                    .shadow(
+                        elevation = if (isPulseActive) 6.dp else 4.dp,
+                        shape = CircleShape,
+                        ambientColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha * 0.7f else 0.35f),
+                        spotColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha else 0.45f)
+                    ),
+                shape = CircleShape,
+                color = Color.White
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(CandyColors.HomeV2.background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (node.thumbnailResId != null && !node.imageLoadFailed) {
+                        Image(
+                            painter = painterResource(id = node.thumbnailResId),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        // Placeholder an toàn khi thiếu ảnh hoặc tải ảnh lỗi (STATE-MATRIX: image_failure)
+                        ChankoIcon(
+                            id = ChankoIconId.ITM_01,
+                            contentDescription = null,
+                            size = 32.dp
+                        )
+                    }
+                }
+            }
+
+            // 3. Huy hiệu trạng thái góc trên phải (không bị xoay)
+            JourneyStatusBadge(
+                status = node.status,
+                badgeColor = style.badgeColor,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-2).dp, y = 2.dp)
+            )
         }
 
-        // 3. Huy hiệu trạng thái góc trên phải (không bị xoay)
-        JourneyStatusBadge(
-            status = node.status,
-            badgeColor = style.badgeColor,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = (-2).dp, y = 2.dp)
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 2. Cụm Sub-Label: Tên món đồ & Pill Giá tiền
+        JourneyNodeSubLabel(
+            title = node.title,
+            priceFormatted = node.priceFormatted
         )
+    }
+}
+
+@Composable
+private fun JourneyNodeSubLabel(
+    title: String,
+    priceFormatted: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        // Tên món đồ (1 dòng, ellipsize, chữ đậm vừa, màu Ink810)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+                lineHeight = 15.sp
+            ),
+            color = CandyColors.HomeV2.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        // Pill Giá tiền (Chip nhỏ bo tròn, nền tím phấn nhạt, chữ tím đậm)
+        val displayPrice = if (!priceFormatted.isNullOrBlank()) {
+            priceFormatted
+        } else {
+            stringResource(R.string.home_journey_missing_price)
+        }
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(CandyColors.HomeV2.journeyPricePillBackground)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = displayPrice,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 10.5.sp,
+                    lineHeight = 13.sp
+                ),
+                color = CandyColors.HomeV2.journeyPricePillText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -650,20 +776,7 @@ private fun JourneyStatusBadge(
                 join = StrokeJoin.Round
             )
             when (status) {
-                JourneyNodeStatus.Saved -> {
-                    // Hình Bookmark trắng
-                    val path = Path().apply {
-                        moveTo(w * 0.22f, h * 0.12f)
-                        lineTo(w * 0.78f, h * 0.12f)
-                        lineTo(w * 0.78f, h * 0.88f)
-                        lineTo(w * 0.50f, h * 0.66f)
-                        lineTo(w * 0.22f, h * 0.88f)
-                        close()
-                    }
-                    drawPath(path = path, color = Color.White)
-                }
-
-                JourneyNodeStatus.Waiting -> {
+                JourneyNodeStatus.CoolingOff -> {
                     // Hình Đồng hồ cát trắng
                     val path = Path().apply {
                         moveTo(w * 0.20f, h * 0.14f)
@@ -696,29 +809,6 @@ private fun JourneyStatusBadge(
                         end = Offset(w * 0.80f, h * 0.50f),
                         strokeWidth = 2.4.dp.toPx(),
                         cap = StrokeCap.Round
-                    )
-                }
-
-                JourneyNodeStatus.Considering -> {
-                    // Hình Dấu hỏi ? trắng
-                    val path = Path().apply {
-                        moveTo(w * 0.28f, h * 0.30f)
-                        cubicTo(
-                            w * 0.28f, h * 0.08f,
-                            w * 0.76f, h * 0.08f,
-                            w * 0.72f, h * 0.36f
-                        )
-                        cubicTo(
-                            w * 0.70f, h * 0.50f,
-                            w * 0.50f, h * 0.50f,
-                            w * 0.50f, h * 0.64f
-                        )
-                    }
-                    drawPath(path = path, color = Color.White, style = stroke)
-                    drawCircle(
-                        color = Color.White,
-                        radius = 1.4.dp.toPx(),
-                        center = Offset(w * 0.50f, h * 0.86f)
                     )
                 }
 

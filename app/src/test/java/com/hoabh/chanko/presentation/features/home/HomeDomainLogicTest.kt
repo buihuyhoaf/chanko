@@ -135,7 +135,7 @@ class HomeDomainLogicTest {
         assertEquals(5, journey.nodes.size)
         assertEquals(6, journey.totalActiveAndHistoryCount)
         assertEquals(
-            listOf("item_1", "item_2", "item_3", "item_4", "item_5"),
+            listOf("item_5", "item_4", "item_3", "item_2", "item_1"),
             journey.nodes.map { it.itemId }
         )
     }
@@ -185,30 +185,36 @@ class HomeDomainLogicTest {
     }
 
     @Test
-    fun `AC-14 All 6 valid statuses map accurately to JourneyNodeStatus`() {
-        val statuses = listOf("Saved", "Considering", "Waiting", "Ready", "Purchased", "Skipped")
+    fun `AC-14 Valid statuses map accurately to 4 Cooling-off JourneyNodeStatus`() {
+        val statuses = listOf("CoolingOff", "Ready", "Purchased", "Skipped")
         val candidates = statuses.mapIndexed { index, status ->
             JourneyItemCandidate(
                 itemId = "item_$index",
                 title = "Món $status",
                 priceMinor = 200_000L,
                 statusRaw = status,
-                createdAtEpochMillis = 10_000L - index
+                createdAtEpochMillis = 10_000L + index
             )
         }
 
-        val journey = JourneySelector.selectRecentJourney(candidates, maxNodes = 6)
+        val journey = JourneySelector.selectRecentJourney(candidates, maxNodes = 4)
         assertEquals(
             listOf(
-                JourneyNodeStatus.Saved,
-                JourneyNodeStatus.Considering,
-                JourneyNodeStatus.Waiting,
+                JourneyNodeStatus.CoolingOff,
                 JourneyNodeStatus.Ready,
                 JourneyNodeStatus.Purchased,
                 JourneyNodeStatus.Skipped
             ),
             journey.nodes.map { it.status }
         )
+    }
+
+    @Test
+    fun `AC-14 legacy statuses map to CoolingOff`() {
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Saved"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Considering"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Waiting"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("FreezeActive"))
     }
 
     @Test

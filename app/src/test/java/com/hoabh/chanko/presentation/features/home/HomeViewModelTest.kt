@@ -186,7 +186,7 @@ class HomeViewModelTest {
             itemId = "item_new",
             title = "Món mới vừa thêm",
             priceMinor = 990_000L,
-            statusRaw = "Saved",
+            statusRaw = "CoolingOff",
             createdAtEpochMillis = 1_762_999_999_000L
         )
         viewModel.onEvent(HomeUiEvent.LiveItemAdded(brandNewItem))
@@ -195,10 +195,10 @@ class HomeViewModelTest {
         assertEquals("item_1", viewModel.uiState.value.journeyNodes.first().itemId)
         assertTrue(viewModel.uiState.value.hasPendingJourneyUpdate)
 
-        // Kết thúc gesture -> món mới mới được đẩy lên đầu
+        // Kết thúc gesture -> món mới mới được đẩy vào (ở dưới cùng vì là món mới nhất)
         viewModel.onEvent(HomeUiEvent.JourneyNodeGestureEnded)
         assertFalse(viewModel.uiState.value.hasPendingJourneyUpdate)
-        assertEquals("item_new", viewModel.uiState.value.journeyNodes.first().itemId)
+        assertEquals("item_new", viewModel.uiState.value.journeyNodes.last().itemId)
     }
 
     @Test
@@ -222,7 +222,7 @@ class HomeViewModelTest {
 
         assertTrue(effects.isEmpty())
         assertEquals(
-            listOf("item_2", "item_3", "item_4", "item_5", "item_6"),
+            listOf("item_6", "item_2", "item_3", "item_4", "item_5"),
             viewModel.uiState.value.journeyNodes.map { it.itemId }
         )
         job.cancel()
@@ -491,5 +491,32 @@ class HomeViewModelTest {
         // Retry
         viewModel.onEvent(HomeUiEvent.RetrySection(HomeSection.Budget))
         assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Content)
+    }
+
+    @Test
+    fun `Daily checkin flow prompts dialog, awards 10 Hat and 10 Pate, updates header pill`() = runTest {
+        // Initial state opens dialog when not checked in
+        assertTrue(viewModel.uiState.value.isCheckInDialogOpen)
+        assertFalse(viewModel.uiState.value.header.hasCheckedInToday)
+
+        val initialHat = viewModel.uiState.value.header.hatBalance
+        val initialPate = viewModel.uiState.value.header.pateBalance
+
+        // Confirm check-in
+        viewModel.onEvent(HomeUiEvent.ConfirmCheckIn)
+
+        assertFalse(viewModel.uiState.value.isCheckInDialogOpen)
+        assertTrue(viewModel.uiState.value.header.hasCheckedInToday)
+        assertEquals(initialHat + 10L, viewModel.uiState.value.header.hatBalance)
+        assertEquals(initialPate + 10L, viewModel.uiState.value.header.pateBalance)
+    }
+
+    @Test
+    fun `Daily checkin dismiss and reopen via RequestCheckIn event`() = runTest {
+        viewModel.onEvent(HomeUiEvent.DismissCheckInDialog)
+        assertFalse(viewModel.uiState.value.isCheckInDialogOpen)
+
+        viewModel.onEvent(HomeUiEvent.RequestCheckIn)
+        assertTrue(viewModel.uiState.value.isCheckInDialogOpen)
     }
 }

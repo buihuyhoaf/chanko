@@ -7,8 +7,12 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.model.PurchaseTransaction
+import com.hoabh.chanko.domain.policy.FreezeCountdownCalculator
+import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
+import com.hoabh.chanko.domain.rewards.UnfreezeCostCalculator
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
+import com.hoabh.chanko.presentation.base.OfflineWriteGate
 import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.features.home.mapper.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.features.myitems.ItemDisplayStatus
@@ -32,7 +36,8 @@ import javax.inject.Inject
 class ItemDetailViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
     private val purchaseRepository: PurchaseRepository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val offlineWriteGate: OfflineWriteGate? = null
 ) : ViewModel() {
 
     private val itemId: Int = checkNotNull(
@@ -174,6 +179,12 @@ class ItemDetailViewModel @Inject constructor(
                     )
                 }
 
+                val fee = UnfreezeCostCalculator.calculateFee(
+                    lockedPriceVnd = item.price,
+                    remainingMillis = remMillis,
+                    totalDurationMillis = item.cooldownDurationMillis
+                )
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -193,6 +204,8 @@ class ItemDetailViewModel @Inject constructor(
                         primaryCtaText = ctaText,
                         decisionJourney = journey,
                         purchaseHistory = mappedPurchases,
+                        unfreezeHatFee = fee.hatFee,
+                        unfreezePateFee = fee.pateFee,
                         speechBubbleUiText = speechUiText,
                         primaryCtaUiText = ctaUiText,
                         remainingFormattedUiText = remainingUiText,
@@ -221,12 +234,30 @@ class ItemDetailViewModel @Inject constructor(
                 }
             }
             is ItemDetailUiEvent.RequestSkipWaiting -> {
-                _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isSkipWaitingConfirmDialogOpen = true) }
+                val current = _uiState.value
+                val remMillis = current.remainingMillis
+                val fee = UnfreezeCostCalculator.calculateFee(
+                    lockedPriceVnd = current.rawPrice,
+                    remainingMillis = remMillis,
+                    totalDurationMillis = maxOf(remMillis, 86_400_000L)
+                )
+                _uiState.update {
+                    it.copy(
+                        isMoreOptionsSheetOpen = false,
+                        isSkipWaitingConfirmDialogOpen = true,
+                        unfreezeHatFee = fee.hatFee,
+                        unfreezePateFee = fee.pateFee
+                    )
+                }
             }
             is ItemDetailUiEvent.ConfirmSkipWaiting -> {
                 // GAP-02: Skip Waiting kết thúc phiên chờ và chuyển sang Ready để đưa ra quyết định
                 _uiState.update { it.copy(isSkipWaitingConfirmDialogOpen = false) }
                 viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
                     val current = _uiState.value
                     if (current.id > 0) {
                         _uiState.update {
@@ -235,8 +266,8 @@ class ItemDetailViewModel @Inject constructor(
                                 remainingFormatted = "Đã kết thúc thời gian chờ",
                                 remainingFormattedUiText = UiText.StringResource(R.string.item_status_cooldown_finished),
                                 displayStatus = ItemDisplayStatus.ReadyForReview,
-                                speechBubbleText = "Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định.",
-                                speechBubbleUiText = UiText.StringResource(R.string.item_detail_speech_decision_time)
+                                speechBubbleText = "Bạn đã mở sớm thời gian chờ. Giờ là lúc đưa ra quyết định mua hoặc bỏ qua.",
+                                speechBubbleUiText = UiText.DynamicString("Bạn đã mở sớm thời gian chờ. Giờ là lúc đưa ra quyết định mua hoặc bỏ qua.")
                             )
                         }
                     }
@@ -244,6 +275,54 @@ class ItemDetailViewModel @Inject constructor(
             }
             is ItemDetailUiEvent.DismissSkipWaitingDialog -> {
                 _uiState.update { it.copy(isSkipWaitingConfirmDialogOpen = false) }
+            }
+            is ItemDetailUiEvent.RequestReFreeze -> {
+                _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isReFreezeConfirmDialogOpen = true) }
+            }
+            is ItemDetailUiEvent.DismissReFreezeDialog -> {
+                _uiState.update { it.copy(isReFreezeConfirmDialogOpen = false) }
+            }
+            is ItemDetailUiEvent.ConfirmReFreeze -> {
+                _uiState.update { it.copy(isReFreezeConfirmDialogOpen = false) }
+                viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
+                    val current = _uiState.value
+                    val now = System.currentTimeMillis()
+                    val newDuration = FreezeDurationPolicy.calculateDurationMillis(current.rawPrice)
+                    val updated = CooldownItem(
+                        id = current.id,
+                        name = current.name,
+                        price = current.rawPrice,
+                        imageUri = current.imageUri,
+                        addedTimestamp = now,
+                        cooldownDurationMillis = newDuration,
+                        reason = current.reason,
+                        status = ItemStatus.COOLING_DOWN
+                    )
+                    itemRepository.updateItem(updated)
+                    _uiState.update {
+                        it.copy(
+                            isRefrozen = true,
+                            displayStatus = ItemDisplayStatus.CoolingOff,
+                            remainingMillis = newDuration,
+                            remainingFormatted = FreezeCountdownCalculator.formatRemainingTimeVi(newDuration),
+                            speechBubbleText = "Đã kích hoạt chu kỳ Freeze mới. Bạn sẽ không nhận thêm thưởng Freeze cho món đồ này.",
+                            speechBubbleUiText = UiText.DynamicString("Đã kích hoạt chu kỳ Freeze mới. Bạn sẽ không nhận thêm thưởng Freeze cho món đồ này.")
+                        )
+                    }
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Đã kích hoạt chu kỳ Freeze mới")))
+                }
+            }
+            is ItemDetailUiEvent.RequestPassItem -> {
+                _uiState.update { it.copy(isMoreOptionsSheetOpen = false) }
+                viewModelScope.launch {
+                    itemRepository.updateItemStatus(_uiState.value.id, ItemStatus.PASSED)
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Đã bỏ qua món đồ này")))
+                    _effect.emit(ItemDetailUiEffect.NavigateBack)
+                }
             }
             is ItemDetailUiEvent.RequestRecordPurchase -> {
                 _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isRecordPurchaseSheetOpen = true) }
@@ -254,6 +333,10 @@ class ItemDetailViewModel @Inject constructor(
             is ItemDetailUiEvent.ConfirmPurchase -> {
                 _uiState.update { it.copy(isRecordPurchaseSheetOpen = false) }
                 viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
                     purchaseRepository.recordPurchase(event.purchase)
                     _effect.emit(ItemDetailUiEffect.ShowToast(UiText.StringResource(R.string.purchase_record_success)))
                 }

@@ -6,6 +6,10 @@ import com.hoabh.chanko.domain.additem.*
 import com.hoabh.chanko.domain.additem.UrlExtractionService
 import com.hoabh.chanko.domain.additem.UnavailableUrlExtractionService
 import com.hoabh.chanko.domain.auth.AuthenticationRepository
+import com.hoabh.chanko.domain.model.CooldownItem
+import com.hoabh.chanko.domain.model.ItemStatus
+import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
+import com.hoabh.chanko.domain.repository.ItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -35,7 +39,8 @@ sealed interface AddItemEffect {
 class AddItemViewModel @Inject constructor(
     private val extraction: UrlExtractionService,
     private val engine: QuickCheckEvaluationContract,
-    auth: AuthenticationRepository
+    auth: AuthenticationRepository,
+    private val itemRepository: ItemRepository? = null
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AddItemUiState())
     val state = mutableState.asStateFlow()
@@ -143,13 +148,39 @@ class AddItemViewModel @Inject constructor(
                     if (snapshot.productRevision != form.productRevision || snapshot.answerRevision != form.answerRevision) {
                         mutableState.update { it.copy(assessing = false, evaluation = EvaluationState.Unavailable) }
                     } else {
+                        val duration = FreezeDurationPolicy.calculateDurationMillis(form.price ?: 0L)
+                        val updatedForm = form.copy(
+                            assessment = snapshot,
+                            coolingChoice = CoolingChoice.APPLIED,
+                            coolingDurationMillis = duration
+                        )
                         mutableState.update { it.copy(assessing = false, evaluation = result,
-                            form = form.copy(assessment = snapshot), step = AddItemStep.DECISION_RESULT) }
+                            form = updatedForm, step = AddItemStep.DECISION_RESULT) }
                         effectsChannel.send(AddItemEffect.Navigate(AddItemStep.DECISION_RESULT))
                     }
                 }
                 EvaluationState.Unavailable -> mutableState.update { it.copy(assessing = false, evaluation = result) }
             }
+        }
+    }
+    fun saveItem() {
+        val current = state.value
+        if (!current.active || current.assessing) return
+        val price = current.form.price ?: return
+        val duration = current.form.coolingDurationMillis ?: FreezeDurationPolicy.calculateDurationMillis(price)
+        val now = System.currentTimeMillis()
+        val item = CooldownItem(
+            name = current.form.title,
+            price = price,
+            imageUri = current.form.photoUri.takeIf { it.isNotBlank() },
+            addedTimestamp = now,
+            cooldownDurationMillis = duration,
+            reason = current.form.reason,
+            status = ItemStatus.COOLING_DOWN
+        )
+        viewModelScope.launch {
+            itemRepository?.insertItem(item)
+            cancel()
         }
     }
     fun cancel() {

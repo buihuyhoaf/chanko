@@ -33,18 +33,20 @@ fun AddItemRoute(step: AddItemStep, viewModel: AddItemViewModel, onEffect: (AddI
     BackHandler { viewModel.cancel() }
     AddItemFlowScreen(state, step, viewModel::cancel, viewModel::edit, viewModel::continueForm,
         onEvaluate = { viewModel.evaluate() }, onEarly = { viewModel.evaluate(early = true) },
-        onAnswer = viewModel::answer, onPhotoError = viewModel::photoFailed)
+        onAnswer = viewModel::answer, onPhotoError = viewModel::photoFailed,
+        onSave = viewModel::saveItem)
 }
 
 @Composable
 fun AddItemFlowScreen(state: AddItemUiState, step: AddItemStep, onBack: () -> Unit,
     onEdit: ((AddItemFormState) -> AddItemFormState) -> Unit, onContinue: () -> Unit,
-    onEvaluate: () -> Unit, onEarly: () -> Unit, onAnswer: (String, String) -> Unit, onPhotoError: () -> Unit) {
+    onEvaluate: () -> Unit, onEarly: () -> Unit, onAnswer: (String, String) -> Unit, onPhotoError: () -> Unit,
+    onSave: () -> Unit = {}) {
     val title = stringResource(when (step) {
         AddItemStep.VERIFY_INFO -> R.string.add_item_verify_title
         AddItemStep.MANUAL_INPUT -> R.string.add_item_manual_title
         AddItemStep.QUICK_CHECK -> R.string.add_item_quick_title
-        AddItemStep.DECISION_RESULT -> R.string.add_item_result_title
+        AddItemStep.DECISION_RESULT -> R.string.add_item_freeze_title
         AddItemStep.URL_DIALOG -> R.string.add_item_title
     })
     BoxWithConstraints(Modifier.fillMaxSize().imePadding()) {
@@ -60,7 +62,8 @@ fun AddItemFlowScreen(state: AddItemUiState, step: AddItemStep, onBack: () -> Un
                             PrimaryAction(stringResource(R.string.add_item_show_result),
                                 !state.assessing && question != null && state.form.answers[question.question.id] != null, onEvaluate)
                         }
-                        AddItemStep.DECISION_RESULT -> PrimaryAction(stringResource(R.string.add_item_save), enabled = false, onClick = {})
+                        AddItemStep.DECISION_RESULT -> PrimaryAction(stringResource(R.string.add_item_freeze_cta),
+                            enabled = !state.assessing, onClick = onSave)
                         AddItemStep.URL_DIALOG -> Unit
                     }
                 }

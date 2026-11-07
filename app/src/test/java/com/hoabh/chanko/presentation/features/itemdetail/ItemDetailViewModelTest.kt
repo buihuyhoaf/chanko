@@ -126,6 +126,65 @@ class ItemDetailViewModelTest {
         assertEquals("Màn hình cong 34 inch", viewModel.uiState.value.name)
     }
 
+    @Test
+    fun reFreeze_resetsCountdownAndMarksRefrozen() = runTest(testDispatcher) {
+        val now = System.currentTimeMillis()
+        val item = CooldownItem(
+            id = 42,
+            name = "Màn hình cong 34 inch",
+            price = 12_000_000L,
+            addedTimestamp = now - (8 * 86_400_000L), // Đã hết hạn
+            cooldownDurationMillis = 7 * 86_400_000L,
+            reason = "Thích",
+            status = ItemStatus.COOLING_DOWN
+        )
+        fakeRepository.setItem(item)
+
+        val savedStateHandle = SavedStateHandle(mapOf("itemId" to 42))
+        viewModel = ItemDetailViewModel(fakeRepository, fakePurchaseRepository, savedStateHandle)
+        runCurrent()
+
+        assertEquals(ItemDisplayStatus.ReadyForReview, viewModel.uiState.value.displayStatus)
+
+        // Request re-freeze -> dialog opens
+        viewModel.onEvent(ItemDetailUiEvent.RequestReFreeze)
+        assertTrue(viewModel.uiState.value.isReFreezeConfirmDialogOpen)
+
+        // Confirm re-freeze -> status resets to CoolingOff with isRefrozen = true
+        viewModel.onEvent(ItemDetailUiEvent.ConfirmReFreeze)
+        runCurrent()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isReFreezeConfirmDialogOpen)
+        assertTrue(state.isRefrozen)
+        assertEquals(ItemDisplayStatus.CoolingOff, state.displayStatus)
+        assertTrue(state.remainingMillis > 0L)
+    }
+
+    @Test
+    fun passItem_updatesStatusAndNavigatesBack() = runTest(testDispatcher) {
+        val now = System.currentTimeMillis()
+        val item = CooldownItem(
+            id = 42,
+            name = "Màn hình cong 34 inch",
+            price = 12_000_000L,
+            addedTimestamp = now,
+            cooldownDurationMillis = 7 * 86_400_000L,
+            reason = "Thích",
+            status = ItemStatus.COOLING_DOWN
+        )
+        fakeRepository.setItem(item)
+
+        val savedStateHandle = SavedStateHandle(mapOf("itemId" to 42))
+        viewModel = ItemDetailViewModel(fakeRepository, fakePurchaseRepository, savedStateHandle)
+        runCurrent()
+
+        viewModel.onEvent(ItemDetailUiEvent.RequestPassItem)
+        runCurrent()
+
+        assertEquals(ItemStatus.PASSED, fakeRepository.lastUpdatedStatus)
+    }
+
     private class FakePurchaseRepository : PurchaseRepository {
         override fun getPurchasesByItemId(itemId: Int): Flow<List<PurchaseTransaction>> =
             MutableStateFlow(emptyList())
@@ -140,6 +199,7 @@ class ItemDetailViewModelTest {
 
     private class FakeItemRepository : ItemRepository {
         private val itemFlow = MutableStateFlow<CooldownItem?>(null)
+        var lastUpdatedStatus: ItemStatus? = null
 
         fun setItem(item: CooldownItem?) {
             itemFlow.value = item
@@ -154,7 +214,9 @@ class ItemDetailViewModelTest {
         override fun getItemsByStatus(status: ItemStatus): Flow<List<CooldownItem>> = MutableStateFlow(emptyList())
         override suspend fun insertItem(item: CooldownItem) {}
         override suspend fun updateItem(item: CooldownItem) {}
-        override suspend fun updateItemStatus(id: Int, status: ItemStatus) {}
+        override suspend fun updateItemStatus(id: Int, status: ItemStatus) {
+            lastUpdatedStatus = status
+        }
         override suspend fun deleteItem(item: CooldownItem) {}
         override fun getTotalSavedAmount(): Flow<Long> = MutableStateFlow(0L)
     }
