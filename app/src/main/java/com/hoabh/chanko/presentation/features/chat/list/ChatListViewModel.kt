@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.chat
+package com.hoabh.chanko.presentation.features.chat.list
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.chat.model.ChatThread

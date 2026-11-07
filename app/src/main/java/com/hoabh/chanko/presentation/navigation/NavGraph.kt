@@ -28,12 +28,12 @@ import com.hoabh.chanko.presentation.features.additem.*
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hoabh.chanko.presentation.features.chat.ChatDetailScreen
-import com.hoabh.chanko.presentation.features.chat.ChatListScreen
-import com.hoabh.chanko.presentation.features.chat.NewChatScreen
-import com.hoabh.chanko.presentation.features.chat.ChatListViewModel
-import com.hoabh.chanko.presentation.features.chat.ChatViewModel
-import com.hoabh.chanko.presentation.features.chat.NewChatViewModel
+import com.hoabh.chanko.presentation.features.chat.detail.ChatDetailScreen
+import com.hoabh.chanko.presentation.features.chat.detail.ChatViewModel
+import com.hoabh.chanko.presentation.features.chat.list.ChatListScreen
+import com.hoabh.chanko.presentation.features.chat.list.ChatListViewModel
+import com.hoabh.chanko.presentation.features.chat.newchat.NewChatScreen
+import com.hoabh.chanko.presentation.features.chat.newchat.NewChatViewModel
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(

@@ -1,6 +1,6 @@
 package com.hoabh.chanko.presentation.features.home
 
-import com.hoabh.chanko.presentation.features.home.domain.JourneyItemCandidate
+import com.hoabh.chanko.presentation.features.home.mapper.JourneyItemCandidate
 
 /**
  * Các sự kiện tương tác trên màn hình Home v2.0 (ANDROID-COMPOSE-GUIDE.md, NAVIGATION-CONTRACT.csv).

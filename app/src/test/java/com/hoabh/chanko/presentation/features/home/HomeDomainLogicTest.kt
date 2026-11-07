@@ -2,10 +2,10 @@ package com.hoabh.chanko.presentation.features.home
 
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.presentation.features.home.components.computeCenteredZigZagLayout
-import com.hoabh.chanko.presentation.features.home.domain.BudgetV2Calculator
-import com.hoabh.chanko.presentation.features.home.domain.HomeCurrencyFormatter
-import com.hoabh.chanko.presentation.features.home.domain.JourneyItemCandidate
-import com.hoabh.chanko.presentation.features.home.domain.JourneySelector
+import com.hoabh.chanko.presentation.features.home.mapper.BudgetV2Calculator
+import com.hoabh.chanko.presentation.features.home.mapper.HomeCurrencyFormatter
+import com.hoabh.chanko.presentation.features.home.mapper.JourneyItemCandidate
+import com.hoabh.chanko.presentation.features.home.mapper.JourneySelector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

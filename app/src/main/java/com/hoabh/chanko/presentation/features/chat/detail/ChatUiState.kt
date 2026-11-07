@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.chat
+package com.hoabh.chanko.presentation.features.chat.detail
 
 import androidx.compose.runtime.Immutable
 import com.hoabh.chanko.domain.chat.model.ChatMessage

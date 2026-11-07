@@ -4,7 +4,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.TriCycleWindow
-import com.hoabh.chanko.presentation.features.home.domain.BudgetCarouselMapper
+import com.hoabh.chanko.presentation.features.home.mapper.BudgetCarouselMapper
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

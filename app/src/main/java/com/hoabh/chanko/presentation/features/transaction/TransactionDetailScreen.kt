@@ -54,7 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.PaymentType
 import com.hoabh.chanko.presentation.base.CollectEffect
-import com.hoabh.chanko.presentation.features.home.domain.HomeCurrencyFormatter
+import com.hoabh.chanko.presentation.features.home.mapper.HomeCurrencyFormatter
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 

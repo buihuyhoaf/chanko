@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.chat
+package com.hoabh.chanko.presentation.features.chat.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

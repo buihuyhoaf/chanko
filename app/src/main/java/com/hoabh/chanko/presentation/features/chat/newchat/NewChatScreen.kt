@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.chat
+package com.hoabh.chanko.presentation.features.chat.newchat
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically

@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.home.domain
+package com.hoabh.chanko.presentation.features.home.mapper
 
 import androidx.annotation.DrawableRes
 import com.hoabh.chanko.presentation.features.home.BudgetCreditCardUi

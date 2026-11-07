@@ -5,10 +5,10 @@ import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.TriCycleWindow
-import com.hoabh.chanko.presentation.features.home.domain.BudgetCarouselMapper
-import com.hoabh.chanko.presentation.features.home.domain.BudgetV2Calculator
-import com.hoabh.chanko.presentation.features.home.domain.JourneyItemCandidate
-import com.hoabh.chanko.presentation.features.home.domain.JourneySelector
+import com.hoabh.chanko.presentation.features.home.mapper.BudgetCarouselMapper
+import com.hoabh.chanko.presentation.features.home.mapper.BudgetV2Calculator
+import com.hoabh.chanko.presentation.features.home.mapper.JourneyItemCandidate
+import com.hoabh.chanko.presentation.features.home.mapper.JourneySelector
 import javax.inject.Inject
 
 /**

@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.features.home.domain
+package com.hoabh.chanko.presentation.features.home.mapper
 
 import com.hoabh.chanko.domain.budget.model.BudgetCalculation
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus

@@ -1,4 +1,6 @@
-package com.hoabh.chanko.presentation.features.chat
+package com.hoabh.chanko.presentation.features.chat.detail
+
+import com.hoabh.chanko.presentation.features.chat.FakeChatDao
 
 import com.hoabh.chanko.data.chat.remote.FakeChatDataSource
 import com.hoabh.chanko.data.chat.repository.ChatRepositoryImpl

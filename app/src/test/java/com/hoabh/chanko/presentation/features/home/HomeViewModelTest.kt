@@ -1,7 +1,7 @@
 package com.hoabh.chanko.presentation.features.home
 
 import com.hoabh.chanko.data.budget.FakeBudgetRepository
-import com.hoabh.chanko.presentation.features.home.domain.JourneyItemCandidate
+import com.hoabh.chanko.presentation.features.home.mapper.JourneyItemCandidate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
