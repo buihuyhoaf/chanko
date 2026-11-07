@@ -23,10 +23,11 @@
   - Hiệu ứng nhịp thở nhẹ (Subtle Glow / Breathing Pulse: chu kỳ 2–3s) trên viền hoặc bóng đổ, kích thích nhẹ nhàng người dùng bấm vào xem chi tiết để đưa ra quyết định mua hay bỏ qua.
   - Badge góc trên phải hiển thị dấu tích xanh nổi bật.
 - **Món "Đang Freeze" (Cooling-off Active / Waiting) — Trực quan hóa tiến độ tĩnh dịu (Calm Progress Arc):**
+  - Màu sắc: **Xanh Băng Tuyết Mát Lạnh (Ice Blue / Soft Cyan - `CandyPalette.Blue400`)**, loại bỏ hoàn toàn màu cam sặc sỡ để tạo cảm giác "hạ nhiệt", thư thái và giải tỏa cơn sốt mua sắm.
   - Thay vì xoay 360 độ vô nghĩa, viền ngoài chuyển thành **Thanh tiến trình hình tròn (Circular Countdown Arc)**.
   - Vòng viền chạy từ góc 12h (hoặc -90 độ):
     - Chiều dài cung viền tỷ lệ với thời gian Freeze còn lại: $\text{Sweep Angle} = 360^\circ \times \frac{\text{remainingMillis}}{\text{totalDurationMillis}}$.
-    - Cung viền thu hẹp dần khi thời gian trôi qua (hoặc cung viền hoàn thành dần), với nền rãnh mờ (track mờ 20% alpha).
+    - Cung viền thu hẹp dần khi thời gian trôi qua, với nền rãnh mờ (track mờ 18% alpha).
   - Không có animation xoay tít; chỉ cập nhật góc cung arc. Giữ sắc thái yên ả, tĩnh lặng, hỗ trợ tâm lý "bình tĩnh hạ nhiệt".
 - **Món Đã mua (Purchased) & Đã bỏ qua (Skipped) — Hoàn tất (Completed / Subdued):**
   - Viền nét liền tĩnh, màu sắc trung tính dịu nhẹ (Slate / SlateBlue).

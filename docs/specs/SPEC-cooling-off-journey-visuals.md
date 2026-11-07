@@ -61,7 +61,7 @@ app/src/test/java/com/hoabh/chanko/presentation/screens/home/
 
 | Trạng thái Domain (`ItemFreezeStatus`) | Trạng thái UI (`JourneyNodeStatus`) | Nhãn tiếng Việt | Kiểu viền (Border Visual) | Màu viền (`CandyColors`) | Huy hiệu Badge (Góc trên phải) |
 |---|---|---|---|---|---|
-| `FREEZE_ACTIVE` | `CoolingOff` | "Đang hạ nhiệt" | Thanh tiến trình tròn (`Circular Arc`) giảm theo $\frac{t_{\text{remaining}}}{t_{\text{total}}}$ | `CandyPalette.Amber400` / `Orange400` trên track mờ | Icon Đồng hồ cát ⏳ (Sandglass) |
+| `FREEZE_ACTIVE` | `CoolingOff` | "Đang hạ nhiệt" | Thanh tiến trình tròn (`Circular Arc`) giảm theo $\frac{t_{\text{remaining}}}{t_{\text{total}}}$ | `CandyColors.HomeV2.statusCoolingOffRing` (Xanh Băng Tuyết Ice Blue - `CandyPalette.Blue400`) trên track mờ | Icon Đồng hồ cát ⏳ (Sandglass) |
 | `READY_FOR_REVIEW` | `Ready` | "Sẵn sàng xem xét" | Viền khép kín + Nhịp thở nhẹ (`Breathing Pulse` 2.5s) | `CandyColors.HomeV2.statusReadyRing` (Mint500) | Icon Dấu tích xanh ✓ (Checkmark) |
 | `BOUGHT` / `UNFROZEN_EARLY` (khi mua) | `Purchased` | "Đã mua" | Viền nét liền tĩnh | `CandyPalette.Blue300` / `Slate400` | Icon Túi mua sắm 🛍️ |
 | `PASSED` | `Skipped` | "Đã bỏ qua" | Viền nét liền tĩnh | `CandyPalette.Slate400` | Icon Dấu trừ − |

@@ -515,12 +515,12 @@ object CandyColors {
         val headerBorderDivider = CandyPalette.Lavender110
 
         // 4 Journey Node Statuses (Cooling-off Ring + Badge + Label Ink — SPEC-cooling-off-journey-visuals.md)
-        val statusCoolingOffInk = CandyPalette.Amber950
-        val statusCoolingOffRing = CandyPalette.Orange450
+        val statusCoolingOffInk = CandyPalette.Blue800
+        val statusCoolingOffRing = CandyPalette.Blue400
         val statusReadyInk = CandyPalette.Mint850
         val statusReadyRing = CandyPalette.Mint500
-        val statusPurchasedInk = CandyPalette.Teal800
-        val statusPurchasedRing = CandyPalette.Blue500
+        val statusPurchasedInk = CandyPalette.Slate600
+        val statusPurchasedRing = CandyPalette.Slate500
         val statusSkippedInk = CandyPalette.Slate610
         val statusSkippedRing = CandyPalette.Slate400
 
