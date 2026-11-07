@@ -511,13 +511,13 @@ Kết nối `DailyCheckInUseCase` vào `HomeViewModel` và `HomeScreen`:
   - Món đã hoàn thành Freeze (`READY_FOR_REVIEW` / `Ready`): hiển thị badge nổi bật *"Sẵn sàng xem xét"* để người dùng nhận diện ngay món nào cần đưa ra quyết định.
 
 **Acceptance criteria:**
-- [ ] Danh sách món đồ trong Journey sắp xếp theo `addedTimestamp` tăng dần (món mới nhất ở dưới cùng).
-- [ ] Node / Card món đồ hiển thị đúng trạng thái đếm ngược hoặc sẵn sàng xem xét.
-- [ ] Chạm vào node điều hướng chính xác đến `ItemDetailScreen` của món tương ứng.
+- [x] Danh sách món đồ trong Journey sắp xếp theo `addedTimestamp` tăng dần (món mới nhất ở dưới cùng).
+- [x] Node / Card món đồ hiển thị đúng trạng thái đếm ngược hoặc sẵn sàng xem xét.
+- [x] Chạm vào node điều hướng chính xác đến `ItemDetailScreen` của món tương ứng.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
-- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 4, Task 16
 

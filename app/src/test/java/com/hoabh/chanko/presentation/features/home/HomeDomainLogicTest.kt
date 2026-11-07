@@ -135,7 +135,7 @@ class HomeDomainLogicTest {
         assertEquals(5, journey.nodes.size)
         assertEquals(6, journey.totalActiveAndHistoryCount)
         assertEquals(
-            listOf("item_1", "item_2", "item_3", "item_4", "item_5"),
+            listOf("item_5", "item_4", "item_3", "item_2", "item_1"),
             journey.nodes.map { it.itemId }
         )
     }
@@ -193,7 +193,7 @@ class HomeDomainLogicTest {
                 title = "Món $status",
                 priceMinor = 200_000L,
                 statusRaw = status,
-                createdAtEpochMillis = 10_000L - index
+                createdAtEpochMillis = 10_000L + index
             )
         }
 

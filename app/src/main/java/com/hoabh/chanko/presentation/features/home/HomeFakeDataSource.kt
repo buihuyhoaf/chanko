@@ -47,7 +47,7 @@ class HomeFakeDataSource @Inject constructor() {
             title = "Tai nghe chụp tai không dây",
             priceMinor = 1_250_000L,
             statusRaw = "Saved",
-            createdAtEpochMillis = 1_762_200_500_000L,
+            createdAtEpochMillis = 1_762_200_100_000L,
             thumbnailResId = R.drawable.sample_headphones
         ),
         JourneyItemCandidate(
@@ -55,7 +55,7 @@ class HomeFakeDataSource @Inject constructor() {
             title = "Áo khoác thể thao",
             priceMinor = 1_650_000L,
             statusRaw = "Waiting",
-            createdAtEpochMillis = 1_762_200_400_000L,
+            createdAtEpochMillis = 1_762_200_200_000L,
             remainingSeconds = 43_200L,
             thumbnailResId = R.drawable.sample_jacket
         ),
@@ -72,7 +72,7 @@ class HomeFakeDataSource @Inject constructor() {
             title = "Bàn phím cơ không dây tím",
             priceMinor = 890_000L,
             statusRaw = "Skipped",
-            createdAtEpochMillis = 1_762_200_200_000L,
+            createdAtEpochMillis = 1_762_200_400_000L,
             thumbnailResId = R.drawable.sample_keyboard
         ),
         JourneyItemCandidate(
@@ -80,7 +80,7 @@ class HomeFakeDataSource @Inject constructor() {
             title = "Balo vải chống thấm nước",
             priceMinor = 550_000L,
             statusRaw = "Considering",
-            createdAtEpochMillis = 1_762_200_100_000L,
+            createdAtEpochMillis = 1_762_200_500_000L,
             thumbnailResId = R.drawable.sample_jacket
         ),
         JourneyItemCandidate(

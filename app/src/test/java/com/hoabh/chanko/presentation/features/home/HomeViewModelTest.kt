@@ -195,10 +195,10 @@ class HomeViewModelTest {
         assertEquals("item_1", viewModel.uiState.value.journeyNodes.first().itemId)
         assertTrue(viewModel.uiState.value.hasPendingJourneyUpdate)
 
-        // Kết thúc gesture -> món mới mới được đẩy lên đầu
+        // Kết thúc gesture -> món mới mới được đẩy vào (ở dưới cùng vì là món mới nhất)
         viewModel.onEvent(HomeUiEvent.JourneyNodeGestureEnded)
         assertFalse(viewModel.uiState.value.hasPendingJourneyUpdate)
-        assertEquals("item_new", viewModel.uiState.value.journeyNodes.first().itemId)
+        assertEquals("item_new", viewModel.uiState.value.journeyNodes.last().itemId)
     }
 
     @Test
@@ -222,7 +222,7 @@ class HomeViewModelTest {
 
         assertTrue(effects.isEmpty())
         assertEquals(
-            listOf("item_2", "item_3", "item_4", "item_5", "item_6"),
+            listOf("item_6", "item_2", "item_3", "item_4", "item_5"),
             viewModel.uiState.value.journeyNodes.map { it.itemId }
         )
         job.cancel()

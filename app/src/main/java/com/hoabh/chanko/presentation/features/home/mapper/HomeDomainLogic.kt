@@ -215,14 +215,20 @@ object JourneySelector {
             )
         }
 
-        val sortedAll = uniqueNonArchived.values.sortedWith(
-            compareByDescending<JourneyNodeUi> { it.createdAtEpochMillis }
+        val sortedAscending = uniqueNonArchived.values.sortedWith(
+            compareBy<JourneyNodeUi> { it.createdAtEpochMillis }
                 .thenBy { it.itemId }
         )
 
+        val selectedNodes = if (sortedAscending.size > maxNodes) {
+            sortedAscending.takeLast(maxNodes)
+        } else {
+            sortedAscending
+        }
+
         return ItemJourneyUi(
-            nodes = sortedAll.take(maxNodes),
-            totalActiveAndHistoryCount = sortedAll.size
+            nodes = selectedNodes,
+            totalActiveAndHistoryCount = sortedAscending.size
         )
     }
 
