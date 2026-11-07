@@ -2,9 +2,11 @@ package com.hoabh.chanko.presentation.screens.myitems
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import com.hoabh.chanko.presentation.screens.home.domain.HomeCurrencyFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -230,6 +232,17 @@ class MyItemsViewModel @Inject constructor(
             ItemStatus.PASSED -> ItemDisplayStatus.Skipped
         }
 
+        val secondaryUiText = when (displayStatus) {
+            ItemDisplayStatus.CoolingOff -> {
+                val remMillis = remainingMillis(now)
+                formatRemainingTimeUiText(remMillis)
+            }
+            ItemDisplayStatus.ReadyForReview -> UiText.StringResource(R.string.item_status_cooldown_finished)
+            ItemDisplayStatus.Purchased -> UiText.StringResource(R.string.item_status_decided_buy)
+            ItemDisplayStatus.Skipped -> UiText.StringResource(R.string.item_status_decided_skip)
+            else -> UiText.Empty
+        }
+
         val secondaryInfo = when (displayStatus) {
             ItemDisplayStatus.CoolingOff -> {
                 val remMillis = remainingMillis(now)
@@ -249,8 +262,22 @@ class MyItemsViewModel @Inject constructor(
             imageUri = imageUri,
             displayStatus = displayStatus,
             secondaryInfoText = secondaryInfo,
-            addedTimestamp = addedTimestamp
+            addedTimestamp = addedTimestamp,
+            secondaryInfoUiText = secondaryUiText
         )
+    }
+
+    private fun formatRemainingTimeUiText(remainingMillis: Long): UiText {
+        val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
+        val hours = TimeUnit.MILLISECONDS.toHours(remainingMillis) % 24
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMillis) % 60
+
+        return when {
+            days > 0 -> UiText.StringResource(R.string.item_remaining_days_hours, days, hours)
+            hours > 0 -> UiText.StringResource(R.string.item_remaining_hours_minutes, hours, minutes)
+            minutes > 0 -> UiText.StringResource(R.string.item_remaining_minutes, minutes)
+            else -> UiText.StringResource(R.string.item_remaining_under_one_minute)
+        }
     }
 
     private fun formatRemainingTime(remainingMillis: Long): String {

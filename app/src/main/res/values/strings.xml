@@ -155,7 +155,6 @@
     <string name="archived_items_empty_desc">Các món đồ bạn tạm gác lại hoặc lưu trữ sẽ xuất hiện tại đây.</string>
     <string name="archived_items_restore_btn">Khôi phục</string>
     <string name="archived_items_restore_success">Đã khôi phục món đồ</string>
-
     <!-- Budget UI v2.0 Strings (C01–C13) -->
     <string name="budget_title">Ngân sách</string>
     <string name="budget_settings_action">Thiết lập ví</string>
@@ -254,4 +253,58 @@
     <string name="budget_history_increase_short">Tăng</string>
     <string name="budget_history_decrease_short">Giảm</string>
     <string name="budget_history_amount_change">%1$s → %2$s</string>
+
+    <!-- Item Display Status Strings -->
+    <string name="item_status_saved">Đã lưu</string>
+    <string name="item_status_considering">Đang cân nhắc</string>
+    <string name="item_status_cooling_off">Đang hạ nhiệt</string>
+    <string name="item_status_ready_for_review">Đến lúc xem lại</string>
+    <string name="item_status_postponed">Đã hoãn</string>
+    <string name="item_status_purchased">Đã mua</string>
+    <string name="item_status_skipped">Đã bỏ qua</string>
+
+    <!-- Item Status Decision & Countdown Strings -->
+    <string name="item_status_cooldown_finished">Đã hết thời gian chờ</string>
+    <string name="item_status_decided_buy">Đã quyết định mua</string>
+    <string name="item_status_decided_skip">Đã bỏ qua món đồ này</string>
+    <string name="item_remaining_days_hours">Còn %1$d ngày %2$d giờ</string>
+    <string name="item_remaining_hours_minutes">Còn %1$d giờ %2$d phút</string>
+    <string name="item_remaining_minutes">Còn %1$d phút</string>
+    <string name="item_remaining_under_one_minute">Còn dưới 1 phút</string>
+    <string name="item_remaining_less_than_one_minute">Dưới 1 phút</string>
+    <string name="item_archived_status_secondary">Đang lưu trữ</string>
+    <!-- Item Detail Strings -->
+    <string name="item_detail_speech_cooling_off">Bạn vẫn có quyền quyết định sau khi thời gian chờ kết thúc.</string>
+    <string name="item_detail_speech_ready">Bạn còn muốn món này không? Hãy cùng xem lại nhu cầu nhé.</string>
+    <string name="item_detail_speech_purchased">Lịch sử mua được lưu ở bên dưới.</string>
+    <string name="item_detail_speech_skipped">Bạn đã tiết kiệm được một khoản tiền nhờ quyết định dừng lại.</string>
+    <string name="item_detail_speech_saved">Cứ để ở đây, bạn có thể cân nhắc sau.</string>
+    <string name="item_detail_speech_considering">Cùng suy nghĩ thêm một chút xem sao nhé.</string>
+    <string name="item_detail_speech_postponed">Món đồ đang được tạm hoãn để đánh giá thêm.</string>
+    <string name="item_detail_speech_decision_time">Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định.</string>
+
+    <string name="item_detail_cta_cooling_off">Đang trong thời gian chờ</string>
+    <string name="item_detail_cta_default">Xem lại quyết định</string>
+
+    <string name="item_detail_no_reason">Không có lý do được ghi lại.</string>
+    <string name="item_detail_duration_days">%1$d ngày</string>
+    <string name="item_detail_journey_added_title">Đã thêm vào danh sách</string>
+    <string name="item_detail_journey_added_desc">Bắt đầu thời gian hạ nhiệt %1$d ngày.</string>
+    <string name="item_detail_journey_cooling_finished_title">Đã hoàn thành thời gian chờ</string>
+    <string name="item_detail_journey_cooling_finished_desc">Món đồ đã sẵn sàng để bạn đưa ra quyết định.</string>
+    <string name="item_detail_journey_bought_title">Đã ghi nhận mua hàng</string>
+    <string name="item_detail_journey_bought_desc">Giao dịch đã được lưu vào hệ thống.</string>
+    <string name="item_detail_journey_passed_title">Đã bỏ qua món đồ</string>
+    <string name="item_detail_journey_passed_desc">Quyết định không mua món đồ này.</string>
+
+    <string name="purchase_history_price_quantity">%1$s × %2$d</string>
+    <!-- Payment & Purchase Strings -->
+    <string name="payment_type_pay_now">Trả ngay</string>
+    <string name="payment_type_credit">Thẻ tín dụng</string>
+    <string name="purchase_record_estimated_price">Giá dự kiến: %1$s</string>
+    <string name="transaction_detail_label_unit_price">Đơn giá thực tế</string>
+    <string name="transaction_detail_label_note">Ghi chú</string>
+    <string name="transaction_detail_default_item_name">Món đồ</string>
+    <string name="transaction_detail_save_success">Đã lưu thay đổi giao dịch</string>
+    <string name="transaction_detail_delete_success">Đã xóa giao dịch nhập sai</string>
 </resources>

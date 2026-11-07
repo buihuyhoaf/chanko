@@ -338,7 +338,7 @@ fun GoogleAccountCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = email.ifBlank { "google-account@gmail.com" },
+                text = email.ifBlank { stringResource(R.string.profile_default_email) },
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,

@@ -1,13 +1,16 @@
 package com.hoabh.chanko.presentation.screens.itemdetail
 
 import androidx.compose.runtime.Immutable
+import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
 
 @Immutable
 data class DecisionJourneyStepUi(
     val title: String,
     val description: String,
-    val formattedTimestamp: String
+    val formattedTimestamp: String,
+    val titleUiText: UiText = UiText.DynamicString(title),
+    val descriptionUiText: UiText = UiText.DynamicString(description)
 )
 
 @Immutable
@@ -41,5 +44,9 @@ data class ItemDetailUiState(
     val purchaseHistory: List<PurchaseHistoryItemUi> = emptyList(),
     val isMoreOptionsSheetOpen: Boolean = false,
     val isSkipWaitingConfirmDialogOpen: Boolean = false,
-    val isRecordPurchaseSheetOpen: Boolean = false
+    val isRecordPurchaseSheetOpen: Boolean = false,
+    val speechBubbleUiText: UiText = UiText.DynamicString(speechBubbleText),
+    val primaryCtaUiText: UiText = UiText.DynamicString(primaryCtaText),
+    val remainingFormattedUiText: UiText = UiText.DynamicString(remainingFormatted),
+    val cooldownDurationUiText: UiText = UiText.DynamicString(cooldownDurationFormatted)
 )

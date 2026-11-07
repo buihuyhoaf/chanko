@@ -104,7 +104,7 @@ private fun PurchaseHistoryRow(
                 color = CandyColors.textPrimary
             )
             Text(
-                text = "${item.actualUnitPriceFormatted} × ${item.quantity}",
+                text = stringResource(R.string.purchase_history_price_quantity, item.actualUnitPriceFormatted, item.quantity),
                 style = MaterialTheme.typography.labelSmall,
                 color = CandyColors.textSecondary
             )

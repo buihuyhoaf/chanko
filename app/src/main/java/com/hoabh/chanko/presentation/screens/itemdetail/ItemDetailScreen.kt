@@ -216,7 +216,7 @@ fun ItemDetailScreen(
                     item(key = "countdown") {
                         CoolingOffCountdownCard(
                             displayStatus = uiState.displayStatus,
-                            remainingFormatted = uiState.remainingFormatted
+                            remainingFormatted = uiState.remainingFormattedUiText.asString()
                         )
                     }
                 }
@@ -239,7 +239,7 @@ fun ItemDetailScreen(
                             Modifier.fillMaxWidth()
                         }
                         ChankoSpeechBubble(
-                            speechText = uiState.speechBubbleText,
+                            speechText = uiState.speechBubbleUiText.asString(),
                             modifier = bubbleModifier
                         )
                     }
@@ -248,9 +248,9 @@ fun ItemDetailScreen(
                 // 5. Expandable Facts (Reason, Date, Duration)
                 item(key = "expandable_details") {
                     ExpandableDetailsSection(
-                        reason = uiState.reason,
+                        reason = uiState.reason.ifBlank { stringResource(R.string.item_detail_no_reason) },
                         addedDate = uiState.formattedAddedDate,
-                        cooldownDuration = uiState.cooldownDurationFormatted
+                        cooldownDuration = uiState.cooldownDurationUiText.asString()
                     )
                 }
 
@@ -275,7 +275,7 @@ fun ItemDetailScreen(
 
         // Sticky Bottom Bar
         StickyBottomActionBar(
-            primaryCtaText = uiState.primaryCtaText,
+            primaryCtaText = uiState.primaryCtaUiText.asString(),
             displayStatus = uiState.displayStatus,
             onPrimaryCtaClick = { onEvent(ItemDetailUiEvent.PrimaryCtaClicked) },
             onMoreOptionsClick = { onEvent(ItemDetailUiEvent.OpenMoreOptions) },
@@ -355,7 +355,7 @@ private fun DetailStatusBadge(
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(
-            text = status.labelText,
+            text = stringResource(status.labelRes),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp

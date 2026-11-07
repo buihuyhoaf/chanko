@@ -1,5 +1,8 @@
 package com.hoabh.chanko.presentation.screens.profile
 
+import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.base.UiText
+
 /**
  * Ba mức tính cách của Linh thú Chanko:
  * - [Friendly]: Thân thiện, nhẹ nhàng, động viên
@@ -19,7 +22,9 @@ data class ProfileAccountUiModel(
     val displayName: String = "",
     val email: String = "",
     val photoUrl: String? = null,
-    val isGoogleLinked: Boolean = true
+    val isGoogleLinked: Boolean = true,
+    val displayNameUiText: UiText = if (displayName.isNotBlank()) UiText.DynamicString(displayName) else UiText.StringResource(R.string.profile_default_display_name),
+    val emailUiText: UiText = if (email.isNotBlank()) UiText.DynamicString(email) else UiText.StringResource(R.string.profile_default_email)
 )
 
 /**
@@ -30,7 +35,7 @@ data class ProfileUiState(
     val committedPersonality: CatPersonality = CatPersonality.Sassy,
     val isReadyForReviewNotificationEnabled: Boolean = true,
     val isSystemNotificationBlocked: Boolean = false,
-    val appVersion: String = "1.0.0",
+    val appVersion: String = com.hoabh.chanko.BuildConfig.VERSION_NAME,
     val isLoading: Boolean = false,
     val isSignOutInProgress: Boolean = false,
     val errorMessage: String? = null

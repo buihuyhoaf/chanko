@@ -1,6 +1,9 @@
 package com.hoabh.chanko.presentation.screens.myitems
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.base.UiText
 
 /**
  * Filter cấp 1 theo ITEM-04:
@@ -41,15 +44,16 @@ enum class ItemSortOption {
  * Trạng thái hiển thị dẫn xuất (Derived Display Status) cho từng thẻ Item
  */
 enum class ItemDisplayStatus(
-    val labelText: String
+    @get:StringRes val labelRes: Int,
+    val labelText: String = ""
 ) {
-    Saved("Đã lưu"),
-    Considering("Đang cân nhắc"),
-    CoolingOff("Đang hạ nhiệt"),
-    ReadyForReview("Đến lúc xem lại"),
-    Postponed("Đã hoãn"),
-    Purchased("Đã mua"),
-    Skipped("Đã bỏ qua")
+    Saved(R.string.item_status_saved, "Đã lưu"),
+    Considering(R.string.item_status_considering, "Đang cân nhắc"),
+    CoolingOff(R.string.item_status_cooling_off, "Đang hạ nhiệt"),
+    ReadyForReview(R.string.item_status_ready_for_review, "Đến lúc xem lại"),
+    Postponed(R.string.item_status_postponed, "Đã hoãn"),
+    Purchased(R.string.item_status_purchased, "Đã mua"),
+    Skipped(R.string.item_status_skipped, "Đã bỏ qua")
 }
 
 @Immutable
@@ -61,7 +65,8 @@ data class MyItemCardUi(
     val imageUri: String? = null,
     val displayStatus: ItemDisplayStatus,
     val secondaryInfoText: String, // Ví dụ: "Còn 2 ngày" hoặc "Đã thêm 3 ngày trước"
-    val addedTimestamp: Long
+    val addedTimestamp: Long,
+    val secondaryInfoUiText: UiText = UiText.DynamicString(secondaryInfoText)
 )
 
 @Immutable
