@@ -132,14 +132,14 @@ Nâng cấp `ItemDetailScreen` để hiển thị trực quan tiến trình Cool
 Hiện thực hóa hệ thống quản lý tài nguyên thay thế Point/EXP: **Hạt** (Resource dùng cho tiện ích, bị trừ khi Unfreeze sớm) và **Pate** (EXP phát triển Chanko). Tài khoản áp dụng quy tắc bất biến: số dư Hạt và Pate không bao giờ âm (chặn sàn ở 0), Level của Chanko chỉ tăng khi tích lũy đủ Pate và không bao giờ bị giảm cấp kể cả khi trừ Pate.
 
 **Acceptance criteria:**
-- [ ] `ResourceLedger` lưu số dư hiện tại `hatBalance: Long` và `pateBalance: Long`.
-- [ ] Mọi phép trừ tài nguyên áp dụng `coerceAtLeast(0)` (cho phép Unfreeze khi số dư bằng 0 mà không phát sinh số âm).
-- [ ] Bảng cấp độ `LevelProgressionTable` định nghĩa ngưỡng Pate từng Level (ví dụ: Level 1: 0, Level 2: 100, Level 3: 250, Level 4: 500...).
-- [ ] Thuộc tính `level` của Chanko được bảo lưu độc lập: khi Pate bị trừ do phạt, `currentLevel` giữ nguyên không bị giáng cấp.
-- [ ] Không có quy đổi Hạt/Pate ra tiền mặt; không có chỉ số đói hay bệnh tật của mascot.
+- [x] `ResourceLedger` lưu số dư hiện tại `hatBalance: Long` và `pateBalance: Long`.
+- [x] Mọi phép trừ tài nguyên áp dụng `coerceAtLeast(0)` (cho phép Unfreeze khi số dư bằng 0 mà không phát sinh số âm).
+- [x] Bảng cấp độ `LevelProgressionTable` định nghĩa ngưỡng Pate từng Level (ví dụ: Level 1: 0, Level 2: 100, Level 3: 250, Level 4: 500...).
+- [x] Thuộc tính `level` của Chanko được bảo lưu độc lập: khi Pate bị trừ do phạt, `currentLevel` giữ nguyên không bị giáng cấp.
+- [x] Không có quy đổi Hạt/Pate ra tiền mặt; không có chỉ số đói hay bệnh tật của mascot.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*ResourceLedgerTest*" --tests "*LevelProgressionTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ResourceLedgerTest*" --tests "*LevelProgressionTest*"`
 
 **Dependencies:** Task 1
 
@@ -160,14 +160,14 @@ $$\text{Chi phí} = \alpha \times \text{lockedPrice} \times \frac{\text{remainin
 Chi phí giảm dần theo thời gian và bằng 0 khi Freeze kết thúc. Xử lý trường hợp mua khi đang Freeze tương đương Unfreeze sớm tại thời điểm mua. Xây dựng `RetroactivePurchaseHandler`: nếu người dùng khai báo mua trễ sau khi đã nhận thưởng Freeze không hợp lệ, hệ thống sẽ thu hồi thưởng đã nhận, áp dụng chi phí Unfreeze tại thời điểm mua thực tế và ghi nhật ký kiểm toán (audit log).
 
 **Acceptance criteria:**
-- [ ] `UnfreezeCostCalculator` tính đúng chi phí Hạt và Pate phải trừ dựa trên giá đã khóa và tỷ lệ thời gian còn lại.
-- [ ] Khi `remainingMillis == 0`, chi phí phạt trả về đúng 0 Hạt, 0 Pate.
-- [ ] Khai báo mua hàng khi đang Freeze: tính chi phí phạt tại thời điểm mua và trừ Hạt/Pate tương ứng.
-- [ ] Khai báo mua trễ (retroactive buy): tự động hoàn tác thưởng Freeze đã cộng, tính phí Unfreeze tại thời điểm mua thực tế, ghi nhận vào `RewardAuditLog`, không trừ trùng lặp nếu trước đó đã Unfreeze.
-- [ ] Unit tests kiểm tra đầy đủ các kịch bản: Unfreeze ngay sau khi tạo, Unfreeze ở 50% thời gian, mua trong lúc Freeze, và khai báo mua sau khi đã nhận thưởng.
+- [x] `UnfreezeCostCalculator` tính đúng chi phí Hạt và Pate phải trừ dựa trên giá đã khóa và tỷ lệ thời gian còn lại.
+- [x] Khi `remainingMillis == 0`, chi phí phạt trả về đúng 0 Hạt, 0 Pate.
+- [x] Khai báo mua hàng khi đang Freeze: tính chi phí phạt tại thời điểm mua và trừ Hạt/Pate tương ứng.
+- [x] Khai báo mua trễ (retroactive buy): tự động hoàn tác thưởng Freeze đã cộng, tính phí Unfreeze tại thời điểm mua thực tế, ghi nhận vào `RewardAuditLog`, không trừ trùng lặp nếu trước đó đã Unfreeze.
+- [x] Unit tests kiểm tra đầy đủ các kịch bản: Unfreeze ngay sau khi tạo, Unfreeze ở 50% thời gian, mua trong lúc Freeze, và khai báo mua sau khi đã nhận thưởng.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*UnfreezeCostCalculatorTest*" --tests "*RetroactivePurchaseHandlerTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*UnfreezeCostCalculatorTest*" --tests "*RetroactivePurchaseHandlerTest*"`
 
 **Dependencies:** Task 2, Task 5
 
@@ -189,14 +189,14 @@ Hiện thực hóa logic trao thưởng tự động:
 3. Không thưởng cho hành vi thêm sản phẩm hay hành vi mua sắm.
 
 **Acceptance criteria:**
-- [ ] `FreezeRewardDispatcher` tự động quét các món đồ hoàn thành Freeze trong ngày và cộng thưởng cho món có giá trị cao nhất.
-- [ ] Sản phẩm Freeze lại (`isRefrozen == true`) bị chặn không cấp thưởng Freeze lần hai.
-- [ ] `DailyCheckInUseCase` kiểm tra và chỉ cho phép nhận thưởng 1 lần mỗi ngày dương lịch sau khi người dùng xác nhận không mua sắm.
-- [ ] Không có cơ chế streak multiplier (thưởng mỗi ngày như nhau).
-- [ ] Unit tests kiểm tra việc chọn món thưởng cao nhất khi nhiều món hoàn tất trong cùng 1 ngày.
+- [x] `FreezeRewardDispatcher` tự động quét các món đồ hoàn thành Freeze trong ngày và cộng thưởng cho món có giá trị cao nhất.
+- [x] Sản phẩm Freeze lại (`isRefrozen == true`) bị chặn không cấp thưởng Freeze lần hai.
+- [x] `DailyCheckInUseCase` kiểm tra và chỉ cho phép nhận thưởng 1 lần mỗi ngày dương lịch sau khi người dùng xác nhận không mua sắm.
+- [x] Không có cơ chế streak multiplier (thưởng mỗi ngày như nhau).
+- [x] Unit tests kiểm tra việc chọn món thưởng cao nhất khi nhiều món hoàn tất trong cùng 1 ngày.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*FreezeRewardDispatcherTest*" --tests "*DailyCheckInTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*FreezeRewardDispatcherTest*" --tests "*DailyCheckInTest*"`
 
 **Dependencies:** Task 5, Task 6
 
@@ -210,9 +210,9 @@ Hiện thực hóa logic trao thưởng tự động:
 ---
 
 ### Checkpoint 2: Rewards, Economy & Ledger Verified
-- [ ] Hệ kinh tế Hạt/Pate, công thức Unfreeze và Daily Check-in hoạt động chính xác.
-- [ ] Số dư không bao giờ âm; Level Chanko không bị tụt.
-- [ ] Toàn bộ unit tests của Phase 2 pass 100%.
+- [x] Hệ kinh tế Hạt/Pate, công thức Unfreeze và Daily Check-in hoạt động chính xác.
+- [x] Số dư không bao giờ âm; Level Chanko không bị tụt.
+- [x] Toàn bộ unit tests của Phase 2 pass 100%.
 
 ---
 
