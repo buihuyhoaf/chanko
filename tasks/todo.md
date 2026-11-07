@@ -449,13 +449,13 @@ Nâng cấp hàng chip tài nguyên `HomeResourceChipsRow` trên `HomeHeader`:
 - Tự động mờ dần khi cuộn trang xuống theo `collapseFraction` tương tự các chip tài nguyên khác.
 
 **Acceptance criteria:**
-- [ ] Khi `hasCheckedInToday = false`: pill hiển thị nhãn Check-in và bấm vào kích hoạt `onCheckInClick`.
-- [ ] Khi `hasCheckedInToday = true`: pill hiển thị trạng thái đã hoàn thành và vô hiệu hóa click.
-- [ ] Hiệu ứng thu gọn Header khi cuộn mượt mà không lỗi layout.
+- [x] Khi `hasCheckedInToday = false`: pill hiển thị nhãn Check-in và bấm vào kích hoạt `onCheckInClick`.
+- [x] Khi `hasCheckedInToday = true`: pill hiển thị trạng thái đã hoàn thành và vô hiệu hóa click.
+- [x] Hiệu ứng thu gọn Header khi cuộn mượt mà không lỗi layout.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
-- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 10, Task 14
 

@@ -88,7 +88,8 @@ fun HomeHeader(
     modifier: Modifier = Modifier,
     collapseFraction: Float = 0f,
     canOpenProfile: Boolean = true,
-    onResourceClick: () -> Unit = {}
+    onResourceClick: () -> Unit = {},
+    onCheckInClick: () -> Unit = {}
 ) {
     val clampedFraction = collapseFraction.coerceIn(0f, 1f)
     val greetingText = header.customGreeting ?: resolveGreetingText(header)
@@ -213,7 +214,9 @@ fun HomeHeader(
                     hatBalance = header.hatBalance,
                     currentLevel = header.currentLevel,
                     pateProgressFraction = header.pateProgressFraction,
+                    hasCheckedInToday = header.hasCheckedInToday,
                     onResourceClick = onResourceClick,
+                    onCheckInClick = onCheckInClick,
                     modifier = Modifier.graphicsLayer { alpha = chipsAlpha }
                 )
             }
@@ -282,14 +285,16 @@ fun HomeResourceChipsRow(
     hatBalance: Long,
     currentLevel: Int,
     pateProgressFraction: Float,
+    hasCheckedInToday: Boolean = false,
     onResourceClick: () -> Unit,
+    onCheckInClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = CandySpace.xs),
-        horizontalArrangement = Arrangement.spacedBy(CandySpace.sm),
+        horizontalArrangement = Arrangement.spacedBy(CandySpace.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Pill Hạt
@@ -300,7 +305,7 @@ fun HomeResourceChipsRow(
             modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = CandySpace.md, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = CandySpace.sm, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
@@ -321,7 +326,7 @@ fun HomeResourceChipsRow(
             modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = CandySpace.md, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = CandySpace.sm, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
             ) {
@@ -333,7 +338,7 @@ fun HomeResourceChipsRow(
                 // Mini progress bar
                 Box(
                     modifier = Modifier
-                        .width(44.dp)
+                        .width(36.dp)
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp))
                         .background(CandyColors.outline)
@@ -344,6 +349,50 @@ fun HomeResourceChipsRow(
                             .fillMaxWidth(pateProgressFraction.coerceIn(0f, 1f))
                             .clip(RoundedCornerShape(3.dp))
                             .background(CandyColors.primary)
+                    )
+                }
+            }
+        }
+
+        // Pill Daily Check-in (Mở lại popup nếu chưa check-in)
+        if (!hasCheckedInToday) {
+            Surface(
+                shape = CandyShape.chip,
+                color = CandyColors.orange.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, CandyColors.orange.copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .clip(CandyShape.chip)
+                    .clickable(role = Role.Button, onClick = onCheckInClick)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = CandySpace.sm, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    ChankoIcon(id = ChankoIconId.ITM_01, contentDescription = null, size = 14.dp)
+                    Text(
+                        text = "Check-in +10",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = CandyColors.orange
+                    )
+                }
+            }
+        } else {
+            Surface(
+                shape = CandyShape.chip,
+                color = CandyColors.readySurface,
+                border = BorderStroke(1.dp, CandyColors.readyAction.copy(alpha = 0.2f)),
+                modifier = Modifier.clip(CandyShape.chip)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = CandySpace.sm, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                ) {
+                    Text(
+                        text = "Đã check-in ✓",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = CandyColors.readyAction
                     )
                 }
             }

@@ -65,7 +65,8 @@ data class HeaderUiModel(
     val hatBalance: Long = 0L,
     val pateBalance: Long = 0L,
     val currentLevel: Int = 1,
-    val pateProgressFraction: Float = 0f
+    val pateProgressFraction: Float = 0f,
+    val hasCheckedInToday: Boolean = false
 ) {
     val displayName: String
         get() = userName.trim()

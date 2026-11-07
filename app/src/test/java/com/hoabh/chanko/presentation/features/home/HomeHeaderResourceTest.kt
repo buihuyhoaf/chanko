@@ -41,4 +41,13 @@ class HomeHeaderResourceTest {
         state = state.copy(isResourceSheetOpen = false)
         assertFalse(state.isResourceSheetOpen)
     }
+
+    @Test
+    fun testHeaderUiModelHasCheckedInTodayProperty() {
+        val headerDefault = HeaderUiModel(userName = "Hoa")
+        assertFalse(headerDefault.hasCheckedInToday)
+
+        val headerCheckedIn = HeaderUiModel(userName = "Hoa", hasCheckedInToday = true)
+        assertTrue(headerCheckedIn.hasCheckedInToday)
+    }
 }
