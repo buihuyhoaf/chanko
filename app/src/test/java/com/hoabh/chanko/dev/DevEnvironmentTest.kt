@@ -5,9 +5,9 @@ import com.hoabh.chanko.data.local.entity.CooldownItemEntity
 import com.hoabh.chanko.domain.auth.AuthResult
 import com.hoabh.chanko.domain.auth.SessionState
 import com.hoabh.chanko.domain.model.ItemStatus
-import com.hoabh.chanko.presentation.screens.setup.components.SetupDraft
-import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
-import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
+import com.hoabh.chanko.presentation.features.setup.components.SetupDraft
+import com.hoabh.chanko.presentation.features.setup.components.SetupStatus
+import com.hoabh.chanko.presentation.features.setup.components.SetupSubmission
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

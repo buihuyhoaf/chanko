@@ -58,19 +58,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
-import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
-import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
-import com.hoabh.chanko.presentation.screens.chat.ChatListScreen
-import com.hoabh.chanko.presentation.screens.chat.ChatListViewModel
-import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
-import com.hoabh.chanko.presentation.screens.home.HomeRoute
-import com.hoabh.chanko.presentation.screens.home.HomeUiEvent
-import com.hoabh.chanko.presentation.screens.home.HomeViewModel
-import com.hoabh.chanko.presentation.screens.myitems.MyItemsRoute
+import com.hoabh.chanko.presentation.features.budget.BudgetRoute
+import com.hoabh.chanko.presentation.features.budget.BudgetViewModel
+import com.hoabh.chanko.presentation.features.chat.ChatListScreen
+import com.hoabh.chanko.presentation.features.chat.ChatListViewModel
+import com.hoabh.chanko.presentation.features.home.HomeMyItemsFilter
+import com.hoabh.chanko.presentation.features.home.HomeRoute
+import com.hoabh.chanko.presentation.features.home.HomeUiEvent
+import com.hoabh.chanko.presentation.features.home.HomeViewModel
+import com.hoabh.chanko.presentation.features.myitems.MyItemsRoute
 import com.hoabh.chanko.ui.theme.CandyColors
-import com.hoabh.chanko.presentation.screens.additem.AddItemViewModel
-import com.hoabh.chanko.presentation.screens.additem.AddItemEffect
-import com.hoabh.chanko.presentation.screens.additem.AddItemEntryHost
+import com.hoabh.chanko.presentation.features.additem.AddItemViewModel
+import com.hoabh.chanko.presentation.features.additem.AddItemEffect
+import com.hoabh.chanko.presentation.features.additem.AddItemEntryHost
 
 fun NavGraphBuilder.mainDestination(
     onAddItemEffect: (AddItemEffect) -> Unit = {},

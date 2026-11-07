@@ -9,8 +9,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hoabh.chanko.domain.auth.AuthFailure
-import com.hoabh.chanko.presentation.screens.login.LoginUiState
-import com.hoabh.chanko.presentation.screens.login.LoginScreen
+import com.hoabh.chanko.presentation.features.login.LoginUiState
+import com.hoabh.chanko.presentation.features.login.LoginScreen
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import java.io.File
 import org.junit.Assert.assertEquals
