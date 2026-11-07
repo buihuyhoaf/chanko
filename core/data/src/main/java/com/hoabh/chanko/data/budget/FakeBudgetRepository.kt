@@ -64,13 +64,13 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     var simulatedDelayMs: Long = 0L
 
     // Cycles
-    val currentCycleId = "cycle_2026_10"
-    val pastCycleId = "cycle_2026_09"
-    val pastUncachedCycleId = "cycle_2026_08"
-    val nextCycleId = "cycle_2026_11"
+    val currentCycleId = "cycle_2026_11"
+    val pastCycleId = "cycle_2026_10"
+    val pastUncachedCycleId = "cycle_2026_09"
+    val nextCycleId = "cycle_2026_12"
 
     // Default data timestamp (fixed base or current time when data was last synced)
-    private val initialDataTimestamp = 1_761_708_600_000L // 2025-10-29 10:30
+    private val initialDataTimestamp = 1_762_500_000_000L // 2026-11-07
 
     private val cachedCycleIdsState = MutableStateFlow(
         setOf(currentCycleId, pastCycleId)
@@ -80,42 +80,42 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         listOf(
             BudgetCycle(
                 id = currentCycleId,
-                label = "Tháng 10/2026",
-                startDate = "01/10/2026",
-                endDate = "31/10/2026",
+                label = "Tháng 11/2026",
+                startDate = "01/11/2026",
+                endDate = "30/11/2026",
                 isCurrent = true,
                 anchorDay = 1,
-                ordinal = 0,
+                ordinal = 10,
                 status = BudgetCycleStatus.Active
             ),
             BudgetCycle(
                 id = pastCycleId,
+                label = "Tháng 10/2026",
+                startDate = "01/10/2026",
+                endDate = "31/10/2026",
+                isCurrent = false,
+                anchorDay = 1,
+                ordinal = 9,
+                status = BudgetCycleStatus.Closed
+            ),
+            BudgetCycle(
+                id = pastUncachedCycleId,
                 label = "Tháng 09/2026",
                 startDate = "01/09/2026",
                 endDate = "30/09/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = -1,
-                status = BudgetCycleStatus.Closed
-            ),
-            BudgetCycle(
-                id = pastUncachedCycleId,
-                label = "Tháng 08/2026",
-                startDate = "01/08/2026",
-                endDate = "31/08/2026",
-                isCurrent = false,
-                anchorDay = 1,
-                ordinal = -2,
+                ordinal = 8,
                 status = BudgetCycleStatus.Closed
             ),
             BudgetCycle(
                 id = nextCycleId,
-                label = "Tháng 11/2026",
-                startDate = "01/11/2026",
-                endDate = "30/11/2026",
+                label = "Tháng 12/2026",
+                startDate = "01/12/2026",
+                endDate = "31/12/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = 1,
+                ordinal = 11,
                 status = BudgetCycleStatus.UpcomingUnconfigured
             )
         )
@@ -167,10 +167,10 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             currentCycleId to listOf(
                 BudgetActivity("act_1", currentCycleId, "Mua tai nghe Sony", -3_500_000L, "Hôm nay, 10:15", "1", BudgetActivityType.PURCHASE_RECORDED),
                 BudgetActivity("act_2", currentCycleId, "Hoàn tiền đơn hàng cũ", 500_000L, "Hôm qua, 16:30", null, BudgetActivityType.EXPENSE_CORRECTED),
-                BudgetActivity("act_3", currentCycleId, "Tăng hạn mức chi tiêu", 1_000_000L, "25/10/2026", null, BudgetActivityType.BUDGET_ADJUSTED)
+                BudgetActivity("act_3", currentCycleId, "Tăng hạn mức chi tiêu", 1_000_000L, "05/11/2026", null, BudgetActivityType.BUDGET_ADJUSTED)
             ),
             pastCycleId to listOf(
-                BudgetActivity("act_past_1", pastCycleId, "Chi tiêu ăn uống", -1_200_000L, "28/09/2026", null, BudgetActivityType.PURCHASE_RECORDED)
+                BudgetActivity("act_past_1", pastCycleId, "Chi tiêu ăn uống", -1_200_000L, "28/10/2026", null, BudgetActivityType.PURCHASE_RECORDED)
             ),
             pastUncachedCycleId to emptyList()
         )
@@ -180,7 +180,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     private val adjustmentsState = MutableStateFlow<Map<String, List<BudgetAdjustment>>>(
         mapOf(
             currentCycleId to listOf(
-                BudgetAdjustment("adj_1", currentCycleId, 4_000_000L, 5_000_000L, "25/10/2026, 09:00")
+                BudgetAdjustment("adj_1", currentCycleId, 5_000_000L, 6_000_000L, "05/11/2026, 09:00")
             ),
             pastCycleId to emptyList(),
             pastUncachedCycleId to emptyList()
@@ -571,9 +571,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val next = cyclesState.value.firstOrNull { it.ordinal == nextOrdinal }
             ?: BudgetCycle(
                 id = nextCycleId,
-                label = "Tháng 11/2026",
-                startDate = "01/11/2026",
-                endDate = "30/11/2026",
+                label = "Tháng 12/2026",
+                startDate = "01/12/2026",
+                endDate = "31/12/2026",
                 isCurrent = false,
                 anchorDay = current.anchorDay,
                 ordinal = nextOrdinal,
@@ -589,9 +589,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val futureOrdinal = nextOrdinal + 1
         val newNextCycle = BudgetCycle(
             id = "cycle_future_$futureOrdinal",
-            label = "Tháng 12/2026",
-            startDate = "01/12/2026",
-            endDate = "31/12/2026",
+            label = "Tháng 01/2027",
+            startDate = "01/01/2027",
+            endDate = "31/01/2027",
             isCurrent = false,
             anchorDay = current.anchorDay,
             ordinal = futureOrdinal,

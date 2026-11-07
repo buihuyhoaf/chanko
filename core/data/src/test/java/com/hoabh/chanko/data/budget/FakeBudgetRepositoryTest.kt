@@ -47,11 +47,11 @@ class FakeBudgetRepositoryTest {
         val window = repository.observeTriCycleWindow().first()
         assertTrue(window.hasPrevious)
         assertEquals(repository.pastCycleId, window.previous?.id)
-        assertEquals("09", window.previous?.labelMonth)
+        assertEquals("10", window.previous?.labelMonth)
         assertEquals(repository.currentCycleId, window.current.id)
-        assertEquals("10", window.current.labelMonth)
+        assertEquals("11", window.current.labelMonth)
         assertEquals(repository.nextCycleId, window.next.id)
-        assertEquals("11", window.next.labelMonth)
+        assertEquals("12", window.next.labelMonth)
         assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingUnconfigured, window.next.status)
     }
 

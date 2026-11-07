@@ -175,8 +175,8 @@ class HomeFakeDataSource @Inject constructor() {
                 val noBudgetCarousel = BudgetCarouselMapper.map(
                     window = TriCycleWindow(
                         previous = null,
-                        current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, null),
-                        next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
+                        current = BudgetCycle("c", "Tháng 11/2026", "01/11/2026", "30/11/2026", true, 1, 10, BudgetCycleStatus.Active, null),
+                        next = BudgetCycle("n", "Tháng 12/2026", "01/12/2026", "31/12/2026", false, 1, 11, BudgetCycleStatus.UpcomingUnconfigured)
                     ),
                     snapshots = emptyMap()
                 )
@@ -215,12 +215,12 @@ class HomeFakeDataSource @Inject constructor() {
                 val overCarousel = (base.budgetCarouselState as? SectionState.Content)?.data?.let { cur ->
                     BudgetCarouselMapper.map(
                         window = TriCycleWindow(
-                            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, -1, BudgetCycleStatus.Closed),
-                            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, 5_000_000L),
-                            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
+                            previous = BudgetCycle("p", "Tháng 10/2026", "01/10/2026", "31/10/2026", false, 1, 9, BudgetCycleStatus.Closed),
+                            current = BudgetCycle("c", "Tháng 11/2026", "01/11/2026", "30/11/2026", true, 1, 10, BudgetCycleStatus.Active, 5_000_000L),
+                            next = BudgetCycle("n", "Tháng 12/2026", "01/12/2026", "31/12/2026", false, 1, 11, BudgetCycleStatus.UpcomingUnconfigured)
                         ),
                         snapshots = mapOf(
-                            "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),
+                            "p" to BudgetSnapshot("p", 6_000_000L, 6_200_000L),
                             "c" to BudgetSnapshot("c", 5_000_000L, 5_650_000L)
                         )
                     )
@@ -328,12 +328,12 @@ class HomeFakeDataSource @Inject constructor() {
         )
         val journey = JourneySelector.selectRecentJourney(defaultCandidates())
         val defaultWindow = TriCycleWindow(
-            previous = BudgetCycle("p", "Tháng 09/2026", "01/09/2026", "30/09/2026", false, 1, -1, BudgetCycleStatus.Closed),
-            current = BudgetCycle("c", "Tháng 10/2026", "01/10/2026", "31/10/2026", true, 1, 0, BudgetCycleStatus.Active, configuredLimitMinor = 5_000_000L),
-            next = BudgetCycle("n", "Tháng 11/2026", "01/11/2026", "30/11/2026", false, 1, 1, BudgetCycleStatus.UpcomingUnconfigured)
+            previous = BudgetCycle("p", "Tháng 10/2026", "01/10/2026", "31/10/2026", false, 1, 9, BudgetCycleStatus.Closed),
+            current = BudgetCycle("c", "Tháng 11/2026", "01/11/2026", "30/11/2026", true, 1, 10, BudgetCycleStatus.Active, configuredLimitMinor = 5_000_000L),
+            next = BudgetCycle("n", "Tháng 12/2026", "01/12/2026", "31/12/2026", false, 1, 11, BudgetCycleStatus.UpcomingUnconfigured)
         )
         val defaultSnapshots = mapOf(
-            "p" to BudgetSnapshot("p", 4_500_000L, 4_200_000L),
+            "p" to BudgetSnapshot("p", 6_000_000L, 6_200_000L),
             "c" to BudgetSnapshot("c", 5_000_000L, 2_650_000L)
         )
         val defaultCarousel = BudgetCarouselMapper.map(defaultWindow, defaultSnapshots)

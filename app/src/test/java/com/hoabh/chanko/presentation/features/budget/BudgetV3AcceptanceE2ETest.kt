@@ -197,9 +197,9 @@ class BudgetV3AcceptanceE2ETest {
     fun `AC10 - Home carousel tiep tuc hoat dong doc lap khong bi anh huong boi Budget v3`() = runTest {
         val window = repository.observeTriCycleWindow().first()
         assertTrue(window.hasPrevious)
-        assertEquals("10", window.current.labelMonth)
-        assertEquals("09", window.previous?.labelMonth)
-        assertEquals("11", window.next.labelMonth)
+        assertEquals("11", window.current.labelMonth)
+        assertEquals("10", window.previous?.labelMonth)
+        assertEquals("12", window.next.labelMonth)
     }
 
     @Test

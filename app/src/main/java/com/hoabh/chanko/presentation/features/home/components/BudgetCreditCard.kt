@@ -522,6 +522,7 @@ fun CardOrganicBackground(
 @Composable
 internal fun CreditCardTopBar(
     monthLabel: String = "",
+    isCurrentMonth: Boolean = false,
     badge: (@Composable () -> Unit)? = null
 ) {
     Row(
@@ -537,7 +538,21 @@ internal fun CreditCardTopBar(
             horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
         ) {
             if (monthLabel.isNotBlank()) {
-                BudgetMonthChip(monthLabel = monthLabel)
+                val chipBorder = if (isCurrentMonth) {
+                    BorderStroke(1.5.dp, Color.White)
+                } else {
+                    null
+                }
+                val chipContainerColor = if (isCurrentMonth) {
+                    Color.White.copy(alpha = 0.38f)
+                } else {
+                    Color.White.copy(alpha = 0.28f)
+                }
+                BudgetMonthChip(
+                    monthLabel = monthLabel,
+                    containerColor = chipContainerColor,
+                    border = chipBorder
+                )
             }
             if (badge != null) {
                 badge()
@@ -563,12 +578,14 @@ fun BudgetMonthChip(
     monthLabel: String,
     modifier: Modifier = Modifier,
     containerColor: Color = Color.White.copy(alpha = 0.28f),
-    contentColor: Color = Color.White
+    contentColor: Color = Color.White,
+    border: BorderStroke? = null
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
         color = containerColor,
+        border = border,
         shadowElevation = 0.dp
     ) {
         Text(
@@ -951,7 +968,10 @@ private fun ActiveCardContent(
                     )
             ) {
                 // Hàng trên: TopBar
-                CreditCardTopBar(monthLabel = slot.monthLabel)
+                CreditCardTopBar(
+                    monthLabel = slot.monthLabel,
+                    isCurrentMonth = true
+                )
 
                 // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
                 Box(
@@ -1120,7 +1140,10 @@ private fun ClosedCardContent(
                     )
             ) {
                 // Hàng trên: TopBar
-                CreditCardTopBar(monthLabel = slot.monthLabel)
+                CreditCardTopBar(
+                    monthLabel = slot.monthLabel,
+                    isCurrentMonth = false
+                )
 
                 // Vùng giữa: Nhãn & Số tiền căn giữa theo chiều dọc (Center Vertical)
                 Box(

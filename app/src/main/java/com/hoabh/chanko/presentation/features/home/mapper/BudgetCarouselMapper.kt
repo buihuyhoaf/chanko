@@ -37,7 +37,7 @@ object BudgetCarouselMapper {
                     cycleLabel = prev.label,
                     dateRangeText = prev.dateRangeText,
                     monthLabel = prev.labelMonth,
-                    themeOrdinal = prev.ordinal,
+                    themeOrdinal = resolveThemeOrdinal(prev),
                     spentMinor = spent,
                     limitMinor = limit,
                     remainingMinor = metrics.remainingMinor ?: (limit - spent),
@@ -65,7 +65,7 @@ object BudgetCarouselMapper {
                     cycleLabel = current.label,
                     dateRangeText = current.dateRangeText,
                     monthLabel = current.labelMonth,
-                    themeOrdinal = current.ordinal
+                    themeOrdinal = resolveThemeOrdinal(current)
                 )
             )
         } else {
@@ -77,7 +77,7 @@ object BudgetCarouselMapper {
                     cycleLabel = current.label,
                     dateRangeText = current.dateRangeText,
                     monthLabel = current.labelMonth,
-                    themeOrdinal = current.ordinal,
+                    themeOrdinal = resolveThemeOrdinal(current),
                     spentMinor = currentSpent,
                     limitMinor = currentLimit,
                     remainingMinor = metrics.remainingMinor ?: (currentLimit - currentSpent),
@@ -105,7 +105,7 @@ object BudgetCarouselMapper {
                     cycleLabel = next.label,
                     dateRangeText = next.dateRangeText,
                     monthLabel = next.labelMonth,
-                    themeOrdinal = next.ordinal,
+                    themeOrdinal = resolveThemeOrdinal(next),
                     limitMinor = limit,
                     limitFormatted = HomeCurrencyFormatter.formatVnd(limit)
                 )
@@ -118,7 +118,7 @@ object BudgetCarouselMapper {
                     cycleLabel = next.label.ifBlank { "Chu kỳ tiếp theo" },
                     dateRangeText = next.dateRangeText,
                     monthLabel = next.labelMonth,
-                    themeOrdinal = next.ordinal
+                    themeOrdinal = resolveThemeOrdinal(next)
                 )
             )
         }
@@ -132,5 +132,14 @@ object BudgetCarouselMapper {
             currentCycleKey = currentKey,
             lastSyncedAtText = null
         )
+    }
+
+    private fun resolveThemeOrdinal(cycle: com.hoabh.chanko.domain.budget.model.BudgetCycle): Int {
+        val month = cycle.labelMonth.toIntOrNull()
+        return if (month != null && month in 1..12) {
+            month - 1
+        } else {
+            cycle.themeIndex
+        }
     }
 }

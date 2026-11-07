@@ -68,14 +68,14 @@ class HomeBudgetE2EFlowTest {
         val prevSlot = data.slots[0]
         assertTrue(prevSlot is BudgetCardSlotUi.ClosedCard)
         assertEquals(BudgetCardRole.Previous, prevSlot.role)
-        assertEquals("cycle_2026_09", prevSlot.cycleId)
+        assertEquals(fakeRepository.pastCycleId, prevSlot.cycleId)
 
         // Slot 2: Active current
         val currentSlot = data.slots[1]
         assertTrue(currentSlot is BudgetCardSlotUi.ActiveCard)
         assertEquals(BudgetCardRole.Current, currentSlot.role)
-        assertEquals("cycle_2026_10", currentSlot.cycleId)
-        assertEquals("cycle_2026_10", data.currentCycleKey)
+        assertEquals(fakeRepository.currentCycleId, currentSlot.cycleId)
+        assertEquals(fakeRepository.currentCycleId, data.currentCycleKey)
 
         // Slot 3: Upcoming placeholder
         val nextSlot = data.slots[2]
@@ -121,7 +121,7 @@ class HomeBudgetE2EFlowTest {
         val configuredNext = updatedNextSlot as BudgetCardSlotUi.UpcomingConfiguredCard
         assertEquals(7_500_000L, configuredNext.limitMinor)
         assertEquals("7.500.000 ₫", configuredNext.limitFormatted)
-        assertEquals(1, configuredNext.themeOrdinal) // ordinal 1 -> floorMod(1, 12) = 1
+        assertEquals(11, configuredNext.themeOrdinal) // Month 12 -> themeOrdinal 11 (Blueberry)
     }
 
     @Test
@@ -136,15 +136,15 @@ class HomeBudgetE2EFlowTest {
         advanceUntilIdle()
 
         val data = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
-        assertEquals("cycle_2026_11", data.currentCycleKey)
+        assertEquals(fakeRepository.nextCycleId, data.currentCycleKey)
 
-        // Current slot is now cycle_2026_11 with configured limit 6.000.000 đ
+        // Current slot is now nextCycleId with configured limit 6.000.000 đ
         val currentSlot = data.slots.first { it.role == BudgetCardRole.Current }
         assertTrue(currentSlot is BudgetCardSlotUi.ActiveCard)
         val activeCurrent = currentSlot as BudgetCardSlotUi.ActiveCard
-        assertEquals("cycle_2026_11", activeCurrent.cycleId)
+        assertEquals(fakeRepository.nextCycleId, activeCurrent.cycleId)
         assertEquals(6_000_000L, activeCurrent.limitMinor)
-        assertEquals(1, activeCurrent.themeOrdinal)
+        assertEquals(11, activeCurrent.themeOrdinal)
     }
 
     @Test
@@ -181,7 +181,7 @@ class HomeBudgetE2EFlowTest {
         }
 
         // Swipe to next slot
-        viewModel.onEvent(HomeUiEvent.BudgetSlotChanged("cycle_2026_11"))
+        viewModel.onEvent(HomeUiEvent.BudgetSlotChanged(fakeRepository.nextCycleId))
 
         // Tap "Xem tất cả" at Section Header
         viewModel.onEvent(HomeUiEvent.BudgetSeeAllTap)
@@ -220,8 +220,8 @@ class HomeBudgetE2EFlowTest {
         val placeholder = initialData.slots[2] as BudgetCardSlotUi.UpcomingPlaceholderCard
 
         // Month chip is 2-digit MM for next month
-        assertEquals("11", placeholder.monthLabel)
-        assertEquals("cycle_2026_11", placeholder.cycleId)
+        assertEquals("12", placeholder.monthLabel)
+        assertEquals(fakeRepository.nextCycleId, placeholder.cycleId)
 
         // Swiping across placeholder slot does not mutate repository or create garbage cycle
         viewModel.onEvent(HomeUiEvent.BudgetSlotChanged(placeholder.key))
@@ -250,8 +250,8 @@ class HomeBudgetE2EFlowTest {
         val prevSlot = data.slots[0] as BudgetCardSlotUi.ClosedCard
 
         assertEquals(BudgetCardRole.Previous, prevSlot.role)
-        assertEquals("09", prevSlot.monthLabel)
-        assertEquals("cycle_2026_09", prevSlot.cycleId)
+        assertEquals("10", prevSlot.monthLabel)
+        assertEquals(fakeRepository.pastCycleId, prevSlot.cycleId)
         assertTrue(prevSlot.remainingMinor >= 0)
 
         // Navigate on Previous card emits ReadOnly mode
@@ -274,7 +274,7 @@ class HomeBudgetE2EFlowTest {
         val currentSlot = data.slots[1] as BudgetCardSlotUi.ActiveCard
 
         // Month chip is 2-digit MM
-        assertEquals("10", currentSlot.monthLabel)
+        assertEquals("11", currentSlot.monthLabel)
         assertEquals(2, currentSlot.monthLabel.length)
         assertTrue(currentSlot.monthLabel.toInt() in 1..12)
 
@@ -346,12 +346,12 @@ class HomeBudgetE2EFlowTest {
 
         val postRolloverData = (viewModel.uiState.value.budgetCarouselState as SectionState.Content).data
         val newCurrent = postRolloverData.slots.first { it.role == BudgetCardRole.Current } as BudgetCardSlotUi.ActiveCard
-        assertEquals("cycle_2026_11", newCurrent.cycleId)
+        assertEquals(fakeRepository.nextCycleId, newCurrent.cycleId)
         assertEquals(8_000_000L, newCurrent.limitMinor)
         assertEquals(configuredNext.themeOrdinal, newCurrent.themeOrdinal)
 
-        // Previous cycle now contains October 2026 as closed
+        // Previous cycle now contains current cycle (November) as closed
         val newPrev = postRolloverData.slots.first { it.role == BudgetCardRole.Previous } as BudgetCardSlotUi.ClosedCard
-        assertEquals("cycle_2026_10", newPrev.cycleId)
+        assertEquals(fakeRepository.currentCycleId, newPrev.cycleId)
     }
 }

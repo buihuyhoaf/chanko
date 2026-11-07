@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.features.home.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -160,10 +161,16 @@ fun BudgetPlaceholderCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (monthLabel.isNotBlank()) {
+                        val isCurrent = role == BudgetCardRole.Current
                         BudgetMonthChip(
                             monthLabel = monthLabel,
-                            containerColor = CandyBudgetThemes.placeholderBadgeBg,
-                            contentColor = Color.White
+                            containerColor = if (isCurrent) {
+                                CandyBudgetThemes.placeholderBadgeBg.copy(alpha = 0.95f)
+                            } else {
+                                CandyBudgetThemes.placeholderBadgeBg
+                            },
+                            contentColor = Color.White,
+                            border = if (isCurrent) BorderStroke(1.5.dp, Color.White) else null
                         )
                     }
                 }

@@ -218,7 +218,7 @@ fun HomeScreen(
     val expandedHeaderHeightDp = if (expandedHeaderHeightPx > 0) {
         with(density) { expandedHeaderHeightPx.toDp() }
     } else {
-        statusBarTopPadding + (if (state.header.isOffline) 100.dp else 68.dp)
+        statusBarTopPadding + (if (state.header.isOffline) 140.dp else 104.dp)
     }
 
     BoxWithConstraints(

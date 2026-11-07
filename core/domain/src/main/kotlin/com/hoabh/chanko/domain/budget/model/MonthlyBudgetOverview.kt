@@ -17,7 +17,7 @@ data class MonthlyBudgetOverview(
     val isOverBudget: Boolean = false,
     val themeMonth: Int = yearMonth.monthValue,
     val canEdit: Boolean = false,
-    val themeOrdinal: Int = (yearMonth.year - 2026) * 12 + (yearMonth.monthValue - 10)
+    val themeOrdinal: Int = yearMonth.monthValue - 1
 ) {
     val isConfigured: Boolean
         get() = setupState != BudgetSetupState.Missing && limitMinor != null && limitMinor > 0L
