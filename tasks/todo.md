@@ -637,13 +637,13 @@ Triển khai render trực quan mới cho các node trong Item Journey:
 - Bổ sung `contentDescription` thân thiện cho TalkBack.
 
 **Acceptance criteria:**
-- [ ] Node `CoolingOff` hiển thị cung tròn đếm ngược tĩnh tại, không quay chóng mặt.
-- [ ] Node `Ready` có nhịp thở mời gọi người dùng khi không bật Reduced Motion.
-- [ ] Khi bật `isReducedMotionEnabled`, mọi hiệu ứng thở đều được tắt, chỉ hiển thị viền tĩnh.
-- [ ] Chạm vào node vẫn điều hướng chính xác đến `ItemDetailScreen`.
+- [x] Node `CoolingOff` hiển thị cung tròn đếm ngược tĩnh tại, không quay chóng mặt.
+- [x] Node `Ready` có nhịp thở mời gọi người dùng khi không bật Reduced Motion.
+- [x] Khi bật `isReducedMotionEnabled`, mọi hiệu ứng thở đều được tắt, chỉ hiển thị viền tĩnh.
+- [x] Chạm vào node vẫn điều hướng chính xác đến `ItemDetailScreen`.
 
 **Verification:**
-- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 20
 

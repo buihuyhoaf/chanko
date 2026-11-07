@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.features.home.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -74,6 +76,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.features.home.ItemJourneyUi
@@ -484,29 +487,51 @@ private fun JourneyProductNode(
     isReducedMotionEnabled: Boolean = false
 ) {
     val style = resolveJourneyNodeStyle(node.status)
-    val nodeCd = stringResource(
-        R.string.home_cd_journey_node,
-        node.title,
-        node.statusLabel,
-        node.priceFormatted
-    )
+    val nodeCd = when (node.status) {
+        JourneyNodeStatus.CoolingOff -> {
+            val remText = node.remainingSeconds?.let { sec ->
+                val days = sec / 86400
+                val hours = (sec % 86400) / 3600
+                if (days > 0) "còn $days ngày $hours giờ" else "còn $hours giờ"
+            } ?: "đang hạ nhiệt"
+            "${node.title}, đang hạ nhiệt, $remText, giá ${node.priceFormatted}"
+        }
+        JourneyNodeStatus.Ready -> {
+            "${node.title}, đã sẵn sàng xem xét, giá ${node.priceFormatted}, chạm để quyết định"
+        }
+        else -> stringResource(
+            R.string.home_cd_journey_node,
+            node.title,
+            node.statusLabel,
+            node.priceFormatted
+        )
+    }
 
-    // Chỉ áp dụng xoay cho item CoolingOff (đang đếm ngược) khi không bật Reduced Motion
-    val isAnimated = (node.status == JourneyNodeStatus.CoolingOff) && !isReducedMotionEnabled
-    val infiniteTransition = rememberInfiniteTransition(label = "orbit_ring_transition_${node.itemId}")
-    val rotationAngle by if (isAnimated) {
-        infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 360f,
+    // Hiệu ứng nhịp thở nhẹ nhàng cho món Ready (mời gọi xem xét quyết định)
+    val isPulseActive = (node.status == JourneyNodeStatus.Ready) && !isReducedMotionEnabled
+    val pulseTransition = rememberInfiniteTransition(label = "pulse_transition_${node.itemId}")
+    val pulseAlpha by if (isPulseActive) {
+        pulseTransition.animateFloat(
+            initialValue = 0.4f,
+            targetValue = 0.9f,
             animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 8000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
+                animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
             ),
-            label = "orbit_rotation_${node.itemId}"
+            label = "pulse_alpha_${node.itemId}"
         )
     } else {
-        remember { mutableFloatStateOf(0f) }
+        remember { mutableFloatStateOf(0.4f) }
     }
+
+    // Tính toán góc quét đếm ngược cho món CoolingOff
+    val totalSeconds = remember(node.priceMinor) {
+        val totalMillis = FreezeDurationPolicy.calculateDurationMillis(node.priceMinor ?: 0L)
+        (totalMillis / 1000L).coerceAtLeast(1L)
+    }
+    val remSeconds = (node.remainingSeconds ?: totalSeconds).coerceIn(0L, totalSeconds)
+    val remainingFraction = (remSeconds.toFloat() / totalSeconds.toFloat()).coerceIn(0f, 1f)
+    val countdownSweepAngle = 360f * remainingFraction
 
     Box(
         modifier = modifier
@@ -531,49 +556,79 @@ private fun JourneyProductNode(
             },
         contentAlignment = Alignment.Center
     ) {
-        // 1. Vòng quỹ đạo ngoài (Orbit Ring) tách rời lõi item
+        // 1. Viền Canvas bên ngoài: Cung đếm ngược (CoolingOff) hoặc Viền nhịp thở (Ready)
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .clearAndSetSemantics {}
         ) {
-            val strokeWidth = 2.5.dp.toPx()
+            val strokeWidth = 3.dp.toPx()
             val orbitRadius = (size.minDimension / 2f) - (strokeWidth / 2f) - 2.dp.toPx()
-            if (isAnimated) {
-                val dash = 8.dp.toPx()
-                val gap = 6.dp.toPx()
-                rotate(degrees = rotationAngle, pivot = center) {
+
+            when (node.status) {
+                JourneyNodeStatus.CoolingOff -> {
+                    // Rãnh nền mờ bên dưới
+                    drawCircle(
+                        color = style.ringColor.copy(alpha = 0.18f),
+                        radius = orbitRadius,
+                        center = center,
+                        style = Stroke(width = strokeWidth)
+                    )
+                    // Cung đếm ngược tròn (Circular Countdown Arc) từ 12h (-90 độ)
+                    val arcDiameter = orbitRadius * 2f
+                    val topLeftOffset = Offset(center.x - orbitRadius, center.y - orbitRadius)
+                    drawArc(
+                        color = style.ringColor,
+                        startAngle = -90f,
+                        sweepAngle = countdownSweepAngle,
+                        useCenter = false,
+                        topLeft = topLeftOffset,
+                        size = Size(arcDiameter, arcDiameter),
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    )
+                }
+
+                JourneyNodeStatus.Ready -> {
+                    // Viền chính khép kín nổi bật
                     drawCircle(
                         color = style.ringColor,
                         radius = orbitRadius,
                         center = center,
-                        style = Stroke(
-                            width = strokeWidth,
-                            cap = StrokeCap.Round,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, gap), 0f)
+                        style = Stroke(width = strokeWidth)
+                    )
+                    // Vòng hào quang nhịp thở bên ngoài khi pulse active
+                    if (isPulseActive) {
+                        drawCircle(
+                            color = style.ringColor.copy(alpha = pulseAlpha * 0.35f),
+                            radius = orbitRadius + 2.dp.toPx(),
+                            center = center,
+                            style = Stroke(width = 1.5.dp.toPx())
                         )
+                    }
+                }
+
+                else -> {
+                    // Purchased / Skipped: Viền nét liền tĩnh, sắc thái trung tính
+                    drawCircle(
+                        color = style.ringColor,
+                        radius = orbitRadius,
+                        center = center,
+                        style = Stroke(width = strokeWidth)
                     )
                 }
-            } else {
-                drawCircle(
-                    color = style.ringColor,
-                    radius = orbitRadius,
-                    center = center,
-                    style = Stroke(width = strokeWidth)
-                )
             }
         }
 
-        // 2. Vòng tròn lõi vật phẩm bên trong với khoảng hở 5dp so với vòng quỹ đạo
+        // 2. Vòng tròn lõi vật phẩm bên trong
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(7.dp)
                 .shadow(
-                    elevation = 4.dp,
+                    elevation = if (isPulseActive) 6.dp else 4.dp,
                     shape = CircleShape,
-                    ambientColor = style.ringColor.copy(alpha = 0.35f),
-                    spotColor = style.ringColor.copy(alpha = 0.45f)
+                    ambientColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha * 0.7f else 0.35f),
+                    spotColor = style.ringColor.copy(alpha = if (isPulseActive) pulseAlpha else 0.45f)
                 ),
             shape = CircleShape,
             color = Color.White
