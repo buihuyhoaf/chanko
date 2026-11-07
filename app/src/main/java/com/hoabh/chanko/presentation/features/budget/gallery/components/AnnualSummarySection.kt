@@ -113,7 +113,7 @@ fun AnnualSummarySection(
             }
 
             Image(
-                painter = painterResource(id = R.drawable.budget_summary_calendar_pink),
+                painter = painterResource(id = R.drawable.budget_card_cat_happy),
                 contentDescription = null,
                 modifier = Modifier.size(56.dp),
                 contentScale = ContentScale.Fit

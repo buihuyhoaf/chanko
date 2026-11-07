@@ -1,6 +1,7 @@
 package com.hoabh.chanko.presentation.features.budget.gallery.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -78,35 +79,32 @@ fun BudgetYearSelector(
             )
         }
 
-        // Nhãn Năm + UI nhận diện năm hiện tại
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(horizontal = 20.dp)
+        // Nhãn Năm + UI nhận diện năm hiện tại bằng viền border
+        val isCurrentYear = selectedYear == currentYear
+        val yearPillShape = RoundedCornerShape(999.dp)
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .then(
+                    if (isCurrentYear) {
+                        Modifier
+                            .clip(yearPillShape)
+                            .background(CandyColors.primarySoft.copy(alpha = 0.5f))
+                            .border(1.5.dp, CandyColors.brandPurple, yearPillShape)
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Năm $selectedYear",
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = CandyColors.textPrimary
+                color = if (isCurrentYear) CandyColors.brandPurple else CandyColors.textPrimary
             )
-            if (selectedYear == currentYear) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(CandyColors.primarySoft)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "Hiện tại",
-                        fontFamily = Nunito,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        color = CandyColors.primaryInk
-                    )
-                }
-            }
         }
 
         // Nút tiến năm (>)

@@ -81,7 +81,7 @@ fun BudgetGalleryHeader(
                     text = "Ngân sách",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     color = CandyColors.textPrimary
                 )
             }

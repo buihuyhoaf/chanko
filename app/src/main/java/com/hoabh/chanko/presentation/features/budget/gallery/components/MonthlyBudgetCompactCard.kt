@@ -1,5 +1,6 @@
 package com.hoabh.chanko.presentation.features.budget.gallery.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,8 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +46,7 @@ import com.hoabh.chanko.domain.budget.model.BudgetSetupState
 import com.hoabh.chanko.domain.budget.model.BudgetTemporalRole
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.MonthlyBudgetOverview
+import com.hoabh.chanko.presentation.features.home.components.CardOrganicBackground
 import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.Nunito
@@ -62,7 +66,9 @@ fun MonthlyBudgetCompactCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gradientBrush = CandyBudgetThemes.getGradientBrushForMonth(overview.themeMonth)
+    val theme = remember(overview.themeOrdinal) {
+        CandyBudgetThemes.getTheme(overview.themeOrdinal)
+    }
     val cardShape = RoundedCornerShape(CandyBudgetThemes.compactCardRadius)
 
     val fontScale = LocalDensity.current.fontScale
@@ -88,21 +94,13 @@ fun MonthlyBudgetCompactCard(
         }
     }
 
-    val cardBorder = if (isCurrentMonth) {
-        Modifier.border(width = 2.5.dp, color = CandyColors.brandPurple, shape = cardShape)
-    } else {
-        Modifier.border(width = 1.dp, color = Color.White.copy(alpha = 0.5f), shape = cardShape)
-    }
-
-    Box(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(CandyBudgetThemes.compactAspect)
             .defaultMinSize(minHeight = CandyBudgetThemes.touchTargetMin)
             .shadow(elevation = 2.dp, shape = cardShape)
             .clip(cardShape)
-            .background(gradientBrush)
-            .then(cardBorder)
             .clickable(
                 onClick = onClick,
                 role = Role.Button
@@ -110,24 +108,34 @@ fun MonthlyBudgetCompactCard(
             .semantics(mergeDescendants = true) {
                 contentDescription = spokenText
                 role = Role.Button
-            }
-            .padding(CandyBudgetThemes.compactPadding)
+            },
+        shape = cardShape,
+        color = theme.main,
+        border = BorderStroke(
+            width = if (isCurrentMonth) 2.5.dp else 1.dp,
+            color = if (isCurrentMonth) CandyColors.brandPurple else Color.White.copy(alpha = 0.5f)
+        )
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Header Row: Month chip pill & Decorative Gold Chip
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Nền hữu cơ với sóng 3D và dấu chân watermark đồng bộ với Home
+            CardOrganicBackground(
+                theme = theme,
+                modifier = Modifier.matchParentSize()
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(CandyBudgetThemes.compactPadding),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Month badge pill "MM" (+ optional "Hiện tại" badge)
+                // Header Row: Month chip pill & Decorative Gold Chip
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Month badge pill "MM"
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
@@ -142,92 +150,77 @@ fun MonthlyBudgetCompactCard(
                         )
                     }
 
-                    if (isCurrentMonth) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(999.dp))
-                                .background(CandyColors.brandPurple)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "Hiện tại",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                    // Decorative Chip (Vector drawn, non-interactive)
+                    CompactDecorativeChip(
+                        modifier = Modifier
+                            .size(width = 24.dp, height = 18.dp)
+                            .clearAndSetSemantics { }
+                    )
+                }
+
+                // Body Area:
+                if (isMissingSetup) {
+                    // Thẻ chưa thiết lập: hiển thị button "+ Thiết lập"
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(Color.White.copy(alpha = 0.9f))
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onClick
                             )
-                        }
+                            .padding(horizontal = 14.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "+ Thiết lập",
+                            fontFamily = Nunito,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = CandyColors.brandPurple
+                        )
+                    }
+                } else {
+                    // Thẻ đã thiết lập: chỉ hiển thị số tiền đã chi tiêu và text "Đã chi tiêu"
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = if (showMascot) 38.dp else 0.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = "Đã chi tiêu",
+                            fontFamily = Nunito,
+                            fontSize = CandyBudgetThemes.compactLabelTextSize,
+                            color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = MoneyVnd.format(overview.actualSpentMinor ?: 0L),
+                            fontFamily = Nunito,
+                            fontSize = CandyBudgetThemes.compactAmountTextSize,
+                            fontWeight = FontWeight.Bold,
+                            color = CandyBudgetThemes.textDark,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
+            }
 
-                // Decorative Chip (Vector drawn, non-interactive)
-                CompactDecorativeChip(
+            if (showMascot) {
+                Image(
+                    painter = painterResource(id = mascotResId),
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(width = 24.dp, height = 18.dp)
-                        .clearAndSetSemantics { }
+                        .size(36.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 4.dp, bottom = 4.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
-
-            // Body Area:
-            if (isMissingSetup) {
-                // Thẻ chưa thiết lập: hiển thị button "+ Thiết lập"
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(Color.White.copy(alpha = 0.9f))
-                        .clickable(
-                            role = Role.Button,
-                            onClick = onClick
-                        )
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "+ Thiết lập",
-                        fontFamily = Nunito,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        color = CandyColors.brandPurple
-                    )
-                }
-            } else {
-                // Thẻ đã thiết lập: chỉ hiển thị số tiền đã chi tiêu và text "Đã chi tiêu"
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = if (showMascot) 38.dp else 0.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = "Đã chi tiêu",
-                        fontFamily = Nunito,
-                        fontSize = CandyBudgetThemes.compactLabelTextSize,
-                        color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = MoneyVnd.format(overview.actualSpentMinor ?: 0L),
-                        fontFamily = Nunito,
-                        fontSize = CandyBudgetThemes.compactAmountTextSize,
-                        fontWeight = FontWeight.Bold,
-                        color = CandyBudgetThemes.textDark,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-
-        if (showMascot) {
-            Image(
-                painter = painterResource(id = mascotResId),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(36.dp)
-                    .align(Alignment.BottomEnd),
-                contentScale = ContentScale.Fit
-            )
         }
     }
 }

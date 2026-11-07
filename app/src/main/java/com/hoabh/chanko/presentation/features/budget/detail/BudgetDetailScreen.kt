@@ -152,7 +152,7 @@ fun BudgetDetailScreen(
                         text = titleText,
                         fontFamily = Nunito,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
+                        fontSize = 24.sp,
                         color = CandyColors.textPrimary
                     )
                 }
