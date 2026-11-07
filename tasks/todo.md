@@ -224,14 +224,14 @@ Hiện thực hóa logic trao thưởng tự động:
 Tích hợp giao dịch ngân sách với danh sách món đồ: Chanko chỉ trừ ngân sách chu kỳ hiện tại khi người dùng xác nhận đã mua sản phẩm đã có trong Chanko. Hỗ trợ 2 phương thức thanh toán: Pay Now và Thẻ tín dụng (đều ghi nhận chi tiêu ngay tại thời điểm mua). Hỗ trợ mua nhiều lần, hoàn tiền (refund) và điều chỉnh chi phí với nhật ký giao dịch minh bạch.
 
 **Acceptance criteria:**
-- [ ] Ngân sách chỉ bị trừ khi có sự kiện mua hàng của một sản phẩm hợp lệ trong hệ thống (không có Quick Purchase độc lập).
-- [ ] Giao dịch Pay Now và Credit Card đều ghi nhận giảm ngân sách khả dụng của chu kỳ hiện tại ngay lập tức.
-- [ ] Hỗ trợ hoàn tiền (refund): khôi phục lại ngân sách chu kỳ tương ứng và cập nhật trạng thái món đồ.
-- [ ] Tất cả số tiền hạch toán đều là VNĐ nguyên vẹn, tách bạch hoàn toàn với số dư Hạt/Pate.
-- [ ] Unit tests kiểm tra ghi nhận chi tiêu, hoàn tiền và tính nhất quán với chu kỳ hiện tại.
+- [x] Ngân sách chỉ bị trừ khi có sự kiện mua hàng của một sản phẩm hợp lệ trong hệ thống (không có Quick Purchase độc lập).
+- [x] Giao dịch Pay Now và Credit Card đều ghi nhận giảm ngân sách khả dụng của chu kỳ hiện tại ngay lập tức.
+- [x] Hỗ trợ hoàn tiền (refund): khôi phục lại ngân sách chu kỳ tương ứng và cập nhật trạng thái món đồ.
+- [x] Tất cả số tiền hạch toán đều là VNĐ nguyên vẹn, tách bạch hoàn toàn với số dư Hạt/Pate.
+- [x] Unit tests kiểm tra ghi nhận chi tiêu, hoàn tiền và tính nhất quán với chu kỳ hiện tại.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*ItemPurchaseBudgetSyncTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ItemPurchaseBudgetSyncTest*"`
 
 **Dependencies:** Task 1, Task 4
 
@@ -250,13 +250,13 @@ Tích hợp giao dịch ngân sách với danh sách món đồ: Chanko chỉ tr
 Thiết lập cơ chế kiểm soát trạng thái mạng cho Budget và Item transactions: Khi ngoại tuyến (offline), ứng dụng chỉ cho phép xem dữ liệu cache (số dư ngân sách, danh sách đồ, thời gian Freeze). Mọi thao tác thay đổi trạng thái (xác nhận mua, Unfreeze sớm, hoàn tiền) bị chặn kèm thông báo tiếng Việt giải thích cần kết nối Internet.
 
 **Acceptance criteria:**
-- [ ] Khi offline, màn hình Home và Item Detail hiển thị đầy đủ thông tin từ cache, không bị lỗi hay reset số dư về 0.
-- [ ] Khi bấm Unfreeze hoặc xác nhận mua lúc mất mạng: chặn thao tác ghi và hiển thị `UiText` hoặc Snackbar: *"Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này."*
-- [ ] Khi có mạng trở lại, tự động mở khóa các thao tác ghi.
-- [ ] Unit tests kiểm tra trạng thái chặn ghi và thông báo lỗi tương ứng.
+- [x] Khi offline, màn hình Home và Item Detail hiển thị đầy đủ thông tin từ cache, không bị lỗi hay reset số dư về 0.
+- [x] Khi bấm Unfreeze hoặc xác nhận mua lúc mất mạng: chặn thao tác ghi và hiển thị `UiText` hoặc Snackbar: *"Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này."*
+- [x] Khi có mạng trở lại, tự động mở khóa các thao tác ghi.
+- [x] Unit tests kiểm tra trạng thái chặn ghi và thông báo lỗi tương ứng.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*OfflineWriteGateTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*OfflineWriteGateTest*"`
 
 **Dependencies:** Task 8
 
@@ -270,8 +270,8 @@ Thiết lập cơ chế kiểm soát trạng thái mạng cho Budget và Item tr
 ---
 
 ### Checkpoint 3: Budget Tracking & Offline Guard Verified
-- [ ] Ngân sách chỉ trừ khi mua sản phẩm có trong app; hạch toán VNĐ chuẩn xác.
-- [ ] Ngoại tuyến chỉ xem cache và chặn mọi thao tác ghi dữ liệu.
+- [x] Ngân sách chỉ trừ khi mua sản phẩm có trong app; hạch toán VNĐ chuẩn xác.
+- [x] Ngoại tuyến chỉ xem cache và chặn mọi thao tác ghi dữ liệu.
 
 ---
 

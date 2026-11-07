@@ -166,6 +166,58 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     )
 
     // --- Scenario Switchers for Testing & Preview ---
+    fun recordItemExpense(
+        itemId: String,
+        itemName: String,
+        amountVnd: Long,
+        paymentType: com.hoabh.chanko.domain.model.PaymentType,
+        cycleId: String = currentCycleId
+    ) {
+        val currentSnapshot = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 0L)
+        val newSpent = currentSnapshot.spentMinor + amountVnd
+        snapshotsState.value = snapshotsState.value + (cycleId to currentSnapshot.copy(
+            spentMinor = newSpent,
+            updatedAt = System.currentTimeMillis()
+        ))
+
+        val currentActivities = activitiesState.value[cycleId] ?: emptyList()
+        val paymentDesc = if (paymentType == com.hoabh.chanko.domain.model.PaymentType.CREDIT) " (Thẻ tín dụng)" else ""
+        val newActivity = BudgetActivity(
+            id = UUID.randomUUID().toString(),
+            cycleId = cycleId,
+            title = "Mua $itemName$paymentDesc",
+            amountChangeMinor = -amountVnd,
+            occurredAt = "Vừa xong",
+            itemId = itemId,
+            type = BudgetActivityType.PURCHASE_RECORDED
+        )
+        activitiesState.value = activitiesState.value + (cycleId to (listOf(newActivity) + currentActivities))
+    }
+
+    fun refundExpense(
+        amountVnd: Long,
+        cycleId: String = currentCycleId
+    ) {
+        val currentSnapshot = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 0L)
+        val newSpent = maxOf(0L, currentSnapshot.spentMinor - amountVnd)
+        snapshotsState.value = snapshotsState.value + (cycleId to currentSnapshot.copy(
+            spentMinor = newSpent,
+            updatedAt = System.currentTimeMillis()
+        ))
+
+        val currentActivities = activitiesState.value[cycleId] ?: emptyList()
+        val newActivity = BudgetActivity(
+            id = UUID.randomUUID().toString(),
+            cycleId = cycleId,
+            title = "Hoàn tiền giao dịch",
+            amountChangeMinor = amountVnd,
+            occurredAt = "Vừa xong",
+            itemId = null,
+            type = BudgetActivityType.EXPENSE_CORRECTED
+        )
+        activitiesState.value = activitiesState.value + (cycleId to (listOf(newActivity) + currentActivities))
+    }
+
     fun setScenarioOverBudget(cycleId: String = currentCycleId) {
         val current = snapshotsState.value[cycleId] ?: BudgetSnapshot(cycleId, 5_000_000L, 5_500_000L)
         snapshotsState.value = snapshotsState.value + (cycleId to current.copy(

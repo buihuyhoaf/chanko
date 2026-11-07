@@ -11,6 +11,7 @@ import com.hoabh.chanko.domain.policy.FreezeCountdownCalculator
 import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
+import com.hoabh.chanko.presentation.base.OfflineWriteGate
 import com.hoabh.chanko.presentation.base.UiText
 import com.hoabh.chanko.presentation.features.home.mapper.HomeCurrencyFormatter
 import com.hoabh.chanko.presentation.features.myitems.ItemDisplayStatus
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class ItemDetailViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
     private val purchaseRepository: PurchaseRepository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val offlineWriteGate: OfflineWriteGate? = null
 ) : ViewModel() {
 
     private val itemId: Int = checkNotNull(
@@ -229,6 +231,10 @@ class ItemDetailViewModel @Inject constructor(
                 // GAP-02: Skip Waiting kết thúc phiên chờ và chuyển sang Ready để đưa ra quyết định
                 _uiState.update { it.copy(isSkipWaitingConfirmDialogOpen = false) }
                 viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
                     val current = _uiState.value
                     if (current.id > 0) {
                         _uiState.update {
@@ -256,6 +262,10 @@ class ItemDetailViewModel @Inject constructor(
             is ItemDetailUiEvent.ConfirmReFreeze -> {
                 _uiState.update { it.copy(isReFreezeConfirmDialogOpen = false) }
                 viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
                     val current = _uiState.value
                     val now = System.currentTimeMillis()
                     val newDuration = FreezeDurationPolicy.calculateDurationMillis(current.rawPrice)
@@ -300,6 +310,10 @@ class ItemDetailViewModel @Inject constructor(
             is ItemDetailUiEvent.ConfirmPurchase -> {
                 _uiState.update { it.copy(isRecordPurchaseSheetOpen = false) }
                 viewModelScope.launch {
+                    if (offlineWriteGate != null && !offlineWriteGate.isNetworkAvailable()) {
+                        _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này.")))
+                        return@launch
+                    }
                     purchaseRepository.recordPurchase(event.purchase)
                     _effect.emit(ItemDetailUiEffect.ShowToast(UiText.StringResource(R.string.purchase_record_success)))
                 }
