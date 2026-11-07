@@ -353,19 +353,19 @@ Xây dựng module điều phối thông báo Push Notification và tổng hợp
 5. Email tổng kết: bản tin tóm tắt các món đang Freeze, tình hình ngân sách và thành tích nuôi Chanko. Tuyệt đối không dùng thông báo để kích thích mua sắm.
 
 **Acceptance criteria:**
-- [ ] `NotificationScheduler` lên lịch các thông báo theo đúng kịch bản nghiệp vụ.
-- [ ] Người dùng chạm vào thông báo hỏi mua hàng có thể chọn nhanh trạng thái hoặc mở ứng dụng để xác nhận.
-- [ ] Nội dung thông báo không bao giờ khuyến khích mua hàng mà tập trung hỗ trợ tự phản tư.
-- [ ] Unit tests kiểm tra điều kiện phát và nội dung thông báo cho từng kịch bản.
+- [x] `NotificationScheduler` (hoặc `NotificationDispatcher`) lên lịch các thông báo theo đúng kịch bản nghiệp vụ.
+- [x] Người dùng chạm vào thông báo hỏi mua hàng có thể chọn nhanh trạng thái hoặc mở ứng dụng để xác nhận.
+- [x] Nội dung thông báo không bao giờ khuyến khích mua hàng mà tập trung hỗ trợ tự phản tư.
+- [x] Unit tests kiểm tra điều kiện phát và nội dung thông báo cho từng kịch bản.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*NotificationSchedulerTest*"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "*NotificationDispatcherTest*"`
 
 **Dependencies:** Task 1, Task 7, Task 8
 
 **Files likely touched:**
 - `app/src/main/java/com/hoabh/chanko/data/notification/NotificationDispatcher.kt`
-- `app/src/main/java/com/hoabh/chanko/data/notification/DailyCheckInReminderWorker.kt`
+- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/notification/NotificationModels.kt`
 - `app/src/test/java/com/hoabh/chanko/data/notification/NotificationDispatcherTest.kt`
 
 **Estimated scope:** Medium (3 files)
