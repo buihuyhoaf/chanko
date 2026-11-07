@@ -8,14 +8,18 @@ import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
+import com.hoabh.chanko.domain.budget.model.BudgetGalleryOverview
 import com.hoabh.chanko.domain.budget.model.BudgetLoadException
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
 import com.hoabh.chanko.domain.budget.model.BudgetSaveException
+import com.hoabh.chanko.domain.budget.model.BudgetSetupState
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.BudgetTemporalRole
 import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
+import com.hoabh.chanko.domain.budget.model.MonthlyBudgetOverview
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.TriCycleWindow
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
@@ -25,12 +29,30 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import java.time.YearMonth
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FakeBudgetRepository @Inject constructor() : BudgetRepository {
+
+    data class FakeMonthRecord(
+        val limitMinor: Long?,
+        val actualSpentMinor: Long?
+    )
+
+    override val firstEstablishedMonth: YearMonth = YearMonth.of(2026, 9)
+    val currentClockMonth: YearMonth = YearMonth.of(2026, 11)
+
+    private val monthlyRecordsState = MutableStateFlow<Map<YearMonth, FakeMonthRecord>>(
+        mapOf(
+            YearMonth.of(2026, 9) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 5_550_000L),
+            YearMonth.of(2026, 10) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 6_200_000L),
+            YearMonth.of(2026, 11) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 3_650_000L)
+            // 2026-12 starts unconfigured (Missing)
+        )
+    )
 
     // --- State Storage ---
     private val isOnlineState = MutableStateFlow(true)
@@ -614,5 +636,106 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     fun setNoPreviousCycleForTesting() {
         val current = cyclesState.value.first { it.isCurrent }
         cyclesState.value = cyclesState.value.filter { it.ordinal >= current.ordinal }
+    }
+
+    override fun getYearGalleryOverview(year: Int): Flow<BudgetGalleryOverview> {
+        return combine(
+            monthlyRecordsState,
+            isOnlineState
+        ) { records, online ->
+            val startMonth = if (year == firstEstablishedMonth.year) {
+                firstEstablishedMonth.monthValue
+            } else if (year < firstEstablishedMonth.year) {
+                13 // Không hiển thị tháng trước năm thiết lập đầu tiên
+            } else {
+                1
+            }
+
+            val monthOverviews = if (startMonth <= 12) {
+                (startMonth..12).map { monthNum ->
+                    val ym = YearMonth.of(year, monthNum)
+                    val record = records[ym]
+                    val role = when {
+                        ym < currentClockMonth -> BudgetTemporalRole.Past
+                        ym == currentClockMonth -> BudgetTemporalRole.Current
+                        else -> BudgetTemporalRole.Future
+                    }
+                    val isConfigured = record?.limitMinor != null && record.limitMinor > 0L
+                    val setupState = if (isConfigured) BudgetSetupState.Configured else BudgetSetupState.Missing
+
+                    if (role == BudgetTemporalRole.Future) {
+                        MonthlyBudgetOverview(
+                            yearMonth = ym,
+                            temporalRole = role,
+                            setupState = setupState,
+                            limitMinor = record?.limitMinor,
+                            actualSpentMinor = null,
+                            remainingMinor = null,
+                            overMinor = null,
+                            usagePercent = null,
+                            isOverBudget = false,
+                            themeMonth = ym.monthValue,
+                            canEdit = true
+                        )
+                    } else {
+                        val limit = record?.limitMinor
+                        val spent = record?.actualSpentMinor ?: 0L
+                        val metrics = if (limit != null && limit > 0L) {
+                            BudgetCalculation.calculateMetrics(limit, spent)
+                        } else null
+
+                        MonthlyBudgetOverview(
+                            yearMonth = ym,
+                            temporalRole = role,
+                            setupState = setupState,
+                            limitMinor = limit,
+                            actualSpentMinor = spent,
+                            remainingMinor = metrics?.remainingMinor,
+                            overMinor = metrics?.overMinor,
+                            usagePercent = metrics?.realPercentInt,
+                            isOverBudget = metrics?.isOverBudget ?: false,
+                            themeMonth = ym.monthValue,
+                            canEdit = (role == BudgetTemporalRole.Current)
+                        )
+                    }
+                }
+            } else {
+                emptyList()
+            }
+
+            val annualTotal = BudgetCalculation.calculateAnnualConfiguredTotal(monthOverviews.map { it.limitMinor })
+            val configuredCount = monthOverviews.count { it.setupState == BudgetSetupState.Configured }
+
+            BudgetGalleryOverview(
+                selectedYear = year,
+                firstEstablishedMonth = firstEstablishedMonth,
+                currentClockMonth = currentClockMonth,
+                annualConfiguredTotalMinor = annualTotal,
+                configuredMonthsCount = configuredCount,
+                months = monthOverviews,
+                isOnline = online,
+                lastSyncedAt = if (!online) initialDataTimestamp else System.currentTimeMillis()
+            )
+        }
+    }
+
+    override suspend fun setBudgetForMonth(yearMonth: YearMonth, limitMinor: Long): Result<Unit> {
+        if (!isOnlineState.value) {
+            return Result.failure(BudgetOfflineException())
+        }
+        if (limitMinor <= 0L) {
+            return Result.failure(InvalidBudgetAmountException())
+        }
+        if (yearMonth < currentClockMonth) {
+            return Result.failure(BudgetPastCycleException())
+        }
+
+        val existing = monthlyRecordsState.value[yearMonth]
+        val updated = FakeMonthRecord(
+            limitMinor = limitMinor,
+            actualSpentMinor = existing?.actualSpentMinor
+        )
+        monthlyRecordsState.value = monthlyRecordsState.value + (yearMonth to updated)
+        return Result.success(Unit)
     }
 }
