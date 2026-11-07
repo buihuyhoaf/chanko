@@ -8,9 +8,11 @@ Tài liệu này định nghĩa các quy chuẩn code (Coding Standards), kiến
 
 Dự án áp dụng mô hình Clean Architecture kết hợp MVVM, chia theo các module / package rõ ràng:
 
-- **Presentation Layer** (`app/src/main/java/.../presentation/` hoặc `feature/*`):
-  - Chứa UI (Jetpack Compose), Screen, ViewModel, UI State (`UiState`), UI Event / Effect (`UiEvent`, `UiAction`).
-  - Presentation chỉ phụ thuộc vào Domain layer (UseCases, Domain Models), không phụ thuộc trực tiếp vào Data layer hay database.
+- **Presentation Layer** (`app/src/main/java/.../presentation/features/` hoặc `feature/*`):
+  - Áp dụng kiến trúc Feature-Driven (`presentation/features/<feature>/`):
+    - **Single-Screen Feature** (`home`, `archived`): Đặt phẳng `<Feature>Screen.kt`, `<Feature>ViewModel.kt`, `<Feature>UiState.kt` ở root; folder con `components/` (khi có $\ge 2$ subcomponents) và `mapper/` (UI mappers, tuyệt đối không đặt tên là `domain`).
+    - **Multi-Screen Feature** (`chat`, `additem`, `auth`): Mỗi màn hình con là 1 subpackage (`chat/list/`, `chat/detail/`), `components/` dùng chung cho toàn bộ feature, `navigation/` cho nested sub-graph.
+  - Presentation chỉ phụ thuộc vào Domain layer (UseCases, Domain Models), không phụ thuộc trực tiếp vào Data layer hay database. Tuyệt đối không đặt folder `domain/` hay `data/` trong presentation.
 - **Domain Layer** (`core/domain/` hoặc từng feature domain):
   - Chứa pure Kotlin code: Domain Models, Repository Interfaces, UseCases.
   - Tuyệt đối **không** phụ thuộc Android SDK (không `Context`, không `android.os.*`, không Compose).

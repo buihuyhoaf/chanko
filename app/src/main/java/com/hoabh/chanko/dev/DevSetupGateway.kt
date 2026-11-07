@@ -1,9 +1,9 @@
 package com.hoabh.chanko.dev
 
-import com.hoabh.chanko.presentation.screens.setup.components.SetupDraft
-import com.hoabh.chanko.presentation.screens.setup.components.SetupGateway
-import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
-import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
+import com.hoabh.chanko.presentation.features.setup.components.SetupDraft
+import com.hoabh.chanko.presentation.features.setup.components.SetupGateway
+import com.hoabh.chanko.presentation.features.setup.components.SetupStatus
+import com.hoabh.chanko.presentation.features.setup.components.SetupSubmission
 
 /**
  * Gateway giả lập cho màn hình Thiết lập ban đầu (Setup) ở môi trường dev.

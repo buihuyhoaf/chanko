@@ -12,7 +12,7 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.domain.model.CooldownItem
 import androidx.compose.ui.graphics.Color
-import com.hoabh.chanko.presentation.screens.myitems.ItemDisplayStatus
+import com.hoabh.chanko.presentation.features.myitems.ItemDisplayStatus
 import com.hoabh.chanko.ui.theme.CandyColors
 import java.text.NumberFormat
 import java.util.Locale

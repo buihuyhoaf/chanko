@@ -1,8 +1,8 @@
 package com.hoabh.chanko
 
 import com.hoabh.chanko.domain.auth.*
-import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginUiEffect
-import com.hoabh.chanko.presentation.screens.login.viewmodel.LoginViewModel
+import com.hoabh.chanko.presentation.features.login.LoginUiEffect
+import com.hoabh.chanko.presentation.features.login.LoginViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.*

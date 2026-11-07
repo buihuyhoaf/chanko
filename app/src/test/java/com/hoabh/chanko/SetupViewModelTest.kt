@@ -1,12 +1,12 @@
 package com.hoabh.chanko
 
-import com.hoabh.chanko.presentation.screens.setup.components.SetupDraft
-import com.hoabh.chanko.presentation.screens.setup.components.SetupGateway
-import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
-import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
-import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
-import com.hoabh.chanko.presentation.screens.setup.viewmodel.SetupViewModel
+import com.hoabh.chanko.presentation.features.setup.components.SetupDraft
+import com.hoabh.chanko.presentation.features.setup.components.SetupGateway
+import com.hoabh.chanko.presentation.features.setup.components.SetupStatus
+import com.hoabh.chanko.presentation.features.setup.components.SetupSubmission
+import com.hoabh.chanko.presentation.features.setup.SetupPage
+import com.hoabh.chanko.presentation.features.setup.SetupProblem
+import com.hoabh.chanko.presentation.features.setup.SetupViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.*

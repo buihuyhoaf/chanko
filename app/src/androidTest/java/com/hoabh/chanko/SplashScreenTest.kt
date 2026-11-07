@@ -10,8 +10,8 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
 import androidx.test.platform.app.InstrumentationRegistry
-import com.hoabh.chanko.presentation.screens.splash.SplashContent
-import com.hoabh.chanko.presentation.screens.splash.SplashScreen
+import com.hoabh.chanko.presentation.features.splash.SplashContent
+import com.hoabh.chanko.presentation.features.splash.SplashScreen
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import android.graphics.Bitmap
 import java.io.File
