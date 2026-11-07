@@ -8,6 +8,8 @@ import com.hoabh.chanko.presentation.features.home.mapper.JourneyItemCandidate
 sealed interface HomeUiEvent {
     // 1. Header (AC-02)
     data object AvatarTap : HomeUiEvent
+    data object ResourcePillTap : HomeUiEvent
+    data object DismissResourceSheet : HomeUiEvent
 
     // 2. Budget Credit Card (AC-04, AC-08, AC-25) & Carousel v2.2 (BC22-01..BC22-20)
     data object BudgetCardTap : HomeUiEvent

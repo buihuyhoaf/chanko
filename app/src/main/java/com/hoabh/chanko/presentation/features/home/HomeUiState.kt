@@ -61,7 +61,11 @@ data class HeaderUiModel(
     val isOffline: Boolean = false,
     val lastSyncedAtText: String? = null,
     val customGreeting: String? = null,
-    val customSubtitle: String? = null
+    val customSubtitle: String? = null,
+    val hatBalance: Long = 0L,
+    val pateBalance: Long = 0L,
+    val currentLevel: Int = 1,
+    val pateProgressFraction: Float = 0f
 ) {
     val displayName: String
         get() = userName.trim()
@@ -346,6 +350,7 @@ data class HomeUiState(
     val isRefreshing: Boolean = false,
     val isOffline: Boolean = false,
     val isReducedMotionEnabled: Boolean = false,
+    val isResourceSheetOpen: Boolean = false,
     val scrollAnchorItemId: String? = null,
     val selectedTab: HomeTab = HomeTab.Home,
     val carouselResetTrigger: Long = 0L

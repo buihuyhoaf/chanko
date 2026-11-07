@@ -83,6 +83,14 @@ class HomeViewModel @Inject constructor(
                 emitNavigationOnce(HomeUiEffect.NavigateToProfile)
             }
 
+            HomeUiEvent.ResourcePillTap -> {
+                updateState { it.copy(isResourceSheetOpen = true) }
+            }
+
+            HomeUiEvent.DismissResourceSheet -> {
+                updateState { it.copy(isResourceSheetOpen = false) }
+            }
+
             HomeUiEvent.BudgetCardTap -> {
                 emitNavigationOnce(HomeUiEffect.NavigateToBudgetDetails)
             }

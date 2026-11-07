@@ -287,14 +287,14 @@ Nâng cấp phần Header/TopBar của `HomeScreen` để hiển thị trực qu
 - Giữ nguyên cấu trúc `BudgetCreditCardCarousel` và `ItemJourneySection`.
 
 **Acceptance criteria:**
-- [ ] TopBar hiển thị đầy đủ 2 chip thông tin: Hạt và Level Chanko (kèm tiến độ Pate).
-- [ ] Format số lượng Hạt thân thiện (ví dụ: `150 Hạt`).
-- [ ] Chạm vào chip hiển thị BottomSheet tóm tắt thông tin tài nguyên và lịch sử nhận thưởng gần nhất.
-- [ ] Không làm xô lệch hoặc gián đoạn layout của Carousel ngân sách v2.2 và danh sách món đồ phía dưới.
+- [x] TopBar hiển thị đầy đủ 2 chip thông tin: Hạt và Level Chanko (kèm tiến độ Pate).
+- [x] Format số lượng Hạt thân thiện (ví dụ: `150 Hạt`).
+- [x] Chạm vào chip hiển thị BottomSheet tóm tắt thông tin tài nguyên và lịch sử nhận thưởng gần nhất.
+- [x] Không làm xô lệch hoặc gián đoạn layout của Carousel ngân sách v2.2 và danh sách món đồ phía dưới.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*HomeHeaderResourceTest*"`
-- [ ] Build succeeds: `./gradlew compileDebugKotlin`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 5, Task 8
 

@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import com.hoabh.chanko.domain.rewards.DefaultLevelProgressionTable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -83,7 +87,8 @@ fun HomeHeader(
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
     collapseFraction: Float = 0f,
-    canOpenProfile: Boolean = true
+    canOpenProfile: Boolean = true,
+    onResourceClick: () -> Unit = {}
 ) {
     val clampedFraction = collapseFraction.coerceIn(0f, 1f)
     val greetingText = header.customGreeting ?: resolveGreetingText(header)
@@ -200,6 +205,20 @@ fun HomeHeader(
             }
         }
 
+        // Chip Tài nguyên (Hạt & Cấp độ Chanko / Pate)
+        if (clampedFraction < 0.7f) {
+            val chipsAlpha = (1f - clampedFraction * 1.4f).coerceIn(0f, 1f)
+            if (chipsAlpha > 0f) {
+                HomeResourceChipsRow(
+                    hatBalance = header.hatBalance,
+                    currentLevel = header.currentLevel,
+                    pateProgressFraction = header.pateProgressFraction,
+                    onResourceClick = onResourceClick,
+                    modifier = Modifier.graphicsLayer { alpha = chipsAlpha }
+                )
+            }
+        }
+
         // Dải banner ngoại tuyến đầy đủ (ẩn dần khi cuộn xuống)
         if (header.isOffline && clampedFraction < 0.85f) {
             val bannerAlpha = (1f - clampedFraction * 1.4f).coerceIn(0f, 1f)
@@ -254,6 +273,80 @@ private fun resolveGreetingText(header: HeaderUiModel): String {
             GreetingPeriod.MORNING -> stringResource(R.string.home_greeting_morning_anonymous)
             GreetingPeriod.AFTERNOON -> stringResource(R.string.home_greeting_afternoon_anonymous)
             GreetingPeriod.EVENING -> stringResource(R.string.home_greeting_evening_anonymous)
+        }
+    }
+}
+
+@Composable
+fun HomeResourceChipsRow(
+    hatBalance: Long,
+    currentLevel: Int,
+    pateProgressFraction: Float,
+    onResourceClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = CandySpace.xs),
+        horizontalArrangement = Arrangement.spacedBy(CandySpace.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Pill Hạt
+        Surface(
+            shape = CandyShape.chip,
+            color = Color(0xFFFFF8F2),
+            border = BorderStroke(1.dp, CandyColors.homeCardBorder),
+            modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = CandySpace.md, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+            ) {
+                ChankoIcon(id = ChankoIconId.ITM_01, contentDescription = null, size = 16.dp)
+                Text(
+                    text = "$hatBalance Hạt",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = CandyColors.textPrimary
+                )
+            }
+        }
+
+        // Pill Level Chanko & Thanh tiến độ Pate
+        Surface(
+            shape = CandyShape.chip,
+            color = Color(0xFFFFF8F2),
+            border = BorderStroke(1.dp, CandyColors.homeCardBorder),
+            modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = CandySpace.md, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+            ) {
+                Text(
+                    text = "Lv. $currentLevel",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = CandyColors.primaryInk
+                )
+                // Mini progress bar
+                Box(
+                    modifier = Modifier
+                        .width(44.dp)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(CandyColors.outline)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(pateProgressFraction.coerceIn(0f, 1f))
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(CandyColors.primary)
+                    )
+                }
+            }
         }
     }
 }

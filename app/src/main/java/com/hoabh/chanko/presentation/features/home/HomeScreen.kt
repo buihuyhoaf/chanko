@@ -24,6 +24,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -289,6 +292,7 @@ fun HomeScreen(
             HomeHeader(
                 header = state.header,
                 onProfileClick = { onEvent(HomeUiEvent.AvatarTap) },
+                onResourceClick = { onEvent(HomeUiEvent.ResourcePillTap) },
                 collapseFraction = collapseFraction,
                 modifier = Modifier
                     .widthIn(max = MaxContentWidthDp)
@@ -413,6 +417,51 @@ fun HomeScreen(
                 onDismiss = { onEvent(HomeUiEvent.DismissInsightDialog) },
                 onHideInsight = { id -> onEvent(HomeUiEvent.InsightHideTap(id)) }
             )
+        }
+
+        if (state.isResourceSheetOpen) {
+            ModalBottomSheet(
+                onDismissRequest = { onEvent(HomeUiEvent.DismissResourceSheet) },
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                androidx.compose.foundation.layout.Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(CandySpace.section),
+                    verticalArrangement = Arrangement.spacedBy(CandySpace.md)
+                ) {
+                    Text(
+                        text = "Tài nguyên & Cấp độ Chanko",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Hạt: ${state.header.hatBalance} (Dùng cho tiện ích hoặc bị trừ khi Unfreeze sớm)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Pate: ${state.header.pateBalance} (Điểm phát triển Level cho Chanko)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "• Cấp độ hiện tại: Level ${state.header.currentLevel}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CandyColors.primary,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(CandySpace.sm))
+                    Button(
+                        onClick = { onEvent(HomeUiEvent.DismissResourceSheet) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = CandyColors.primary)
+                    ) {
+                        Text("Đóng", color = androidx.compose.ui.graphics.Color.White)
+                    }
+                }
+            }
         }
     }
 }
