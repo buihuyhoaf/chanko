@@ -307,4 +307,6 @@
     <string name="transaction_detail_default_item_name">Món đồ</string>
     <string name="transaction_detail_save_success">Đã lưu thay đổi giao dịch</string>
     <string name="transaction_detail_delete_success">Đã xóa giao dịch nhập sai</string>
+    <string name="budget_detail_title">Chi tiết ngân sách</string>
+    <string name="budget_recent_activity_title">Hoạt động gần đây</string>
 </resources>

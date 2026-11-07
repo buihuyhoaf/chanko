@@ -520,7 +520,7 @@ fun CardOrganicBackground(
 }
 
 @Composable
-private fun CreditCardTopBar(
+internal fun CreditCardTopBar(
     monthLabel: String = "",
     badge: (@Composable () -> Unit)? = null
 ) {
@@ -604,7 +604,7 @@ private fun DecorativePawMark(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
+internal fun DecorativeGoldChip(modifier: Modifier = Modifier) {
     val chipFill = CandyColors.HomeV2.chipGold
     val chipStroke = CandyColors.HomeV2.chipGoldStroke
     Canvas(modifier = modifier) {
@@ -643,7 +643,7 @@ private fun DecorativeGoldChip(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DecorativeContactlessWaves(modifier: Modifier = Modifier) {
+internal fun DecorativeContactlessWaves(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         val stroke = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round)
         val radii = listOf(0.28f, 0.50f, 0.72f, 0.94f)
