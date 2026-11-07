@@ -315,13 +315,13 @@ Hiện thực hóa phản hồi biểu cảm của Chanko Mascot:
 - Khi người dùng bấm Unfreeze sớm: hiển thị Dialog xác nhận chi phí Hạt và Pate bị trừ với giọng điệu hoàn toàn trung lập, minh bạch và không phán xét. Chanko không khóc, không giận dỗi hay trách móc người dùng (`MASCOT-FEEDING = A`).
 
 **Acceptance criteria:**
-- [ ] Dialog Unfreeze hiển thị rõ ràng: số Hạt và Pate sẽ bị trừ, số dư còn lại sau khi trừ, và nút xác nhận Unfreeze.
-- [ ] Văn bản trong dialog mang giọng điệu khách quan, hỗ trợ, không dùng từ ngữ tiêu cực hay tạo cảm giác tội lỗi.
-- [ ] Khi lên cấp: hiển thị hiệu ứng thông báo chúc mừng Chanko đã lớn hơn (tăng Level).
-- [ ] Unit tests kiểm tra trạng thái cảm xúc của Mascot theo từng sự kiện.
+- [x] Dialog Unfreeze hiển thị rõ ràng: số Hạt và Pate sẽ bị trừ, số dư còn lại sau khi trừ, và nút xác nhận Unfreeze.
+- [x] Văn bản trong dialog mang giọng điệu khách quan, hỗ trợ, không dùng từ ngữ tiêu cực hay tạo cảm giác tội lỗi.
+- [x] Khi lên cấp: hiển thị hiệu ứng thông báo chúc mừng Chanko đã lớn hơn (tăng Level).
+- [x] Unit tests kiểm tra trạng thái cảm xúc của Mascot theo từng sự kiện.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest --tests "*MascotEmotionStateTest*"`
+- [x] Tests pass: `./gradlew testDebugUnitTest --tests "*MascotEmotionStateTest*"`
 
 **Dependencies:** Task 4, Task 6, Task 10
 
@@ -335,8 +335,8 @@ Hiện thực hóa phản hồi biểu cảm của Chanko Mascot:
 ---
 
 ### Checkpoint 4: Home & Mascot Interaction Verified
-- [ ] Header hiển thị đầy đủ Hạt, Pate và Level Chanko.
-- [ ] Mascot tương tác tích cực khi nhận thưởng và trung lập khi Unfreeze sớm.
+- [x] Header hiển thị đầy đủ Hạt, Pate và Level Chanko.
+- [x] Mascot tương tác tích cực khi nhận thưởng và trung lập khi Unfreeze sớm.
 
 ---
 

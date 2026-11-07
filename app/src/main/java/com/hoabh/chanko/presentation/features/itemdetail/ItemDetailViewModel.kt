@@ -9,6 +9,7 @@ import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.model.PurchaseTransaction
 import com.hoabh.chanko.domain.policy.FreezeCountdownCalculator
 import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
+import com.hoabh.chanko.domain.rewards.UnfreezeCostCalculator
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
 import com.hoabh.chanko.presentation.base.OfflineWriteGate
@@ -178,6 +179,12 @@ class ItemDetailViewModel @Inject constructor(
                     )
                 }
 
+                val fee = UnfreezeCostCalculator.calculateFee(
+                    lockedPriceVnd = item.price,
+                    remainingMillis = remMillis,
+                    totalDurationMillis = item.cooldownDurationMillis
+                )
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -197,6 +204,8 @@ class ItemDetailViewModel @Inject constructor(
                         primaryCtaText = ctaText,
                         decisionJourney = journey,
                         purchaseHistory = mappedPurchases,
+                        unfreezeHatFee = fee.hatFee,
+                        unfreezePateFee = fee.pateFee,
                         speechBubbleUiText = speechUiText,
                         primaryCtaUiText = ctaUiText,
                         remainingFormattedUiText = remainingUiText,
@@ -225,7 +234,21 @@ class ItemDetailViewModel @Inject constructor(
                 }
             }
             is ItemDetailUiEvent.RequestSkipWaiting -> {
-                _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isSkipWaitingConfirmDialogOpen = true) }
+                val current = _uiState.value
+                val remMillis = current.remainingMillis
+                val fee = UnfreezeCostCalculator.calculateFee(
+                    lockedPriceVnd = current.rawPrice,
+                    remainingMillis = remMillis,
+                    totalDurationMillis = maxOf(remMillis, 86_400_000L)
+                )
+                _uiState.update {
+                    it.copy(
+                        isMoreOptionsSheetOpen = false,
+                        isSkipWaitingConfirmDialogOpen = true,
+                        unfreezeHatFee = fee.hatFee,
+                        unfreezePateFee = fee.pateFee
+                    )
+                }
             }
             is ItemDetailUiEvent.ConfirmSkipWaiting -> {
                 // GAP-02: Skip Waiting kết thúc phiên chờ và chuyển sang Ready để đưa ra quyết định
@@ -243,8 +266,8 @@ class ItemDetailViewModel @Inject constructor(
                                 remainingFormatted = "Đã kết thúc thời gian chờ",
                                 remainingFormattedUiText = UiText.StringResource(R.string.item_status_cooldown_finished),
                                 displayStatus = ItemDisplayStatus.ReadyForReview,
-                                speechBubbleText = "Bạn đã kết thúc thời gian chờ. Giờ là lúc đưa ra quyết định.",
-                                speechBubbleUiText = UiText.StringResource(R.string.item_detail_speech_decision_time)
+                                speechBubbleText = "Bạn đã mở sớm thời gian chờ. Giờ là lúc đưa ra quyết định mua hoặc bỏ qua.",
+                                speechBubbleUiText = UiText.DynamicString("Bạn đã mở sớm thời gian chờ. Giờ là lúc đưa ra quyết định mua hoặc bỏ qua.")
                             )
                         }
                     }
