@@ -180,7 +180,7 @@ object JourneySelector {
                 continue
             }
 
-            val isCoolingExpired = parsedStatus == JourneyNodeStatus.Waiting &&
+            val isCoolingExpired = parsedStatus == JourneyNodeStatus.CoolingOff &&
                 candidate.remainingSeconds != null &&
                 candidate.remainingSeconds <= 0L
 
@@ -233,12 +233,10 @@ object JourneySelector {
     }
 
     fun parseStatus(raw: String?): JourneyNodeStatus? = when (raw?.trim()) {
-        "Saved" -> JourneyNodeStatus.Saved
-        "Considering" -> JourneyNodeStatus.Considering
-        "Waiting", "CoolingOff" -> JourneyNodeStatus.Waiting
-        "Ready", "Review" -> JourneyNodeStatus.Ready
-        "Purchased", "Bought" -> JourneyNodeStatus.Purchased
-        "Skipped", "Passed" -> JourneyNodeStatus.Skipped
+        "Waiting", "CoolingOff", "FreezeActive", "FREEZE_ACTIVE", "Saved", "Considering" -> JourneyNodeStatus.CoolingOff
+        "Ready", "Review", "READY_FOR_REVIEW" -> JourneyNodeStatus.Ready
+        "Purchased", "Bought", "BOUGHT", "UNFROZEN_EARLY" -> JourneyNodeStatus.Purchased
+        "Skipped", "Passed", "PASSED" -> JourneyNodeStatus.Skipped
         else -> null
     }
 }

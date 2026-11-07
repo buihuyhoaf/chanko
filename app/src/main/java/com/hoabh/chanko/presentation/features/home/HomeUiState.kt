@@ -265,19 +265,15 @@ enum class DecisionVerdict {
 }
 
 /**
- * 6 trạng thái hợp lệ của node trên Item Journey v2.0 (UX-SPEC.md, DESIGN-TOKENS.json, AC-14):
- * - Saved ("Đã lưu")
- * - Considering ("Đang cân nhắc")
- * - Waiting ("Đang chờ")
- * - Ready ("Sẵn sàng xem lại")
+ * 4 trạng thái hợp lệ của node trên Item Journey (SPEC-cooling-off-journey-visuals.md):
+ * - CoolingOff ("Đang hạ nhiệt")
+ * - Ready ("Sẵn sàng xem xét")
  * - Purchased ("Đã mua")
  * - Skipped ("Đã bỏ qua")
  */
 enum class JourneyNodeStatus(val vietnameseLabel: String) {
-    Saved("Đã lưu"),
-    Considering("Đang cân nhắc"),
-    Waiting("Đang chờ"),
-    Ready("Sẵn sàng xem lại"),
+    CoolingOff("Đang hạ nhiệt"),
+    Ready("Sẵn sàng xem xét"),
     Purchased("Đã mua"),
     Skipped("Đã bỏ qua")
 }

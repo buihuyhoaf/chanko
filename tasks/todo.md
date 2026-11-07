@@ -578,14 +578,14 @@ Loại bỏ hoàn toàn các trạng thái tàn dư cũ (`Saved` - "Đã lưu", 
 Cập nhật `HomeDomainLogic.kt` (`parseStatus` và `selectRecentJourney`) để ánh xạ chuẩn xác, cập nhật các kịch bản mẫu trong `HomeFakeDataSource.kt` và sửa đổi `HomeDomainLogicTest.kt`.
 
 **Acceptance criteria:**
-- [ ] `JourneyNodeStatus` chỉ còn 4 trạng thái: `CoolingOff`, `Ready`, `Purchased`, `Skipped`.
-- [ ] `HomeDomainLogic.parseStatus()` ánh xạ `"Waiting"`, `"CoolingOff"`, `"FreezeActive"` về `JourneyNodeStatus.CoolingOff`.
-- [ ] Khi hết thời gian đếm ngược (`remainingSeconds <= 0L`), tự động chuyển sang `JourneyNodeStatus.Ready`.
-- [ ] Mock data trong `HomeFakeDataSource.kt` không còn dùng trạng thái cũ `Saved` / `Considering`.
+- [x] `JourneyNodeStatus` chỉ còn 4 trạng thái: `CoolingOff`, `Ready`, `Purchased`, `Skipped`.
+- [x] `HomeDomainLogic.parseStatus()` ánh xạ `"Waiting"`, `"CoolingOff"`, `"FreezeActive"` về `JourneyNodeStatus.CoolingOff`.
+- [x] Khi hết thời gian đếm ngược (`remainingSeconds <= 0L`), tự động chuyển sang `JourneyNodeStatus.Ready`.
+- [x] Mock data trong `HomeFakeDataSource.kt` không còn dùng trạng thái cũ `Saved` / `Considering`.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
-- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Checkpoint 6
 

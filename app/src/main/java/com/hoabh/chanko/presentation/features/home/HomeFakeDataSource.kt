@@ -46,15 +46,16 @@ class HomeFakeDataSource @Inject constructor() {
             itemId = "item_1",
             title = "Tai nghe chụp tai không dây",
             priceMinor = 1_250_000L,
-            statusRaw = "Saved",
+            statusRaw = "CoolingOff",
             createdAtEpochMillis = 1_762_200_100_000L,
+            remainingSeconds = 86_400L,
             thumbnailResId = R.drawable.sample_headphones
         ),
         JourneyItemCandidate(
             itemId = "item_2",
             title = "Áo khoác thể thao",
             priceMinor = 1_650_000L,
-            statusRaw = "Waiting",
+            statusRaw = "CoolingOff",
             createdAtEpochMillis = 1_762_200_200_000L,
             remainingSeconds = 43_200L,
             thumbnailResId = R.drawable.sample_jacket
@@ -79,8 +80,9 @@ class HomeFakeDataSource @Inject constructor() {
             itemId = "item_5",
             title = "Balo vải chống thấm nước",
             priceMinor = 550_000L,
-            statusRaw = "Considering",
+            statusRaw = "CoolingOff",
             createdAtEpochMillis = 1_762_200_500_000L,
+            remainingSeconds = 172_800L,
             thumbnailResId = R.drawable.sample_jacket
         ),
         JourneyItemCandidate(

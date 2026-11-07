@@ -97,15 +97,7 @@ data class JourneyNodeVisualStyle(
 )
 
 fun resolveJourneyNodeStyle(status: JourneyNodeStatus): JourneyNodeVisualStyle = when (status) {
-    JourneyNodeStatus.Saved -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusSavedRing,
-        badgeColor = CandyColors.HomeV2.statusSavedRing
-    )
-    JourneyNodeStatus.Considering -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusConsideringRing,
-        badgeColor = CandyColors.HomeV2.statusConsideringInk
-    )
-    JourneyNodeStatus.Waiting -> JourneyNodeVisualStyle(
+    JourneyNodeStatus.CoolingOff -> JourneyNodeVisualStyle(
         ringColor = CandyColors.HomeV2.statusWaitingRing,
         badgeColor = CandyColors.HomeV2.statusWaitingRing
     )
@@ -499,8 +491,8 @@ private fun JourneyProductNode(
         node.priceFormatted
     )
 
-    // Chỉ áp dụng xoay cho item Waiting (đang đếm ngược) hoặc Considering (đang cân nhắc) khi không bật Reduced Motion
-    val isAnimated = (node.status == JourneyNodeStatus.Waiting || node.status == JourneyNodeStatus.Considering) && !isReducedMotionEnabled
+    // Chỉ áp dụng xoay cho item CoolingOff (đang đếm ngược) khi không bật Reduced Motion
+    val isAnimated = (node.status == JourneyNodeStatus.CoolingOff) && !isReducedMotionEnabled
     val infiniteTransition = rememberInfiniteTransition(label = "orbit_ring_transition_${node.itemId}")
     val rotationAngle by if (isAnimated) {
         infiniteTransition.animateFloat(
@@ -650,20 +642,7 @@ private fun JourneyStatusBadge(
                 join = StrokeJoin.Round
             )
             when (status) {
-                JourneyNodeStatus.Saved -> {
-                    // Hình Bookmark trắng
-                    val path = Path().apply {
-                        moveTo(w * 0.22f, h * 0.12f)
-                        lineTo(w * 0.78f, h * 0.12f)
-                        lineTo(w * 0.78f, h * 0.88f)
-                        lineTo(w * 0.50f, h * 0.66f)
-                        lineTo(w * 0.22f, h * 0.88f)
-                        close()
-                    }
-                    drawPath(path = path, color = Color.White)
-                }
-
-                JourneyNodeStatus.Waiting -> {
+                JourneyNodeStatus.CoolingOff -> {
                     // Hình Đồng hồ cát trắng
                     val path = Path().apply {
                         moveTo(w * 0.20f, h * 0.14f)
@@ -696,29 +675,6 @@ private fun JourneyStatusBadge(
                         end = Offset(w * 0.80f, h * 0.50f),
                         strokeWidth = 2.4.dp.toPx(),
                         cap = StrokeCap.Round
-                    )
-                }
-
-                JourneyNodeStatus.Considering -> {
-                    // Hình Dấu hỏi ? trắng
-                    val path = Path().apply {
-                        moveTo(w * 0.28f, h * 0.30f)
-                        cubicTo(
-                            w * 0.28f, h * 0.08f,
-                            w * 0.76f, h * 0.08f,
-                            w * 0.72f, h * 0.36f
-                        )
-                        cubicTo(
-                            w * 0.70f, h * 0.50f,
-                            w * 0.50f, h * 0.50f,
-                            w * 0.50f, h * 0.64f
-                        )
-                    }
-                    drawPath(path = path, color = Color.White, style = stroke)
-                    drawCircle(
-                        color = Color.White,
-                        radius = 1.4.dp.toPx(),
-                        center = Offset(w * 0.50f, h * 0.86f)
                     )
                 }
 

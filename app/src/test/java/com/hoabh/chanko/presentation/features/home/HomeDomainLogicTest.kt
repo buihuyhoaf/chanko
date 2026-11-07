@@ -185,8 +185,8 @@ class HomeDomainLogicTest {
     }
 
     @Test
-    fun `AC-14 All 6 valid statuses map accurately to JourneyNodeStatus`() {
-        val statuses = listOf("Saved", "Considering", "Waiting", "Ready", "Purchased", "Skipped")
+    fun `AC-14 Valid statuses map accurately to 4 Cooling-off JourneyNodeStatus`() {
+        val statuses = listOf("CoolingOff", "Ready", "Purchased", "Skipped")
         val candidates = statuses.mapIndexed { index, status ->
             JourneyItemCandidate(
                 itemId = "item_$index",
@@ -197,18 +197,24 @@ class HomeDomainLogicTest {
             )
         }
 
-        val journey = JourneySelector.selectRecentJourney(candidates, maxNodes = 6)
+        val journey = JourneySelector.selectRecentJourney(candidates, maxNodes = 4)
         assertEquals(
             listOf(
-                JourneyNodeStatus.Saved,
-                JourneyNodeStatus.Considering,
-                JourneyNodeStatus.Waiting,
+                JourneyNodeStatus.CoolingOff,
                 JourneyNodeStatus.Ready,
                 JourneyNodeStatus.Purchased,
                 JourneyNodeStatus.Skipped
             ),
             journey.nodes.map { it.status }
         )
+    }
+
+    @Test
+    fun `AC-14 legacy statuses map to CoolingOff`() {
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Saved"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Considering"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("Waiting"))
+        assertEquals(JourneyNodeStatus.CoolingOff, JourneySelector.parseStatus("FreezeActive"))
     }
 
     @Test
