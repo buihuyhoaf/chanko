@@ -1,0 +1,216 @@
+﻿SHOULD I BUY IT?
+TECH-03 — API & Backend Architecture v1.1
+Ngày cập nhật: 17/10/2026
+Trạng thái: Tổng hợp baseline đã chốt; đặc tả kỹ thuật phục vụ triển khai MVP.
+Phạm vi: Android Native → REST API → FastAPI Modular Monolith.
+Căn cứ: yêu cầu TECH-03 trong phiên làm việc này; Functional Specification v1.1 (SPEC-01–09, INPUT-01–04, ADR-09, AUTH-05); TECH-01 v1.1. TECH-02 được tìm thấy nhưng còn trống tại thời điểm đối chiếu; không coi schema chưa đọc được là schema đã xác minh.
+Các đường dẫn con, tên trường JSON, mã lỗi và ví dụ dưới đây cụ thể hóa hợp đồng API trong phạm vi đã duyệt; không xác nhận rằng từng tên hoặc tham số minh họa đã được phê duyệt riêng. Các giá trị giới hạn vận hành phải được cấu hình, kiểm thử trước triển khai; không mở rộng tính năng sản phẩm.
+
+
+1. Backend Architecture & Module Boundaries
+1.1. Stack và hướng phụ thuộc
+FastAPI chạy dưới dạng một modular monolith. Pydantic 2 kiểm tra DTO đầu vào/đầu ra; SQLAlchemy 2 AsyncSession và asyncpg truy cập PostgreSQL; Alembic quản lý migration. Redis phục vụ rate limiting và dữ liệu hỗ trợ tạm thời, không là nguồn dữ liệu chi tiêu chính thức.
+Luồng xử lý: Router → Application Service → Domain Rules → Repository/Infrastructure. Router xác thực, parse request và ánh xạ HTTP; application service giữ ranh giới transaction; domain kiểm tra bất biến; infrastructure triển khai PostgreSQL, Redis, private object storage và LLM Gateway.
+Mỗi request/use case có AsyncSession riêng, không dùng chung session giữa các coroutine chạy đồng thời. Repository không tự commit; application service commit một lần sau khi toàn bộ thay đổi liên quan hợp lệ. Không giữ transaction/khóa database trong lúc chờ LLM hoặc tải URL ngoài.
+1.2. Trách nhiệm module
+auth: Google challenge/nonce, xác minh danh tính, phiên, token rotation/revocation.
+users: hồ sơ và preferences, gồm personality; không trộn vào purchase accounting.
+shopping_items: CRUD item, trạng thái, skip và decision history.
+purchases: ghi nhận/sửa/xóa giao dịch, Quick Add, repeat/Buy Again; phối hợp budgets và cooling_off.
+budgets: settings, ranh giới chu kỳ tháng có ngày bắt đầu tùy chỉnh, tổng chi và lịch sử.
+payment_methods: PAY_NOW mặc định, CREDIT và card labels; không có số thẻ nhạy cảm hoặc nghiệp vụ dư nợ.
+cooling_off: start/extend/shorten/cancel/review, các phiên và lịch sử.
+ai: conversation/messages, orchestration, verdict và evaluation history; không gọi service ghi purchase hoặc thay trạng thái item.
+product_import: Shopee/Lazada và shortlink, best-effort preview; không tạo item.
+media: presigned upload, xác minh object, liên kết một ảnh/item.
+insights: số liệu định lượng và Story Recap từ dữ liệu thật.
+home: read aggregation qua application/read services của các module; không sở hữu business mutation mới.
+core/shared chỉ chứa cấu hình, security, database, errors, logging và kiểu dùng chung cần thiết. Module khác truy cập qua service/interface rõ ràng; không sửa trực tiếp bảng của module khác, không phụ thuộc vòng. Dùng cùng transaction khi use case cần tính nguyên tử qua nhiều module.
+
+
+2. REST API Contract
+2.1. Quy ước chung
+Base path /api/v1; HTTPS, JSON UTF-8. Authorization: Bearer <access_token> cho endpoint được bảo vệ. ID là opaque identifier; ví dụ dùng UUID. Timestamp là RFC 3339 UTC; ngày mua và chu kỳ được diễn giải theo timezone tài khoản, không theo timezone máy chủ.
+Tiền truyền bằng chuỗi số chính xác cùng currency, tránh float; actual_price là đơn giá VND nguyên, ví dụ "450000". quantity >= 1, mặc định 1. Backend tính total_amount = actual_price × quantity khi tạo/sửa Purchase; Android chỉ xem trước, không rounding. total_amount là trường trả về do server tính, không phải đầu vào có thẩm quyền; bỏ cách hiểu purchase.amount là tổng nhập tay. Giá dự kiến của item độc lập với giá thực.
+GET không thực hiện quyết định mua. POST tạo resource/action; PATCH cập nhật trường được cho phép; DELETE xóa theo quy tắc bảo toàn lịch sử. Không cho client ghi owner_id, tổng chi dẫn xuất hoặc AI verdict qua DTO cập nhật item.
+Response đơn: {"data":{...},"meta":{"request_id":"..."}}. Danh sách: {"data":[...],"page":{"next_cursor":null,"has_more":false},"meta":{"request_id":"..."}}. Cursor pagination với thứ tự ổn định và ID làm tie-breaker; cursor ràng buộc bộ lọc/phạm vi owner, limit có trần cấu hình.
+201 cho tạo mới; 200 cho đọc/cập nhật/action có nội dung; 204 cho xóa không nội dung. Không bọc JSON vào 204. Response chính thức trả version và updated_at cho resource cần kiểm soát xung đột.
+Idempotency-Key bắt buộc cho các POST quan trọng: tạo item/purchase, Quick Add, cooling-off actions, gửi AI message/evaluate, upload completion. Retry của cùng ý định giữ nguyên key; thao tác mới, kể cả Buy Again mới, dùng key mới. PATCH/DELETE kết hợp version và key khi có side effect liên quan.
+2.2. Shopping items
+GET /shopping-items?status=WAITING&cursor=...&limit=...
+POST /shopping-items
+GET /shopping-items/{item_id}
+PATCH /shopping-items/{item_id}
+DELETE /shopping-items/{item_id}
+POST /shopping-items/{item_id}/skip
+Năm trạng thái: WISHLIST, CONSIDERING, WAITING, PURCHASED, SKIPPED (mapping API của Wishlist/Considering/Waiting/Purchased/Skipped). AI BUY/WAIT/SKIP nằm ở model khác.
+Lưu Wishlist không bắt buộc AI. Tạo Purchase chuyển ShoppingItem sang PURCHASED; người dùng vẫn có thể đổi status thủ công mà không tự tạo/xóa Purchase hoặc chi tiêu. WAITING phải tương ứng phiên cooling-off hợp lệ. Skip là quyết định rõ của user; nếu đang chờ, chuyển phiên ACTIVE sang RESOLVED với resolution SKIPPED.
+Xóa item không được cascade mất purchase/history hoặc giảm ngân sách ngoài ý định. Khi đã có giao dịch, giữ liên kết lịch sử bằng chính sách lưu trữ/xóa logic phù hợp TECH-02; nếu chưa có quy tắc bảo toàn khả thi thì trả 409, không xóa vật lý gây mất dữ liệu.
+Ví dụ tạo item:
+POST /api/v1/shopping-items
+Idempotency-Key: <uuid>
+{"name":"Áo khoác","estimated_price":"500000","currency":"VND","status":"WISHLIST","note":"Cần cho chuyến đi"}
+201: {"data":{"id":"<item_id>","name":"Áo khoác","estimated_price":"500000","currency":"VND","status":"WISHLIST","version":1},"meta":{"request_id":"<request_id>"}}
+2.3. Purchases, repeat, Quick Add và Buy Again
+GET /purchases?cycle_id=...&item_id=...&cursor=...
+POST /purchases
+GET /purchases/{purchase_id}
+PATCH /purchases/{purchase_id}
+DELETE /purchases/{purchase_id}
+POST /purchases/quick-add
+Một ShoppingItem có N Purchase. Mark as Purchased, repeat và Buy Again cùng gọi POST /purchases với item_id hiện có. Buy Again luôn do user xác nhận, không tự mua định kỳ; Frequently Purchased chỉ là số liệu lịch sử.
+Quick Add nhận item tối thiểu và purchase trong cùng request, tạo item Purchased và giao dịch trong một transaction; không yêu cầu AI/Wishlist trước đó.
+Ví dụ ghi nhận:
+{"item_id":"<item_id>","actual_price":"450000","currency":"VND","quantity":2,"purchased_at":"2026-10-17T03:00:00Z","payment_type":"PAY_NOW","note":null}
+201: {"data":{"id":"<purchase_id>","item_id":"<item_id>","actual_price":"450000","quantity":2,"total_amount":"900000","currency":"VND","payment_type":"PAY_NOW","card_id":null,"budget_cycle_id":"<cycle_id>","version":1},"meta":{"request_id":"<request_id>"}}
+Ví dụ Quick Add:
+{"item":{"name":"Áo khoác","estimated_price":"500000","currency":"VND"},"purchase":{"actual_price":"450000","currency":"VND","purchased_at":"2026-10-17T03:00:00Z","quantity":1,"payment_type":"CREDIT","card_id":null}}
+Sửa/xóa dành cho giao dịch nhập sai, không biểu diễn Refund. Sửa actual_price/quantity phải tính lại total_amount ở backend, không rounding; sửa ngày/payment tính lại các chu kỳ bị ảnh hưởng. Xóa giao dịch không xóa evaluation và không tự thay đổi trạng thái ShoppingItem, kể cả xóa Purchase cuối; người dùng đổi trạng thái thủ công, không dựng lại cooling-off cũ.
+2.4. Budget và payment methods
+GET /budget/settings; PATCH /budget/settings
+GET /budget/cycles?cursor=...; GET /budget/cycles/current; GET /budget/cycles/{cycle_id}
+GET /payment-methods; POST /payment-methods
+PATCH /payment-methods/{method_id}; DELETE /payment-methods/{method_id}
+Settings chứa amount, currency, cycle_start_day và timezone. cycle_start_day chọn một lần khi setup, từ 1–31; không cho đổi trong MVP. PATCH sau setup vẫn cho đổi budget amount nhưng không cho thay cycle_start_day. Ví dụ PATCH với If-Match: "3":
+{"amount":"5000000"}
+Chỉ một ngân sách mua sắm tổng thể; không tự thêm category budgets hoặc rollover. Ranh giới chu kỳ là [start, next_start), không chồng lấn; ngày mua thực tế quyết định chu kỳ. Chu kỳ mới mở tự động bằng logic idempotent server, không cần Android gửi mutation.
+Ngày bắt đầu 1–31 được giữ cố định sau setup. Tháng thiếu ngày thì dùng ngày cuối tháng, nhưng giữ ngày neo gốc cho tháng tiếp theo. Không có chu kỳ chuyển tiếp vì MVP không cho đổi start day. Vẫn cho đổi budget amount, không rollover; chi tiết hiệu lực amount phải nhất quán với budget_amount_snapshot của TECH-02.
+PAY_NOW được tạo duy nhất mặc định khi đăng ký; không thể xóa làm tài khoản mất phương thức mặc định. CREDIT chỉ mô tả thanh toán và card label; không bắt buộc card_id. Card có tham chiếu cũ được lưu/ẩn an toàn để lịch sử vẫn đọc được. Không lưu PAN/CVV; không có credit limit, debt, repayment, statement hay due date.
+PAY_NOW và CREDIT tính vào tổng chi cùng cách, ngay theo ngày mua. Tổng chi là tổng các purchase hợp lệ; có thể vượt ngân sách, không tự chặn user mua theo lời khuyên AI hoặc tự tạo logic hạn mức tín dụng.
+2.5. Cooling-off
+GET /shopping-items/{item_id}/cooling-off
+POST /shopping-items/{item_id}/cooling-off/start
+POST /cooling-off/{cooling_id}/extend
+POST /cooling-off/{cooling_id}/shorten
+POST /cooling-off/{cooling_id}/cancel
+POST /cooling-off/{cooling_id}/review
+GET /shopping-items/{item_id}/cooling-off-history
+Start nhận ends_at do user xác nhận; extend/shorten nhận deadline mới và version. Server kiểm tra thời gian và ownership. Một item tối đa một phiên ACTIVE, được bảo vệ ở database để hai request đồng thời không tạo hai phiên.
+State riêng có đúng bốn giá trị: ACTIVE khi bắt đầu/extend/shorten; COMPLETED khi hết hạn; CANCELLED khi người dùng chủ động hủy; RESOLVED khi mua hoặc chuyển item sang SKIPPED trong lúc chờ (resolution PURCHASED/SKIPPED). Server xác nhận hết hạn idempotent; không tự mua, tự skip hoặc tạo chi tiêu. Read endpoint không thực hiện quyết định của người dùng.
+Review nhận choice NOT_ANYMORE / NEED_MORE_TIME / STILL_WANT_IT. NOT_ANYMORE ghi user decision SKIPPED; nếu phiên còn ACTIVE thì chuyển RESOLVED. NEED_MORE_TIME cần deadline xác nhận; extend/shorten giữ ACTIVE đối với phiên đang chờ. Cơ chế bắt đầu lượt chờ sau COMPLETED cần cụ thể hóa, không tự hồi sinh phiên đã kết thúc. STILL_WANT_IT chỉ mở bước re-evaluation nhanh hoặc tự quyết. Chỉ POST /purchases mới ghi mua.
+Mua hoặc skip trong lúc chờ được phép; chuyển ACTIVE sang RESOLVED với resolution PURCHASED/SKIPPED và giữ history. Cancel chuyển ACTIVE sang CANCELLED. Extend/shorten chỉ điều chỉnh ACTIVE; không tái kích hoạt phiên kết thúc bằng request gia hạn trễ. Race mua/gia hạn được giải quyết bằng transaction và version conflict.
+Thông báo hết hạn nếu được phép tối đa một lần/phiên theo spec; cách lập lịch thuộc TECH-04, không yêu cầu thêm queue platform trong TECH-03.
+2.6. AI, import, media, insights và Home
+POST /ai/conversations với item_id; GET /ai/conversations/{conversation_id}
+GET /ai/conversations/{conversation_id}/messages; POST /ai/conversations/{conversation_id}/messages
+POST /ai/conversations/{conversation_id}/evaluate
+GET /shopping-items/{item_id}/evaluations; GET /ai/evaluations/{evaluation_id}
+GET /ai/conversations?item_id=... để đọc lại lịch sử. Conversation mới hoặc đánh giá lại không ghi đè evaluation cũ.
+POST /product-imports/preview với {"url":"<Shopee/Lazada URL>"}: trả dữ liệu trích xuất được, trường thiếu và warning; không tạo ShoppingItem. Preview đã được user sửa/xác nhận mới gửi POST /shopping-items. Share Intent dùng lại luồng này.
+POST /media/presigned-uploads với item_id, content_type, size_bytes.
+POST /media/uploads/{upload_id}/complete sau khi Android upload trực tiếp; chỉ liên kết ảnh khi backend xác minh object.
+GET /shopping-items/{item_id}/image trả quyền đọc ngắn hạn sau owner check; bucket private. Một ảnh/item, MinIO dev và R2 production; không lưu BLOB trong PostgreSQL.
+GET /insights?cycle_id=...; GET /insights/recaps?cursor=...; GET /insights/recaps/{cycle_id}
+GET /home
+Insights tách item count khỏi transaction count, verdict khỏi actual decision; không dựng savings chắc chắn từ giá món bỏ qua. Recap chỉ cho chu kỳ đã kết thúc, có bốn phần Your Spending / Your Decisions / Your Cooling-off Journey / Cat’s Final Words và xem lại lịch sử. Mỗi lần xem, backend tính lại từ dữ liệu lịch sử hiện tại của chu kỳ; sửa/xóa Purchase làm số liệu cập nhật. Không snapshot cố định, không lưu riêng nội dung recap trong MVP. AI chỉ diễn đạt dựa trên số liệu hiện tại, nên Cat’s Final Words có thể thay đổi khi xem lại.
+Home gom budget summary, waiting items và context mascot từ dữ liệu thật; trả as_of và không gọi LLM cho mỗi lần tap mèo.
+
+
+3. Authentication & Session Lifecycle
+3.1. Google challenge/nonce
+POST /auth/google/challenge trả challenge_id, nonce và expires_at; nonce khó đoán, thời hạn ngắn cấu hình, chỉ dùng một lần. Android gắn nonce vào Google Sign-In theo SDK, gửi Google ID token và challenge_id tới POST /auth/google.
+Backend kiểm tra chữ ký bằng Google keys, issuer, audience client ID được phép, expiry và nonce đúng binding challenge. Không tin email/user_id do client tự khai; dùng Google sub làm định danh liên kết. Consume challenge và tạo phiên chỉ khi toàn bộ xác minh thành công; chống replay bằng thao tác atomic.
+Khởi tạo account và PAY_NOW mặc định trong cùng transaction, unique constraint tránh tạo trùng khi đăng nhập đồng thời. Khởi tạo này không tạo chi tiêu.
+3.2. Access và refresh
+Access JWT sống 15 phút, xác minh signature/algorithm allowlist, issuer, audience, expiry và session binding. Refresh token opaque ngẫu nhiên; backend chỉ lưu hash cùng session/family và timestamps.
+POST /auth/refresh nhận refresh token, rotation mỗi lần dùng; trả access token mới và refresh token mới. Idle tối đa 30 ngày kể từ hoạt động refresh hợp lệ; absolute tối đa 90 ngày từ lúc tạo phiên, không được kéo dài qua rotation.
+Rotation kiểm tra và consume token cũ atomically. Reuse token đã consume thu hồi token family/phiên liên quan và yêu cầu đăng nhập lại. Android dùng single-flight refresh để tránh nhiều request cạnh tranh; không retry mù refresh cũ sau khi mất response. Nếu không xác định rotation đã hoàn tất, đăng nhập lại an toàn.
+POST /auth/logout thu hồi phiên hiện tại, trả thành công idempotent. Backend kiểm tra phiên bị revoked cho request được bảo vệ, tránh access JWT còn hạn tiếp tục dùng sau logout.
+Không log Google token, JWT, refresh token, nonce hoặc Authorization header. Android giữ token bằng cơ chế secure storage nền tảng, không ở Room. Hết session thì yêu cầu Google Sign-In lại; không biến mutation thất bại thành thành công cục bộ.
+
+
+4. Data Processing, Transactions & Online-first
+4.1. Atomic use cases
+Ghi purchase: kiểm tra owner item/card → khóa/kiểm tra version liên quan → tính total_amount = actual_price × quantity (VND nguyên, không rounding) → xác định chu kỳ theo purchased_at → tạo purchase → cập nhật projection ngân sách nếu có → chuyển item sang PURCHASED và ghi decision history → resolve cooling-off ACTIVE với resolution PURCHASED → lưu kết quả idempotency → commit.
+Quick Add thêm bước tạo item trong cùng transaction. Bất kỳ bước database nào lỗi đều rollback toàn bộ; không có item mồ côi hoặc purchase nửa chừng. Response thành công chỉ sau commit.
+Sửa purchase: đọc dữ liệu gốc, kiểm tra version, tính lại total_amount từ actual_price × quantity, tính chênh lệch chu kỳ cũ/mới, cập nhật nhất quán rồi commit. Xóa purchase nhập sai giữ audit, tính lại tổng và giữ nguyên trạng thái ShoppingItem kể cả khi đó là Purchase cuối. Nếu totals được materialize, cập nhật có kiểm soát cạnh tranh; số tổng luôn có thể đối soát với purchase nguồn.
+Không dựa vào Redis cho idempotency chi tiêu. Lưu key bền vững với owner, operation, payload hash, trạng thái/kết quả trong PostgreSQL; uniqueness và transaction ngăn double write. Cùng key/cùng payload trả cùng kết quả; cùng key/khác payload trả 409 IDEMPOTENCY_CONFLICT. Request đang xử lý trả lỗi retriable rõ ràng, không chạy lại side effect.
+Thời gian giữ key và timeout phải được cấu hình và công bố trước release; Android không tự retry mutation ngoài cửa sổ bảo đảm khi kết quả còn chưa rõ.
+4.2. Optimistic versioning
+GET trả version; PATCH/DELETE và actions nhạy cảm gửi If-Match: "<version>". Cập nhật với điều kiện owner/id/version, tăng version atomically; thiếu precondition trả 428, version cũ trả 409 VERSION_CONFLICT. Client đọc lại và cho user xem lại thay đổi, không ghi đè âm thầm.
+Use case đụng nhiều resource kiểm tra mọi version/bất biến liên quan trong cùng transaction; không chỉ kiểm tra item trên router rồi ghi sau.
+4.3. Room và lỗi kết nối
+Room chỉ là read cache và manual draft. Khi offline cho xem cache có dấu dữ liệu cũ, countdown từ deadline server và lưu draft/ảnh bền vững trong private app storage. Không có offline purchase, cooling-off mutation, AI hay import.
+Mạng trở lại: user mở lại draft, kiểm tra, xác nhận gửi. Draft không tự replay hoặc vào outbox; không tự tính ngân sách. Sau server success, cập nhật cache liên quan; nếu mất response sau commit, retry cùng idempotency key để xác định kết quả trước khi gửi mới.
+Cache refresh khi mở màn hình, foreground, user refresh hoặc mutation thành công; stale-while-revalidate cho đọc. Phân vùng cache theo account và xóa dữ liệu phù hợp khi logout để tránh lộ chéo người dùng.
+4.4. External side effects
+Upload và PostgreSQL không có distributed transaction. Item tạo thành công vẫn tồn tại nếu ảnh lỗi; completion chỉ liên kết object đã kiểm tra. Retry completion không tạo nhiều ảnh hoặc bỏ qua version; ảnh upload chưa hoàn tất có vòng đời dọn dẹp cấu hình.
+LLM/URL request có timeout, giới hạn retries và payload; không gọi trong transaction dài. Redis lỗi không làm mất dữ liệu nghiệp vụ; endpoint cần limiter/security mà không bảo đảm được thì trả 503 theo chính sách fail-closed, không bỏ qua bảo vệ một cách im lặng.
+
+
+5. Hybrid AI Orchestration
+5.1. Luồng đánh giá
+Xác thực owner conversation/item → lấy snapshot ngữ cảnh được phép (item, ngân sách, lịch sử liên quan, user answers/preferences) → LLM Gateway một provider MVP → Decision Engine kiểm soát business context → Personality Layer diễn đạt → Pydantic structured output validator → lưu messages/evaluation hợp lệ → trả REST response.
+Quick Check thường 1–3 câu, có suggested answers/free text; user được yêu cầu verdict sớm. Re-evaluation sau cooling-off có thể 1–2 câu hoặc bỏ qua. Không bắt user phải hoàn thành hội thoại mới được mua.
+MVP dùng REST request/response không streaming; không SSE/WebSocket. Gateway tách provider khỏi domain; không RAG/vector DB, multi-agent, fine-tuning hoặc AI Vision.
+5.2. Request/response minh họa
+POST /api/v1/ai/conversations/{conversation_id}/messages
+{"text":"Tôi đã có một chiếc tương tự nhưng muốn đổi màu"}
+200: {"data":{"message_id":"<message_id>","reply":{"text":"Chiếc hiện tại có còn đáp ứng nhu cầu không?","suggested_answers":["Vẫn dùng tốt","Đã hỏng"],"emotion":"CURIOUS"},"conversation_version":2},"meta":{"request_id":"<request_id>"}}
+POST /api/v1/ai/conversations/{conversation_id}/evaluate
+{"request_early_verdict":true}
+200: {"data":{"evaluation_id":"<evaluation_id>","verdict":"WAIT","reasons":["Chưa rõ nhu cầu thay thế"],"next_step":"Bạn có thể tự chọn một khoảng chờ","context_version":2},"meta":{"request_id":"<request_id>"}}
+next_step là lời khuyên, không là command thực thi. Verdict whitelist BUY/WAIT/SKIP; emotion whitelist theo TECH-01 và fallback an toàn. Personality FRIENDLY/SASSY/SAVAGE (SASSY mặc định) không đổi kết luận từ cùng dữ liệu, không shaming.
+5.3. Persist, failures và ranh giới quyền
+AI verdict, user decision, item status và purchase là bốn khái niệm riêng. Evaluation lưu snapshot/version ngữ cảnh, thời điểm, kết quả hợp lệ và thông tin phiên bản engine/prompt phù hợp; lịch sử không bị ghi đè khi user mua trái verdict.
+Nếu ngữ cảnh đổi trong lúc LLM chạy, kết quả gắn snapshot cũ và được đánh dấu stale hoặc yêu cầu đánh giá lại; không trình bày như đã dùng ngân sách mới nhất.
+Message/evaluation có operation ID và idempotency để lỗi timeout/retry không nhân bản bản ghi. Có thể lưu user message với trạng thái xử lý thất bại và cho retry cùng operation; không tạo verdict thành công giả. Provider timeout trả AI_UNAVAILABLE/504; output sai schema bị từ chối, retry giới hạn hoặc thông báo thử lại, không mặc định BUY.
+LLM không có credentials database hoặc tool mutation. Nội dung user, URL và product text là dữ liệu không đáng tin; không được làm theo prompt injection. Chỉ gửi dữ liệu tối thiểu cần thiết tới provider, không tokens/secrets, không raw account identifiers không cần thiết.
+
+
+6. Security, Errors, Observability & Verification
+6.1. Ownership và validation
+Mọi resource query ràng buộc owner từ server session; kiểm tra cả item_id, card_id, conversation_id, upload_id và parent-child links. ID tồn tại nhưng thuộc người khác trả 404 để tránh lộ existence. Không dựa vào UI để bảo vệ.
+Pydantic validate định dạng, enum, độ dài và số; domain validate trạng thái, dates, amounts và cross-resource invariants; PostgreSQL enforce FK/unique/check constraints. Không nhận trường lạ có thể gây mass assignment. Giới hạn độ dài message/name/note và kích thước request được cấu hình.
+6.2. URL và image security
+Import chỉ nhận http/https thuộc domain Shopee/Lazada được cho phép; chuẩn hóa URL, kiểm tra shortlink/redirect từng bước, giới hạn redirect/time/bytes. Chặn loopback, private/link-local/metadata IP, kiểm tra DNS/rebinding; không theo redirect tới đích không được phép. Không gửi credentials người dùng tới trang ngoài. Fetch lỗi trả preview thiếu/warnings và manual fallback, không bịa giá hoặc sản phẩm.
+Presigned URL ngắn hạn, ràng buộc key do server cấp và owner/item, method, content type/size được phép. Completion xác minh tồn tại, actual size, định dạng nội dung ảnh và quyền sở hữu trước attach; không tin filename/MIME client khai. Chặn file không phải ảnh, payload quá cỡ, ảnh giải nén quá lớn; loại metadata nhạy cảm nếu pipeline hỗ trợ. Bucket private, read URL hết hạn; không log signed URL. Không dùng ảnh để suy ra tên/giá/category trong MVP.
+6.3. Unified error contract
+{"error":{"code":"VERSION_CONFLICT","message":"Dữ liệu đã thay đổi. Hãy tải lại trước khi lưu.","details":[{"field":"version","reason":"stale"}],"retryable":false},"meta":{"request_id":"<request_id>"}}
+400 malformed request/cursor; 401 token/challenge/session không hợp lệ; 403 action không được phép; 404 resource không có trong owner scope; 409 version/idempotency/domain conflict; 422 validation; 428 thiếu version; 429 rate limit; 500 lỗi nội bộ; 503 dependency không sẵn sàng; 504 upstream timeout.
+Không trả stack trace, SQL, secrets hoặc raw provider response. 429 có Retry-After; client retry có backoff/jitter cho GET và mutation có idempotency khi phù hợp. Validation/domain conflict cần user sửa hoặc tải lại; không retry vô hạn.
+6.4. Logging và rate limits
+Structured log gồm request_id, route template, status, latency, operation result và mã lỗi; che token, signed URL, message nhạy cảm và nội dung riêng tư không cần thiết. Correlate transaction/AI operation bằng ID nội bộ, không log toàn bộ body.
+Rate limit theo IP cho auth/challenge, theo user/session cho mutations và AI, giới hạn import/upload và gọi provider. Mức cụ thể dựa cấu hình/đo tải; theo dõi 4xx/5xx, p95 latency, DB errors, AI timeout/schema failures và số lần trùng key, không tự thêm analytics sản phẩm.
+Secrets chỉ phía server; HTTPS; provider API key không có trong Android. Hạ tầng, CI/CD, backups và triển khai monitoring chi tiết thuộc TECH-04.
+6.5. Acceptance & test cases
+Các mục dưới đây là test plan cho triển khai, không phải khẳng định đã chạy hệ thống API.
+AUTH: nonce đúng dùng được một lần; sai nonce/audience/expiry bị từ chối; login đồng thời chỉ một PAY_NOW; refresh rotate thành công, reuse revoke, idle 30d/absolute 90d, logout chặn session.
+OWNER: user A không đọc/sửa/xóa tài nguyên của B; nested IDs và upload completion cũng bị chặn.
+PURCHASE: cùng key gửi đồng thời chỉ một giao dịch; key cũ khác payload 409; mất response sau commit rồi retry trả kết quả cũ; lỗi giữa Quick Add rollback toàn bộ.
+BUDGET: PAY_NOW và CREDIT cùng amount/date cho cùng tác động; card null hợp lệ; default quantity 1; nhiều purchase/item được tính riêng; sửa ngày chuyển chu kỳ cập nhật cả cũ/mới; xóa nhập sai tính lại; midnight/timezone và tháng ngắn đúng ranh giới đã chốt.
+CONCURRENCY: PATCH version cũ thất bại; hai cooling-off start chỉ một ACTIVE; mua đồng thời gia hạn không để item Purchased còn phiên Active; skip không mất purchase/evaluation history.
+COOLING-OFF: start cần user action; extend/shorten/cancel/review đúng state; hết hạn không mua, không đổi verdict, không trừ tiền; review Not Anymore ghi user decision; notification tối đa một lần.
+AI: BUY/WAIT/SKIP không sửa item hoặc budget; có thể mua trái verdict; evaluation history giữ nguyên; malformed JSON/timeout/prompt injection không tạo hành động hoặc kết quả giả; retry không nhân đôi messages/evaluation; đổi personality không đổi business verdict.
+IMPORT/MEDIA: shortlink hợp lệ, unsupported URL và fetch lỗi có manual fallback; SSRF/redirect private bị chặn; import preview không tạo item; sai owner/MIME/size hoặc URL hết hạn bị từ chối; upload lỗi giữ item, completion retry không nhân bản ảnh.
+OFFLINE: cache đọc được và hiển thị độ cũ; draft/ảnh còn sau restart; reconnect không auto-submit; purchase/AI/import/cooling mutations bị yêu cầu online; countdown local không ghi trạng thái server.
+INSIGHTS/HOME: tách item/transaction/verdict/decision; số liệu đối soát purchases; recap chỉ chu kỳ kết thúc, không bịa savings, không gợi ý mua lại; Home không tạo purchase hoặc gọi AI cho tap.
+SCOPE: OpenAPI không có Refund endpoints; schema không có debt/limit/repayment; không có outbox mutation, payment gateway, discovery/price tracking, AI Vision hoặc streaming AI.
+
+
+Tài liệu liên quan
+Functional Specification v1.1: https://docs.google.com/document/d/1I-H3HP8LwBXYNBkAX85IQFMt3-346t3B-Kak246M8Go
+TECH-01 v1.1: https://docs.google.com/document/d/1iedDkUbbOWThMm_vDs5RRQ-BKJ6NMDLTkb4YhcTapEI
+TECH-02: https://docs.google.com/document/d/1nLLLfrWpU0tKbrL9YhjKsTZiVcpYZ_5lQ5fgHKY-0dQ
+Ghi chú triển khai: đối chiếu schema TECH-02 theo năm quyết định đã chốt ngày 17/10/2026; cụ thể hóa các chi tiết kỹ thuật còn mở trước migration. TECH-04 cần thiết kế riêng; tài liệu này không tự chọn nền tảng deployment.
+
+
+PHỤ LỤC ĐỐI CHIẾU TÀI LIỆU — 17/10/2026
+TECH-02 hiện đã có nội dung và đã được đọc khi rà soát; ghi chú “còn trống tại thời điểm đối chiếu” ở đầu tài liệu là thông tin lịch sử, không phải trạng thái hiện tại.
+Baseline đã chốt giữ nguyên: năm status WISHLIST/CONSIDERING/WAITING/PURCHASED/SKIPPED; một item nhiều purchase; Credit là nhãn thanh toán, tác động ngân sách như PAY_NOW; không refund MVP; online-first Room cache/draft; FastAPI modular monolith; hybrid AI; mèo trắng 3D clay.
+Năm quyết định nghiệp vụ đã được xác nhận ngày 17/10/2026 và đã cập nhật vào contract bên trên:
+• actual_price là đơn giá VND nguyên; quantity >= 1 mặc định 1; backend tính total_amount = actual_price × quantity, Android chỉ xem trước, không rounding. Các ví dụ Purchase dùng actual_price và total_amount thống nhất TECH-02.
+• Tạo Purchase chuyển ShoppingItem sang PURCHASED; xóa bất kỳ Purchase nào, kể cả Purchase cuối, giữ nguyên status item. Người dùng đổi status thủ công; chỉ đổi status không tự tạo purchase hoặc chi tiêu.
+• Cooling-off: ACTIVE bắt đầu/extend/shorten; COMPLETED hết hạn; CANCELLED chủ động hủy; RESOLVED khi mua hoặc SKIPPED lúc đang chờ. Hết hạn không tự mua/skip.
+• Budget start day chọn một lần lúc setup 1–31, không cho đổi trong MVP; tháng thiếu ngày lấy ngày cuối, giữ ngày neo gốc; không có chu kỳ chuyển tiếp; vẫn đổi budget amount, không rollover.
+• Monthly Story Recap tính lại từ dữ liệu lịch sử mỗi lần xem; sửa/xóa Purchase cập nhật số liệu; không snapshot hoặc lưu riêng nội dung recap trong MVP; Cat’s Final Words có thể thay đổi. Chi tiết kỹ thuật còn mở không mở lại các quyết định này. TECH-04 chưa thiết kế/phê duyệt.
+
+
+PHỤ LỤC CHỐT NGHIỆP VỤ & HỢP ĐỒNG TRIỂN KHAI — 17/10/2026 (CÓ HIỆU LỰC)
+Phụ lục này là baseline MVP được phê duyệt, thay thế các câu hỏi mở và mô tả cũ trái ngược ở phần trước; không mở rộng scope sản phẩm.
+1. Purchase & giá: estimated_unit_price là đơn giá dự kiến (mapping thống nhất API/domain/database/Room draft); actual_unit_price là tên chuẩn cho đơn giá thực tế (tên cũ actual_price được thay thế ở contract mới). Giá tiền là VND nguyên, quantity là INTEGER >= 1, mặc định 1. Backend kiểm tra và tính total_amount = actual_unit_price × quantity, không làm tròn; Android chỉ preview. Purchase tạo mới chuyển item sang PURCHASED; xóa Purchase, kể cả Purchase cuối, không tự đổi status item, nhưng tính lại chi tiêu và lưu audit theo contract.
+2. Budget: cycle_start_day cố định sau lần setup đầu (1–31), tháng thiếu ngày dùng ngày cuối cùng nhưng vẫn giữ ngày neo gốc, không có chu kỳ chuyển tiếp; không rollover MVP. Khi user thay đổi budget_amount, thay đổi có hiệu lực ngay cho chu kỳ hiện tại: cùng một transaction cập nhật BudgetSetting và budget_amount_snapshot của BudgetCycle hiện hành; remaining được tính lại ngay, không sửa Purchases hay ngày chu kỳ. Chu kỳ đã đóng giữ nguyên snapshot ngân sách lịch sử.
+3. Cooling-off sau khi hết hạn: khi ACTIVE hết deadline, CoolingOffPeriod -> COMPLETED và ShoppingItem WAITING -> CONSIDERING; không tự mua hoặc skip. Chọn Need More Time sau COMPLETED tạo CoolingOffPeriod ACTIVE mới và item -> WAITING; giữ phiên cũ COMPLETED để bảo toàn lịch sử (không extend phiên COMPLETED). Hủy phiên ACTIVE: period -> CANCELLED, item WAITING -> CONSIDERING. Mua khi ACTIVE: ghi Purchase, period -> RESOLVED, item -> PURCHASED. Skip khi ACTIVE: period -> RESOLVED, item -> SKIPPED, không tạo Purchase. Extend/shorten chỉ dành cho ACTIVE, vẫn ACTIVE/WAITING. Khi chuyển thủ công WAITING -> WISHLIST hoặc CONSIDERING: period ACTIVE -> CANCELLED; đổi sang SKIPPED: ACTIVE -> RESOLVED. Chuyển sang WAITING chỉ thông qua bắt đầu Cooling-off. Với item WAITING, thao tác mua phải ghi Purchase; không đặt PURCHASED như một nhãn thay cho giao dịch. Các thay đổi liên đới được backend ghi atomically; khi offline Android chỉ hiển thị đếm ngược, không tự ghi thay đổi chính thức.
+4. Story Recap: tổng kết từng chu kỳ được tính lại từ lịch sử khi xem, kể cả sau sửa/xóa Purchase; không lưu snapshot hoặc nội dung recap cố định. Cat’s Final Words có thể thay đổi theo số liệu.
+5. Credit: PAY_NOW và CREDIT cùng ghi nhận chi tiêu tại ngày mua; CREDIT chỉ là phương thức thanh toán có tên, không quản lý dư nợ/hạn mức/sao kê/hạn trả. Không refunds, không product discovery, không rollover trong MVP.
+6. Quy tắc tương thích: expected_unit_price / estimated_price / expected_price trong các đoạn cũ đều phải được chuẩn hóa thành estimated_unit_price ở schema và API mới; actual_price cũ -> actual_unit_price. Không để các tên cũ tồn tại trong migration/DTO mới. Các câu từng ghi quantity có thể thập phân, chưa quyết định hiệu lực budget amount, hoặc chưa xác định cơ chế Need More Time được coi là đã giải quyết bởi phụ lục này.
