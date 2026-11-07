@@ -96,6 +96,8 @@ flowchart TD
   - *Checkpoint 5:* Điều phối thông báo và kiểm thử hồi quy toàn diện đạt 100% build và unit tests.
 - **Phase 6: Home Screen Refresh — Daily Check-in, Item Sorting & Mascot Celebration** (Tasks 14–18)
   - *Checkpoint 6:* Popup Daily Check-in, nút pill trên Header, sắp xếp item mới nhất ở dưới cùng và chúc mừng tăng Level hoạt động trơn tru, không ảnh hưởng Carousel v2.2.
+- **Phase 7: Item Journey Cooling-off Visuals & State Streamlining** (Tasks 19–22)
+  - *Checkpoint 7:* Loại bỏ hoàn toàn tàn dư Saved/Considering, hiển thị Circular Progress Arc cho CoolingOff và nhịp thở cho Ready, đạt 100% test và assembleDevDebug.
 
 ---
 
@@ -115,7 +117,21 @@ flowchart TD
 
 ---
 
-## 6. Risks & Mitigation Strategies
+## 6. Phase 7 Task Breakdown: Item Journey Cooling-off Visuals
+
+```mermaid
+flowchart TD
+    T19["Task 19: Streamline JourneyNodeStatus & Domain Mapping"]
+    T20["Task 20: Consolidate Ring Tokens & Node Styles"]
+    T21["Task 21: Circular Countdown Arc & Ready Pulse Rendering"]
+    T22["Task 22: Full Regression & Verification"]
+
+    T19 --> T20 --> T21 --> T22
+```
+
+---
+
+## 7. Risks & Mitigation Strategies
 
 | Rủi ro (Risk) | Mức độ | Biện pháp giảm thiểu (Mitigation) |
 | :--- | :---: | :--- |

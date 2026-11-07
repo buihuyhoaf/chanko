@@ -562,3 +562,124 @@ Thực hiện kiểm thử tích hợp và hồi quy toàn diện cho màn hình
 - [x] Popup Daily Check-in và pill mở lại trên Header hoạt động mượt mà.
 - [x] Danh sách món đồ sắp xếp chuẩn thời gian (mới nhất dưới cùng) và hiển thị rõ trạng thái Freeze / Sẵn sàng.
 - [x] Carousel ngân sách 3 thẻ v2.2 hoàn toàn nguyên vẹn, 100% test xanh.
+
+---
+
+## Phase 7: Item Journey Cooling-off Visuals & State Streamlining (`cooling-off-journey-visuals`)
+
+### Task 19: Tinh gọn Enum Trạng thái `JourneyNodeStatus` & Ánh xạ Miền (Domain Mapping)
+
+**Description:**
+Loại bỏ hoàn toàn các trạng thái tàn dư cũ (`Saved` - "Đã lưu", `Considering` - "Đang cân nhắc") và verdict `BUY/WAIT/SKIP` khỏi Item Journey. Tinh gọn `JourneyNodeStatus` đồng bộ với `ItemFreezeStatus`:
+- `CoolingOff` ("Đang hạ nhiệt")
+- `Ready` ("Sẵn sàng xem xét")
+- `Purchased` ("Đã mua")
+- `Skipped` ("Đã bỏ qua")
+Cập nhật `HomeDomainLogic.kt` (`parseStatus` và `selectRecentJourney`) để ánh xạ chuẩn xác, cập nhật các kịch bản mẫu trong `HomeFakeDataSource.kt` và sửa đổi `HomeDomainLogicTest.kt`.
+
+**Acceptance criteria:**
+- [ ] `JourneyNodeStatus` chỉ còn 4 trạng thái: `CoolingOff`, `Ready`, `Purchased`, `Skipped`.
+- [ ] `HomeDomainLogic.parseStatus()` ánh xạ `"Waiting"`, `"CoolingOff"`, `"FreezeActive"` về `JourneyNodeStatus.CoolingOff`.
+- [ ] Khi hết thời gian đếm ngược (`remainingSeconds <= 0L`), tự động chuyển sang `JourneyNodeStatus.Ready`.
+- [ ] Mock data trong `HomeFakeDataSource.kt` không còn dùng trạng thái cũ `Saved` / `Considering`.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
+- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Checkpoint 6
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeUiState.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogic.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeFakeDataSource.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
+
+**Estimated scope:** Medium (4 files)
+
+---
+
+### Task 20: Tinh gọn Bảng Màu Viền & Visual Styles (`Color.kt` & `ItemJourneySection.kt`)
+
+**Description:**
+Loại bỏ các token màu viền tàn dư cũ (`statusSavedRing`, `statusConsideringRing`) trong `CandyColors.HomeV2`. Tinh giản `resolveJourneyNodeStyle()` xuống 3 nhóm thị giác:
+- `CoolingOff`: Viền màu hổ phách/cam dịu (`CandyColors.HomeV2.statusWaitingRing` hoặc token băng mát tương ứng) trên nền rãnh track mờ (`alpha = 0.15f`).
+- `Ready`: Viền màu Mint xanh ngọc tươi sáng (`CandyColors.HomeV2.statusReadyRing`).
+- `Purchased` / `Skipped`: Viền trung tính nét liền tĩnh (`CandyColors.HomeV2.statusSkippedRing`).
+Đảm bảo 100% tuân thủ `ColorArchitectureTest`.
+
+**Acceptance criteria:**
+- [ ] `resolveJourneyNodeStyle(status)` chỉ xử lý 4 trạng thái, trả về đúng cấu hình viền và badge.
+- [ ] Không còn tham chiếu đến `Saved` hay `Considering` trong `ItemJourneySection.kt`.
+- [ ] Huy hiệu góc trên phải (`JourneyStatusBadge`) giữ lại icon chuẩn: ⏳ Đồng hồ cát (CoolingOff), ✓ Tích xanh (Ready), 🛍️ Túi (Purchased), − Dấu trừ (Skipped).
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"`
+- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Task 19
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
+- `app/src/main/java/com/hoabh/chanko/ui/theme/Color.kt`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+### Task 21: Vẽ Canvas Circular Progress Arc & Hiệu ứng Nhịp Thở Ready (`ItemJourneySection.kt`)
+
+**Description:**
+Triển khai render trực quan mới cho các node trong Item Journey:
+- Loại bỏ hoàn toàn vòng quay 360 độ liên tục vô tận (`rotationAngle`).
+- Đối với `CoolingOff`: Vẽ Canvas `drawArc` bắt đầu từ -90° (đỉnh 12h), chiều dài cung quét `sweepAngle` tỷ lệ theo thời gian còn lại, trên một rãnh tròn mờ bên dưới.
+- Đối với `Ready`: Khi `!isReducedMotionEnabled`, tạo hiệu ứng nhịp thở nhẹ (`Breathing Pulse` chu kỳ 2.5s) trên viền và bóng đổ để thu hút sự chú ý vào quyết định mua/bỏ qua. Khi `isReducedMotionEnabled`, hiển thị viền tĩnh rõ ràng.
+- Bổ sung `contentDescription` thân thiện cho TalkBack.
+
+**Acceptance criteria:**
+- [ ] Node `CoolingOff` hiển thị cung tròn đếm ngược tĩnh tại, không quay chóng mặt.
+- [ ] Node `Ready` có nhịp thở mời gọi người dùng khi không bật Reduced Motion.
+- [ ] Khi bật `isReducedMotionEnabled`, mọi hiệu ứng thở đều được tắt, chỉ hiển thị viền tĩnh.
+- [ ] Chạm vào node vẫn điều hướng chính xác đến `ItemDetailScreen`.
+
+**Verification:**
+- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Task 20
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
+
+**Estimated scope:** Medium (1-2 files)
+
+---
+
+### Task 22: Kiểm thử Hồi quy Toàn diện & Xác thực Biên dịch
+
+**Description:**
+Chạy toàn bộ kiểm thử đơn vị, kiểm thử kiến trúc màu sắc và kiểm tra biên dịch build sản phẩm sau khi hoàn tất refactor thị giác Item Journey.
+
+**Acceptance criteria:**
+- [ ] Cập nhật các test case trong `HomeViewModelTest.kt`, `HomeCheckInFlowTest.kt` tương thích 100% với trạng thái mới.
+- [ ] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
+- [ ] `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"` PASS 100%.
+- [ ] `./gradlew assembleDevDebug` biên dịch thành công 100%.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest`
+- [ ] Build succeeds: `./gradlew assembleDevDebug`
+
+**Dependencies:** Tasks 19–21
+
+**Files likely touched:**
+- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeViewModelTest.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeCheckInFlowTest.kt`
+
+**Estimated scope:** Small (2 test files)
+
+---
+
+### Checkpoint 7: Item Journey Cooling-off Visuals Verified
+- [ ] Không còn tàn dư trạng thái `Saved` / `Considering`.
+- [ ] Viền đếm ngược tròn (Circular Progress Arc) và nhịp thở (Breathing Pulse) hoạt động hoàn hảo.
+- [ ] Carousel 3 thẻ v2.2 và toàn bộ các tính năng khác giữ nguyên 100% độ ổn định.
