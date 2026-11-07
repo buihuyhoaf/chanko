@@ -32,10 +32,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -277,17 +277,52 @@ fun BudgetDetailScreen(
                     }
                 }
 
-                // Item 3: Danh sách các giao dịch gần đây (gồm cả chi tiêu & điều chỉnh ngân sách)
-                item {
-                    RecentActivitiesSection(
-                        activities = state.recentActivities,
-                        adjustments = state.adjustments,
-                        onActivityClick = { activity ->
-                            onEvent(BudgetUiEvent.ActivityItemClicked(activity))
-                        },
-                        canWrite = state.canWrite,
-                        onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
+                // Item 3: Tiêu đề Hoạt động gần đây
+                item(key = "activities_header") {
+                    Text(
+                        text = stringResource(R.string.budget_recent_activity_title),
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = CandyColors.textPrimary,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
+                }
+
+                val hasActivities = state.recentActivities.isNotEmpty() || state.adjustments.isNotEmpty()
+                if (!hasActivities) {
+                    item(key = "empty_activities") {
+                        Text(
+                            text = stringResource(R.string.budget_activity_empty),
+                            fontFamily = Nunito,
+                            fontSize = 13.sp,
+                            color = CandyColors.textSecondary,
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
+                    }
+                } else {
+                    // Danh sách các hoạt động chi tiêu / hoàn tiền
+                    items(
+                        items = state.recentActivities,
+                        key = { "act_${it.id}" }
+                    ) { activity ->
+                        ActivityItemCard(
+                            activity = activity,
+                            onClick = { onEvent(BudgetUiEvent.ActivityItemClicked(activity)) }
+                        )
+                    }
+
+                    // Danh sách các điều chỉnh hạn mức ngân sách
+                    items(
+                        items = state.adjustments,
+                        key = { "adj_${it.id}" }
+                    ) { adjustment ->
+                        AdjustmentItemCard(
+                            adjustment = adjustment,
+                            canWrite = state.canWrite,
+                            onClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
+                        )
+                    }
                 }
             }
         }
@@ -710,202 +745,164 @@ private fun BudgetInfoCard(
 }
 
 /**
- * Item 3: Danh sách tất cả các giao dịch trong chu kỳ ("Hoạt động gần đây"):
- * Hiển thị toàn bộ các giao dịch bao gồm mua sản phẩm, hoàn tiền, và lịch sử điều chỉnh ngân sách.
+ * Thẻ giao dịch hoạt động chi tiêu hoặc hoàn tiền dạng phẳng độc lập.
  */
 @Composable
-private fun RecentActivitiesSection(
-    activities: List<BudgetActivity>,
-    adjustments: List<BudgetAdjustment>,
-    onActivityClick: (BudgetActivity) -> Unit,
-    canWrite: Boolean,
-    onEditBudgetClick: () -> Unit,
+private fun ActivityItemCard(
+    activity: BudgetActivity,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hasItems = activities.isNotEmpty() || adjustments.isNotEmpty()
+    val cardShape = RoundedCornerShape(16.dp)
+    val dummyThumbnail = when {
+        activity.title.contains("tai nghe", ignoreCase = true) -> R.drawable.sample_headphones
+        activity.title.contains("bàn phím", ignoreCase = true) -> R.drawable.sample_keyboard
+        activity.title.contains("áo", ignoreCase = true) -> R.drawable.sample_jacket
+        activity.type == BudgetActivityType.PURCHASE_RECORDED -> R.drawable.sample_headphones
+        else -> null
+    }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(Color.White)
+            .border(1.dp, CandyColors.detailCardBorder, cardShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = stringResource(R.string.budget_recent_activity_title),
-            fontFamily = Nunito,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = CandyColors.textPrimary
-        )
-
-        Surface(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.White,
-            border = BorderStroke(1.dp, CandyColors.detailCardBorder),
-            shadowElevation = 2.dp
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!hasItems) {
-                Text(
-                    text = stringResource(R.string.budget_activity_empty),
-                    fontFamily = Nunito,
-                    fontSize = 13.sp,
-                    color = CandyColors.textSecondary,
-                    modifier = Modifier.padding(20.dp)
-                )
-            } else {
-                Column(
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(CandyColors.detailIconSurface)
+                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // 1. Danh sách các hoạt động chi tiêu / hoàn tiền
-                    activities.forEachIndexed { index, activity ->
-                        val dummyThumbnail = when {
-                            activity.title.contains("tai nghe", ignoreCase = true) -> R.drawable.sample_headphones
-                            activity.title.contains("bàn phím", ignoreCase = true) -> R.drawable.sample_keyboard
-                            activity.title.contains("áo", ignoreCase = true) -> R.drawable.sample_jacket
-                            activity.type == BudgetActivityType.PURCHASE_RECORDED -> R.drawable.sample_headphones
-                            else -> null
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onActivityClick(activity) }
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(CandyColors.detailIconSurface)
-                                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(8.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (dummyThumbnail != null) {
-                                        Image(
-                                            painter = painterResource(id = dummyThumbnail),
-                                            contentDescription = null,
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        ChankoIcon(
-                                            id = ChankoIconId.ITM_01,
-                                            contentDescription = null,
-                                            size = 20.dp
-                                        )
-                                    }
-                                }
-
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(
-                                        text = activity.title,
-                                        fontFamily = Nunito,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 14.sp,
-                                        color = CandyColors.textPrimary
-                                    )
-                                    Text(
-                                        text = activity.occurredAt,
-                                        fontFamily = Nunito,
-                                        fontSize = 12.sp,
-                                        color = CandyColors.textSecondary
-                                    )
-                                }
-                            }
-
-                            Text(
-                                text = activity.amountFormatted,
-                                fontFamily = Nunito,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = if (activity.amountChangeMinor < 0) CandyColors.overBudget else CandyColors.success
-                            )
-                        }
-
-                        if (index < activities.size - 1 || adjustments.isNotEmpty()) {
-                            HorizontalDivider(
-                                color = CandyColors.detailDivider,
-                                thickness = 1.dp
-                            )
-                        }
-                    }
-
-                    // 2. Danh sách các điều chỉnh hạn mức ngân sách
-                    adjustments.forEachIndexed { index, adjustment ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable(enabled = canWrite, onClick = onEditBudgetClick)
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(CandyColors.detailIconSurface)
-                                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(8.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    ChankoIcon(
-                                        id = ChankoIconId.ACT_05,
-                                        contentDescription = null,
-                                        size = 20.dp
-                                    )
-                                }
-
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.budget_adjustment_history_title),
-                                        fontFamily = Nunito,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 14.sp,
-                                        color = CandyColors.textPrimary
-                                    )
-                                    Text(
-                                        text = "${adjustment.oldLimitFormatted} → ${adjustment.newLimitFormatted} · ${adjustment.adjustedAt}",
-                                        fontFamily = Nunito,
-                                        fontSize = 12.sp,
-                                        color = CandyColors.textSecondary
-                                    )
-                                }
-                            }
-
-                            Text(
-                                text = adjustment.diffFormatted,
-                                fontFamily = Nunito,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = if (adjustment.isIncrease) CandyColors.success else CandyColors.overBudget
-                            )
-                        }
-
-                        if (index < adjustments.size - 1) {
-                            HorizontalDivider(
-                                color = CandyColors.detailDivider,
-                                thickness = 1.dp
-                            )
-                        }
+                    if (dummyThumbnail != null) {
+                        Image(
+                            painter = painterResource(id = dummyThumbnail),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        ChankoIcon(
+                            id = ChankoIconId.ITM_01,
+                            contentDescription = null,
+                            size = 20.dp
+                        )
                     }
                 }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = activity.title,
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = activity.occurredAt,
+                        fontFamily = Nunito,
+                        fontSize = 12.sp,
+                        color = CandyColors.textSecondary
+                    )
+                }
             }
+
+            Text(
+                text = activity.amountFormatted,
+                fontFamily = Nunito,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = if (activity.amountChangeMinor < 0) CandyColors.overBudget else CandyColors.success
+            )
+        }
+    }
+}
+
+/**
+ * Thẻ điều chỉnh hạn mức ngân sách dạng phẳng độc lập.
+ */
+@Composable
+private fun AdjustmentItemCard(
+    adjustment: BudgetAdjustment,
+    canWrite: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cardShape = RoundedCornerShape(16.dp)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(Color.White)
+            .border(1.dp, CandyColors.detailCardBorder, cardShape)
+            .clickable(enabled = canWrite, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(CandyColors.detailIconSurface)
+                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_05,
+                        contentDescription = null,
+                        size = 20.dp
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = stringResource(R.string.budget_adjustment_history_title),
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = CandyColors.textPrimary
+                    )
+                    Text(
+                        text = "${adjustment.oldLimitFormatted} → ${adjustment.newLimitFormatted} · ${adjustment.adjustedAt}",
+                        fontFamily = Nunito,
+                        fontSize = 12.sp,
+                        color = CandyColors.textSecondary
+                    )
+                }
+            }
+
+            Text(
+                text = adjustment.diffFormatted,
+                fontFamily = Nunito,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = if (adjustment.isIncrease) CandyColors.success else CandyColors.overBudget
+            )
         }
     }
 }
