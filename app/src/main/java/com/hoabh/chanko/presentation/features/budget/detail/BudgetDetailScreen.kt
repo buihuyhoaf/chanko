@@ -1,6 +1,15 @@
 package com.hoabh.chanko.presentation.features.budget.detail
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,11 +30,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -36,12 +47,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -102,6 +115,7 @@ fun BudgetDetailScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
+    var isInfoCardExpanded by rememberSaveable { mutableStateOf(false) }
 
     // Bắt phím Back phần cứng / hệ thống
     BackHandler {
@@ -206,18 +220,35 @@ fun BudgetDetailScreen(
                 item {
                     DetailHeroCreditCard(
                         cycle = state.selectedCycle,
-                        snapshot = state.snapshot
+                        snapshot = state.snapshot,
+                        isExpanded = isInfoCardExpanded,
+                        onToggleExpand = { isInfoCardExpanded = !isInfoCardExpanded }
                     )
                 }
 
-                // Item 2: Thẻ thông tin chi tiết ngân sách
+                // Item 2: Thẻ thông tin chi tiết ngân sách (hiển thị / ẩn có animation)
                 item {
-                    BudgetInfoCard(
-                        cycle = state.selectedCycle,
-                        snapshot = state.snapshot,
-                        canWrite = state.canWrite,
-                        onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
-                    )
+                    AnimatedVisibility(
+                        visible = isInfoCardExpanded,
+                        enter = fadeIn(animationSpec = tween(250)) + expandVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        ),
+                        exit = fadeOut(animationSpec = tween(180)) + shrinkVertically(
+                            animationSpec = spring(
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                    ) {
+                        BudgetInfoCard(
+                            cycle = state.selectedCycle,
+                            snapshot = state.snapshot,
+                            canWrite = state.canWrite,
+                            onEditBudgetClick = { onEvent(BudgetUiEvent.OpenEditBudget) }
+                        )
+                    }
                 }
 
                 // Item 3: Danh sách các giao dịch gần đây (gồm cả chi tiêu & điều chỉnh ngân sách)
@@ -267,6 +298,8 @@ fun BudgetDetailScreen(
 private fun DetailHeroCreditCard(
     cycle: BudgetCycle?,
     snapshot: BudgetSnapshot?,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val themeOrdinal = cycle?.themeIndex ?: 0
@@ -311,9 +344,8 @@ private fun DetailHeroCreditCard(
                 spotColor = theme.dark.copy(alpha = 0.45f)
             )
             .clip(RoundedCornerShape(CandyBudgetThemes.cardRadius))
-            .semantics(mergeDescendants = true) {
+            .semantics {
                 contentDescription = cardCd
-                role = Role.Button
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     current = visualProgress.coerceIn(0f, 1f),
                     range = 0f..1f
@@ -330,7 +362,7 @@ private fun DetailHeroCreditCard(
                 modifier = Modifier.matchParentSize()
             )
 
-            // Mascot Chanko
+            // Mascot Chanko (được nâng lên nhẹ để tạo khoảng trống cho nút Xem chi tiết)
             Image(
                 painter = painterResource(
                     id = if (isOver) R.drawable.mascot_worried else R.drawable.mascot_happy
@@ -339,8 +371,8 @@ private fun DetailHeroCreditCard(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 22.dp)
-                    .size(104.dp)
+                    .padding(end = 18.dp, bottom = 26.dp)
+                    .size(96.dp)
                     .clearAndSetSemantics {}
             )
 
@@ -352,7 +384,7 @@ private fun DetailHeroCreditCard(
                         start = CandyBudgetThemes.contentPadding,
                         top = CandyBudgetThemes.contentPadding,
                         end = CandyBudgetThemes.contentPadding,
-                        bottom = 14.dp
+                        bottom = 12.dp
                     )
             ) {
                 // TopBar với month chip pill, chip vàng EMV & contactless waves
@@ -389,45 +421,103 @@ private fun DetailHeroCreditCard(
                     }
                 }
 
-                // Vùng dưới: Thanh tiến trình & Percent pill
+                // Vùng dưới: Thanh tiến trình (bên trái) & Nút Xem chi tiết / Ẩn chi tiết (bên phải)
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.66f)
+                        .fillMaxWidth()
                         .padding(bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(
+                    // Thanh tiến trình & Percent pill
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(14.dp)
-                            .clip(RoundedCornerShape(999.dp))
-                            .background(Color.White.copy(alpha = 0.35f))
+                            .weight(1f, fill = false)
+                            .padding(end = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(CandySpace.xs)
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .fillMaxWidth(visualProgress.coerceIn(0f, 1f))
+                                .width(88.dp)
+                                .height(14.dp)
                                 .clip(RoundedCornerShape(999.dp))
-                                .background(
-                                    if (isOver) CandyBudgetThemes.coralWarning else Color.White
-                                )
-                        )
+                                .background(Color.White.copy(alpha = 0.35f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(visualProgress.coerceIn(0f, 1f))
+                                    .clip(RoundedCornerShape(999.dp))
+                                    .background(
+                                        if (isOver) CandyBudgetThemes.coralWarning else Color.White
+                                    )
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = Color.White.copy(alpha = 0.3f)
+                        ) {
+                            Text(
+                                text = percentText,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 12.sp
+                                ),
+                                color = if (isOver) CandyBudgetThemes.coralWarning else Color.White,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
                     }
 
+                    // Nút "Xem chi tiết" / "Ẩn chi tiết" dạng capsule pill góc dưới bên phải
+                    val togglePillShape = RoundedCornerShape(999.dp)
+                    val chevronRotation by animateFloatAsState(
+                        targetValue = if (isExpanded) 270f else 90f,
+                        label = "chevronRotation"
+                    )
+
                     Surface(
-                        shape = RoundedCornerShape(999.dp),
-                        color = Color.White.copy(alpha = 0.3f)
+                        modifier = Modifier
+                            .clip(togglePillShape)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onToggleExpand
+                            )
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = if (isExpanded) {
+                                    "Ẩn chi tiết ngân sách"
+                                } else {
+                                    "Xem chi tiết ngân sách"
+                                }
+                            },
+                        shape = togglePillShape,
+                        color = Color.White.copy(alpha = 0.22f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.42f))
                     ) {
-                        Text(
-                            text = percentText,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 13.sp
-                            ),
-                            color = if (isOver) CandyBudgetThemes.coralWarning else Color.White,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = if (isExpanded) "Ẩn chi tiết" else "Xem chi tiết",
+                                fontFamily = Nunito,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.5.sp,
+                                color = Color.White
+                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.chanko_act_18_default),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .graphicsLayer(rotationZ = chevronRotation),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
