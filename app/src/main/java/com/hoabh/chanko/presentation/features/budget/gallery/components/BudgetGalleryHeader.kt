@@ -22,9 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -68,12 +70,12 @@ fun BudgetGalleryHeader(
                 ) {
                     ChankoIcon(
                         id = ChankoIconId.ACT_02,
-                        contentDescription = "Quay lại",
+                        contentDescription = stringResource(R.string.back),
                         size = 24.dp
                     )
                 }
                 Text(
-                    text = "Ngân sách",
+                    text = stringResource(R.string.budget_title),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
@@ -82,7 +84,7 @@ fun BudgetGalleryHeader(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Theo dõi ngân sách mỗi tháng, mua sắm có suy nghĩ hơn. ✨",
+                text = stringResource(R.string.budget_gallery_description),
                 fontFamily = Nunito,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
@@ -97,7 +99,7 @@ fun BudgetGalleryHeader(
             ) {
                 ChankoIcon(
                     id = ChankoIconId.ACT_10,
-                    contentDescription = "Tùy chọn ngân sách",
+                    contentDescription = stringResource(R.string.budget_menu_options),
                     size = 24.dp
                 )
             }
@@ -110,7 +112,7 @@ fun BudgetGalleryHeader(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "Giới thiệu về ngân sách",
+                            text = stringResource(R.string.budget_gallery_menu_about),
                             fontFamily = Nunito,
                             fontSize = 14.sp,
                             color = CandyColors.textPrimary
@@ -124,7 +126,7 @@ fun BudgetGalleryHeader(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "Đồng bộ dữ liệu",
+                            text = stringResource(R.string.budget_gallery_menu_sync),
                             fontFamily = Nunito,
                             fontSize = 14.sp,
                             color = CandyColors.textPrimary

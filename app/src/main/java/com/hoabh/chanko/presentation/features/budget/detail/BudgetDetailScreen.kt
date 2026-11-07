@@ -139,52 +139,78 @@ fun BudgetDetailScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            // 1. Top App Bar với nút Back và Tiêu đề
+            // 1. Top App Bar với nút Back, Tiêu đề và Mô tả phụ (đồng bộ với BudgetGalleryHeader)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = CandySpace.lg, vertical = CandySpace.sm),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(start = CandySpace.lg, end = CandySpace.lg, top = 8.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
                 ) {
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.size(40.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        ChankoIcon(
-                            id = ChankoIconId.ACT_02,
-                            contentDescription = stringResource(R.string.back),
-                            size = 24.dp
+                        IconButton(
+                            onClick = onBackClick,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            ChankoIcon(
+                                id = ChankoIconId.ACT_02,
+                                contentDescription = stringResource(R.string.back),
+                                size = 24.dp
+                            )
+                        }
+
+                        Text(
+                            text = titleText,
+                            fontFamily = Nunito,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = CandyColors.textPrimary
                         )
                     }
-
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = titleText,
+                        text = stringResource(R.string.budget_detail_description),
                         fontFamily = Nunito,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        color = CandyColors.textPrimary
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        color = CandyColors.textSecondary
                     )
                 }
 
                 if (state.canWrite) {
                     Box {
-                        IconButton(onClick = { isMenuExpanded = true }) {
+                        IconButton(
+                            onClick = { isMenuExpanded = true },
+                            modifier = Modifier.size(48.dp)
+                        ) {
                             ChankoIcon(
                                 id = ChankoIconId.ACT_10,
-                                contentDescription = stringResource(R.string.budget_menu_options)
+                                contentDescription = stringResource(R.string.budget_menu_options),
+                                size = 24.dp
                             )
                         }
                         DropdownMenu(
                             expanded = isMenuExpanded,
-                            onDismissRequest = { isMenuExpanded = false }
+                            onDismissRequest = { isMenuExpanded = false },
+                            modifier = Modifier.background(Color.White)
                         ) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.budget_wallet_action_edit_budget)) },
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.budget_wallet_action_edit_budget),
+                                        fontFamily = Nunito,
+                                        fontSize = 14.sp,
+                                        color = CandyColors.textPrimary
+                                    )
+                                },
                                 leadingIcon = {
                                     ChankoIcon(
                                         id = ChankoIconId.ACT_05,
@@ -302,7 +328,8 @@ private fun DetailHeroCreditCard(
     onToggleExpand: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val themeOrdinal = cycle?.themeIndex ?: 0
+    val month = cycle?.labelMonth?.toIntOrNull()
+    val themeOrdinal = if (month != null && month in 1..12) month - 1 else (cycle?.themeIndex ?: 0)
     val theme = remember(themeOrdinal) {
         CandyBudgetThemes.getTheme(themeOrdinal)
     }
@@ -322,15 +349,21 @@ private fun DetailHeroCreditCard(
         snapshot?.remainingFormatted ?: "0 đ"
     }
 
+    val cardCdPrefix = stringResource(
+        R.string.budget_detail_spoken_card_prefix,
+        monthLabel,
+        snapshot?.budgetFormatted ?: "0 đ",
+        snapshot?.spentFormatted ?: "0 đ"
+    )
+    val cardCdProgress = stringResource(R.string.budget_detail_spoken_progress, percentText)
     val cardCd = buildString {
-        append("Thẻ ngân sách tháng $monthLabel. ")
-        append("Hạn mức: ${snapshot?.budgetFormatted ?: "0 đ"}, đã chi: ${snapshot?.spentFormatted ?: "0 đ"}. ")
+        append(cardCdPrefix)
         if (isOver) {
-            append("Vượt ngân sách: $amountFormatted. ")
+            append("${stringResource(R.string.budget_summary_label_over)}: $amountFormatted. ")
         } else {
-            append("Còn lại: $amountFormatted. ")
+            append("${stringResource(R.string.budget_summary_label_remaining)}: $amountFormatted. ")
         }
-        append("Tiến độ: $percentText.")
+        append(cardCdProgress)
     }
 
     Surface(
@@ -477,6 +510,10 @@ private fun DetailHeroCreditCard(
                         targetValue = if (isExpanded) 270f else 90f,
                         label = "chevronRotation"
                     )
+                    val expandCollapseTextShow = stringResource(R.string.budget_detail_toggle_expand)
+                    val expandCollapseTextHide = stringResource(R.string.budget_detail_toggle_collapse)
+                    val expandCollapseCdShow = stringResource(R.string.budget_detail_toggle_expand_cd)
+                    val expandCollapseCdHide = stringResource(R.string.budget_detail_toggle_collapse_cd)
 
                     Surface(
                         modifier = Modifier
@@ -488,9 +525,9 @@ private fun DetailHeroCreditCard(
                             .semantics {
                                 role = Role.Button
                                 contentDescription = if (isExpanded) {
-                                    "Ẩn chi tiết ngân sách"
+                                    expandCollapseCdHide
                                 } else {
-                                    "Xem chi tiết ngân sách"
+                                    expandCollapseCdShow
                                 }
                             },
                         shape = togglePillShape,
@@ -503,7 +540,7 @@ private fun DetailHeroCreditCard(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = if (isExpanded) "Ẩn chi tiết" else "Xem chi tiết",
+                                text = if (isExpanded) expandCollapseTextHide else expandCollapseTextShow,
                                 fontFamily = Nunito,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.5.sp,
@@ -545,7 +582,11 @@ private fun BudgetInfoCard(
     val budgetFormatted = snapshot?.budgetFormatted ?: "0 đ"
     val spentFormatted = snapshot?.spentFormatted ?: "0 đ"
     val isOver = snapshot?.isOverBudget == true
-    val remainingOrOverLabel = if (isOver) "Vượt ngân sách" else "Còn lại"
+    val remainingOrOverLabel = if (isOver) {
+        stringResource(R.string.budget_summary_label_over)
+    } else {
+        stringResource(R.string.budget_summary_label_remaining)
+    }
     val remainingOrOverFormatted = if (isOver) {
         snapshot?.overFormatted ?: "0 đ"
     } else {
@@ -569,7 +610,7 @@ private fun BudgetInfoCard(
             // 1. Thời gian
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Thời gian",
+                    text = stringResource(R.string.budget_detail_period_label),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp,
@@ -587,7 +628,7 @@ private fun BudgetInfoCard(
             // 2. Ngân sách (kèm icon edit nếu canWrite)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Ngân sách",
+                    text = stringResource(R.string.budget_summary_label_limit),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp,
@@ -623,7 +664,7 @@ private fun BudgetInfoCard(
             // 3. Đã chi
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Đã chi",
+                    text = stringResource(R.string.budget_summary_label_spent),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp,
@@ -658,7 +699,7 @@ private fun BudgetInfoCard(
 
             // 5. Tiến độ sử dụng: %
             Text(
-                text = "Tiến độ sử dụng: $percentage%",
+                text = stringResource(R.string.budget_detail_progress_label, percentage),
                 fontFamily = Nunito,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,

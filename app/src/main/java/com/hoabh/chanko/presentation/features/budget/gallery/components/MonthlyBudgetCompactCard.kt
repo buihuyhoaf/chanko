@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -84,14 +85,19 @@ fun MonthlyBudgetCompactCard(
         else -> R.drawable.budget_card_cat_happy
     }
 
-    val spokenText = buildString {
-        append("Tháng ${overview.monthNumberText} năm ${overview.yearText}. ")
-        if (isCurrentMonth) append("Tháng hiện tại. ")
-        if (isMissingSetup) {
-            append("Chưa thiết lập ngân sách. Chạm để thiết lập.")
-        } else {
-            append("Đã chi tiêu ${MoneyVnd.spoken(overview.actualSpentMinor ?: 0L)}. Chạm để xem chi tiết.")
-        }
+    val currentPrefix = if (isCurrentMonth) stringResource(R.string.budget_compact_spoken_current) else ""
+    val spokenText = if (isMissingSetup) {
+        stringResource(
+            R.string.budget_compact_spoken_not_configured,
+            overview.monthNumberText,
+            overview.yearText
+        )
+    } else {
+        val spentSpoken = stringResource(
+            R.string.budget_compact_spoken_spent,
+            MoneyVnd.spoken(overview.actualSpentMinor ?: 0L)
+        )
+        "Tháng ${overview.monthNumberText} năm ${overview.yearText}. $currentPrefix$spentSpoken"
     }
 
     Surface(
@@ -173,7 +179,7 @@ fun MonthlyBudgetCompactCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "+ Thiết lập",
+                            text = stringResource(R.string.budget_compact_setup_button),
                             fontFamily = Nunito,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
@@ -189,7 +195,7 @@ fun MonthlyBudgetCompactCard(
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
-                            text = "Đã chi tiêu",
+                            text = stringResource(R.string.budget_compact_spent_label),
                             fontFamily = Nunito,
                             fontSize = CandyBudgetThemes.compactLabelTextSize,
                             color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),

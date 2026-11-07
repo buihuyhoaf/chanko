@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -86,10 +87,14 @@ fun FutureBudgetSheetContent(
     val parsedAmount = MoneyVnd.parse(rawInput)
     val isValid = parsedAmount != null && MoneyVnd.isValidBudget(parsedAmount)
 
+    val invalidError = stringResource(R.string.budget_edit_error_invalid)
+    val zeroError = stringResource(R.string.budget_future_sheet_error_zero)
+    val overflowError = stringResource(R.string.budget_edit_error_overflow)
+
     val errorMessage = when {
-        rawInput.isNotBlank() && parsedAmount == null -> "Số tiền không hợp lệ"
-        rawInput.isNotBlank() && parsedAmount != null && parsedAmount <= 0L -> "Ngân sách phải lớn hơn 0"
-        rawInput.isNotBlank() && parsedAmount != null && !MoneyVnd.isValidBudget(parsedAmount) -> "Ngân sách vượt quá giới hạn cho phép"
+        rawInput.isNotBlank() && parsedAmount == null -> invalidError
+        rawInput.isNotBlank() && parsedAmount != null && parsedAmount <= 0L -> zeroError
+        rawInput.isNotBlank() && parsedAmount != null && !MoneyVnd.isValidBudget(parsedAmount) -> overflowError
         else -> null
     }
 
@@ -135,7 +140,11 @@ fun FutureBudgetSheetContent(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = if (isEditMode) "Chỉnh sửa ngân sách" else "Thiết lập ngân sách",
+                    text = if (isEditMode) {
+                        stringResource(R.string.budget_future_sheet_edit_title)
+                    } else {
+                        stringResource(R.string.budget_future_sheet_setup_title)
+                    },
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
@@ -155,14 +164,14 @@ fun FutureBudgetSheetContent(
             ) {
                 ChankoIcon(
                     id = ChankoIconId.ACT_02,
-                    contentDescription = "Đóng"
+                    contentDescription = stringResource(R.string.budget_btn_close)
                 )
             }
         }
 
         // Subtitle helper
         Text(
-            text = "Ngân sách này sẽ áp dụng cho toàn bộ chi tiêu trong tháng tương lai và chưa phát sinh giao dịch thực tế.",
+            text = stringResource(R.string.budget_future_sheet_helper),
             fontFamily = Nunito,
             fontSize = 13.sp,
             color = CandyColors.mutedInk
@@ -177,8 +186,8 @@ fun FutureBudgetSheetContent(
                     rawInput = filtered
                 },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Số tiền ngân sách (VND)") },
-                placeholder = { Text("Ví dụ: 6.000.000") },
+                label = { Text(stringResource(R.string.budget_future_sheet_label)) },
+                placeholder = { Text(stringResource(R.string.budget_future_sheet_placeholder)) },
                 singleLine = true,
                 isError = errorMessage != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -193,7 +202,7 @@ fun FutureBudgetSheetContent(
                         IconButton(onClick = { rawInput = "" }) {
                             ChankoIcon(
                                 id = ChankoIconId.ACT_02,
-                                contentDescription = "Xóa nội dung",
+                                contentDescription = stringResource(R.string.budget_future_sheet_clear_cd),
                                 size = 18.dp
                             )
                         }
@@ -232,7 +241,7 @@ fun FutureBudgetSheetContent(
                     size = 18.dp
                 )
                 Text(
-                    text = "Gợi ý từ tháng trước: ${MoneyVnd.format(suggestedLimit)}",
+                    text = stringResource(R.string.budget_future_sheet_suggestion, MoneyVnd.format(suggestedLimit)),
                     fontFamily = Nunito,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -251,7 +260,7 @@ fun FutureBudgetSheetContent(
                     .padding(12.dp)
             ) {
                 Text(
-                    text = "Bạn đang ở chế độ ngoại tuyến. Không thể lưu thay đổi lúc này.",
+                    text = stringResource(R.string.budget_state_offline_banner),
                     fontFamily = Nunito,
                     fontSize = 12.sp,
                     color = CandyColors.overBudget
@@ -275,7 +284,7 @@ fun FutureBudgetSheetContent(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Hủy",
+                    text = stringResource(R.string.budget_btn_cancel),
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
@@ -300,7 +309,11 @@ fun FutureBudgetSheetContent(
                 )
             ) {
                 Text(
-                    text = if (isSaving) "Đang lưu..." else "Lưu ngân sách",
+                    text = if (isSaving) {
+                        stringResource(R.string.budget_status_saving)
+                    } else {
+                        stringResource(R.string.budget_future_sheet_save_button)
+                    },
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,

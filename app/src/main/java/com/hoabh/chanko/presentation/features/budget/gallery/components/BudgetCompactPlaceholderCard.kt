@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -29,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.budget.model.MonthlyBudgetOverview
 import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 
@@ -45,7 +47,11 @@ fun BudgetCompactPlaceholderCard(
     modifier: Modifier = Modifier
 ) {
     val cardShape = RoundedCornerShape(CandyBudgetThemes.compactCardRadius)
-    val spokenText = "Tháng ${overview.monthNumberText} năm ${overview.yearText}. Chưa thiết lập ngân sách. Chạm để thiết lập."
+    val spokenText = stringResource(
+        R.string.budget_compact_spoken_not_configured,
+        overview.monthNumberText,
+        overview.yearText
+    )
 
     val strokeColor = CandyBudgetThemes.placeholderBorder
     val bgColor = CandyBudgetThemes.placeholderBackground
@@ -109,7 +115,7 @@ fun BudgetCompactPlaceholderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Chưa thiết lập",
+                    text = stringResource(R.string.budget_compact_not_configured),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                     color = CandyBudgetThemes.placeholderInk.copy(alpha = 0.7f)
@@ -122,7 +128,7 @@ fun BudgetCompactPlaceholderCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "+ Thiết lập",
+                        text = stringResource(R.string.budget_compact_setup_button),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = CandyBudgetThemes.placeholderCtaText

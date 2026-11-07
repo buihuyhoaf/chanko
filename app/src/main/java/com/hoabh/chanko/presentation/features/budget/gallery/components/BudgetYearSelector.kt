@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -24,6 +25,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.ui.theme.CandyBudgetThemes
@@ -47,6 +49,9 @@ fun BudgetYearSelector(
     onNextYear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val prevYearCd = stringResource(R.string.budget_year_selector_previous_cd)
+    val nextYearCd = stringResource(R.string.budget_year_selector_next_cd)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -65,7 +70,7 @@ fun BudgetYearSelector(
                     onClick = onPreviousYear
                 )
                 .semantics {
-                    contentDescription = "Xem năm trước"
+                    contentDescription = prevYearCd
                     role = Role.Button
                 },
             contentAlignment = Alignment.Center
@@ -99,7 +104,7 @@ fun BudgetYearSelector(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Năm $selectedYear",
+                text = stringResource(R.string.budget_year_selector_label, selectedYear),
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
@@ -118,7 +123,7 @@ fun BudgetYearSelector(
                     onClick = onNextYear
                 )
                 .semantics {
-                    contentDescription = "Xem năm kế tiếp"
+                    contentDescription = nextYearCd
                     role = Role.Button
                 },
             contentAlignment = Alignment.Center

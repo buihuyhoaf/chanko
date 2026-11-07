@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,7 +73,7 @@ fun AnnualSummarySection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Tổng ngân sách năm",
+                        text = stringResource(R.string.budget_annual_summary_title),
                         fontFamily = Nunito,
                         fontSize = 13.sp,
                         color = CandyColors.textSecondary
@@ -85,7 +86,11 @@ fun AnnualSummarySection(
                             .padding(horizontal = 10.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "$configuredMonthsCount/$totalMonthsInYear tháng",
+                            text = stringResource(
+                                R.string.budget_annual_summary_configured_months,
+                                configuredMonthsCount,
+                                totalMonthsInYear
+                            ),
                             fontFamily = Nunito,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
@@ -104,7 +109,7 @@ fun AnnualSummarySection(
 
                 if (!isOnline) {
                     Text(
-                        text = "Đang xem dữ liệu ngoại tuyến",
+                        text = stringResource(R.string.budget_annual_summary_offline),
                         fontFamily = Nunito,
                         fontSize = 12.sp,
                         color = CandyColors.overBudget
