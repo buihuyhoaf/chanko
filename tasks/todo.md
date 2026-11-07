@@ -540,14 +540,14 @@ Thực hiện kiểm thử tích hợp và hồi quy toàn diện cho màn hình
 - Chạy toàn bộ test suite và build check `assembleDevDebug`.
 
 **Acceptance criteria:**
-- [ ] Viết test `HomeCheckInFlowTest` kiểm tra trọn vẹn luồng Check-in và cập nhật tài nguyên.
-- [ ] Tất cả các bài test của Home (Carousel, Header, DomainLogic, CheckIn) PASS 100%.
-- [ ] `./gradlew :app:testDevDebugUnitTest` PASS 100% không lỗi.
-- [ ] `./gradlew assembleDevDebug` biên dịch thành công 100%.
+- [x] Viết test `HomeCheckInFlowTest` kiểm tra trọn vẹn luồng Check-in và cập nhật tài nguyên.
+- [x] Tất cả các bài test của Home (Carousel, Header, DomainLogic, CheckIn) PASS 100%.
+- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100% không lỗi.
+- [x] `./gradlew assembleDevDebug` biên dịch thành công 100%.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest`
-- [ ] Build succeeds: `./gradlew assembleDevDebug`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest`
+- [x] Build succeeds: `./gradlew assembleDevDebug`
 
 **Dependencies:** Tasks 14–17
 
@@ -559,6 +559,6 @@ Thực hiện kiểm thử tích hợp và hồi quy toàn diện cho màn hình
 ---
 
 ### Checkpoint 6: Home Screen Refresh Verified
-- [ ] Popup Daily Check-in và pill mở lại trên Header hoạt động mượt mà.
-- [ ] Danh sách món đồ sắp xếp chuẩn thời gian (mới nhất dưới cùng) và hiển thị rõ trạng thái Freeze / Sẵn sàng.
-- [ ] Carousel ngân sách 3 thẻ v2.2 hoàn toàn nguyên vẹn, 100% test xanh.
+- [x] Popup Daily Check-in và pill mở lại trên Header hoạt động mượt mà.
+- [x] Danh sách món đồ sắp xếp chuẩn thời gian (mới nhất dưới cùng) và hiển thị rõ trạng thái Freeze / Sẵn sàng.
+- [x] Carousel ngân sách 3 thẻ v2.2 hoàn toàn nguyên vẹn, 100% test xanh.
