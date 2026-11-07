@@ -331,6 +331,7 @@ object CandyColors {
     val homeAmbientPeachOrb = CandyPalette.PeachAmbientOrb
     val homeCardSurface = CandyPalette.CoolWhite
     val homeCardBorder = CandyPalette.Lavender110
+    val resourceChipBg = CandyPalette.BudgetMonthBadgeBg
     val dialogueBubbleSurface = CandyPalette.WarmCream
     val dialogueBubbleBorder = CandyPalette.Peach150
     val calendarDayInk = CandyPalette.Slate700

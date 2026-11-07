@@ -383,14 +383,14 @@ Thực hiện kiểm thử tích hợp toàn diện trên toàn bộ hệ thốn
 5. Kiểm tra hồi quy không ảnh hưởng đến bất kỳ tính năng hiện có nào của Home v2.2.
 
 **Acceptance criteria:**
-- [ ] Toàn bộ luồng end-to-end từ thêm đồ đến thưởng hoặc unfreeze chạy thành công.
-- [ ] Không có hồi quy trên `BudgetCreditCardCarousel` (BC22-01..BC22-24 vẫn PASS 100%).
-- [ ] Chạy toàn bộ test suite thành công qua terminal `./gradlew testDebugUnitTest`.
-- [ ] Biên dịch `assembleDebug` thành công 100% không cảnh báo nghiêm trọng.
+- [x] Toàn bộ luồng end-to-end từ thêm đồ đến thưởng hoặc unfreeze chạy thành công.
+- [x] Không có hồi quy trên `BudgetCreditCardCarousel` (BC22-01..BC22-24 vẫn PASS 100%).
+- [x] Chạy toàn bộ test suite thành công qua terminal `./gradlew testDebugUnitTest`.
+- [x] Biên dịch `assembleDebug` thành công 100% không cảnh báo nghiêm trọng.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew testDebugUnitTest`
-- [ ] Build succeeds: `./gradlew assembleDebug`
+- [x] Tests pass: `./gradlew testDebugUnitTest`
+- [x] Build succeeds: `./gradlew assembleDebug`
 
 **Dependencies:** Tasks 1–12
 
@@ -402,5 +402,5 @@ Thực hiện kiểm thử tích hợp toàn diện trên toàn bộ hệ thốn
 ---
 
 ### Checkpoint 5: Hoàn tất Toàn diện & Sẵn sàng Triển khai
-- [ ] Đầy đủ 13 tasks qua 5 phases đã được định nghĩa với acceptance criteria và verification rõ ràng.
-- [ ] Kế hoạch sẵn sàng để lập trình viên hoặc AI agent thực hiện từng bước.
+- [x] Đầy đủ 13 tasks qua 5 phases đã được định nghĩa với acceptance criteria và verification rõ ràng.
+- [x] Kế hoạch sẵn sàng để lập trình viên hoặc AI agent thực hiện từng bước.

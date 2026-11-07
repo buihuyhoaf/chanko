@@ -295,7 +295,7 @@ fun HomeResourceChipsRow(
         // Pill Hạt
         Surface(
             shape = CandyShape.chip,
-            color = Color(0xFFFFF8F2),
+            color = CandyColors.resourceChipBg,
             border = BorderStroke(1.dp, CandyColors.homeCardBorder),
             modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
         ) {
@@ -316,7 +316,7 @@ fun HomeResourceChipsRow(
         // Pill Level Chanko & Thanh tiến độ Pate
         Surface(
             shape = CandyShape.chip,
-            color = Color(0xFFFFF8F2),
+            color = CandyColors.resourceChipBg,
             border = BorderStroke(1.dp, CandyColors.homeCardBorder),
             modifier = Modifier.clip(CandyShape.chip).clickable(role = Role.Button, onClick = onResourceClick)
         ) {
