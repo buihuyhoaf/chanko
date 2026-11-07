@@ -66,10 +66,12 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCard
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCardCarousel
+import com.hoabh.chanko.presentation.features.home.components.DailyCheckInDialog
 import com.hoabh.chanko.presentation.features.home.components.HomeHeader
 import com.hoabh.chanko.presentation.features.home.components.HomeHeaderTokens
 import com.hoabh.chanko.presentation.features.home.components.InsightExplanationDialog
 import com.hoabh.chanko.presentation.features.home.components.ItemJourneySection
+import com.hoabh.chanko.presentation.features.home.components.LevelUpCelebrationDialog
 import com.hoabh.chanko.presentation.features.home.components.ObservationCard
 import com.hoabh.chanko.presentation.features.home.components.calculateCollapseFraction
 import com.hoabh.chanko.ui.theme.CandyColors
@@ -293,6 +295,7 @@ fun HomeScreen(
                 header = state.header,
                 onProfileClick = { onEvent(HomeUiEvent.AvatarTap) },
                 onResourceClick = { onEvent(HomeUiEvent.ResourcePillTap) },
+                onCheckInClick = { onEvent(HomeUiEvent.RequestCheckIn) },
                 collapseFraction = collapseFraction,
                 modifier = Modifier
                     .widthIn(max = MaxContentWidthDp)
@@ -462,6 +465,20 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+
+        if (state.isCheckInDialogOpen) {
+            DailyCheckInDialog(
+                onConfirm = { onEvent(HomeUiEvent.ConfirmCheckIn) },
+                onDismiss = { onEvent(HomeUiEvent.DismissCheckInDialog) }
+            )
+        }
+
+        if (state.showLevelUpCelebration) {
+            LevelUpCelebrationDialog(
+                newLevel = state.celebratedLevel,
+                onDismiss = { onEvent(HomeUiEvent.DismissLevelUpCelebration) }
+            )
         }
     }
 }

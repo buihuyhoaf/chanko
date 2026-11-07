@@ -480,13 +480,13 @@ Kết nối `DailyCheckInUseCase` vào `HomeViewModel` và `HomeScreen`:
 - Khi phát hiện `currentLevel` tăng: tự động mở `LevelUpCelebrationDialog` chúc mừng Chanko lớn hơn.
 
 **Acceptance criteria:**
-- [ ] Tự động mở popup Check-in khi chưa check-in trong ngày; không mở lại nếu người dùng đã chọn "Để sau" trong phiên đó.
-- [ ] Bấm xác nhận check-in cộng đúng 10 Hạt & 10 Pate vào StateFlow của Header tức thì.
-- [ ] Nút pill trên Header chuyển sang trạng thái "Đã check-in" ngay lập tức.
-- [ ] Mascot phát câu thoại chúc mừng và dialog Level Up hiển thị khi Chanko tăng Cấp.
+- [x] Tự động mở popup Check-in khi chưa check-in trong ngày; không mở lại nếu người dùng đã chọn "Để sau" trong phiên đó.
+- [x] Bấm xác nhận check-in cộng đúng 10 Hạt & 10 Pate vào StateFlow của Header tức thì.
+- [x] Nút pill trên Header chuyển sang trạng thái "Đã check-in" ngay lập tức.
+- [x] Mascot phát câu thoại chúc mừng và dialog Level Up hiển thị khi Chanko tăng Cấp.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeViewModelTest*"`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeViewModelTest*"`
 
 **Dependencies:** Task 7, Task 14, Task 15
 

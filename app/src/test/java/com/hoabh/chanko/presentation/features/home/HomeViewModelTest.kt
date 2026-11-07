@@ -492,4 +492,31 @@ class HomeViewModelTest {
         viewModel.onEvent(HomeUiEvent.RetrySection(HomeSection.Budget))
         assertTrue(viewModel.uiState.value.budgetCarouselState is SectionState.Content)
     }
+
+    @Test
+    fun `Daily checkin flow prompts dialog, awards 10 Hat and 10 Pate, updates header pill`() = runTest {
+        // Initial state opens dialog when not checked in
+        assertTrue(viewModel.uiState.value.isCheckInDialogOpen)
+        assertFalse(viewModel.uiState.value.header.hasCheckedInToday)
+
+        val initialHat = viewModel.uiState.value.header.hatBalance
+        val initialPate = viewModel.uiState.value.header.pateBalance
+
+        // Confirm check-in
+        viewModel.onEvent(HomeUiEvent.ConfirmCheckIn)
+
+        assertFalse(viewModel.uiState.value.isCheckInDialogOpen)
+        assertTrue(viewModel.uiState.value.header.hasCheckedInToday)
+        assertEquals(initialHat + 10L, viewModel.uiState.value.header.hatBalance)
+        assertEquals(initialPate + 10L, viewModel.uiState.value.header.pateBalance)
+    }
+
+    @Test
+    fun `Daily checkin dismiss and reopen via RequestCheckIn event`() = runTest {
+        viewModel.onEvent(HomeUiEvent.DismissCheckInDialog)
+        assertFalse(viewModel.uiState.value.isCheckInDialogOpen)
+
+        viewModel.onEvent(HomeUiEvent.RequestCheckIn)
+        assertTrue(viewModel.uiState.value.isCheckInDialogOpen)
+    }
 }

@@ -352,6 +352,9 @@ data class HomeUiState(
     val isOffline: Boolean = false,
     val isReducedMotionEnabled: Boolean = false,
     val isResourceSheetOpen: Boolean = false,
+    val isCheckInDialogOpen: Boolean = false,
+    val showLevelUpCelebration: Boolean = false,
+    val celebratedLevel: Int = 1,
     val scrollAnchorItemId: String? = null,
     val selectedTab: HomeTab = HomeTab.Home,
     val carouselResetTrigger: Long = 0L

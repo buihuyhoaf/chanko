@@ -3,6 +3,9 @@ package com.hoabh.chanko.presentation.features.home
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
+import com.hoabh.chanko.domain.rewards.DailyCheckInUseCase
+import com.hoabh.chanko.domain.rewards.DefaultLevelProgressionTable
+import com.hoabh.chanko.domain.rewards.ResourceBalance
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import com.hoabh.chanko.presentation.features.home.mapper.BudgetCarouselMapper
 import com.hoabh.chanko.presentation.features.home.mapper.BudgetV2Calculator
@@ -26,6 +29,8 @@ class HomeViewModel @Inject constructor(
     )
 ) {
 
+    private val dailyCheckInUseCase: DailyCheckInUseCase = DailyCheckInUseCase()
+
     // Lưu bền vững danh sách insightId đã ẩn qua các lần refresh/select scenario (AC-26)
     private val persistentHiddenInsightIds = LinkedHashSet<String>()
 
@@ -40,6 +45,9 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeBudgetRepository()
+        if (!currentState.header.hasCheckedInToday) {
+            updateState { it.copy(isCheckInDialogOpen = true) }
+        }
     }
 
     private fun observeBudgetRepository() {
@@ -89,6 +97,49 @@ class HomeViewModel @Inject constructor(
 
             HomeUiEvent.DismissResourceSheet -> {
                 updateState { it.copy(isResourceSheetOpen = false) }
+            }
+
+            HomeUiEvent.RequestCheckIn -> {
+                updateState { it.copy(isCheckInDialogOpen = true) }
+            }
+
+            HomeUiEvent.DismissCheckInDialog -> {
+                updateState { it.copy(isCheckInDialogOpen = false) }
+            }
+
+            HomeUiEvent.ConfirmCheckIn -> {
+                val currentHeader = currentState.header
+                val currentBalance = ResourceBalance(
+                    hatBalance = currentHeader.hatBalance,
+                    pateBalance = currentHeader.pateBalance,
+                    currentLevel = currentHeader.currentLevel
+                )
+                val checkInResult = dailyCheckInUseCase.execute(
+                    currentBalance = currentBalance,
+                    hasCheckedInToday = currentHeader.hasCheckedInToday,
+                    confirmedNoImpulseBuying = true
+                )
+                val newBal = checkInResult.updatedBalance
+                val didLevelUp = newBal.currentLevel > currentBalance.currentLevel
+                val newFraction = DefaultLevelProgressionTable.calculateProgressFraction(newBal.pateBalance)
+                updateState { state ->
+                    state.copy(
+                        isCheckInDialogOpen = false,
+                        showLevelUpCelebration = didLevelUp,
+                        celebratedLevel = newBal.currentLevel,
+                        header = state.header.copy(
+                            hatBalance = newBal.hatBalance,
+                            pateBalance = newBal.pateBalance,
+                            currentLevel = newBal.currentLevel,
+                            pateProgressFraction = newFraction,
+                            hasCheckedInToday = true
+                        )
+                    )
+                }
+            }
+
+            HomeUiEvent.DismissLevelUpCelebration -> {
+                updateState { it.copy(showLevelUpCelebration = false) }
             }
 
             HomeUiEvent.BudgetCardTap -> {

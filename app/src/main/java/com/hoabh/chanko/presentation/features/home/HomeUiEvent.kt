@@ -10,6 +10,10 @@ sealed interface HomeUiEvent {
     data object AvatarTap : HomeUiEvent
     data object ResourcePillTap : HomeUiEvent
     data object DismissResourceSheet : HomeUiEvent
+    data object RequestCheckIn : HomeUiEvent
+    data object DismissCheckInDialog : HomeUiEvent
+    data object ConfirmCheckIn : HomeUiEvent
+    data object DismissLevelUpCelebration : HomeUiEvent
 
     // 2. Budget Credit Card (AC-04, AC-08, AC-25) & Carousel v2.2 (BC22-01..BC22-20)
     data object BudgetCardTap : HomeUiEvent
