@@ -421,14 +421,14 @@ Xây dựng Composable `DailyCheckInDialog` xuất hiện tự động hoặc kh
 - Giọng điệu thân thiện, tích cực, tuân thủ nguyên tắc `MASCOT-FEEDING = A`.
 
 **Acceptance criteria:**
-- [ ] Dialog hiển thị tiêu đề, nội dung câu hỏi xác nhận và phần thưởng +10 Hạt & +10 Pate.
-- [ ] Bấm "Xác nhận" gọi callback `onConfirm` để cộng thưởng vào ledger.
-- [ ] Bấm "Để sau" gọi callback `onDismiss` đóng popup mà không phạt người dùng.
-- [ ] Tuân thủ chuẩn thiết kế Candy Colors (không dùng direct hex Color ngoài Color.kt) và responsive font scale.
+- [x] Dialog hiển thị tiêu đề, nội dung câu hỏi xác nhận và phần thưởng +10 Hạt & +10 Pate.
+- [x] Bấm "Xác nhận" gọi callback `onConfirm` để cộng thưởng vào ledger.
+- [x] Bấm "Để sau" gọi callback `onDismiss` đóng popup mà không phạt người dùng.
+- [x] Tuân thủ chuẩn thiết kế Candy Colors (không dùng direct hex Color ngoài Color.kt) và responsive font scale.
 
 **Verification:**
-- [ ] Preview hoạt động tốt trong Compose Previews.
-- [ ] Unit test giao diện hoặc kiểm thử trạng thái component pass.
+- [x] Preview hoạt động tốt trong Compose Previews.
+- [x] Unit test giao diện hoặc kiểm thử trạng thái component pass.
 
 **Dependencies:** Task 7, Task 10
 
