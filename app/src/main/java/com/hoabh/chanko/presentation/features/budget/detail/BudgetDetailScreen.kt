@@ -467,7 +467,7 @@ private fun BudgetInfoCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, Color(0xFFE4CCFB)),
+        border = BorderStroke(1.dp, CandyColors.detailCardBorder),
         shadowElevation = 2.dp
     ) {
         Column(
@@ -609,7 +609,7 @@ private fun RecentActivitiesSection(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             color = Color.White,
-            border = BorderStroke(1.dp, Color(0xFFE4CCFB)),
+            border = BorderStroke(1.dp, CandyColors.detailCardBorder),
             shadowElevation = 2.dp
         ) {
             if (!hasItems) {
@@ -655,8 +655,8 @@ private fun RecentActivitiesSection(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFFEEE5F7))
-                                        .border(1.dp, Color(0xFFE4CCFB), RoundedCornerShape(8.dp)),
+                                        .background(CandyColors.detailIconSurface)
+                                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (dummyThumbnail != null) {
@@ -703,7 +703,7 @@ private fun RecentActivitiesSection(
 
                         if (index < activities.size - 1 || adjustments.isNotEmpty()) {
                             HorizontalDivider(
-                                color = Color(0xFFF3E8FF),
+                                color = CandyColors.detailDivider,
                                 thickness = 1.dp
                             )
                         }
@@ -729,8 +729,8 @@ private fun RecentActivitiesSection(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFFEEE5F7))
-                                        .border(1.dp, Color(0xFFE4CCFB), RoundedCornerShape(8.dp)),
+                                        .background(CandyColors.detailIconSurface)
+                                        .border(1.dp, CandyColors.detailCardBorder, RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     ChankoIcon(
@@ -768,7 +768,7 @@ private fun RecentActivitiesSection(
 
                         if (index < adjustments.size - 1) {
                             HorizontalDivider(
-                                color = Color(0xFFF3E8FF),
+                                color = CandyColors.detailDivider,
                                 thickness = 1.dp
                             )
                         }

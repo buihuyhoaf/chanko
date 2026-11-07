@@ -58,6 +58,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
+import com.hoabh.chanko.presentation.features.budget.BudgetDetailRoute
+import com.hoabh.chanko.presentation.features.budget.BudgetGalleryRoute
 import com.hoabh.chanko.presentation.features.budget.BudgetRoute
 import com.hoabh.chanko.presentation.features.budget.BudgetViewModel
 import com.hoabh.chanko.presentation.features.chat.list.ChatListScreen
@@ -99,7 +101,11 @@ fun NavGraphBuilder.mainDestination(
 }
 
 internal fun NavHostController.selectTab(destination: TopLevelDestination) {
-    if (destination == TopLevelDestination.Home && currentDestination?.route == Screen.BudgetDetails.route) {
+    if (destination == TopLevelDestination.Home && (
+        currentDestination?.route == Screen.BudgetDetails.route ||
+        currentDestination?.route == Screen.BudgetDetail.route ||
+        currentDestination?.route == Screen.BudgetGallery.route
+    )) {
         popBackStack(TopLevelDestination.Home.route, inclusive = false)
         return
     }
@@ -169,23 +175,24 @@ fun MainNavigation(
                         onAddNewItemClick = onAddNewItemClick,
                         onProfileClick = onNavigateToProfile,
                         onBudgetDetailsClick = {
-                            controller.navigate(Screen.BudgetDetails.createRoute()) {
+                            controller.navigate(Screen.BudgetDetail.createRoute()) {
                                 launchSingleTop = true
                             }
                             onNavigateToBudgetDetails()
                         },
                         onNavigateToBudget = { cycleId, mode ->
-                            controller.navigate(Screen.BudgetDetails.createRoute(cycleId = cycleId, mode = mode)) {
+                            controller.navigate(Screen.BudgetDetail.createRoute(cycleId = cycleId, mode = mode)) {
                                 launchSingleTop = true
                             }
                         },
                         onNavigateToBudgetHistory = {
-                            controller.navigate(Screen.BudgetDetails.createRoute(expandHistory = true)) {
+                            // "Xem tất cả" điều hướng đến BudgetGalleryScreen
+                            controller.navigate(Screen.BudgetGallery.route) {
                                 launchSingleTop = true
                             }
                         },
                         onNavigateToBudgetSetup = { targetCycleId ->
-                            controller.navigate(Screen.BudgetDetails.createRoute(cycleId = targetCycleId, mode = "SetupNext")) {
+                            controller.navigate(Screen.BudgetDetail.createRoute(cycleId = targetCycleId, mode = "SetupNext")) {
                                 launchSingleTop = true
                             }
                         },
@@ -194,6 +201,42 @@ fun MainNavigation(
                             pendingMyItemsFilter = filter
                             controller.selectTab(TopLevelDestination.MyItems)
                         }
+                    )
+                }
+                // Màn hình Thư viện Ngân sách theo năm (BudgetGalleryScreen) khi click "Xem tất cả"
+                composable(Screen.BudgetGallery.route) {
+                    BudgetGalleryRoute(
+                        onBackClick = { controller.popBackStack() },
+                        onNavigateToDetail = { targetCycleId ->
+                            controller.navigate(Screen.BudgetDetail.createRoute(cycleId = targetCycleId)) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+                // Màn hình Chi tiết Ngân sách chu kỳ (BudgetDetailScreen) khi click vào thẻ
+                composable(
+                    route = Screen.BudgetDetail.route,
+                    arguments = listOf(
+                        navArgument("cycleId") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        },
+                        navArgument("mode") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = "Active"
+                        }
+                    )
+                ) { backStackEntry ->
+                    val cycleId = backStackEntry.arguments?.getString("cycleId")
+                    val mode = backStackEntry.arguments?.getString("mode")
+                    BudgetDetailRoute(
+                        onBackClick = { controller.popBackStack() },
+                        onNavigateToItemDetail = onNavigateToItemDetail,
+                        cycleId = cycleId,
+                        mode = mode
                     )
                 }
                 composable(
@@ -215,10 +258,14 @@ fun MainNavigation(
                         }
                     )
                 ) { backStackEntry ->
+                    val cycleId = backStackEntry.arguments?.getString("cycleId")
+                    val mode = backStackEntry.arguments?.getString("mode")
                     val expandHistory = backStackEntry.arguments?.getBoolean("expandHistory") ?: false
                     BudgetRoute(
                         onBackClick = { controller.popBackStack() },
                         onNavigateToItemDetail = onNavigateToItemDetail,
+                        cycleId = cycleId,
+                        mode = mode,
                         expandHistory = expandHistory,
                         openCyclePicker = expandHistory
                     )
