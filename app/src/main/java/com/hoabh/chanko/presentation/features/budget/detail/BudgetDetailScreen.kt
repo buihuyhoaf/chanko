@@ -121,9 +121,9 @@ fun BudgetDetailScreen(
                         modifier = Modifier.size(40.dp)
                     ) {
                         ChankoIcon(
-                            id = ChankoIconId.NAV_03,
+                            id = ChankoIconId.ACT_02,
                             contentDescription = "Quay lại",
-                            modifier = Modifier.size(24.dp)
+                            size = 24.dp
                         )
                     }
 

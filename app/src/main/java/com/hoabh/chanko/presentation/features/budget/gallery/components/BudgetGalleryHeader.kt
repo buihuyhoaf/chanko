@@ -44,6 +44,7 @@ import com.hoabh.chanko.ui.theme.Nunito
  */
 @Composable
 fun BudgetGalleryHeader(
+    onBackClick: () -> Unit,
     onAboutClick: () -> Unit,
     onSyncClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -62,13 +63,28 @@ fun BudgetGalleryHeader(
                 .weight(1f)
                 .padding(end = 8.dp)
         ) {
-            Text(
-                text = "Ngân sách",
-                fontFamily = Nunito,
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                color = CandyColors.textPrimary
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    ChankoIcon(
+                        id = ChankoIconId.ACT_02,
+                        contentDescription = "Quay lại",
+                        size = 24.dp
+                    )
+                }
+                Text(
+                    text = "Ngân sách",
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = CandyColors.textPrimary
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Theo dõi ngân sách mỗi tháng, mua sắm có suy nghĩ hơn. ✨",

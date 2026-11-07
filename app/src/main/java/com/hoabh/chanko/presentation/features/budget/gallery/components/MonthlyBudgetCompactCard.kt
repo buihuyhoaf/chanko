@@ -9,15 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,13 +45,15 @@ import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import com.hoabh.chanko.domain.budget.model.MonthlyBudgetOverview
 import com.hoabh.chanko.ui.theme.CandyBudgetThemes
 import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.ui.theme.Nunito
 
 /**
- * Thẻ tháng nhỏ (Compact Monthly Card) trên lưới 2 cột Budget Gallery v3 (04-COMPOSE-GUIDE.md).
- * - Aspect ratio: ~1.6
- * - Bo góc 20dp, padding 12dp
- * - Tương tác chuẩn: min touch target 48dp
+ * Thẻ tháng nhỏ (Compact Monthly Card) trên lưới 2 cột Budget Gallery v3:
+ * - Aspect ratio: ~1.6, bo góc 20dp, padding 12dp
  * - Palette 12 tháng native gradient
+ * - Viền nổi bật nhận diện tháng hiện tại
+ * - Thẻ chưa thiết lập: hiển thị button "+ Thiết lập" trên nền thẻ tín dụng bình thường
+ * - Thẻ đã thiết lập: chỉ hiển thị số tiền đã chi tiêu và text "Đã chi tiêu"
  * - Hiển thị mascot 36dp ở góc thẻ, tự động ẩn khi font hệ thống >= 150%
  */
 @Composable
@@ -63,23 +62,17 @@ fun MonthlyBudgetCompactCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (overview.setupState == BudgetSetupState.Missing && overview.temporalRole == BudgetTemporalRole.Future) {
-        BudgetCompactPlaceholderCard(
-            overview = overview,
-            onClick = onClick,
-            modifier = modifier
-        )
-        return
-    }
-
-    val theme = CandyBudgetThemes.forMonth(overview.themeMonth)
     val gradientBrush = CandyBudgetThemes.getGradientBrushForMonth(overview.themeMonth)
     val cardShape = RoundedCornerShape(CandyBudgetThemes.compactCardRadius)
 
     val fontScale = LocalDensity.current.fontScale
     val showMascot = fontScale < 1.5f
 
+    val isCurrentMonth = overview.temporalRole == BudgetTemporalRole.Current
+    val isMissingSetup = overview.setupState == BudgetSetupState.Missing
+
     val mascotResId = when {
+        isMissingSetup -> R.drawable.budget_card_cat_sleepy
         overview.isOverBudget -> R.drawable.budget_card_cat_concerned
         overview.temporalRole == BudgetTemporalRole.Past || overview.temporalRole == BudgetTemporalRole.Future -> R.drawable.budget_card_cat_sleepy
         else -> R.drawable.budget_card_cat_happy
@@ -87,27 +80,18 @@ fun MonthlyBudgetCompactCard(
 
     val spokenText = buildString {
         append("Tháng ${overview.monthNumberText} năm ${overview.yearText}. ")
-        when (overview.temporalRole) {
-            BudgetTemporalRole.Past -> {
-                if (overview.isOverBudget) {
-                    append("Vượt ngân sách ${overview.overMinor?.let { MoneyVnd.spoken(it) } ?: ""}. ")
-                } else {
-                    append("Còn lại cuối kỳ ${overview.remainingMinor?.let { MoneyVnd.spoken(it) } ?: ""}. ")
-                }
-            }
-            BudgetTemporalRole.Current -> {
-                if (overview.isOverBudget) {
-                    append("Vượt ngân sách ${overview.overMinor?.let { MoneyVnd.spoken(it) } ?: ""}. ")
-                } else {
-                    append("Ngân sách còn lại ${overview.remainingMinor?.let { MoneyVnd.spoken(it) } ?: ""}. ")
-                }
-                overview.usagePercent?.let { append("Đã dùng $it phần trăm. ") }
-            }
-            BudgetTemporalRole.Future -> {
-                append("Ngân sách dự kiến ${overview.limitMinor?.let { MoneyVnd.spoken(it) } ?: ""}. Chưa bắt đầu. ")
-            }
+        if (isCurrentMonth) append("Tháng hiện tại. ")
+        if (isMissingSetup) {
+            append("Chưa thiết lập ngân sách. Chạm để thiết lập.")
+        } else {
+            append("Đã chi tiêu ${MoneyVnd.spoken(overview.actualSpentMinor ?: 0L)}. Chạm để xem chi tiết.")
         }
-        append("Chạm để xem chi tiết.")
+    }
+
+    val cardBorder = if (isCurrentMonth) {
+        Modifier.border(width = 2.5.dp, color = CandyColors.brandPurple, shape = cardShape)
+    } else {
+        Modifier.border(width = 1.dp, color = Color.White.copy(alpha = 0.5f), shape = cardShape)
     }
 
     Box(
@@ -118,7 +102,7 @@ fun MonthlyBudgetCompactCard(
             .shadow(elevation = 2.dp, shape = cardShape)
             .clip(cardShape)
             .background(gradientBrush)
-            .border(width = 1.dp, color = Color.White.copy(alpha = 0.5f), shape = cardShape)
+            .then(cardBorder)
             .clickable(
                 onClick = onClick,
                 role = Role.Button
@@ -139,19 +123,40 @@ fun MonthlyBudgetCompactCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Month badge pill "MM"
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(Color.White.copy(alpha = 0.85f))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                // Month badge pill "MM" (+ optional "Hiện tại" badge)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = overview.monthNumberText,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CandyBudgetThemes.textDark
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(Color.White.copy(alpha = 0.85f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = overview.monthNumberText,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CandyBudgetThemes.textDark
+                        )
+                    }
+
+                    if (isCurrentMonth) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(999.dp))
+                                .background(CandyColors.brandPurple)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Hiện tại",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
                 }
 
                 // Decorative Chip (Vector drawn, non-interactive)
@@ -162,164 +167,54 @@ fun MonthlyBudgetCompactCard(
                 )
             }
 
-            // Body: Data label, Amount, and Status Pill
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = if (showMascot) 38.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                when (overview.temporalRole) {
-                    BudgetTemporalRole.Past -> {
-                        if (overview.isOverBudget) {
-                            Text(
-                                text = "Vượt",
-                                fontSize = CandyBudgetThemes.compactLabelTextSize,
-                                fontWeight = FontWeight.SemiBold,
-                                color = CandyBudgetThemes.coralWarning,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = MoneyVnd.format(overview.overMinor ?: 0L),
-                                fontSize = CandyBudgetThemes.compactAmountTextSize,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyBudgetThemes.coralWarning,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        } else {
-                            Text(
-                                text = "Còn lại cuối kỳ",
-                                fontSize = CandyBudgetThemes.compactLabelTextSize,
-                                color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = MoneyVnd.format(overview.remainingMinor ?: 0L),
-                                fontSize = CandyBudgetThemes.compactAmountTextSize,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyBudgetThemes.textDark,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    BudgetTemporalRole.Current -> {
-                        if (overview.isOverBudget) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Vượt ngân sách",
-                                    fontSize = CandyBudgetThemes.compactLabelTextSize,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = CandyBudgetThemes.coralWarning,
-                                    maxLines = 1
-                                )
-                                overview.usagePercent?.let { percent ->
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(999.dp))
-                                            .background(CandyBudgetThemes.coralWarning)
-                                            .padding(horizontal = 6.dp, vertical = 1.dp)
-                                    ) {
-                                        Text(
-                                            text = "$percent%",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = MoneyVnd.format(overview.overMinor ?: 0L),
-                                fontSize = CandyBudgetThemes.compactAmountTextSize,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyBudgetThemes.coralWarning,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Còn lại",
-                                    fontSize = CandyBudgetThemes.compactLabelTextSize,
-                                    color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
-                                    maxLines = 1
-                                )
-                                overview.usagePercent?.let { percent ->
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(999.dp))
-                                            .background(Color.White.copy(alpha = 0.6f))
-                                            .padding(horizontal = 6.dp, vertical = 1.dp)
-                                    ) {
-                                        Text(
-                                            text = "$percent%",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = CandyBudgetThemes.textDark
-                                        )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = MoneyVnd.format(overview.remainingMinor ?: 0L),
-                                fontSize = CandyBudgetThemes.compactAmountTextSize,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyBudgetThemes.textDark,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    BudgetTemporalRole.Future -> {
-                        Text(
-                            text = "Ngân sách dự kiến",
-                            fontSize = CandyBudgetThemes.compactLabelTextSize,
-                            color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+            // Body Area:
+            if (isMissingSetup) {
+                // Thẻ chưa thiết lập: hiển thị button "+ Thiết lập"
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.White.copy(alpha = 0.9f))
+                        .clickable(
+                            role = Role.Button,
+                            onClick = onClick
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = MoneyVnd.format(overview.limitMinor ?: 0L),
-                                fontSize = CandyBudgetThemes.compactAmountTextSize,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyBudgetThemes.textDark,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .background(Color.White.copy(alpha = 0.6f))
-                                    .padding(horizontal = 6.dp, vertical = 1.dp)
-                            ) {
-                                Text(
-                                    text = "Chưa bắt đầu",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = CandyBudgetThemes.textDark.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
-                    }
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "+ Thiết lập",
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = CandyColors.brandPurple
+                    )
+                }
+            } else {
+                // Thẻ đã thiết lập: chỉ hiển thị số tiền đã chi tiêu và text "Đã chi tiêu"
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = if (showMascot) 38.dp else 0.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = "Đã chi tiêu",
+                        fontFamily = Nunito,
+                        fontSize = CandyBudgetThemes.compactLabelTextSize,
+                        color = CandyBudgetThemes.textDark.copy(alpha = 0.75f),
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = MoneyVnd.format(overview.actualSpentMinor ?: 0L),
+                        fontFamily = Nunito,
+                        fontSize = CandyBudgetThemes.compactAmountTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = CandyBudgetThemes.textDark,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

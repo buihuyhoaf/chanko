@@ -43,6 +43,7 @@ import com.hoabh.chanko.ui.theme.CandyColors
 fun BudgetGalleryScreen(
     state: BudgetGalleryUiState,
     onEvent: (BudgetGalleryUiEvent) -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
@@ -70,6 +71,7 @@ fun BudgetGalleryScreen(
                 // Item 1: Gallery Header with Mascot & Options Menu (span 2 cột)
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     BudgetGalleryHeader(
+                        onBackClick = onBackClick,
                         onAboutClick = { onEvent(BudgetGalleryUiEvent.ShowAboutInfo) },
                         onSyncClick = { onEvent(BudgetGalleryUiEvent.SyncData) }
                     )
@@ -90,6 +92,7 @@ fun BudgetGalleryScreen(
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     BudgetYearSelector(
                         selectedYear = state.selectedYear,
+                        currentYear = state.currentClockMonth.year,
                         canNavigatePrevious = state.canNavigateToPreviousYear,
                         canNavigateNext = state.canNavigateToNextYear,
                         onPreviousYear = { onEvent(BudgetGalleryUiEvent.PreviousYear) },

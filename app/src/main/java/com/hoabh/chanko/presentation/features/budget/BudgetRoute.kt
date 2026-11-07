@@ -122,6 +122,7 @@ fun BudgetRoute(
         BudgetGalleryScreen(
             state = galleryState,
             onEvent = galleryViewModel::onEvent,
+            onBackClick = onBackClick,
             modifier = modifier,
             lazyGridState = galleryGridState,
             snackbarHostState = snackbarHostState
