@@ -95,8 +95,9 @@ object BudgetCarouselMapper {
 
         // 3. Next Slot (BC22-05, BC22-07)
         val next = window.next
-        if (next.status == BudgetCycleStatus.UpcomingConfigured && next.configuredLimitMinor != null) {
-            val limit = next.configuredLimitMinor
+        val nextConfiguredLimit = next.configuredLimitMinor
+        if (next.status == BudgetCycleStatus.UpcomingConfigured && nextConfiguredLimit != null) {
+            val limit = nextConfiguredLimit
             slots.add(
                 BudgetCardSlotUi.UpcomingConfiguredCard(
                     key = next.id,

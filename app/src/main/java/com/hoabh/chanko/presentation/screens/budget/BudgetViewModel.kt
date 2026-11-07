@@ -310,8 +310,11 @@ class BudgetViewModel @Inject constructor(
             is BudgetUiEvent.ActivityItemClicked -> {
                 if (event.activity.type == BudgetActivityType.BUDGET_ADJUSTED) {
                     sendEffect(BudgetUiEffect.NavigateToWalletSettings(expandHistory = true))
-                } else if (!event.activity.itemId.isNullOrBlank()) {
-                    handleOpenSharedItemDetail(event.activity.itemId)
+                } else {
+                    val targetItemId = event.activity.itemId
+                    if (!targetItemId.isNullOrBlank()) {
+                        handleOpenSharedItemDetail(targetItemId)
+                    }
                 }
             }
 

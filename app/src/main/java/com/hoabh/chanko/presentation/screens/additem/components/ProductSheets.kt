@@ -13,6 +13,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.screens.additem.HelpText
+import com.hoabh.chanko.presentation.screens.additem.LinkAction
+import com.hoabh.chanko.presentation.screens.additem.PrimaryAction
+import com.hoabh.chanko.presentation.screens.additem.ReviewCard
+import com.hoabh.chanko.presentation.screens.additem.SecondaryAction
+import com.hoabh.chanko.presentation.screens.additem.formatVnd
 import com.hoabh.chanko.ui.theme.*
 
 /** Presentation-only models; real matching and variant payloads remain integration pending. */

@@ -2,6 +2,7 @@ package com.hoabh.chanko.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 
 @Entity(tableName = "cooldown_items")
@@ -15,4 +16,12 @@ data class CooldownItemEntity(
     val reason: String,
     val status: ItemStatus,
     val isArchived: Boolean = false
+)
+
+fun CooldownItemEntity.toDomain() = CooldownItem(
+    id, name, price, imageUri, addedTimestamp, cooldownDurationMillis, reason, status, isArchived
+)
+
+fun CooldownItem.toEntity() = CooldownItemEntity(
+    id, name, price, imageUri, addedTimestamp, cooldownDurationMillis, reason, status, isArchived
 )

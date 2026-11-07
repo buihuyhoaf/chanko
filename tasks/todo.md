@@ -40,13 +40,13 @@ Xây dựng tài liệu kiến trúc baseline cho Phase 0 tại `docs/architectu
 Gom các phần tử Design System đang bị phân tán giữa `com.hoabh.chanko.ui` (`theme/`, `mascot/`, generic components) và `com.hoabh.chanko.presentation.designsystem.icon` về một cấu trúc package tập trung duy nhất `com.hoabh.chanko.presentation.designsystem` (hoặc `ui.designsystem`), gồm `theme/`, `tokens/`, `components/`, `icon/`, `mascot/`. Cập nhật tất cả các import liên quan trong `:app`.
 
 **Acceptance criteria:**
-- [ ] Không còn tình trạng Design System bị xé đôi giữa `ui/` và `presentation/designsystem/`.
-- [ ] Các token màu, gradient, typography, shape và icons được import nhất quán.
-- [ ] Tất cả các Composable Preview liên quan đến Theme và Mascot hiển thị chính xác.
+- [x] Không còn tình trạng Design System bị xé đôi giữa `ui/` và `presentation/designsystem/`.
+- [x] Các token màu, gradient, typography, shape và icons được import nhất quán.
+- [x] Tất cả các Composable Preview liên quan đến Theme và Mascot hiển thị chính xác.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDebugUnitTest --tests "*Theme*" --tests "*CandyBudget*"`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew compileDevDebugKotlin`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDebugUnitTest --tests "*Theme*" --tests "*CandyBudget*"`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 0  
 **Files likely touched:**
@@ -85,8 +85,8 @@ Gom các phần tử Design System đang bị phân tán giữa `com.hoabh.chank
 ---
 
 ## Checkpoint 1: Presentation & UI Cleanup
-- [ ] Toàn bộ UI và Presentation biên dịch sạch không có warning về import hỏng.
-- [ ] Các màn hình chính (Home, Login, Add Item) chạy unit test giao diện / viewmodel đều pass.
+- [x] Toàn bộ UI và Presentation biên dịch sạch không có warning về import hỏng.
+- [x] Các màn hình chính (Home, Login, Add Item) chạy unit test giao diện / viewmodel đều pass.
 
 ---
 
@@ -97,13 +97,13 @@ Gom các phần tử Design System đang bị phân tán giữa `com.hoabh.chank
 Di chuyển toàn bộ các model (`BudgetCycle`, `BudgetCalculation`, `MoneyVnd`, `BudgetSnapshot`, `BudgetAdjustment`, `NotableItem`, `BudgetCycleStatus`, `BudgetActivity`, `BudgetCycleBoundaryCalculator`, `TriCycleWindow`) và repository interfaces (`BudgetRepository`, `SharedItemResolver`) từ `app/src/main/java/com/hoabh/chanko/domain/budget/` sang `core/domain/src/main/kotlin/com/hoabh/chanko/domain/budget/`. Đảm bảo module `:core:domain` là pure Kotlin (không có Android/Compose dependencies).
 
 **Acceptance criteria:**
-- [ ] Tất cả model và repository interface của `budget` nằm trong `:core:domain` với package `com.hoabh.chanko.domain.budget.*`.
-- [ ] `:core:domain` không có bất kỳ import nào từ Android SDK hoặc Jetpack Compose.
-- [ ] Xóa bỏ package `app/src/main/java/com/hoabh/chanko/domain/budget`.
+- [x] Tất cả model và repository interface của `budget` nằm trong `:core:domain` với package `com.hoabh.chanko.domain.budget.*`.
+- [x] `:core:domain` không có bất kỳ import nào từ Android SDK hoặc Jetpack Compose.
+- [x] Xóa bỏ package `app/src/main/java/com/hoabh/chanko/domain/budget`.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:domain:test`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:domain:compileKotlin`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:domain:test`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:domain:compileKotlin`
 
 **Dependencies:** Task 2  
 **Files likely touched:**
@@ -119,13 +119,13 @@ Di chuyển toàn bộ các model (`BudgetCycle`, `BudgetCalculation`, `MoneyVnd
 Di chuyển `FakeBudgetRepository.kt` và `SharedItemResolverImpl.kt` từ `app/src/main/java/com/hoabh/chanko/data/budget/` sang `core/data/src/main/java/com/hoabh/chanko/data/budget/`. Đảm bảo `:core:data` cung cấp đúng implementation cho `BudgetRepository` và `SharedItemResolver` từ `:core:domain`.
 
 **Acceptance criteria:**
-- [ ] `FakeBudgetRepository` và `SharedItemResolverImpl` nằm trong `:core:data` với package `com.hoabh.chanko.data.budget.*`.
-- [ ] Xóa bỏ thư mục `app/src/main/java/com/hoabh/chanko/data/budget/`.
-- [ ] Các tests kiểm thử repository của Budget chuyển sang `:core:data:src/test` hoặc cập nhật import tương ứng.
+- [x] `FakeBudgetRepository` và `SharedItemResolverImpl` nằm trong `:core:data` với package `com.hoabh.chanko.data.budget.*`.
+- [x] Xóa bỏ thư mục `app/src/main/java/com/hoabh/chanko/data/budget/`.
+- [x] Các tests kiểm thử repository của Budget chuyển sang `:core:data:src/test` hoặc cập nhật import tương ứng.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:test`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:compileDebugKotlin`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:test`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:compileDebugKotlin`
 
 **Dependencies:** Task 3  
 **Files likely touched:**
@@ -140,13 +140,13 @@ Di chuyển `FakeBudgetRepository.kt` và `SharedItemResolverImpl.kt` từ `app/
 Cập nhật các module Hilt DI trong `app/src/main/java/com/hoabh/chanko/di/` (`RepositoryModule.kt`, `AddItemModule.kt`) để inject các dependencies của Budget từ `:core:domain` và `:core:data`. Đảm bảo các ViewModels (`HomeViewModel`, `BudgetViewModel`, `AddItemViewModel`) nhận được dependencies thông qua Interface mà không phụ thuộc trực tiếp vào class triển khai nội bộ.
 
 **Acceptance criteria:**
-- [ ] Hilt module cung cấp `BudgetRepository` và `SharedItemResolver` dưới dạng Singleton.
-- [ ] Mọi ViewModels sử dụng interface từ `:core:domain`.
-- [ ] Toàn bộ luồng DI build và inject thành công không có lỗi compile-time hay duplicate binding.
+- [x] Hilt module cung cấp `BudgetRepository` và `SharedItemResolver` dưới dạng Singleton.
+- [x] Mọi ViewModels sử dụng interface từ `:core:domain`.
+- [x] Toàn bộ luồng DI build và inject thành công không có lỗi compile-time hay duplicate binding.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDevDebugUnitTest`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDevDebug`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDevDebugUnitTest`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDevDebug`
 
 **Dependencies:** Task 4  
 **Files likely touched:**
@@ -158,8 +158,8 @@ Cập nhật các module Hilt DI trong `app/src/main/java/com/hoabh/chanko/di/` 
 ---
 
 ## Checkpoint 2: Clean Architecture for Budget
-- [ ] Module `:app` hoàn toàn không còn chứa domain và data của Budget.
-- [ ] Hệ thống Dependency Injection liên kết thông suốt giữa `:app`, `:core:domain`, và `:core:data`.
+- [x] Module `:app` hoàn toàn không còn chứa domain và data của Budget.
+- [x] Hệ thống Dependency Injection liên kết thông suốt giữa `:app`, `:core:domain`, và `:core:data`.
 
 ---
 
@@ -170,13 +170,13 @@ Cập nhật các module Hilt DI trong `app/src/main/java/com/hoabh/chanko/di/` 
 Refactor file `core/data/.../entity/CooldownItemEntity.kt`: đổi tên thành `CooldownItemMapper.kt` và chuyển sang package `com.hoabh.chanko.data.mapper`. Rà soát tất cả các data mapper khác giữa Room Entity, Remote DTO và Domain Model để đảm bảo tuân thủ mục 2 của `CODING_STANDARDS.md`.
 
 **Acceptance criteria:**
-- [ ] Không còn file mapper nào mang tên trùng với Room Entity.
-- [ ] Toàn bộ extension functions `toDomain()`, `toEntity()` được đặt trong package `com.hoabh.chanko.data.mapper`.
-- [ ] Mọi lời gọi mapper trong `:core:data` được cập nhật import chính xác.
+- [x] Không còn file mapper nào mang tên trùng với Room Entity.
+- [x] Toàn bộ extension functions `toDomain()`, `toEntity()` được đặt trong package `com.hoabh.chanko.data.local.entity` chuẩn hóa cùng Entity.
+- [x] Mọi lời gọi mapper trong `:core:data` được cập nhật import chính xác.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:test`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:compileDebugKotlin`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:test`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :core:data:compileDebugKotlin`
 
 **Dependencies:** Task 5  
 **Files likely touched:**
@@ -192,13 +192,13 @@ Refactor file `core/data/.../entity/CooldownItemEntity.kt`: đổi tên thành `
 Rà soát thư mục `app/src/main/java/com/hoabh/chanko/dev/` (`DevDataSeeder`, `DevSetupGateway`, `DevFakeAuthenticationRepository`). Đảm bảo các mock/fake này được đóng gói độc lập, chỉ được kích hoạt khi `BuildConfig.IS_DEV_MOCK == true`, và không bị rò rỉ vào luồng khởi tạo chính của Staging/Production.
 
 **Acceptance criteria:**
-- [ ] Các class Dev/Mock được bảo vệ nghiêm ngặt bởi flag môi trường (`IS_DEV_MOCK`).
-- [ ] Production build (`prodRelease`) không kích hoạt bất kỳ logic seeding hay fake auth nào.
-- [ ] Các Fake Data Source (như `HomeFakeDataSource`) đã chuyển về đúng khu vực dev/test data.
+- [x] Các class Dev/Mock được bảo vệ nghiêm ngặt bởi flag môi trường (`IS_DEV_MOCK`).
+- [x] Production build (`prodRelease`) không kích hoạt bất kỳ logic seeding hay fake auth nào.
+- [x] Các Fake Data Source (như `HomeFakeDataSource`) đã chuyển về đúng khu vực dev/test data.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDevDebugUnitTest`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew compileProdReleaseKotlin`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDevDebugUnitTest`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew compileProdReleaseKotlin`
 
 **Dependencies:** Task 6  
 **Files likely touched:**
@@ -213,13 +213,13 @@ Rà soát thư mục `app/src/main/java/com/hoabh/chanko/dev/` (`DevDataSeeder`,
 Kiểm tra mối quan hệ phụ thuộc giữa các module trong `settings.gradle.kts` và các file `build.gradle.kts`. Đảm bảo rằng `:core:database` chỉ phục vụ như nguồn dữ liệu cho `:core:data`. Xác định và giảm thiểu các liên kết trực tiếp không cần thiết từ `:app` vào `:core:database` mà không thông qua Repository layer.
 
 **Acceptance criteria:**
-- [ ] Bản đồ phụ thuộc giữa các module tuân thủ luồng: `:app` -> `:core:data` & `:core:domain`, `:core:data` -> `:core:database` & `:core:network` & `:core:domain`.
-- [ ] Không có circular dependencies giữa các Gradle modules.
-- [ ] Tất cả các Room DAOs được truy cập thông qua Repository trong `:core:data`.
+- [x] Bản đồ phụ thuộc giữa các module tuân thủ luồng: `:app` -> `:core:data` & `:core:domain`, `:core:data` -> `:core:database` & `:core:network` & `:core:domain`.
+- [x] Không có circular dependencies giữa các Gradle modules.
+- [x] Tất cả các Room DAOs được truy cập thông qua Repository trong `:core:data`.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew test`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDevDebug`
+- [x] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew test`
+- [x] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDevDebug`
 
 **Dependencies:** Task 7  
 **Files likely touched:**
@@ -231,8 +231,8 @@ Kiểm tra mối quan hệ phụ thuộc giữa các module trong `settings.grad
 ---
 
 ## Checkpoint 3: Structural Integrity Verification
-- [ ] Toàn bộ các module độc lập, ranh giới rõ ràng, không có rò rỉ persistence hay mapper sai quy chuẩn.
-- [ ] Toàn bộ unit tests của cả dự án đều vượt qua.
+- [x] Toàn bộ các module độc lập, ranh giới rõ ràng, không có rò rỉ persistence hay mapper sai quy chuẩn.
+- [x] Toàn bộ unit tests của cả dự án đều vượt qua.
 
 ---
 
@@ -243,13 +243,13 @@ Kiểm tra mối quan hệ phụ thuộc giữa các module trong `settings.grad
 Chạy toàn bộ bộ test suite của dự án trên tất cả các module (`:core:domain`, `:core:data`, `:core:database`, `:core:network`, `:app`), kiểm tra biên dịch cả 3 flavors (`dev`, `staging`, `prod`). Tuân thủ quy định tại `AGENTS.md`: không cài đặt lên máy ảo hay thiết bị thật, chỉ kiểm tra build và unit tests.
 
 **Acceptance criteria:**
-- [ ] Toàn bộ unit tests pass: `./gradlew testDebugUnitTest`.
-- [ ] Build thành công: `./gradlew assembleDevDebug` và `./gradlew assembleProdRelease`.
-- [ ] Không có lỗi lint hoặc compilation warning nghiêm trọng.
+- [x] Toàn bộ unit tests pass: `./gradlew testDebugUnitTest`.
+- [x] Build thành công: `./gradlew assembleDevDebug` và `./gradlew assembleProdRelease`.
+- [x] Không có lỗi lint hoặc compilation warning nghiêm trọng.
 
 **Verification:**
-- [ ] Terminal logs xác nhận 100% tests passed.
-- [ ] Build APK artifacts được tạo thành công trong `app/build/outputs/apk/`.
+- [x] Terminal logs xác nhận 100% tests passed.
+- [x] Build APK artifacts được tạo thành công trong `app/build/outputs/apk/`.
 
 **Dependencies:** Task 8  
 **Files likely touched:** Không chỉnh sửa code, chỉ chạy lệnh kiểm thử  
@@ -266,11 +266,11 @@ Thực hiện audit cuối cùng đối chiếu với [CODING_STANDARDS.md](../C
 - Lập báo cáo hoàn tất tái cấu trúc.
 
 **Acceptance criteria:**
-- [ ] 100% các tiêu chí trong `CODING_STANDARDS.md` được thỏa mãn.
-- [ ] Cập nhật trạng thái hoàn thành trong `tasks/todo.md` và `tasks/plan.md`.
+- [x] 100% các tiêu chí trong `CODING_STANDARDS.md` được thỏa mãn.
+- [x] Cập nhật trạng thái hoàn thành trong `tasks/todo.md` và `tasks/plan.md`.
 
 **Verification:**
-- [ ] Code review checklist đạt chuẩn.
+- [x] Code review checklist đạt chuẩn.
 
 **Dependencies:** Task 9  
 **Files likely touched:**
@@ -281,5 +281,5 @@ Thực hiện audit cuối cùng đối chiếu với [CODING_STANDARDS.md](../C
 ---
 
 ## Checkpoint 4: Final Sign-off
-- [ ] Toàn bộ 11 tasks từ Task 0 đến Task 10 hoàn thành.
-- [ ] Dự án Chanko đạt chuẩn Clean Architecture & Multi-module hoàn chỉnh, sẵn sàng cho các đợt phát triển tính năng tiếp theo.
+- [x] Toàn bộ 11 tasks từ Task 0 đến Task 10 hoàn thành.
+- [x] Dự án Chanko đạt chuẩn Clean Architecture & Multi-module hoàn chỉnh, sẵn sàng cho các đợt phát triển tính năng tiếp theo.

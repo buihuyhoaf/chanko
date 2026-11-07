@@ -80,40 +80,40 @@ Kế hoạch này chia làm 4 giai đoạn rõ ràng:
 ## 4. Task List & Checkpoints
 
 ### Phase 0: Architecture Baseline & Documentation
-- [ ] **Task 0:** Thiết lập `docs/architecture/phase-0/README.md` và Source Inventory theo quy định `AGENTS.md`.
+- [x] **Task 0:** Thiết lập `docs/architecture/phase-0/README.md` và Source Inventory theo quy định `AGENTS.md`.
 
 ### Phase 1: Presentation & Design System Standardization
-- [ ] **Task 1:** Hợp nhất Design System (Theme, Colors, Mascot, Icons, Common UI Components) về một cấu trúc package đồng nhất.
-- [ ] **Task 2:** Chuẩn hóa cấu trúc các màn hình (`home`, `login`, `additem`) và loại bỏ `HomeFakeDataSource` khỏi presentation.
+- [x] **Task 1:** Hợp nhất Design System (Theme, Colors, Mascot, Icons, Common UI Components) về một cấu trúc package đồng nhất.
+- [x] **Task 2:** Chuẩn hóa cấu trúc các màn hình (`home`, `login`, `additem`) và loại bỏ `HomeFakeDataSource` khỏi presentation.
 
 ### Checkpoint 1: Presentation Verification
-- [ ] Biên dịch Kotlin tầng UI sạch sẽ, không có import bị lỗi.
-- [ ] Preview của các component và screen hoạt động bình thường.
+- [x] Biên dịch Kotlin tầng UI sạch sẽ, không có import bị lỗi.
+- [x] Preview của các component và screen hoạt động bình thường.
 
 ### Phase 2: Budget Feature Migration to Clean Core
-- [ ] **Task 3:** Chuyển Domain Models & Interfaces của `budget` từ `:app` sang `:core:domain`.
-- [ ] **Task 4:** Chuyển Repository Implementation của `budget` từ `:app` sang `:core:data`.
-- [ ] **Task 5:** Cập nhật Hilt DI Modules (`RepositoryModule`, `AddItemModule`) và liên kết dependencies giữa các module.
+- [x] **Task 3:** Chuyển Domain Models & Interfaces của `budget` từ `:app` sang `:core:domain`.
+- [x] **Task 4:** Chuyển Repository Implementation của `budget` từ `:app` sang `:core:data`.
+- [x] **Task 5:** Cập nhật Hilt DI Modules (`RepositoryModule`, `AddItemModule`) và liên kết dependencies giữa các module.
 
 ### Checkpoint 2: Core Domain & Data Verification
-- [ ] `:core:domain` compile thuần túy không có Android dependency.
-- [ ] Các unit test cho Budget Domain & Logic (`BudgetCycleTest`, `HomeDomainLogicTest`, ...) chạy thông suốt.
+- [x] `:core:domain` compile thuần túy không có Android dependency.
+- [x] Các unit test cho Budget Domain & Logic (`BudgetCycleTest`, `HomeDomainLogicTest`, ...) chạy thông suốt.
 
 ### Phase 3: Data Layer, Mappers & Dev Code Cleanliness
-- [ ] **Task 6:** Chuẩn hóa Mappers (tách và đổi tên `CooldownItemEntity.kt` trong `:core:data` thành `CooldownItemMapper.kt` trong package `mapper`).
-- [ ] **Task 7:** Phân tách và dọn dẹp Dev/Mock components (`app/.../dev/`), tránh lẫn vào production logic.
-- [ ] **Task 8:** Rà soát và đóng gói persistence layer (`:core:database`), giảm thiểu tiếp xúc trực tiếp từ `:app`.
+- [x] **Task 6:** Chuẩn hóa Mappers (tách và đổi tên `CooldownItemEntity.kt` trong `:core:data` thành `CooldownItemMapper.kt` trong package `mapper`).
+- [x] **Task 7:** Phân tách và dọn dẹp Dev/Mock components (`app/.../dev/`), tránh lẫn vào production logic.
+- [x] **Task 8:** Rà soát và đóng gói persistence layer (`:core:database`), giảm thiểu tiếp xúc trực tiếp từ `:app`.
 
 ### Checkpoint 3: Structural Integrity Verification
-- [ ] Toàn bộ các module `:core:domain`, `:core:data`, `:core:database`, `:core:network`, `:app` liên kết chặt chẽ và không có vòng lặp (circular dependency).
+- [x] Toàn bộ các module `:core:domain`, `:core:data`, `:core:database`, `:core:network`, `:app` liên kết chặt chẽ và không có vòng lặp (circular dependency).
 
 ### Phase 4: Final Verification & Sign-off
-- [ ] **Task 9:** Thực hiện kiểm thử toàn bộ dự án (`./gradlew testDebugUnitTest`) và kiểm tra build (`./gradlew assembleDebug`).
-- [ ] **Task 10:** Đối chiếu toàn diện với `CODING_STANDARDS.md` và quy định cấm cài đặt thiết bị/máy ảo trong `AGENTS.md`.
+- [x] **Task 9:** Thực hiện kiểm thử toàn bộ dự án (`./gradlew testDebugUnitTest`) và kiểm tra build (`./gradlew assembleDebug`).
+- [x] **Task 10:** Đối chiếu toàn diện với `CODING_STANDARDS.md` và quy định cấm cài đặt thiết bị/máy ảo trong `AGENTS.md`.
 
 ### Checkpoint 4: Completion & Readiness
-- [ ] Không có file thừa, không còn import mồ côi (unused imports).
-- [ ] Báo cáo nghiệm thu cấu trúc hoàn tất.
+- [x] Không có file thừa, không còn import mồ côi (unused imports).
+- [x] Báo cáo nghiệm thu cấu trúc hoàn tất.
 
 ---
 
