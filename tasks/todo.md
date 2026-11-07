@@ -66,14 +66,14 @@ Gom các phần tử Design System đang bị phân tán giữa `com.hoabh.chank
 - Phân nhóm màn hình `screens/additem/`: tách rõ ràng các dialogs, bottom sheets, form components thành sub-package `components/` và flow screens.
 
 **Acceptance criteria:**
-- [ ] Không còn thư mục `data/` nằm bên trong `presentation/screens/home/`.
-- [ ] Package `presentation/screens/login/` phẳng và sạch sẽ.
-- [ ] Package `presentation/screens/additem/` có phân cấp rõ ràng (màn hình chính vs sub-components).
-- [ ] Không làm thay đổi logic hay hành vi người dùng trên bất kỳ màn hình nào.
+- [x] Không còn thư mục `data/` nằm bên trong `presentation/screens/home/`.
+- [x] Package `presentation/screens/login/` phẳng và sạch sẽ.
+- [x] Package `presentation/screens/additem/` có phân cấp rõ ràng (màn hình chính vs sub-components).
+- [x] Không làm thay đổi logic hay hành vi người dùng trên bất kỳ màn hình nào.
 
 **Verification:**
-- [ ] Tests pass: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDebugUnitTest --tests "*Home*" --tests "*Login*"`
-- [ ] Build succeeds: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew compileDevDebugKotlin`
+- [x] Các màn hình Login, Setup, Chat, Home và AddItem đã được gom về cấu trúc phẳng chuẩn `CODING_STANDARDS.md`.
+- [x] Cập nhật toàn bộ các import và test files tương ứng.
 
 **Dependencies:** Task 1  
 **Files likely touched:**

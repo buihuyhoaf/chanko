@@ -60,8 +60,8 @@ import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
 import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
-import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
+import com.hoabh.chanko.presentation.screens.chat.ChatListScreen
+import com.hoabh.chanko.presentation.screens.chat.ChatListViewModel
 import com.hoabh.chanko.presentation.screens.home.HomeMyItemsFilter
 import com.hoabh.chanko.presentation.screens.home.HomeRoute
 import com.hoabh.chanko.presentation.screens.home.HomeUiEvent

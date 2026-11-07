@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.screen
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -52,10 +52,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.domain.model.CooldownItem
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatMode
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatUiEffect
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatUiState
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatViewModel
 import com.hoabh.chanko.ui.theme.CandyColors
 import kotlinx.coroutines.flow.collectLatest
 

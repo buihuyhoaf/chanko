@@ -14,12 +14,12 @@ import com.hoabh.chanko.presentation.screens.archived.ArchivedItemsRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetRoute
 import com.hoabh.chanko.presentation.screens.budget.BudgetViewModel
 import com.hoabh.chanko.presentation.screens.itemdetail.ItemDetailRoute
-import com.hoabh.chanko.presentation.screens.login.screen.LoginRoute
+import com.hoabh.chanko.presentation.screens.login.LoginRoute
+import com.hoabh.chanko.presentation.screens.login.loginDestination
 import com.hoabh.chanko.presentation.screens.transaction.TransactionDetailRoute
-import com.hoabh.chanko.presentation.screens.login.screen.loginDestination
 import com.hoabh.chanko.presentation.screens.profile.ProfileRoute
 import com.hoabh.chanko.presentation.screens.profile.personality.PersonalityRoute
-import com.hoabh.chanko.presentation.screens.setup.screen.setupDestination
+import com.hoabh.chanko.presentation.screens.setup.setupDestination
 import com.hoabh.chanko.presentation.screens.splash.splashDestination
 import androidx.navigation.navigation
 import androidx.compose.runtime.remember
@@ -28,12 +28,12 @@ import com.hoabh.chanko.presentation.screens.additem.*
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hoabh.chanko.presentation.screens.chat.screen.ChatDetailScreen
-import com.hoabh.chanko.presentation.screens.chat.screen.ChatListScreen
-import com.hoabh.chanko.presentation.screens.chat.screen.NewChatScreen
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.NewChatViewModel
+import com.hoabh.chanko.presentation.screens.chat.ChatDetailScreen
+import com.hoabh.chanko.presentation.screens.chat.ChatListScreen
+import com.hoabh.chanko.presentation.screens.chat.NewChatScreen
+import com.hoabh.chanko.presentation.screens.chat.ChatListViewModel
+import com.hoabh.chanko.presentation.screens.chat.ChatViewModel
+import com.hoabh.chanko.presentation.screens.chat.NewChatViewModel
 
 /** Các route công khai không yêu cầu phiên đăng nhập */
 private val UnauthenticatedRoutes = setOf(

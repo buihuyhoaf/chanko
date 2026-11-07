@@ -3,7 +3,6 @@ package com.hoabh.chanko.presentation.screens.chat
 import com.hoabh.chanko.data.chat.remote.FakeChatDataSource
 import com.hoabh.chanko.data.chat.repository.ChatRepositoryImpl
 import com.hoabh.chanko.domain.chat.model.ThreadFilter
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

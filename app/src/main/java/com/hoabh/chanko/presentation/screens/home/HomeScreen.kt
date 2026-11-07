@@ -69,8 +69,6 @@ import com.hoabh.chanko.presentation.screens.home.components.InsightExplanationD
 import com.hoabh.chanko.presentation.screens.home.components.ItemJourneySection
 import com.hoabh.chanko.presentation.screens.home.components.ObservationCard
 import com.hoabh.chanko.presentation.screens.home.components.calculateCollapseFraction
-import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
-import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme

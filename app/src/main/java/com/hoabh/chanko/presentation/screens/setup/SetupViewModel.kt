@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup.viewmodel
+package com.hoabh.chanko.presentation.screens.setup
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.presentation.base.BaseViewModel
@@ -7,9 +7,6 @@ import com.hoabh.chanko.presentation.screens.setup.components.SetupGateway
 import com.hoabh.chanko.presentation.screens.setup.components.SetupStatus
 import com.hoabh.chanko.presentation.screens.setup.components.SetupSubmission
 import com.hoabh.chanko.presentation.screens.setup.components.UnconfiguredSetupGateway
-import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
-import com.hoabh.chanko.presentation.screens.setup.data.SetupUiState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext

@@ -1,6 +1,5 @@
 package com.hoabh.chanko.presentation.screens.home
 
-import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
 
 /**

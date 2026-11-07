@@ -2,8 +2,6 @@ package com.hoabh.chanko.presentation.screens.home
 
 import com.hoabh.chanko.data.budget.FakeBudgetRepository
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
-import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
-import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

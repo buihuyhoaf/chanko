@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.viewmodel
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.chat.model.ChatMessage
@@ -8,8 +8,6 @@ import com.hoabh.chanko.domain.chat.model.MessageSender
 import com.hoabh.chanko.domain.chat.model.ThreadMode
 import com.hoabh.chanko.domain.chat.repository.ChatRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
-import com.hoabh.chanko.presentation.screens.chat.ChatUiEffect
-import com.hoabh.chanko.presentation.screens.chat.ChatUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

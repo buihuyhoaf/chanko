@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.screen
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -70,7 +70,6 @@ import com.hoabh.chanko.domain.chat.model.ThreadMode
 import com.hoabh.chanko.presentation.screens.chat.components.ArchiveConfirmationDialog
 import com.hoabh.chanko.presentation.screens.chat.components.DeleteConfirmationDialog
 import com.hoabh.chanko.presentation.screens.chat.components.RenameThreadDialog
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatListViewModel
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import java.text.SimpleDateFormat

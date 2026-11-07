@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup.screen
+package com.hoabh.chanko.presentation.screens.setup
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -38,25 +38,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.hoabh.chanko.BuildConfig
 import com.hoabh.chanko.R
+import com.hoabh.chanko.presentation.navigation.Screen
 import com.hoabh.chanko.presentation.screens.setup.components.Secondary
 import com.hoabh.chanko.presentation.screens.setup.components.SetupAnchorDayStep
 import com.hoabh.chanko.presentation.screens.setup.components.SetupBudgetStep
 import com.hoabh.chanko.presentation.screens.setup.components.SetupButton
 import com.hoabh.chanko.presentation.screens.setup.components.SetupDayPickerBottomSheet
 import com.hoabh.chanko.presentation.screens.setup.components.SetupErrorDialog
+import com.hoabh.chanko.presentation.screens.setup.components.SetupGateway
 import com.hoabh.chanko.presentation.screens.setup.components.SetupHeroBanner
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
-import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
 import com.hoabh.chanko.presentation.screens.setup.components.SetupProblemText
 import com.hoabh.chanko.presentation.screens.setup.components.SetupTopBar
-import com.hoabh.chanko.presentation.screens.setup.data.SetupUiState
-import com.hoabh.chanko.presentation.screens.setup.viewmodel.SetupViewModel
+import com.hoabh.chanko.presentation.screens.setup.components.UnconfiguredSetupGateway
 import com.hoabh.chanko.presentation.screens.setup.components.findActivity
-import com.hoabh.chanko.presentation.navigation.Screen
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 import com.hoabh.chanko.ui.theme.ChankoTheme
@@ -79,8 +77,8 @@ fun SetupGate(
     onConfirmedComplete: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val gateway: com.hoabh.chanko.presentation.screens.setup.components.SetupGateway = remember {
-        if (BuildConfig.IS_DEV_MOCK) com.hoabh.chanko.dev.DevSetupGateway else com.hoabh.chanko.presentation.screens.setup.components.UnconfiguredSetupGateway
+    val gateway: SetupGateway = remember {
+        if (BuildConfig.IS_DEV_MOCK) com.hoabh.chanko.dev.DevSetupGateway else UnconfiguredSetupGateway
     }
     val model: SetupViewModel = viewModel(
         key = "setup:$accountKey",

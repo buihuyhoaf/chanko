@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.viewmodel
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.model.CooldownItem

@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.additem
+package com.hoabh.chanko.presentation.screens.additem.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.BorderStroke

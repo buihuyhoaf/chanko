@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.hoabh.chanko.R
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.SetupProblem
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandySpace
 

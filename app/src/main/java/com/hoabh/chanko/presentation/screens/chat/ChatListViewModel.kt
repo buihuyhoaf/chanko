@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.viewmodel
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.chat.model.ChatThread
@@ -7,10 +7,7 @@ import com.hoabh.chanko.domain.chat.model.ThreadFilter
 import com.hoabh.chanko.domain.chat.repository.ChatRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

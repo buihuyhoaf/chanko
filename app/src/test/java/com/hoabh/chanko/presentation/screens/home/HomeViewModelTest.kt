@@ -1,8 +1,6 @@
 package com.hoabh.chanko.presentation.screens.home
 
 import com.hoabh.chanko.data.budget.FakeBudgetRepository
-import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
-import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

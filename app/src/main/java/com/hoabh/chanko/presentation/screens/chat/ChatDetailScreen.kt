@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.chat.screen
+package com.hoabh.chanko.presentation.screens.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,7 +56,6 @@ import com.hoabh.chanko.presentation.screens.chat.components.DeleteConfirmationD
 import com.hoabh.chanko.presentation.screens.chat.components.RenameThreadDialog
 import com.hoabh.chanko.presentation.screens.chat.components.SameThreadItemPickerSheet
 import com.hoabh.chanko.presentation.screens.chat.components.ThreadOptionsSheet
-import com.hoabh.chanko.presentation.screens.chat.viewmodel.ChatViewModel
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyElevation
 import com.hoabh.chanko.ui.theme.CandySpace

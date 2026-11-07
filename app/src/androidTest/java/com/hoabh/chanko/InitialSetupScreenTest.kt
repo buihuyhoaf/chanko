@@ -7,11 +7,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
-import com.hoabh.chanko.presentation.screens.setup.data.SetupPage
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
-import com.hoabh.chanko.presentation.screens.setup.data.SetupUiState
-import com.hoabh.chanko.presentation.screens.setup.screen.InitialSetupScreen
-import com.hoabh.chanko.presentation.screens.setup.screen.SetupStatusScreen
+import com.hoabh.chanko.presentation.screens.setup.InitialSetupScreen
+import com.hoabh.chanko.presentation.screens.setup.SetupPage
+import com.hoabh.chanko.presentation.screens.setup.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.SetupStatusScreen
+import com.hoabh.chanko.presentation.screens.setup.SetupUiState
 import com.hoabh.chanko.ui.theme.ChankoTheme
 import org.junit.Assert.*
 import org.junit.Rule

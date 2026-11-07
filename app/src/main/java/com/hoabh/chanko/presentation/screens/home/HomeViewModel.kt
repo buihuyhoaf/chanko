@@ -4,8 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
-import com.hoabh.chanko.presentation.screens.home.data.HomeFakeDataSource
-import com.hoabh.chanko.presentation.screens.home.data.HomeScenario
 import com.hoabh.chanko.presentation.screens.home.domain.BudgetCarouselMapper
 import com.hoabh.chanko.presentation.screens.home.domain.BudgetV2Calculator
 import com.hoabh.chanko.presentation.screens.home.domain.JourneyItemCandidate

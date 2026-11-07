@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.hoabh.chanko.R
-import com.hoabh.chanko.presentation.screens.setup.data.SetupProblem
+import com.hoabh.chanko.presentation.screens.setup.SetupProblem
 import com.hoabh.chanko.ui.theme.CandyColors
 import com.hoabh.chanko.ui.theme.CandyShape
 

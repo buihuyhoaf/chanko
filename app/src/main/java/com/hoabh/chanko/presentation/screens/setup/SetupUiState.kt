@@ -1,4 +1,4 @@
-package com.hoabh.chanko.presentation.screens.setup.data
+package com.hoabh.chanko.presentation.screens.setup
 
 enum class SetupPage { CHECKING, STATUS_ERROR, FORM, COMPLETE }
 
