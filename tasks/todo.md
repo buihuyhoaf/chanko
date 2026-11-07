@@ -660,14 +660,14 @@ Triển khai render trực quan mới cho các node trong Item Journey:
 Chạy toàn bộ kiểm thử đơn vị, kiểm thử kiến trúc màu sắc và kiểm tra biên dịch build sản phẩm sau khi hoàn tất refactor thị giác Item Journey.
 
 **Acceptance criteria:**
-- [ ] Cập nhật các test case trong `HomeViewModelTest.kt`, `HomeCheckInFlowTest.kt` tương thích 100% với trạng thái mới.
-- [ ] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
-- [ ] `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"` PASS 100%.
-- [ ] `./gradlew assembleDevDebug` biên dịch thành công 100%.
+- [x] Cập nhật các test case trong `HomeViewModelTest.kt`, `HomeCheckInFlowTest.kt` tương thích 100% với trạng thái mới.
+- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
+- [x] `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"` PASS 100%.
+- [x] `./gradlew assembleDevDebug` biên dịch thành công 100%.
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest`
-- [ ] Build succeeds: `./gradlew assembleDevDebug`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest`
+- [x] Build succeeds: `./gradlew assembleDevDebug`
 
 **Dependencies:** Tasks 19–21
 
@@ -680,6 +680,6 @@ Chạy toàn bộ kiểm thử đơn vị, kiểm thử kiến trúc màu sắc 
 ---
 
 ### Checkpoint 7: Item Journey Cooling-off Visuals Verified
-- [ ] Không còn tàn dư trạng thái `Saved` / `Considering`.
-- [ ] Viền đếm ngược tròn (Circular Progress Arc) và nhịp thở (Breathing Pulse) hoạt động hoàn hảo.
-- [ ] Carousel 3 thẻ v2.2 và toàn bộ các tính năng khác giữ nguyên 100% độ ổn định.
+- [x] Không còn tàn dư trạng thái `Saved` / `Considering`.
+- [x] Viền đếm ngược tròn (Circular Progress Arc) và nhịp thở (Breathing Pulse) hoạt động hoàn hảo.
+- [x] Carousel 3 thẻ v2.2 và toàn bộ các tính năng khác giữ nguyên 100% độ ổn định.

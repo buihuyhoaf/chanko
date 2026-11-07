@@ -186,7 +186,7 @@ class HomeViewModelTest {
             itemId = "item_new",
             title = "Món mới vừa thêm",
             priceMinor = 990_000L,
-            statusRaw = "Saved",
+            statusRaw = "CoolingOff",
             createdAtEpochMillis = 1_762_999_999_000L
         )
         viewModel.onEvent(HomeUiEvent.LiveItemAdded(brandNewItem))
