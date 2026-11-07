@@ -33,7 +33,7 @@ import com.hoabh.chanko.ui.theme.Nunito
  * - Nền kính trắng lavender, viền mỏng
  * - Tổng hạn mức đã thiết lập trong năm (không tính nháp/gợi ý)
  * - Số tháng đã thiết lập
- * - Ảnh minh họa lịch hồng (budget_summary_calendar_pink.png, 48–64dp) ở góc phải
+ * - Mèo đếm tiền (budget_header_cat_counting_money.png) ở góc phải
  * - Cảnh báo ngoại tuyến nếu mất kết nối mạng
  */
 @Composable
@@ -113,9 +113,9 @@ fun AnnualSummarySection(
             }
 
             Image(
-                painter = painterResource(id = R.drawable.budget_card_cat_happy),
+                painter = painterResource(id = R.drawable.budget_header_cat_counting_money),
                 contentDescription = null,
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier.size(64.dp),
                 contentScale = ContentScale.Fit
             )
         }
