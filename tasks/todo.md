@@ -1,769 +1,454 @@
-# Tasks: Chanko Core Ecosystem (Cooling-off, Rewards, Mascot Economy, Budget Tracking & Notifications)
+# Danh sách Công việc Triển khai: Chanko Chat UI v2.2 (Product-Centric Chat)
 
-> **Plan tham chiếu:** [tasks/plan.md](plan.md)  
-> **Capability Map:** [CAPABILITY-MAP-chanko-core.md](../CAPABILITY-MAP-chanko-core.md)  
-> **Nguồn quyết định đã chốt:** Cập nhật ngày 07/11/2026
+> **Kế hoạch kiến trúc:** [tasks/plan.md](tasks/plan.md)  
+> **Tài liệu đặc tả:** [SPEC-chat-ui-v2.2.md](../SPEC-chat-ui-v2.2.md) & [docs/features/chat-ui-v2.2-spec.md](../docs/features/chat-ui-v2.2-spec.md)  
+> **Quy chuẩn thực thi:** Kiểm thử đơn vị + Build compilation (`assembleDevDebug`) sau mỗi bước; không chạy trên emulator/thiết bị thật.
 
 ---
 
-## Phase 1: Cooling-off Engine & Shopping Flow (`cooling-off-core`)
+## Phase 1: Assets & Design Tokens
 
-### Task 1: Định nghĩa Domain Models & Policy cho Vòng đời Freeze bắt buộc
+### Task 1: Tích hợp Tài nguyên Handoff v2.2 vào `app/src/main/res/`
 
 **Description:**
-Xây dựng mô hình miền (Domain models) cho vòng đời Cooling-off của sản phẩm: loại bỏ hoàn toàn các phán quyết BUY/WAIT/SKIP và trạng thái "Đang cân nhắc". Mọi sản phẩm sau Quick Check tự động chuyển sang trạng thái `FREEZE_ACTIVE` với thời gian Freeze do `FreezeDurationPolicy` tự động xác định dựa trên giá sản phẩm. Hỗ trợ trạng thái `READY_FOR_REVIEW` khi hết thời gian, đánh dấu cờ `isRefrozen` để chặn thưởng lần hai.
+Sao chép toàn bộ tài nguyên đã kiểm định từ `Chanko-Chat-UI-v2.2/android/res` vào `app/src/main/res/`:
+- 39 Candy Duotone Icons (VectorDrawable XML) vào `res/drawable/`.
+- 2 ảnh Mascot WebP (`chanko_chat_hero.webp`, `chanko_chat_avatar.webp`) vào `res/drawable-nodpi/`.
+- 4 font static Nunito TTF (`chat_nunito_400/600/700/800.ttf`) vào `res/font/`.
+- 5 fixture ảnh PNG sạch vào `res/drawable-nodpi/`.
 
 **Acceptance criteria:**
-- [x] Enum `ItemFreezeStatus` gồm: `FREEZE_ACTIVE`, `READY_FOR_REVIEW`, `UNFROZEN_EARLY`, `BOUGHT`, `PASSED`.
-- [x] `FreezeDurationPolicy` tự tính thời gian Freeze theo giá sản phẩm:
-  - `< 200.000đ`: 1 ngày (24 giờ)
-  - `200.000đ – 1.000.000đ`: 3 ngày (72 giờ)
-  - `1.000.000đ – 5.000.000đ`: 7 ngày (168 giờ)
-  - `> 5.000.000đ`: 14 ngày (336 giờ)
-  - Người dùng không có quyền tùy chỉnh hay bỏ qua thời gian Freeze.
-- [x] Model `FreezeState` lưu trữ: `lockedPrice`, `startedAtMillis`, `durationMillis`, `isRefrozen: Boolean`, `rewardClaimed: Boolean`.
-- [x] Unit tests kiểm tra chuyển đổi trạng thái hợp lệ và tính toán thời gian theo phân khúc giá.
+- [x] Toàn bộ 39 tệp XML icon, 2 WebP mascot, 4 TTF font và 5 PNG fixture có mặt đúng thư mục `app/src/main/res/`.
+- [x] Không có lỗi xung đột định danh tài nguyên (resource conflict).
+- [x] Biên dịch AAPT thành công.
 
 **Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*FreezeDurationPolicyTest*" --tests "*FreezeLifecycleTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
 
 **Dependencies:** None
 
 **Files likely touched:**
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/model/FreezeModels.kt`
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/policy/FreezeDurationPolicy.kt`
-- `core/domain/src/test/kotlin/com/hoabh/chanko/domain/policy/FreezeDurationPolicyTest.kt`
+- `app/src/main/res/drawable/chat_*.xml` (39 files)
+- `app/src/main/res/drawable-nodpi/chanko_chat_*.webp` (2 files)
+- `app/src/main/res/drawable-nodpi/chat_fixture_*.png` (5 files)
+- `app/src/main/res/font/chat_nunito_*.ttf` (4 files)
 
-**Estimated scope:** Small (2-3 files)
+**Estimated scope:** Medium (Resource copy)
 
 ---
 
-### Task 2: Máy tính Đếm ngược & Khóa Giá Sản phẩm (Price Lock & Countdown Engine)
+### Task 2: Định nghĩa Design Tokens & Typography Chat v2.2
 
 **Description:**
-Hiện thực hóa bộ tính toán thời gian còn lại của Freeze căn cứ trên mốc thời gian tuyệt đối (Epoch timestamp UTC) và cơ chế khóa giá (`lockedPrice`). Cung cấp helper kiểm tra sản phẩm đã hoàn thành Freeze chưa (`isFreezeComplete(now)`), tính tỷ lệ thời gian còn lại $\frac{t_{\text{remaining}}}{t_{\text{total}}}$, và format chuỗi thời gian đếm ngược thân thiện tiếng Việt (ví dụ: `"Còn 2 ngày 5 giờ"`, `"Đã sẵn sàng xem xét"`).
+Tạo đối tượng `ChatTokens` và cấu hình typography Nunito cho Chat trong hệ thống Design System:
+- Các mã màu chuẩn v2.2: Primary `#8965F6`, CTA `#7043D6`, Body `#292238`, Secondary `#62586F`, User Bubble `#EEE6FF`, Nền gradient `["#F5F0FF", "#FFF1F7"]`.
+- `FontFamily` Nunito liên kết với 4 tệp font `chat_nunito_400/600/700/800`.
+- Thiết lập kích thước font chuẩn: Heading 24sp, Body 15sp, LineHeight 22sp.
 
 **Acceptance criteria:**
-- [x] `FreezeCountdownCalculator` tính chính xác số mili-giây còn lại: `remainingMillis(now) = max(0, (startedAt + duration) - now)`.
-- [x] Tỷ lệ thời gian còn lại trả về giá trị float trong khoảng `[0.0f, 1.0f]`.
-- [x] `lockedPrice` được gán cố định lúc bắt đầu Freeze và không bị biến đổi khi xem chi tiết hoặc tính phí.
-- [x] Khi `remainingMillis == 0`, tự động xác định trạng thái là `READY_FOR_REVIEW` mà không tự động mua sản phẩm.
-- [x] Unit tests phủ các mốc thời gian: vừa bắt đầu, giữa chừng, vừa hết hạn, và đã quá hạn nhiều ngày.
+- [x] Đối tượng token cung cấp đầy đủ các màu và kiểu chữ cho Chat v2.2.
+- [x] Tỷ lệ tương phản màu văn bản CTA trên nền trắng đạt $\ge 4.5:1$.
 
 **Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*FreezeCountdownCalculatorTest*"`
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
 
 **Dependencies:** Task 1
 
 **Files likely touched:**
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/policy/FreezeCountdownCalculator.kt`
-- `core/domain/src/test/kotlin/com/hoabh/chanko/domain/policy/FreezeCountdownCalculatorTest.kt`
-
-**Estimated scope:** Small (2 files)
-
----
-
-### Task 3: Đơn giản hóa AddItemFlowScreen & QuickCheckScreen theo Luồng Bắt buộc Freeze
-
-**Description:**
-Cập nhật luồng Thêm sản phẩm (`AddItemFlowScreen` và `QuickCheckScreen`): sau khi hoàn thành 1–3 câu hỏi thích ứng của Quick Check, màn hình chuyển tiếp ngay sang xác nhận bắt đầu Freeze do Chanko ấn định. Loại bỏ hoàn toàn màn hình phán quyết `DecisionResultScreen` cũ với các nút chọn verdict BUY/WAIT/SKIP hoặc lựa chọn "Không áp dụng thời gian chờ".
-
-**Acceptance criteria:**
-- [x] Loại bỏ bước phán quyết BUY/WAIT/SKIP và các lựa chọn bỏ qua thời gian chờ.
-- [x] Sau câu hỏi cuối của Quick Check (hoặc khi bấm "Nhận định sớm"), hiển thị màn hình thông báo Chanko kích hoạt Cooling-off với thời gian Freeze được gán tự động.
-- [x] Nhấn hoàn tất sẽ lưu sản phẩm với trạng thái `FREEZE_ACTIVE` và mốc thời gian bắt đầu chính xác.
-- [x] Dữ liệu lưu thành công chuyển thẳng về Home hoặc Item Detail của món đồ đang Freeze.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*AddItemViewModelTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 1, Task 2
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/additem/AddItemViewModel.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/additem/AddItemFlowScreen.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/additem/QuickCheckScreen.kt`
-
-**Estimated scope:** Medium (3-4 files)
-
----
-
-### Task 4: Cập nhật ItemDetailScreen: Đếm ngược Freeze, Unfreeze sớm & Trạng thái Sẵn sàng xem xét
-
-**Description:**
-Nâng cấp `ItemDetailScreen` để hiển thị trực quan tiến trình Cooling-off: hiển thị card đếm ngược thời gian Freeze còn lại (`CoolingOffCountdownCard`), nút "Unfreeze sớm", và khi hết thời gian Freeze tự động hiển thị trạng thái *"Sẵn sàng xem xét"* cùng 2 hành động: "Xác nhận đã mua" hoặc "Bỏ qua / Freeze lại".
-
-**Acceptance criteria:**
-- [x] Khi đang `FREEZE_ACTIVE`: hiển thị thanh đếm ngược với thời gian còn lại, thông tin chi phí Unfreeze dự tính nếu mở sớm, và nút Unfreeze.
-- [x] Khi hết thời gian: hiển thị banner *"Sẵn sàng xem xét"*, cho phép người dùng lựa chọn:
-  - "Xác nhận đã mua"
-  - "Bỏ qua món đồ"
-  - "Freeze lại" (cập nhật `isRefrozen = true`, áp dụng chu kỳ Freeze mới nhưng không được nhận thưởng lần hai).
-- [x] Giữ nguyên các phần thông tin sản phẩm và lịch sử hành trình hiện hữu.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ItemDetailViewModelTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 2, Task 3
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/ItemDetailScreen.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/ItemDetailViewModel.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/components/CoolingOffCountdownCard.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Checkpoint 1: Cooling-off Engine & Shopping Flow Verified
-- [x] Vòng đời Freeze bắt buộc từ lúc thêm sản phẩm đến lúc hết hạn hoặc Unfreeze hoạt động trơn tru.
-- [x] Tất cả unit tests của Phase 1 pass 100%.
-
----
-
-## Phase 2: Rewards, Mascot Economy & Unfreeze Penalty (`rewards-mascot-economy`)
-
-### Task 5: Sổ Cái Tài nguyên Hạt, Pate & Mô hình Tiến trình Level (Ledger & Level Engine)
-
-**Description:**
-Hiện thực hóa hệ thống quản lý tài nguyên thay thế Point/EXP: **Hạt** (Resource dùng cho tiện ích, bị trừ khi Unfreeze sớm) và **Pate** (EXP phát triển Chanko). Tài khoản áp dụng quy tắc bất biến: số dư Hạt và Pate không bao giờ âm (chặn sàn ở 0), Level của Chanko chỉ tăng khi tích lũy đủ Pate và không bao giờ bị giảm cấp kể cả khi trừ Pate.
-
-**Acceptance criteria:**
-- [x] `ResourceLedger` lưu số dư hiện tại `hatBalance: Long` và `pateBalance: Long`.
-- [x] Mọi phép trừ tài nguyên áp dụng `coerceAtLeast(0)` (cho phép Unfreeze khi số dư bằng 0 mà không phát sinh số âm).
-- [x] Bảng cấp độ `LevelProgressionTable` định nghĩa ngưỡng Pate từng Level (ví dụ: Level 1: 0, Level 2: 100, Level 3: 250, Level 4: 500...).
-- [x] Thuộc tính `level` của Chanko được bảo lưu độc lập: khi Pate bị trừ do phạt, `currentLevel` giữ nguyên không bị giáng cấp.
-- [x] Không có quy đổi Hạt/Pate ra tiền mặt; không có chỉ số đói hay bệnh tật của mascot.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ResourceLedgerTest*" --tests "*LevelProgressionTest*"`
-
-**Dependencies:** Task 1
-
-**Files likely touched:**
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/ResourceLedger.kt`
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/LevelProgression.kt`
-- `core/domain/src/test/kotlin/com/hoabh/chanko/domain/rewards/ResourceLedgerTest.kt`
-
-**Estimated scope:** Small (3 files)
-
----
-
-### Task 6: Công thức Tính Phạt Unfreeze & Cơ chế Phạt Hồi tố (Penalty & Retroactive Clawback)
-
-**Description:**
-Xây dựng bộ tính chi phí Unfreeze sớm theo nguyên tắc:
-$$\text{Chi phí} = \alpha \times \text{lockedPrice} \times \frac{\text{remainingMillis}}{\text{totalDurationMillis}}$$
-Chi phí giảm dần theo thời gian và bằng 0 khi Freeze kết thúc. Xử lý trường hợp mua khi đang Freeze tương đương Unfreeze sớm tại thời điểm mua. Xây dựng `RetroactivePurchaseHandler`: nếu người dùng khai báo mua trễ sau khi đã nhận thưởng Freeze không hợp lệ, hệ thống sẽ thu hồi thưởng đã nhận, áp dụng chi phí Unfreeze tại thời điểm mua thực tế và ghi nhật ký kiểm toán (audit log).
-
-**Acceptance criteria:**
-- [x] `UnfreezeCostCalculator` tính đúng chi phí Hạt và Pate phải trừ dựa trên giá đã khóa và tỷ lệ thời gian còn lại.
-- [x] Khi `remainingMillis == 0`, chi phí phạt trả về đúng 0 Hạt, 0 Pate.
-- [x] Khai báo mua hàng khi đang Freeze: tính chi phí phạt tại thời điểm mua và trừ Hạt/Pate tương ứng.
-- [x] Khai báo mua trễ (retroactive buy): tự động hoàn tác thưởng Freeze đã cộng, tính phí Unfreeze tại thời điểm mua thực tế, ghi nhận vào `RewardAuditLog`, không trừ trùng lặp nếu trước đó đã Unfreeze.
-- [x] Unit tests kiểm tra đầy đủ các kịch bản: Unfreeze ngay sau khi tạo, Unfreeze ở 50% thời gian, mua trong lúc Freeze, và khai báo mua sau khi đã nhận thưởng.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*UnfreezeCostCalculatorTest*" --tests "*RetroactivePurchaseHandlerTest*"`
-
-**Dependencies:** Task 2, Task 5
-
-**Files likely touched:**
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/UnfreezeCostCalculator.kt`
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/RetroactivePurchaseHandler.kt`
-- `core/domain/src/test/kotlin/com/hoabh/chanko/domain/rewards/UnfreezeCostCalculatorTest.kt`
-
-**Estimated scope:** Medium (3-4 files)
-
----
-
-### Task 7: Cơ chế Thưởng Freeze Tự động & Daily Check-in Hợp lệ
-
-**Description:**
-Hiện thực hóa logic trao thưởng tự động:
-1. **Hoàn thành Freeze hợp lệ:** Thưởng Hạt và Pate tỷ lệ theo giá sản phẩm, tự động cộng kể cả khi không mở app. Giới hạn tối đa 1 phần thưởng Freeze mỗi ngày: nếu có nhiều món hoàn thành cùng ngày, chọn món có giá trị thưởng cao nhất (`DailyRewardCapPolicy`).
-2. **Daily Check-in:** Người dùng xác nhận "Hôm nay tôi không mua sắm ngoài dự kiến" để nhận mức Hạt/Pate cố định (ví dụ: 10 Hạt + 10 Pate), không có streak multiplier.
-3. Không thưởng cho hành vi thêm sản phẩm hay hành vi mua sắm.
-
-**Acceptance criteria:**
-- [x] `FreezeRewardDispatcher` tự động quét các món đồ hoàn thành Freeze trong ngày và cộng thưởng cho món có giá trị cao nhất.
-- [x] Sản phẩm Freeze lại (`isRefrozen == true`) bị chặn không cấp thưởng Freeze lần hai.
-- [x] `DailyCheckInUseCase` kiểm tra và chỉ cho phép nhận thưởng 1 lần mỗi ngày dương lịch sau khi người dùng xác nhận không mua sắm.
-- [x] Không có cơ chế streak multiplier (thưởng mỗi ngày như nhau).
-- [x] Unit tests kiểm tra việc chọn món thưởng cao nhất khi nhiều món hoàn tất trong cùng 1 ngày.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*FreezeRewardDispatcherTest*" --tests "*DailyCheckInTest*"`
-
-**Dependencies:** Task 5, Task 6
-
-**Files likely touched:**
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/FreezeRewardDispatcher.kt`
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/rewards/DailyCheckInUseCase.kt`
-- `core/domain/src/test/kotlin/com/hoabh/chanko/domain/rewards/FreezeRewardDispatcherTest.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Checkpoint 2: Rewards, Economy & Ledger Verified
-- [x] Hệ kinh tế Hạt/Pate, công thức Unfreeze và Daily Check-in hoạt động chính xác.
-- [x] Số dư không bao giờ âm; Level Chanko không bị tụt.
-- [x] Toàn bộ unit tests của Phase 2 pass 100%.
-
----
-
-## Phase 3: Item-Centric Budget Tracking & Offline Gate (`budget-item-tracking`)
-
-### Task 8: Ghi nhận Giao dịch Ngân sách Chỉ theo Sản phẩm đã Thêm (Item Purchase Recorder)
-
-**Description:**
-Tích hợp giao dịch ngân sách với danh sách món đồ: Chanko chỉ trừ ngân sách chu kỳ hiện tại khi người dùng xác nhận đã mua sản phẩm đã có trong Chanko. Hỗ trợ 2 phương thức thanh toán: Pay Now và Thẻ tín dụng (đều ghi nhận chi tiêu ngay tại thời điểm mua). Hỗ trợ mua nhiều lần, hoàn tiền (refund) và điều chỉnh chi phí với nhật ký giao dịch minh bạch.
-
-**Acceptance criteria:**
-- [x] Ngân sách chỉ bị trừ khi có sự kiện mua hàng của một sản phẩm hợp lệ trong hệ thống (không có Quick Purchase độc lập).
-- [x] Giao dịch Pay Now và Credit Card đều ghi nhận giảm ngân sách khả dụng của chu kỳ hiện tại ngay lập tức.
-- [x] Hỗ trợ hoàn tiền (refund): khôi phục lại ngân sách chu kỳ tương ứng và cập nhật trạng thái món đồ.
-- [x] Tất cả số tiền hạch toán đều là VNĐ nguyên vẹn, tách bạch hoàn toàn với số dư Hạt/Pate.
-- [x] Unit tests kiểm tra ghi nhận chi tiêu, hoàn tiền và tính nhất quán với chu kỳ hiện tại.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ItemPurchaseBudgetSyncTest*"`
-
-**Dependencies:** Task 1, Task 4
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/domain/budget/repository/BudgetRepository.kt`
-- `app/src/main/java/com/hoabh/chanko/data/budget/FakeBudgetRepository.kt`
-- `app/src/test/java/com/hoabh/chanko/data/budget/ItemPurchaseBudgetSyncTest.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Task 9: Cơ chế Ngoại tuyến: Bảo vệ Ghi dữ liệu & Hiển thị Cache An toàn (Offline Write Gate)
-
-**Description:**
-Thiết lập cơ chế kiểm soát trạng thái mạng cho Budget và Item transactions: Khi ngoại tuyến (offline), ứng dụng chỉ cho phép xem dữ liệu cache (số dư ngân sách, danh sách đồ, thời gian Freeze). Mọi thao tác thay đổi trạng thái (xác nhận mua, Unfreeze sớm, hoàn tiền) bị chặn kèm thông báo tiếng Việt giải thích cần kết nối Internet.
-
-**Acceptance criteria:**
-- [x] Khi offline, màn hình Home và Item Detail hiển thị đầy đủ thông tin từ cache, không bị lỗi hay reset số dư về 0.
-- [x] Khi bấm Unfreeze hoặc xác nhận mua lúc mất mạng: chặn thao tác ghi và hiển thị `UiText` hoặc Snackbar: *"Bạn đang ngoại tuyến. Vui lòng kết nối mạng để thực hiện thao tác này."*
-- [x] Khi có mạng trở lại, tự động mở khóa các thao tác ghi.
-- [x] Unit tests kiểm tra trạng thái chặn ghi và thông báo lỗi tương ứng.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*OfflineWriteGateTest*"`
-
-**Dependencies:** Task 8
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/base/NetworkConnectivityManager.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/ItemDetailViewModel.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/screens/itemdetail/ItemDetailOfflineTest.kt`
-
-**Estimated scope:** Small (2-3 files)
-
----
-
-### Checkpoint 3: Budget Tracking & Offline Guard Verified
-- [x] Ngân sách chỉ trừ khi mua sản phẩm có trong app; hạch toán VNĐ chuẩn xác.
-- [x] Ngoại tuyến chỉ xem cache và chặn mọi thao tác ghi dữ liệu.
-
----
-
-## Phase 4: Home Header & Mascot Expression Integration (`home-mascot-presentation`)
-
-### Task 10: Tích hợp Chip Tài nguyên Hạt, Pate Bar & Level trên TopBar Home
-
-**Description:**
-Nâng cấp phần Header/TopBar của `HomeScreen` để hiển thị trực quan các chỉ số tài nguyên của người dùng và Chanko:
-- Pill Hạt: icon Hạt + số lượng hiện có.
-- Pill Chanko Level & Thanh tiến độ Pate: Level hiện tại (ví dụ: `Lv. 3`) cùng thanh progress mini hiển thị tỷ lệ Pate đạt được so với ngưỡng lên cấp tiếp theo.
-- Tự động cập nhật tức thì (StateFlow) khi có phần thưởng hoặc khi Unfreeze.
-- Giữ nguyên cấu trúc `BudgetCreditCardCarousel` và `ItemJourneySection`.
-
-**Acceptance criteria:**
-- [x] TopBar hiển thị đầy đủ 2 chip thông tin: Hạt và Level Chanko (kèm tiến độ Pate).
-- [x] Format số lượng Hạt thân thiện (ví dụ: `150 Hạt`).
-- [x] Chạm vào chip hiển thị BottomSheet tóm tắt thông tin tài nguyên và lịch sử nhận thưởng gần nhất.
-- [x] Không làm xô lệch hoặc gián đoạn layout của Carousel ngân sách v2.2 và danh sách món đồ phía dưới.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 5, Task 8
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeScreen.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Task 11: Biểu cảm Mascot Phản hồi Theo Ngữ cảnh & Dialog Unfreeze Trung lập
-
-**Description:**
-Hiện thực hóa phản hồi biểu cảm của Chanko Mascot:
-- Mascot phản ứng vui vẻ (`R.drawable.mascot_happy`) khi người dùng nhận thưởng Freeze, hoàn thành Daily Check-in hoặc Chanko lên Level.
-- Khi người dùng bấm Unfreeze sớm: hiển thị Dialog xác nhận chi phí Hạt và Pate bị trừ với giọng điệu hoàn toàn trung lập, minh bạch và không phán xét. Chanko không khóc, không giận dỗi hay trách móc người dùng (`MASCOT-FEEDING = A`).
-
-**Acceptance criteria:**
-- [x] Dialog Unfreeze hiển thị rõ ràng: số Hạt và Pate sẽ bị trừ, số dư còn lại sau khi trừ, và nút xác nhận Unfreeze.
-- [x] Văn bản trong dialog mang giọng điệu khách quan, hỗ trợ, không dùng từ ngữ tiêu cực hay tạo cảm giác tội lỗi.
-- [x] Khi lên cấp: hiển thị hiệu ứng thông báo chúc mừng Chanko đã lớn hơn (tăng Level).
-- [x] Unit tests kiểm tra trạng thái cảm xúc của Mascot theo từng sự kiện.
-
-**Verification:**
-- [x] Tests pass: `./gradlew testDebugUnitTest --tests "*MascotEmotionStateTest*"`
-
-**Dependencies:** Task 4, Task 6, Task 10
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/ui/mascot/ChankoMascot.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/itemdetail/components/UnfreezeConfirmDialog.kt`
-- `app/src/test/java/com/hoabh/chanko/ui/mascot/MascotEmotionTest.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Checkpoint 4: Home & Mascot Interaction Verified
-- [x] Header hiển thị đầy đủ Hạt, Pate và Level Chanko.
-- [x] Mascot tương tác tích cực khi nhận thưởng và trung lập khi Unfreeze sớm.
-
----
-
-## Phase 5: Proactive Notifications & Verification (`notifications-daily-checkin`)
-
-### Task 12: Bộ Điều phối Thông báo Chủ động & Lời Nhắc Daily Check-in
-
-**Description:**
-Xây dựng module điều phối thông báo Push Notification và tổng hợp Daily Email:
-1. Thông báo hỏi mua hàng: Định kỳ hỏi người dùng có mua sản phẩm nào đang thêm trong Chanko hay chưa (với các tùy chọn: "Chưa mua", "Đã mua [chọn sản phẩm]", "Để sau").
-2. Nhắc nhở Daily Check-in vào khung giờ tối nếu người dùng chưa check-in.
-3. Thông báo sản phẩm đã hoàn thành Freeze và sẵn sàng xem xét.
-4. Thông báo nhận thưởng Hạt/Pate và Chanko lên cấp.
-5. Email tổng kết: bản tin tóm tắt các món đang Freeze, tình hình ngân sách và thành tích nuôi Chanko. Tuyệt đối không dùng thông báo để kích thích mua sắm.
-
-**Acceptance criteria:**
-- [x] `NotificationScheduler` (hoặc `NotificationDispatcher`) lên lịch các thông báo theo đúng kịch bản nghiệp vụ.
-- [x] Người dùng chạm vào thông báo hỏi mua hàng có thể chọn nhanh trạng thái hoặc mở ứng dụng để xác nhận.
-- [x] Nội dung thông báo không bao giờ khuyến khích mua hàng mà tập trung hỗ trợ tự phản tư.
-- [x] Unit tests kiểm tra điều kiện phát và nội dung thông báo cho từng kịch bản.
-
-**Verification:**
-- [x] Tests pass: `./gradlew testDebugUnitTest --tests "*NotificationDispatcherTest*"`
-
-**Dependencies:** Task 1, Task 7, Task 8
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/data/notification/NotificationDispatcher.kt`
-- `core/domain/src/main/kotlin/com/hoabh/chanko/domain/notification/NotificationModels.kt`
-- `app/src/test/java/com/hoabh/chanko/data/notification/NotificationDispatcherTest.kt`
-
-**Estimated scope:** Medium (3 files)
-
----
-
-### Task 13: Kiểm thử Tích hợp Toàn diện (E2E Integration & Regression Verification)
-
-**Description:**
-Thực hiện kiểm thử tích hợp toàn diện trên toàn bộ hệ thống từ:
-1. Thêm sản phẩm $\to$ Quick Check $\to$ Kích hoạt Freeze bắt buộc $\to$ Khóa giá.
-2. Đếm ngược $\to$ Hết hạn $\to$ Sẵn sàng xem xét $\to$ Thưởng Hạt & Pate tự động $\to$ Chanko tăng Level.
-3. Luồng Unfreeze sớm: tính phí chính xác $\to$ trừ Hạt/Pate không âm.
-4. Luồng xác nhận mua đồ: trừ ngân sách chu kỳ hiện tại chuẩn xác $\to$ cập nhật Home Carousel.
-5. Kiểm tra hồi quy không ảnh hưởng đến bất kỳ tính năng hiện có nào của Home v2.2.
-
-**Acceptance criteria:**
-- [x] Toàn bộ luồng end-to-end từ thêm đồ đến thưởng hoặc unfreeze chạy thành công.
-- [x] Không có hồi quy trên `BudgetCreditCardCarousel` (BC22-01..BC22-24 vẫn PASS 100%).
-- [x] Chạy toàn bộ test suite thành công qua terminal `./gradlew testDebugUnitTest`.
-- [x] Biên dịch `assembleDebug` thành công 100% không cảnh báo nghiêm trọng.
-
-**Verification:**
-- [x] Tests pass: `./gradlew testDebugUnitTest`
-- [x] Build succeeds: `./gradlew assembleDebug`
-
-**Dependencies:** Tasks 1–12
-
-**Files likely touched:**
-- `app/src/test/java/com/hoabh/chanko/e2e/ChankoCoreE2ETest.kt`
-
-**Estimated scope:** Medium (1-2 files)
-
----
-
-### Checkpoint 5: Hoàn tất Toàn diện & Sẵn sàng Triển khai
-- [x] Đầy đủ 13 tasks qua 5 phases đã được định nghĩa với acceptance criteria và verification rõ ràng.
-- [x] Kế hoạch sẵn sàng để lập trình viên hoặc AI agent thực hiện từng bước.
-
----
-
-## Phase 6: Home Screen Refresh — Daily Check-in, Item Sorting & Mascot Celebration (`home-screen-refresh`)
-
-### Task 14: Thành phần Dialog Popup Daily Check-in (`DailyCheckInDialog.kt`)
-
-**Description:**
-Xây dựng Composable `DailyCheckInDialog` xuất hiện tự động hoặc khi bấm nút Check-in trên Home:
-- Hiển thị thông điệp nhẹ nhàng, không phán xét: *"Hôm nay bạn có giữ được kế hoạch chi tiêu, không mua sắm ngoài dự kiến chứ?"*
-- Hiển thị rõ phần thưởng: `+10 Hạt, +10 Pate`
-- 2 nút hành động:
-  - Nút chính: *"Xác nhận (+10 Hạt, +10 Pate)"*
-  - Nút phụ: *"Để sau"* (đóng popup nhẹ nhàng, không ép buộc hay spam)
-- Giọng điệu thân thiện, tích cực, tuân thủ nguyên tắc `MASCOT-FEEDING = A`.
-
-**Acceptance criteria:**
-- [x] Dialog hiển thị tiêu đề, nội dung câu hỏi xác nhận và phần thưởng +10 Hạt & +10 Pate.
-- [x] Bấm "Xác nhận" gọi callback `onConfirm` để cộng thưởng vào ledger.
-- [x] Bấm "Để sau" gọi callback `onDismiss` đóng popup mà không phạt người dùng.
-- [x] Tuân thủ chuẩn thiết kế Candy Colors (không dùng direct hex Color ngoài Color.kt) và responsive font scale.
-
-**Verification:**
-- [x] Preview hoạt động tốt trong Compose Previews.
-- [x] Unit test giao diện hoặc kiểm thử trạng thái component pass.
-
-**Dependencies:** Task 7, Task 10
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/DailyCheckInDialog.kt`
-
-**Estimated scope:** Small (1 file)
-
----
-
-### Task 15: Nút Pill Daily Check-in trên TopBar Header (`HomeHeader.kt`)
-
-**Description:**
-Nâng cấp hàng chip tài nguyên `HomeResourceChipsRow` trên `HomeHeader`:
-- Thêm một chip `DailyCheckInPill` cạnh chip Hạt và Level:
-  - Khi **chưa check-in hôm nay**: hiển thị pill màu cam/accent nổi bật `[Check-in +10 🌰]`, bấm vào mở lại `DailyCheckInDialog`.
-  - Khi **đã check-in hôm nay**: hiển thị pill màu xám/xanh dịu `[Đã check-in ✓]`, disabled (không clickable) để người dùng yên tâm.
-- Tự động mờ dần khi cuộn trang xuống theo `collapseFraction` tương tự các chip tài nguyên khác.
-
-**Acceptance criteria:**
-- [x] Khi `hasCheckedInToday = false`: pill hiển thị nhãn Check-in và bấm vào kích hoạt `onCheckInClick`.
-- [x] Khi `hasCheckedInToday = true`: pill hiển thị trạng thái đã hoàn thành và vô hiệu hóa click.
-- [x] Hiệu ứng thu gọn Header khi cuộn mượt mà không lỗi layout.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 10, Task 14
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/HomeHeader.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/HomeHeaderResourceTest.kt`
-
-**Estimated scope:** Small (2-3 files)
-
----
-
-### Task 16: Tích hợp Luồng Daily Check-in & Level Up Celebration vào ViewModel và Screen
-
-**Description:**
-Kết nối `DailyCheckInUseCase` vào `HomeViewModel` và `HomeScreen`:
-- Khi mở app lần đầu trong ngày: nếu người dùng chưa check-in, tự động set `isCheckInDialogOpen = true` (chỉ mở tự động 1 lần trong phiên để không làm phiền).
-- Xử lý các sự kiện:
-  - `HomeUiEvent.RequestCheckIn`: mở dialog.
-  - `HomeUiEvent.DismissCheckInDialog`: đóng dialog.
-  - `HomeUiEvent.ConfirmCheckIn`: gọi `DailyCheckInUseCase` $\to$ cộng 10 Hạt & 10 Pate $\to$ cập nhật số dư Header $\to$ cập nhật `hasCheckedInToday = true` $\to$ Mascot phản hồi vui vẻ (`MascotEvent.DailyCheckInCompleted`).
-- Khi phát hiện `currentLevel` tăng: tự động mở `LevelUpCelebrationDialog` chúc mừng Chanko lớn hơn.
-
-**Acceptance criteria:**
-- [x] Tự động mở popup Check-in khi chưa check-in trong ngày; không mở lại nếu người dùng đã chọn "Để sau" trong phiên đó.
-- [x] Bấm xác nhận check-in cộng đúng 10 Hạt & 10 Pate vào StateFlow của Header tức thì.
-- [x] Nút pill trên Header chuyển sang trạng thái "Đã check-in" ngay lập tức.
-- [x] Mascot phát câu thoại chúc mừng và dialog Level Up hiển thị khi Chanko tăng Cấp.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeViewModelTest*"`
-
-**Dependencies:** Task 7, Task 14, Task 15
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiEvent.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeScreen.kt`
-
-**Estimated scope:** Medium (4 files)
-
----
-
-### Task 17: Sắp xếp Danh sách Item Journey theo Thời gian (Mới nhất ở dưới cùng) & Trạng thái Trực quan
-
-**Description:**
-Điều chỉnh danh sách món đồ trong `ItemJourneySection`:
-- Giữ 1 danh sách cuộn duy nhất (không chia tab/nhóm).
-- Sắp xếp các món đồ theo thứ tự thời gian được thêm vào: món cũ nhất ở trên, **món mới nhất ở dưới cùng** (`addedTimestamp` tăng dần).
-- Hiển thị trực quan trạng thái:
-  - Món đang Cooling-off (`FREEZE_ACTIVE` / `Waiting`): hiển thị countdown thời gian còn lại (VD: `Còn 2 ngày 14h`).
-  - Món đã hoàn thành Freeze (`READY_FOR_REVIEW` / `Ready`): hiển thị badge nổi bật *"Sẵn sàng xem xét"* để người dùng nhận diện ngay món nào cần đưa ra quyết định.
-
-**Acceptance criteria:**
-- [x] Danh sách món đồ trong Journey sắp xếp theo `addedTimestamp` tăng dần (món mới nhất ở dưới cùng).
-- [x] Node / Card món đồ hiển thị đúng trạng thái đếm ngược hoặc sẵn sàng xem xét.
-- [x] Chạm vào node điều hướng chính xác đến `ItemDetailScreen` của món tương ứng.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 4, Task 16
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/ItemJourneySection.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
-
-**Estimated scope:** Medium (2 files)
-
----
-
-### Task 18: Kiểm thử Toàn diện & Hồi quy Màn hình Home (Home Regression & E2E Test)
-
-**Description:**
-Thực hiện kiểm thử tích hợp và hồi quy toàn diện cho màn hình Home sau khi refresh:
-- Kiểm tra toàn bộ luồng Check-in: tự động mở popup $\to$ xác nhận $\to$ Header cập nhật Hạt/Pate $\to$ pill chuyển trạng thái.
-- Kiểm tra thứ tự sắp xếp danh sách món đồ (mới nhất dưới cùng).
-- Xác minh không có bất kỳ hồi quy nào trên `BudgetCreditCardCarousel` (BC22-01..BC22-24 vẫn PASS 100%).
-- Kiểm tra kiến trúc màu sắc `ColorArchitectureTest` (không dùng direct hex).
-- Chạy toàn bộ test suite và build check `assembleDevDebug`.
-
-**Acceptance criteria:**
-- [x] Viết test `HomeCheckInFlowTest` kiểm tra trọn vẹn luồng Check-in và cập nhật tài nguyên.
-- [x] Tất cả các bài test của Home (Carousel, Header, DomainLogic, CheckIn) PASS 100%.
-- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100% không lỗi.
-- [x] `./gradlew assembleDevDebug` biên dịch thành công 100%.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest`
-- [x] Build succeeds: `./gradlew assembleDevDebug`
-
-**Dependencies:** Tasks 14–17
-
-**Files likely touched:**
-- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/HomeCheckInFlowTest.kt`
-
-**Estimated scope:** Small (1 file)
-
----
-
-### Checkpoint 6: Home Screen Refresh Verified
-- [x] Popup Daily Check-in và pill mở lại trên Header hoạt động mượt mà.
-- [x] Danh sách món đồ sắp xếp chuẩn thời gian (mới nhất dưới cùng) và hiển thị rõ trạng thái Freeze / Sẵn sàng.
-- [x] Carousel ngân sách 3 thẻ v2.2 hoàn toàn nguyên vẹn, 100% test xanh.
-
----
-
-## Phase 7: Item Journey Cooling-off Visuals & State Streamlining (`cooling-off-journey-visuals`)
-
-### Task 19: Tinh gọn Enum Trạng thái `JourneyNodeStatus` & Ánh xạ Miền (Domain Mapping)
-
-**Description:**
-Loại bỏ hoàn toàn các trạng thái tàn dư cũ (`Saved` - "Đã lưu", `Considering` - "Đang cân nhắc") và verdict `BUY/WAIT/SKIP` khỏi Item Journey. Tinh gọn `JourneyNodeStatus` đồng bộ với `ItemFreezeStatus`:
-- `CoolingOff` ("Đang hạ nhiệt")
-- `Ready` ("Sẵn sàng xem xét")
-- `Purchased` ("Đã mua")
-- `Skipped` ("Đã bỏ qua")
-Cập nhật `HomeDomainLogic.kt` (`parseStatus` và `selectRecentJourney`) để ánh xạ chuẩn xác, cập nhật các kịch bản mẫu trong `HomeFakeDataSource.kt` và sửa đổi `HomeDomainLogicTest.kt`.
-
-**Acceptance criteria:**
-- [x] `JourneyNodeStatus` chỉ còn 4 trạng thái: `CoolingOff`, `Ready`, `Purchased`, `Skipped`.
-- [x] `HomeDomainLogic.parseStatus()` ánh xạ `"Waiting"`, `"CoolingOff"`, `"FreezeActive"` về `JourneyNodeStatus.CoolingOff`.
-- [x] Khi hết thời gian đếm ngược (`remainingSeconds <= 0L`), tự động chuyển sang `JourneyNodeStatus.Ready`.
-- [x] Mock data trong `HomeFakeDataSource.kt` không còn dùng trạng thái cũ `Saved` / `Considering`.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Checkpoint 6
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeUiState.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogic.kt`
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeFakeDataSource.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
-
-**Estimated scope:** Medium (4 files)
-
----
-
-### Task 20: Tinh gọn Bảng Màu Viền & Visual Styles (`Color.kt` & `ItemJourneySection.kt`)
-
-**Description:**
-Loại bỏ các token màu viền tàn dư cũ (`statusSavedRing`, `statusConsideringRing`) trong `CandyColors.HomeV2`. Tinh giản `resolveJourneyNodeStyle()` xuống 3 nhóm thị giác:
-- `CoolingOff`: Viền màu hổ phách/cam dịu (`CandyColors.HomeV2.statusWaitingRing` hoặc token băng mát tương ứng) trên nền rãnh track mờ (`alpha = 0.15f`).
-- `Ready`: Viền màu Mint xanh ngọc tươi sáng (`CandyColors.HomeV2.statusReadyRing`).
-- `Purchased` / `Skipped`: Viền trung tính nét liền tĩnh (`CandyColors.HomeV2.statusSkippedRing`).
-Đảm bảo 100% tuân thủ `ColorArchitectureTest`.
-
-**Acceptance criteria:**
-- [x] `resolveJourneyNodeStyle(status)` chỉ xử lý 4 trạng thái, trả về đúng cấu hình viền và badge.
-- [x] Không còn tham chiếu đến `Saved` hay `Considering` trong `ItemJourneySection.kt`.
-- [x] Huy hiệu góc trên phải (`JourneyStatusBadge`) giữ lại icon chuẩn: ⏳ Đồng hồ cát (CoolingOff), ✓ Tích xanh (Ready), 🛍️ Túi (Purchased), − Dấu trừ (Skipped).
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"`
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 19
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
-- `app/src/main/java/com/hoabh/chanko/ui/theme/Color.kt`
-
-**Estimated scope:** Small (2 files)
-
----
-
-### Task 21: Vẽ Canvas Circular Progress Arc & Hiệu ứng Nhịp Thở Ready (`ItemJourneySection.kt`)
-
-**Description:**
-Triển khai render trực quan mới cho các node trong Item Journey:
-- Loại bỏ hoàn toàn vòng quay 360 độ liên tục vô tận (`rotationAngle`).
-- Đối với `CoolingOff`: Vẽ Canvas `drawArc` bắt đầu từ -90° (đỉnh 12h), chiều dài cung quét `sweepAngle` tỷ lệ theo thời gian còn lại, trên một rãnh tròn mờ bên dưới.
-- Đối với `Ready`: Khi `!isReducedMotionEnabled`, tạo hiệu ứng nhịp thở nhẹ (`Breathing Pulse` chu kỳ 2.5s) trên viền và bóng đổ để thu hút sự chú ý vào quyết định mua/bỏ qua. Khi `isReducedMotionEnabled`, hiển thị viền tĩnh rõ ràng.
-- Bổ sung `contentDescription` thân thiện cho TalkBack.
-
-**Acceptance criteria:**
-- [x] Node `CoolingOff` hiển thị cung tròn đếm ngược tĩnh tại, không quay chóng mặt.
-- [x] Node `Ready` có nhịp thở mời gọi người dùng khi không bật Reduced Motion.
-- [x] Khi bật `isReducedMotionEnabled`, mọi hiệu ứng thở đều được tắt, chỉ hiển thị viền tĩnh.
-- [x] Chạm vào node vẫn điều hướng chính xác đến `ItemDetailScreen`.
-
-**Verification:**
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 20
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
-
-**Estimated scope:** Medium (1-2 files)
-
----
-
-### Task 22: Kiểm thử Hồi quy Toàn diện & Xác thực Biên dịch
-
-**Description:**
-Chạy toàn bộ kiểm thử đơn vị, kiểm thử kiến trúc màu sắc và kiểm tra biên dịch build sản phẩm sau khi hoàn tất refactor thị giác Item Journey.
-
-**Acceptance criteria:**
-- [x] Cập nhật các test case trong `HomeViewModelTest.kt`, `HomeCheckInFlowTest.kt` tương thích 100% với trạng thái mới.
-- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
-- [x] `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"` PASS 100%.
-- [x] `./gradlew assembleDevDebug` biên dịch thành công 100%.
-
-**Verification:**
-- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest`
-- [x] Build succeeds: `./gradlew assembleDevDebug`
-
-**Dependencies:** Tasks 19–21
-
-**Files likely touched:**
-- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeViewModelTest.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeCheckInFlowTest.kt`
-
-**Estimated scope:** Small (2 test files)
-
----
-
-### Checkpoint 7: Item Journey Cooling-off Visuals Verified
-- [x] Không còn tàn dư trạng thái `Saved` / `Considering`.
-- [x] Viền đếm ngược tròn (Circular Progress Arc) và nhịp thở (Breathing Pulse) hoạt động hoàn hảo.
-- [x] Carousel 3 thẻ v2.2 và toàn bộ các tính năng khác giữ nguyên 100% độ ổn định.
-
----
-
-## Phase 8: Item Journey Sub-Labels (Title & Price Display)
-
-### Task 23: Thiết kế Component Sub-Label dưới chân Node (`JourneyNodeSubLabel`)
-
-**Description:**
-Xây dựng component `JourneyNodeSubLabel` hiển thị Tên món đồ (Title) và Pill Giá tiền (Price Tag) nằm gọn gàng bên dưới vòng tròn sản phẩm:
-- Tên món đồ: tối đa 1 dòng, `12sp`, `FontWeight.SemiBold`, cắt ngắn với `TextOverflow.Ellipsis`, màu `CandyColors.HomeV2.textPrimary`.
-- Pill Giá tiền: Chip nhỏ bo tròn `RoundedCornerShape(8.dp)`, nền tím pastel nhẹ `Color(0xFFF0ECF8)` hoặc `Gray100`, text `11sp`, `FontWeight.Bold`, hiển thị `node.priceFormatted` (ví dụ `1.5M`, `350k`), trường hợp thiếu giá (`AC-09`) hiển thị `"Chưa rõ giá"`.
-
-**Acceptance criteria:**
-- [x] Component `JourneyNodeSubLabel` render rõ ràng tên và pill giá tiền.
-- [x] Xử lý an toàn khi thiếu giá hoặc tên dài.
-- [x] Độ tương phản màu chữ đạt chuẩn WCAG AA (> 4.5:1).
-
-**Verification:**
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** None
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
-
-**Estimated scope:** Small (1 file)
-
----
-
-### Task 24: Tích hợp Sub-Label vào `JourneyProductNode` & Cân chỉnh Bố cục Ziczac
-
-**Description:**
-Tích hợp `JourneyNodeSubLabel` vào khối trạm của mỗi node trên Item Journey:
-- Gom vòng tròn chính và `JourneyNodeSubLabel` vào khối trạm dọc (`Column`, `Alignment.CenterHorizontally`).
-- Căn chỉnh tâm vòng tròn chính khớp chính xác với `nodeCentersDp` để đường nét đứt kết nối giữ nguyên tọa độ chuẩn.
-- Cập nhật `computeCenteredZigZagLayout`: Tăng bước nhảy dọc `verticalStep` từ `74dp/80dp` lên `116dp/124dp` và cập nhật `totalHeight` để nhường không gian cho text, tránh chữ bị đè hoặc chạm vào node tiếp theo.
-- Đảm bảo 2 chú mèo mascot ở 2 bên không bị che khuất hoặc xâm lấn vùng chạm của node.
-
-**Acceptance criteria:**
-- [x] Các trạm ziczac hiển thị đầy đủ Vòng tròn + Tên món + Pill Giá tiền.
-- [x] Đường nét đứt và các trạm không bị chồng chéo hay che khuất chữ.
-- [x] Vùng chạm và semantics bao trùm toàn bộ khối trạm (chạm vào tên hoặc giá tiền vẫn điều hướng mở chi tiết sản phẩm).
-
-**Verification:**
-- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
-
-**Dependencies:** Task 23
-
-**Files likely touched:**
-- `app/src/main/java/com/hoabh/chanko/presentation/features/home/components/ItemJourneySection.kt`
-- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
-
-**Estimated scope:** Medium (1-2 files)
-
----
-
-### Task 25: Kiểm thử Hồi quy, Accessibility Semantics & Build Verification
-
-**Description:**
-Chạy toàn bộ test suites, kiểm tra hồi quy layout test trong `HomeDomainLogicTest.kt`, kiểm tra semantics TalkBack và biên dịch APK `assembleDevDebug`.
-
-**Acceptance criteria:**
-- [x] `HomeDomainLogicTest.kt` kiểm tra layout centered ziczac vượt qua thành công với khoảng cách mới.
-- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
-- [x] `./gradlew test` PASS 100%.
-- [x] `./gradlew assembleDevDebug` thành công 100%.
-
-**Verification:**
-- [x] Tests pass: `./gradlew test`
-- [x] Build succeeds: `./gradlew assembleDevDebug`
-
-**Dependencies:** Tasks 23, 24
-
-**Files likely touched:**
-- `app/src/test/java/com/hoabh/chanko/presentation/features/home/HomeDomainLogicTest.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/designsystem/theme/ChatTokens.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/designsystem/theme/Type.kt`
 
 **Estimated scope:** Small (1-2 files)
 
 ---
 
-### Checkpoint 8: Item Journey Sub-Labels Verified
-- [x] Tên món đồ và giá tiền hiển thị rõ ràng, trực quan, thẩm mỹ theo phong cách Candy Theme.
-- [x] Trải nghiệm cuộn ziczac mượt mà, không va chạm Mascot hay đè chữ.
-- [x] 100% tests và build compilation passed.
+### Checkpoint 1: Assets & Tokens Ready
+- [x] Toàn bộ VectorDrawables, Mascot WebP và Nunito TTF biên dịch thành công.
+- [x] Token màu và Typography sẵn sàng cho UI.
+
+---
+
+## Phase 2: Domain Layer
+
+### Task 3: Mô hình Hóa Domain Entities cho Product-Centric Chat
+
+**Description:**
+Định nghĩa các Domain Models bất biến tuân thủ Clean Architecture:
+- `ProductSnapshot`: `productId`, `name`, `price` (Long VND), `thumbnailResId`, `coolingOff: CoolingOffInfo?`, `isPrimaryDeleted: Boolean`.
+- `CoolingOffInfo`: `startedAtEpochMillis`, `durationMillis`, `remainingMillis`, `progress: Float`, `status: CoolingOffStatus` (`ACTIVE`, `ELAPSED`, `UNKNOWN`).
+- `ChatMessage`: `id`, `threadId`, `sender` (`USER`, `CHANKO`), `content`, `productSnapshots: List<ProductSnapshot>`, `createdAtEpochMillis`, `status` (`SENDING`, `SENT`, `FAILED`).
+- `ChatThread`: `id`, `title`, `primaryProduct: ProductSnapshot`, `referenceProducts: List<ProductSnapshot>`, `lastMessage: ChatMessage?`, `updatedAtEpochMillis`, `isArchived: Boolean`, `readOnlyReason: ReadOnlyReason`.
+- `ReadOnlyReason`: Sealed interface (`NONE`, `ARCHIVED`, `PRIMARY_DELETED`, `OFFLINE`).
+
+**Acceptance criteria:**
+- [x] Các models là pure Kotlin (không phụ thuộc Android framework).
+- [x] Không chứa khái niệm "Trò chuyện tự do" (mọi thread bắt buộc có `primaryProduct`).
+- [x] Không chứa phán quyết BUY/WAIT/SKIP (phân tích chỉ lưu qua `productSnapshots`).
+
+**Verification:**
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/domain/chat/model/ChatThread.kt`
+- `app/src/main/java/com/hoabh/chanko/domain/chat/model/ChatMessage.kt`
+- `app/src/main/java/com/hoabh/chanko/domain/chat/model/ProductSnapshot.kt`
+- `app/src/main/java/com/hoabh/chanko/domain/chat/model/CoolingOffInfo.kt`
+- `app/src/main/java/com/hoabh/chanko/domain/chat/model/ReadOnlyReason.kt`
+
+**Estimated scope:** Medium (4-5 files)
+
+---
+
+### Task 4: Giao diện ChatRepository & Tính toán Thời gian Monotonic
+
+**Description:**
+Định nghĩa `ChatRepository` interface bao quát 13 operations chuẩn hóa:
+- Quản lý sản phẩm: `getEligibleProducts(query, cursor, limit): Flow<List<ProductSnapshot>>`.
+- Tra cứu lịch sử: `findActiveThreadForProduct(productId): ChatThread?`, `getArchivedThreadsForProduct(productId): List<ChatThread>`.
+- Quản lý Threads: `getThreads(query, archived): Flow<List<ChatThread>>`, `getThread(threadId): Flow<ChatThread?>`, `renameThread(threadId, newTitle)`, `archiveThread(threadId)`, `restoreThread(threadId)`, `deleteThread(threadId)`.
+- Quản lý Tin nhắn & Gửi tin nguyên tử: `getMessages(threadId): Flow<List<ChatMessage>>`, `sendFirstMessage(draftThread, firstMessageText, idempotencyKey): ChatThread`, `sendMessage(threadId, messageText, idempotencyKey)`.
+- Tham chiếu: `addReference(threadId, productId)`, `removeReference(threadId, productId)`.
+- Generation & Streaming: `streamAiResponse(threadId, generationId): Flow<ChatGenerationEvent>`, `cancelGeneration(threadId, generationId)`.
+- Xây dựng lớp tiện ích `MonotonicClockCalculator` tính toán `remainingMillis` và `progress` dựa trên `elapsedRealtime`.
+
+**Acceptance criteria:**
+- [x] Interface bao quát đầy đủ 13 nghiệp vụ của hợp đồng OpenAPI 3.0.3.
+- [x] Lớp tính toán hạ nhiệt có unit test xác minh chính xác các trạng thái `ACTIVE`, `ELAPSED`, `UNKNOWN`.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*CoolingOffCalculatorTest*"`
+
+**Dependencies:** Task 3
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/domain/chat/repository/ChatRepository.kt`
+- `app/src/main/java/com/hoabh/chanko/domain/chat/util/MonotonicClockCalculator.kt`
+- `app/src/test/java/com/hoabh/chanko/domain/chat/util/CoolingOffCalculatorTest.kt`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+### Checkpoint 2: Domain Layer Verified
+- [x] Domain Models và Repository interface hoàn thiện.
+- [x] Unit tests cho logic tính toán thời gian hạ nhiệt đạt 100%.
+
+---
+
+## Phase 3: Data Layer & Fake Repository
+
+### Task 5: DTOs Khớp OpenAPI 3.0.3 & Data Mappers
+
+**Description:**
+Tạo các Data Transfer Objects (DTO) ánh xạ 1:1 với hợp đồng `Chanko-Chat-UI-v2.2/contract/openapi.yaml`:
+- `ChatProductDto`, `ChatThreadDto`, `ChatMessageDto`, `ProductSnapshotDto`, `CoolingOffDto`, `GenerationEventDto`.
+- Mappers hai chiều chuyển đổi giữa DTO $\longleftrightarrow$ Domain Model.
+
+**Acceptance criteria:**
+- [x] Khớp cấu trúc JSON của hợp đồng OpenAPI.
+- [x] Chuyển đổi chính xác tiền tệ VND (integer minor unit) và thời gian RFC3339 / epoch millis.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ChatDtoMapperTest*"`
+
+**Dependencies:** Task 3
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/data/chat/dto/ChatDtos.kt`
+- `app/src/main/java/com/hoabh/chanko/data/chat/mapper/ChatMapper.kt`
+- `app/src/test/java/com/hoabh/chanko/data/chat/mapper/ChatDtoMapperTest.kt`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+### Task 6: Xây dựng Deterministic FakeChatRepository (In-Memory Mock)
+
+**Description:**
+Triển khai `FakeChatRepository` phục vụ phát triển độc lập theo B07:
+- Khởi tạo với dữ liệu seed từ `Chanko-Chat-UI-v2.2/mock/seed.json` (danh sách sản phẩm tai nghe, đồng hồ, bàn phím, ghế; các thread mẫu).
+- Hỗ trợ gửi tin nhắn đầu tiên nguyên tử (`sendFirstMessage`), gộp optimistic ack, chống trùng lặp bằng `Idempotency-Key` (`EDGE-10`).
+- Giả lập phát streaming phản hồi của Chanko (`streamAiResponse`) với các đoạn văn bản phân tích khách quan cho từng sản phẩm (`productSnapshots`), không tạo phán quyết BUY/WAIT/SKIP (`EDGE-11`).
+- Hỗ trợ hủy generation (`cancelGeneration`) và khóa chỉnh sửa tham chiếu khi đang streaming (`EDGE-09`, `EDGE-12`).
+
+**Acceptance criteria:**
+- [x] Hoạt động trơn tru trong bộ nhớ RAM, phục vụ mọi luồng UI mà không cần mạng Internet.
+- [x] Đạt 100% các ca kiểm thử hành vi tương đương hợp đồng OpenAPI.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*FakeChatRepositoryTest*"`
+
+**Dependencies:** Tasks 4, 5
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/data/chat/fake/FakeChatRepository.kt`
+- `app/src/test/java/com/hoabh/chanko/data/chat/fake/FakeChatRepositoryTest.kt`
+
+**Estimated scope:** Medium (2 files)
+
+---
+
+### Task 7: Cập nhật Room Database Entity & DAO (Dev Fallback Mode)
+
+**Description:**
+Cập nhật Room Database để hỗ trợ lưu cache offline cho Chat v2.2:
+- Cập nhật `ChatThreadEntity` (`primaryProductId`, `title`, `isArchived`, `readOnlyReason`).
+- Cập nhật `ChatMessageEntity` (`threadId`, `content`, `productSnapshotsJson`, `status`).
+- Áp dụng `fallbackToDestructiveMigration()` trong AppDatabase cấu hình Dev theo thỏa thuận người dùng (không cần migration script phức tạp).
+
+**Acceptance criteria:**
+- [x] Schema Room cập nhật hỗ trợ đầy đủ các trường mới của Chat v2.2.
+- [x] Biên dịch KSP Room thành công, không báo lỗi schema mismatch.
+
+**Verification:**
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+
+**Dependencies:** Task 3
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/data/local/database/entity/ChatThreadEntity.kt`
+- `app/src/main/java/com/hoabh/chanko/data/local/database/entity/ChatMessageEntity.kt`
+- `app/src/main/java/com/hoabh/chanko/data/local/database/AppDatabase.kt`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+### Checkpoint 3: Data Layer & Mock Engine Verified
+- [x] `FakeChatRepository` pass toàn bộ unit tests.
+- [x] Room schema mới biên dịch thành công.
+
+---
+
+## Phase 4: Shared UI Components
+
+### Task 8: Xây dựng `ProductContextCard` & `ReferenceChipsRow`
+
+**Description:**
+Xây dựng header sản phẩm chính và hàng chip tham chiếu tại `components/`:
+- `ProductContextCard`: Hiển thị ảnh thumbnail 56dp, tên món, giá tiền định dạng VND, huy hiệu trạng thái Cooling-off (Active / Elapsed / Unknown). Hỗ trợ trạng thái khi SP chính bị xóa (`CL-GAP-04`, `EDGE-01`).
+- `ReferenceChipsRow`: Cuộn ngang (`LazyRow`), mỗi chip hiển thị thumbnail nhỏ + tên món + nút xóa (`chat_close`). Cuối hàng có nút `+ Thêm món so sánh` (`chat_reference`).
+- Khóa tương tác khi AI đang stream (`EDGE-09`) hoặc thread chỉ đọc.
+- Touch target của nút xóa và nút thêm $\ge 48\,\text{dp}$.
+
+**Acceptance criteria:**
+- [x] Render chuẩn xác theo thiết kế v2.2.
+- [x] Semantics trợ năng đầy đủ: đọc tên món, giá, trạng thái hạ nhiệt.
+
+**Verification:**
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+
+**Dependencies:** Tasks 2, 3
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/components/ProductContextCard.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/components/ReferenceChipsRow.kt`
+
+**Estimated scope:** Medium (2 files)
+
+---
+
+### Task 9: Xây dựng `ChatMessageBubble` & `CoolingOffIndicator`
+
+**Description:**
+Tái cấu trúc bong bóng tin nhắn:
+- Bong bóng User: Nền `#EEE6FF`, góc bo 20dp, căn phải, max 82% chiều rộng màn hình.
+- Bong bóng Chanko: Nền trắng viền mềm, avatar Chanko 32dp, hiển thị nội dung phân tích khách quan kèm thẻ con `ProductSnapshotCard` cho từng sản phẩm được nhắc đến (`CD-GAP-03`, `EDGE-11`).
+- **Loại bỏ hoàn toàn code hiển thị Decision Verdict Card BUY/WAIT/SKIP cũ.**
+- Component `CoolingOffIndicator`: Hiển thị đếm ngược thời gian thực (ví dụ: "Còn lại 2 ngày 14 giờ") kèm thanh tiến trình determinate; khi hết thời gian hiển thị "Sẵn sàng xem xét".
+
+**Acceptance criteria:**
+- [x] Không còn bất kỳ dấu vết nào của thẻ BUY/WAIT/SKIP cũ trong `ChatMessageBubble`.
+- [x] Thẻ con snapshot hiển thị rõ ràng thông tin sản phẩm và giá tại thời điểm phân tích (`EDGE-03`).
+
+**Verification:**
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+
+**Dependencies:** Tasks 2, 3
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/components/ChatMessageBubble.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/components/CoolingOffIndicator.kt`
+
+**Estimated scope:** Medium (2 files)
+
+---
+
+### Task 10: Xây dựng `ChatComposerBar` Nâng Cao
+
+**Description:**
+Cải tiến khung soạn thảo tin nhắn:
+- Chiều cao tối thiểu 56dp, co giãn đa dòng tối đa 6 dòng rồi tự động cuộn nội bộ.
+- Tích hợp `Modifier.imePadding()` và `Modifier.navigationBarsPadding()` chống bị bàn phím che khuất.
+- Nút Gửi (`chat_send_default` / `chat_send_selected` / `chat_send_disabled`) với touch target $\ge 48\,\text{dp}$.
+- Trạng thái vô hiệu hóa kèm giải thích rõ ràng khi thread chỉ đọc (`readOnlyReason`: Đã lưu trữ, Món đồ chính đã xóa, hoặc Ngoại tuyến).
+
+**Acceptance criteria:**
+- [x] Composer hoạt động mượt mà, không bị che khi mở IME.
+- [x] Vô hiệu hóa đúng khi thread chỉ đọc hoặc đang ngoại tuyến.
+
+**Verification:**
+- [x] Build succeeds: `./gradlew :app:compileDevDebugKotlin --no-configuration-cache`
+
+**Dependencies:** Tasks 1, 2
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/components/ChatComposerBar.kt`
+
+**Estimated scope:** Small (1 file)
+
+---
+
+### Checkpoint 4: Shared Components Verified
+- [x] Toàn bộ components dùng chung biên dịch thành công.
+- [x] Không còn tàn dư Decision Card cũ.
+
+---
+
+## Phase 5: Screens Refactor
+
+### Task 11: Tái cấu trúc Màn hình `ChatListScreen` (CL)
+
+**Description:**
+Nâng cấp giao diện Danh sách trò chuyện (CL):
+- **Loại bỏ toàn bộ Filter Chips cũ** (Đang cân nhắc / Chờ xem lại / Đã mua) (`CL-GAP-02`).
+- Thanh tìm kiếm (OutlinedTextField min 52dp, icon `chat_search_default`).
+- Header Hero Mascot (`chanko_chat_hero.webp`, cao 100–120dp, ContentScale.Fit).
+- Thread rows: Hiển thị thumbnail sản phẩm chính (56dp) + huy hiệu `+N` nếu có tham chiếu (`CL-GAP-01`), tiêu đề, tin nhắn xem trước, thời gian, và trạng thái Cooling-off.
+- Sắp xếp thread theo tin nhắn mới nhất (`lastMessageAt DESC, id DESC`) (`CL-GAP-03`).
+- Nút bấm tạo chat mới (`Đoạn chat mới` min 56dp, icon `chat_new_chat_default`).
+- Xử lý Thread khi sản phẩm chính bị xóa: Giữ lịch sử và hiển thị nhãn chỉ đọc (`CL-GAP-04`, `EDGE-01`).
+- Menu tùy chọn (`ThreadOptionsSheet`): Đổi tên, Lưu trữ, Xóa (`EDGE-01`).
+
+**Acceptance criteria:**
+- [x] Không còn filter chips cũ.
+- [x] Hiển thị badge `+N` chuẩn xác theo số lượng tham chiếu.
+- [x] Sắp xếp danh sách chính xác.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ChatListViewModelTest*"`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
+
+**Dependencies:** Tasks 8, 9, 10
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/list/ChatListScreen.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/list/ChatListViewModel.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/list/ChatListUiState.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/chat/list/ChatListViewModelTest.kt`
+
+**Estimated scope:** Medium (4 files)
+
+---
+
+### Task 12: Tái cấu trúc Màn hình `NewChatScreen` (NC)
+
+**Description:**
+Nâng cấp giao diện Bắt đầu trò chuyện mới (NC):
+- **Loại bỏ hoàn toàn chế độ "Trò chuyện tự do"** (`CHAT-01`).
+- Màn hình tập trung vào việc chọn duy nhất 1 sản phẩm chính từ danh sách (Single-select với semantics radio, card min 88dp, thumbnail 64dp) (`NC-GAP-02`).
+- Empty State khi chưa có món đồ: Nút CTA dẫn sang luồng thêm món (`NC-GAP-03`).
+- Khi chọn 1 món đồ đã có cuộc trò chuyện: Tra cứu lịch sử (`CHAT-02`, `NC-GAP-01`, `EDGE-04`), hiển thị Dialog tùy chọn: *"Tiếp tục đoạn chat cũ"* (mặc định mở chat hoạt động gần nhất) hoặc *"Tạo đoạn chat mới"*; cho phép mở danh sách chat đã lưu trữ.
+- Bản nháp (Draft) chỉ lưu ở client, không ghi server/Room trước khi gửi tin nhắn đầu tiên thành công (`NC-GAP-04`, `EDGE-05`, `EDGE-06`).
+
+**Acceptance criteria:**
+- [x] Không còn tùy chọn Free Chat.
+- [x] Chọn sản phẩm kích hoạt tra cứu lịch sử và hiển thị đúng dialog tiếp tục/tạo mới.
+- [x] Thoát màn hình khi draft rỗng không cảnh báo; không tạo thread rác trong Room.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*NewChatViewModelTest*"`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
+
+**Dependencies:** Tasks 6, 8, 10
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/newchat/NewChatScreen.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/newchat/NewChatViewModel.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/newchat/NewChatUiState.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/chat/newchat/NewChatViewModelTest.kt`
+
+**Estimated scope:** Medium (4 files)
+
+---
+
+### Task 13: Tái cấu trúc Màn hình `ChatDetailScreen` (CD)
+
+**Description:**
+Nâng cấp màn hình Chi tiết trò chuyện (CD):
+- TopAppBar hiển thị Avatar Chanko (40dp), tên cuộc trò chuyện, nút Quay lại và nút Menu (Đổi tên, Lưu trữ, Xóa).
+- Header cố định hiển thị `ProductContextCard` của sản phẩm chính (bất biến, không thể thay đổi sản phẩm chính) (`CD-GAP-02`).
+- Ngay dưới là `ReferenceChipsRow` cuộn ngang: cho phép bấm `+ Thêm món` để mở sheet chọn sản phẩm tham chiếu (chặn không cho chọn trùng SP chính hoặc trùng SP đã có - `EDGE-07`).
+- Bỏ tham chiếu không làm mất tin nhắn phân tích cũ (`CD-GAP-04`, `EDGE-08`).
+- Timeline tin nhắn: `LazyColumn` giữ nguyên vị trí cuộn khi nạp tin cũ; hiển thị chỉ báo tin mới khi đang đọc tin cũ.
+- Khi AI đang streaming: Hiển thị typing/partial stream, khóa sửa tham chiếu (`EDGE-09`), vô hiệu hóa nút xóa/lưu trữ cho tới khi cancel hoặc hoàn tất (`EDGE-12`).
+- Khung gõ `ChatComposerBar` ở dưới cùng.
+
+**Acceptance criteria:**
+- [x] Sản phẩm chính bất biến, không thể gỡ bỏ.
+- [x] Thao tác thêm/bớt tham chiếu mượt mà, chặn chọn trùng lặp.
+- [x] Quản lý stream an toàn và cho phép hủy generation rõ ràng.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ChatViewModelTest*"`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
+
+**Dependencies:** Tasks 8, 9, 10, 12
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/detail/ChatDetailScreen.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/detail/ChatViewModel.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/chat/detail/ChatUiState.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/chat/detail/ChatViewModelTest.kt`
+
+**Estimated scope:** Large (4 files)
+
+---
+
+### Checkpoint 5: 3 Screens Refactored & Passing Tests
+- [x] CL, NC, CD hoạt động đồng bộ trên FakeChatRepository.
+- [x] Toàn bộ unit tests của 3 ViewModels đều pass 100%.
+
+---
+
+## Phase 6: Navigation Integration & Full Verification
+
+### Task 14: Tích hợp Điều hướng Toàn cục & Kiểm chứng 27 Tiêu chí UX
+
+**Description:**
+Hoàn thiện tích hợp điều hướng giữa các màn hình ứng dụng:
+- Từ `HomeScreen`: Nút Chat điều hướng vào `ChatListScreen` (`CHAT-03`).
+- Từ `ItemDetailScreen`: Nút "Cân nhắc cùng Chanko" điều hướng trực tiếp sang Chat với sản phẩm này làm sản phẩm chính (nếu đã có chat thì mở CD, nếu chưa thì mở CD trạng thái nháp).
+- Viết test suite hồi quy `ChatEndToEndFlowTest` xác minh đầy đủ 27 tiêu chí:
+  - 3 CHAT decisions (`CHAT-01`, `02`, `03`).
+  - 12 GAP decisions (`CL-GAP-01..04`, `NC-GAP-01..04`, `CD-GAP-01..04`).
+  - 12 EDGE decisions (`EDGE-01..EDGE-12`).
+- Biên dịch toàn bộ ứng dụng và chạy toàn bộ unit tests.
+
+**Acceptance criteria:**
+- [x] Điều hướng hoạt động thông suốt từ Home và Item Detail.
+- [x] Toàn bộ 27 tiêu chí nghiệm thu được bao phủ bởi Unit Tests.
+- [x] `./gradlew :app:testDevDebugUnitTest` PASS 100%.
+- [x] `./gradlew :app:assembleDevDebug` PASS 100%.
+
+**Verification:**
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest`
+- [x] Build succeeds: `./gradlew :app:assembleDevDebug --no-configuration-cache`
+
+**Dependencies:** Tasks 11, 12, 13
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/navigation/ChatNavGraph.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/features/home/HomeScreen.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/features/chat/ChatEndToEndFlowTest.kt`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+### Checkpoint 6: Chanko Chat v2.2 Fully Verified
+- [x] 27/27 Tiêu chí UX và Edge Cases đạt tiêu chuẩn.
+- [x] 100% tests JVM pass.
+- [x] APK DevDebug biên dịch sạch, không lỗi cảnh báo nghiêm trọng.

@@ -21,7 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ChatThreadEntity::class,
         ChatMessageEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

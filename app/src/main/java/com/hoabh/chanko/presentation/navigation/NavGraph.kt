@@ -326,13 +326,13 @@ fun NavGraph(
             val newChatViewModel: NewChatViewModel = hiltViewModel()
             NewChatScreen(
                 viewModel = newChatViewModel,
-                onNavigateToChatDetail = { contextMode, itemId, itemName, itemPrice ->
+                onNavigateToChatDetail = { threadId, productId, productName, productPrice, _ ->
                     navController.navigate(
                         Screen.ChatDetail.createRoute(
-                            contextMode = contextMode,
-                            itemId = itemId,
-                            itemName = itemName,
-                            itemPrice = itemPrice
+                            threadId = threadId,
+                            itemId = productId,
+                            itemName = productName,
+                            itemPrice = productPrice
                         )
                     ) {
                         popUpTo(Screen.NewChat.route) { inclusive = true }
@@ -378,7 +378,6 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val threadId = backStackEntry.arguments?.getString("threadId")
-            val contextMode = backStackEntry.arguments?.getString("contextMode")
             val itemId = backStackEntry.arguments?.getString("itemId")
             val rawItemName = backStackEntry.arguments?.getString("itemName")
             val itemName = if (!rawItemName.isNullOrBlank()) {
@@ -394,10 +393,9 @@ fun NavGraph(
             ChatDetailScreen(
                 threadId = threadId,
                 viewModel = chatViewModel,
-                contextMode = contextMode,
-                itemId = itemId,
-                itemName = itemName,
-                itemPrice = itemPrice,
+                productId = itemId,
+                productName = itemName,
+                productPrice = itemPrice,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToItemDetail = { idStr ->
                     val id = idStr.toIntOrNull()

@@ -1,72 +1,96 @@
 package com.hoabh.chanko.domain.chat.repository
 
+import com.hoabh.chanko.domain.chat.model.ChatGenerationEvent
 import com.hoabh.chanko.domain.chat.model.ChatMessage
 import com.hoabh.chanko.domain.chat.model.ChatThread
+import com.hoabh.chanko.domain.chat.model.ProductSnapshot
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Hợp đồng giao tiếp cho Chat with Chanko (tuân thủ Backend Contract v1.4).
+ * Giao diện Kho dữ liệu Chat tuân thủ chuẩn OpenAPI 3.0.3 (13 operations).
+ * B07: Contract Ready — Pending Backend Implementation.
  */
 interface ChatRepository {
     /**
-     * Luồng danh sách các phiên hội thoại (không bao gồm các thread đã archive).
+     * 1. GET /chat/products - Lấy danh sách sản phẩm đủ điều kiện chọn làm SP chính hoặc tham chiếu.
      */
-    fun getActiveThreads(): Flow<List<ChatThread>>
+    fun getEligibleProducts(query: String? = null, cursor: String? = null, limit: Int = 20): Flow<List<ProductSnapshot>>
 
     /**
-     * Luồng danh sách các phiên hội thoại đã lưu trữ (Archived).
+     * 2. GET /chat/products/{productId}/threads - Tra cứu lịch sử chat của sản phẩm.
      */
-    fun getArchivedThreads(): Flow<List<ChatThread>>
+    suspend fun findActiveThreadForProduct(productId: String): ChatThread?
+
+    suspend fun getArchivedThreadsForProduct(productId: String): List<ChatThread>
 
     /**
-     * Lấy chi tiết một phiên trò chuyện theo ID.
+     * 3. GET /chat/threads - Lấy danh sách cuộc trò chuyện sắp xếp theo lastMessageAt DESC.
+     */
+    fun getThreads(query: String? = null, isArchived: Boolean = false): Flow<List<ChatThread>>
+
+    /**
+     * 4. GET /chat/threads/{threadId} - Lấy chi tiết một phiên trò chuyện.
      */
     fun getThreadById(threadId: String): Flow<ChatThread?>
 
     /**
-     * Lấy danh sách tin nhắn theo Thread ID.
+     * 5. POST /chat/threads - Khởi tạo thread mới nguyên tử kèm tin nhắn đầu tiên (NC-GAP-04).
      */
-    fun getMessages(threadId: String): Flow<List<ChatMessage>>
-
-    /**
-     * Gửi tin nhắn mới trong một thread (hoặc tạo mới nếu thread chưa tồn tại).
-     */
-    suspend fun sendMessage(threadId: String, text: String): Result<ChatMessage>
-
-    /**
-     * Chuyển đổi ngữ cảnh từ FREE sang ITEM trên CÙNG MỘT THREAD (Approved A2 Amendment).
-     * Giữ nguyên toàn bộ message IDs, transcript, thứ tự và draft.
-     */
-    suspend fun bindExistingItem(
-        threadId: String,
-        itemId: String,
-        itemName: String,
-        itemPriceVnd: Long
+    suspend fun sendFirstMessage(
+        draftThread: ChatThread,
+        firstMessageText: String,
+        idempotencyKey: String,
+        clientMessageId: String
     ): Result<ChatThread>
 
     /**
-     * Yêu cầu đánh giá sớm (Request Early Verdict) cho món đồ đang liên kết.
-     */
-    suspend fun requestVerdict(threadId: String): Result<ChatMessage>
-
-    /**
-     * Lưu trữ phiên trò chuyện (Archive).
-     */
-    suspend fun archiveThread(threadId: String): Result<Unit>
-
-    /**
-     * Khôi phục phiên trò chuyện từ kho lưu trữ.
-     */
-    suspend fun restoreThread(threadId: String): Result<Unit>
-
-    /**
-     * Đổi tên cuộc trò chuyện (CHAT-UX-REV-01 Rename UX).
+     * 6. PATCH /chat/threads/{threadId} - Đổi tên cuộc trò chuyện.
      */
     suspend fun renameThread(threadId: String, newTitle: String): Result<Unit>
 
     /**
-     * Xóa phiên trò chuyện (R07 Deletion).
-     * Xóa hội thoại nhưng giữ nguyên các Official Decision Records gắn với Shopping Item.
+     * 7. POST /chat/threads/{threadId}/archive - Lưu trữ cuộc trò chuyện.
+     */
+    suspend fun archiveThread(threadId: String): Result<Unit>
+
+    /**
+     * 8. POST /chat/threads/{threadId}/restore - Khôi phục cuộc trò chuyện từ kho lưu trữ.
+     */
+    suspend fun restoreThread(threadId: String): Result<Unit>
+
+    /**
+     * 9. DELETE /chat/threads/{threadId} - Xóa vĩnh viễn phiên trò chuyện.
      */
     suspend fun deleteThread(threadId: String): Result<Unit>
+
+    /**
+     * 10. GET /chat/threads/{threadId}/messages - Lấy danh sách tin nhắn của cuộc trò chuyện.
+     */
+    fun getMessages(threadId: String): Flow<List<ChatMessage>>
+
+    /**
+     * 11. POST /chat/threads/{threadId}/messages - Gửi tin nhắn mới với cơ chế idempotent an toàn.
+     */
+    suspend fun sendMessage(
+        threadId: String,
+        text: String,
+        idempotencyKey: String,
+        clientMessageId: String
+    ): Result<ChatMessage>
+
+    /**
+     * 12. POST /chat/threads/{threadId}/references - Thêm sản phẩm tham chiếu.
+     *     DELETE /chat/threads/{threadId}/references/{productId} - Gỡ bỏ sản phẩm tham chiếu.
+     */
+    suspend fun addReference(threadId: String, productId: String): Result<ChatThread>
+
+    suspend fun removeReference(threadId: String, productId: String): Result<ChatThread>
+
+    /**
+     * 13. GET /chat/threads/{threadId}/generations/{generationId}/events - Nhận luồng SSE phản hồi của AI.
+     *     POST /chat/threads/{threadId}/generations/{generationId}/cancel - Hủy generation.
+     */
+    fun streamAiResponse(threadId: String, generationId: String): Flow<ChatGenerationEvent>
+
+    suspend fun cancelGeneration(threadId: String, generationId: String): Result<Unit>
 }

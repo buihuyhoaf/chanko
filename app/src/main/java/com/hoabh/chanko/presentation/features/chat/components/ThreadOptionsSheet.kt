@@ -90,10 +90,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.backgroundLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        ChankoIcon(
-                            id = ChankoIconId.ACT_05,
+                        Image(
+                            painter = painterResource(id = R.drawable.chat_rename_default),
                             contentDescription = "Đổi tên",
-                            size = 20.dp
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -174,10 +174,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.backgroundLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        ChankoIcon(
-                            id = ChankoIconId.ITM_06,
+                        Image(
+                            painter = painterResource(id = R.drawable.chat_archive_default),
                             contentDescription = "Lưu trữ",
-                            size = 20.dp
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -212,10 +212,10 @@ fun ThreadOptionsSheet(
                             .background(CandyColors.readySurface),
                         contentAlignment = Alignment.Center
                     ) {
-                        ChankoIcon(
-                            id = ChankoIconId.ACT_11,
+                        Image(
+                            painter = painterResource(id = R.drawable.chat_retry_default),
                             contentDescription = "Khôi phục",
-                            size = 20.dp
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -253,10 +253,10 @@ fun ThreadOptionsSheet(
                         .background(CandyColors.speechSurface),
                     contentAlignment = Alignment.Center
                 ) {
-                    ChankoIcon(
-                        id = ChankoIconId.ACT_06,
+                    Image(
+                        painter = painterResource(id = R.drawable.chat_delete_default),
                         contentDescription = "Xóa",
-                        size = 20.dp
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(14.dp))

@@ -16,41 +16,44 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.chat.model.ChatMessage
-import com.hoabh.chanko.domain.chat.model.DecisionVerdict
 import com.hoabh.chanko.domain.chat.model.MessageSender
-import com.hoabh.chanko.ui.theme.CandyColors
+import com.hoabh.chanko.domain.chat.model.ProductSnapshot
+import com.hoabh.chanko.ui.theme.ChatTokens
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * Bong bóng tin nhắn Chat with Chanko theo chuẩn CHAT-UX-REV-01:
- * - User bubble: Chữ tối tương phản cao trên nền lavender dịu (tối đa 82% chiều ngang).
- * - Chanko bubble: Avatar 32dp bên ngoài, bong bóng nền trắng, tên "Chanko" và thời gian.
- * - Decision Card: Render trung tính (Neutral BUY, mascot Neutral, nút Xem món đồ).
+ * ChatMessageBubble v2.2:
+ * - User: Bong bóng tím nhạt (#EEE6FF), max 82% chiều rộng màn hình.
+ * - Chanko: Avatar mascot nodpi (32dp), nền trắng viền mềm, phân tích khách quan (CD-GAP-03, EDGE-11).
+ * - Hoàn toàn không còn thẻ Decision Verdict Card (BUY/WAIT/SKIP) cũ.
  */
 @Composable
 fun ChatMessageBubble(
     message: ChatMessage,
-    onViewItemClick: (() -> Unit)? = null,
+    onProductClick: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val timeString = timeFormat.format(Date(message.timestamp))
+    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val timeString = timeFormat.format(Date(message.createdAtEpochMillis))
 
     when (message.sender) {
         MessageSender.USER -> {
@@ -58,44 +61,56 @@ fun ChatMessageBubble(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Spacer(modifier = Modifier.weight(0.18f))
                 Column(
-                    modifier = Modifier.weight(0.82f, fill = false),
-                    horizontalAlignment = Alignment.End
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.fillMaxWidth(0.82f)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp))
-                            .background(CandyColors.Chat.userBubbleBg)
-                            .border(1.dp, CandyColors.Chat.userBubbleBorder, RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp))
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 20.dp,
+                                    topEnd = 20.dp,
+                                    bottomStart = 20.dp,
+                                    bottomEnd = 4.dp
+                                )
+                            )
+                            .background(ChatTokens.userBubble)
                             .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .semantics {
+                                contentDescription = "Tin nhắn của bạn: ${message.content}, lúc $timeString"
+                            }
                     ) {
                         Text(
-                            text = message.text,
-                            color = CandyColors.Chat.userBubbleText,
+                            text = message.content,
+                            color = ChatTokens.body,
                             fontSize = 15.sp,
-                            lineHeight = 22.sp
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight.Normal
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = timeString,
+                        color = ChatTokens.secondary,
                         fontSize = 11.sp,
-                        color = CandyColors.mutedInk,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }
             }
         }
-        MessageSender.CHANKO -> {
+
+        MessageSender.CHANKO, MessageSender.SYSTEM -> {
             Row(
                 modifier = modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
+                horizontalArrangement = Arrangement.Start
             ) {
-                // Avatar Chanko 32dp
+                // Mascot avatar
                 Image(
-                    painter = painterResource(id = R.drawable.chanko_neutral),
-                    contentDescription = "Chanko",
+                    painter = painterResource(id = R.drawable.chanko_chat_avatar),
+                    contentDescription = "Chanko Mascot",
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
@@ -104,73 +119,68 @@ fun ChatMessageBubble(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Column(
-                    modifier = Modifier.weight(1f, fill = false)
+                    modifier = Modifier.fillMaxWidth(0.88f)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Header name & time
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    ) {
                         Text(
                             text = "Chanko",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CandyColors.textPrimary
+                            color = ChatTokens.body
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "· $timeString",
+                            text = timeString,
                             fontSize = 11.sp,
-                            color = CandyColors.mutedInk
+                            color = ChatTokens.secondary
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
+                    // Main response bubble
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.92f)
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 20.dp))
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 4.dp,
+                                    topEnd = 20.dp,
+                                    bottomStart = 20.dp,
+                                    bottomEnd = 20.dp
+                                )
+                            )
                             .background(Color.White)
-                            .border(1.5.dp, CandyColors.divider, RoundedCornerShape(topStart = 4.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 20.dp))
-                            .padding(14.dp)
+                            .border(1.dp, ChatTokens.bubbleBorder, RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp))
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .semantics {
+                                contentDescription = "Chanko phản hồi: ${message.content}"
+                            }
                     ) {
                         Column {
                             Text(
-                                text = message.text,
-                                color = CandyColors.textPrimary,
+                                text = message.content,
+                                color = ChatTokens.body,
                                 fontSize = 15.sp,
-                                lineHeight = 22.sp
+                                lineHeight = 22.sp,
+                                fontWeight = FontWeight.Normal
                             )
 
-                            val verdict = message.verdict
-                            if (verdict != null) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                DecisionVerdictCard(
-                                    verdict = verdict,
-                                    onViewItemClick = onViewItemClick
-                                )
+                            // Product Snapshots Analysis (CD-GAP-03, EDGE-11)
+                            if (message.productSnapshots.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    message.productSnapshots.forEach { snapshot ->
+                                        AnalysisSnapshotCard(
+                                            product = snapshot,
+                                            onClick = { onProductClick?.invoke(snapshot.productId) }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
-        }
-        MessageSender.SYSTEM -> {
-            Box(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(CandyColors.Chat.userBubbleBg)
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = message.text,
-                        color = CandyColors.primaryInk,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
                 }
             }
         }
@@ -178,102 +188,56 @@ fun ChatMessageBubble(
 }
 
 /**
- * Thẻ nhận định của Chanko theo chuẩn trung tính (Neutral BUY):
- * Không pháo hoa, không màu xanh lá chiến thắng, dùng mascot tĩnh Neutral.
+ * AnalysisSnapshotCard: Thẻ snapshot sản phẩm gắn kèm phân tích (CD-GAP-03, EDGE-11).
+ * Không có thẻ BUY/WAIT/SKIP, chỉ thể hiện khách quan dữ liệu sản phẩm.
  */
 @Composable
-fun DecisionVerdictCard(
-    verdict: DecisionVerdict,
-    onViewItemClick: (() -> Unit)? = null,
+fun AnalysisSnapshotCard(
+    product: ProductSnapshot,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (verdictLabel, subtitle) = when (verdict) {
-        DecisionVerdict.BUY -> Pair(
-            "BUY · Có thể cân nhắc mua",
-            "Món đồ này có thể cân nhắc nếu bạn thực sự cần thiết."
-        )
-        DecisionVerdict.WAIT -> Pair(
-            "WAIT · Có thể chờ thêm",
-            "Hãy để hết thời gian hạ nhiệt để đánh giá khách quan hơn."
-        )
-        DecisionVerdict.SKIP -> Pair(
-            "SKIP · Có thể bỏ qua",
-            "Món đồ chưa thực sự cần thiết lúc này, nên giữ lại ngân sách."
-        )
-    }
-
-    Box(
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = ChatTokens.snapshotCardBg,
+        border = androidx.compose.foundation.BorderStroke(1.dp, ChatTokens.cardBorder),
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(CandyColors.Chat.assistantBubbleBg)
-            .border(1.5.dp, CandyColors.divider, RoundedCornerShape(18.dp))
-            .padding(14.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Nhận định của Chanko",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = CandyColors.mutedInk
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = verdictLabel,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CandyColors.Chat.assistantBubbleText
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = subtitle,
-                        fontSize = 12.sp,
-                        color = CandyColors.textSecondary,
-                        lineHeight = 16.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Mascot tĩnh Neutral (72dp)
-                Image(
-                    painter = painterResource(id = R.drawable.chanko_neutral),
-                    contentDescription = "Chanko Neutral",
-                    modifier = Modifier.size(64.dp)
-                )
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = "Sản phẩm được phân tích: ${product.name}, giá ${formatVndPrice(product.price)}"
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Cơ sở: Hãy kiểm tra lại nhu cầu thực tế và ngân sách khả dụng trước khi quyết định.",
-                fontSize = 12.sp,
-                color = CandyColors.mutedInk,
-                lineHeight = 16.sp
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            val thumbRes = product.thumbnailResId ?: getProductThumbnailResId(product.thumbnailUrl)
+            Image(
+                painter = painterResource(id = thumbRes),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White)
             )
 
-            if (onViewItemClick != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onViewItemClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CandyColors.brandPurple
-                    ),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Xem món đồ",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = product.name,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ChatTokens.body
+                )
+                Text(
+                    text = formatVndPrice(product.price),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = ChatTokens.primaryTextAndCTA
+                )
             }
         }
     }

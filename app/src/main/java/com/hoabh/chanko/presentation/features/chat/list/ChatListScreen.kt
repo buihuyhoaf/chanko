@@ -4,240 +4,158 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.chat.model.ChatThread
-import com.hoabh.chanko.domain.chat.model.ItemContextStatus
-import com.hoabh.chanko.domain.chat.model.ThreadFilter
-import com.hoabh.chanko.domain.chat.model.ThreadMode
+import com.hoabh.chanko.domain.chat.model.CoolingOffStatus
 import com.hoabh.chanko.presentation.features.chat.components.ArchiveConfirmationDialog
 import com.hoabh.chanko.presentation.features.chat.components.DeleteConfirmationDialog
 import com.hoabh.chanko.presentation.features.chat.components.RenameThreadDialog
-import com.hoabh.chanko.ui.theme.CandyColors
-import com.hoabh.chanko.ui.theme.CandySpace
+import com.hoabh.chanko.presentation.features.chat.components.ThreadOptionsSheet
+import com.hoabh.chanko.presentation.features.chat.components.formatVndPrice
+import com.hoabh.chanko.presentation.features.chat.components.getProductThumbnailResId
+import com.hoabh.chanko.ui.theme.ChatTokens
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Màn hình CL — Chat List (Danh sách cuộc trò chuyện theo chuẩn CHAT-UX-REV-01):
- * - Quản lý hội thoại kiểu Messenger: Header, Subtitle, Hero mascot, Search bar, Filter chips.
- * - Danh sách Thread Cards với thumbnail, tiêu đề, đoạn xem trước, thời gian và tag.
- * - Nút "+ Đoạn chat mới" cố định ở đáy an toàn.
- * - TUYỆT ĐỐI KHÔNG CÓ Ô GÕ TIN NHẮN (COMPOSER) TẠI ĐÂY.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
     viewModel: ChatListViewModel,
     onNavigateToDetail: (threadId: String) -> Unit,
     onNavigateToNewChat: () -> Unit,
-    onNavigateToItemDetail: (itemId: String) -> Unit,
+    onNavigateToItemDetail: (productId: String) -> Unit,
     modifier: Modifier = Modifier,
     contentBottomPadding: Dp = 0.dp
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var isHeaderMenuExpanded by remember { mutableStateOf(false) }
-    val effectiveBottomPadding = if (contentBottomPadding > 0.dp) {
-        contentBottomPadding
-    } else {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    }
+    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val effectiveBottomPadding = maxOf(contentBottomPadding, navBottom)
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(CandyColors.background)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = ChatTokens.screenBg
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-        ) {
-            // 1. Header & More Action
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = CandySpace.lg, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (uiState.showArchived) "Cuộc trò chuyện đã lưu trữ" else "Chat với Chanko",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        ),
-                        color = CandyColors.textPrimary
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Cùng suy nghĩ kỹ hơn trước mỗi quyết định",
-                        fontSize = 13.sp,
-                        color = CandyColors.mutedInk
-                    )
-                }
-
-                Box {
-                    IconButton(onClick = { isHeaderMenuExpanded = true }) {
-                        ChankoIcon(
-                            id = ChankoIconId.ACT_10,
-                            contentDescription = "Tùy chọn danh sách"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = isHeaderMenuExpanded,
-                        onDismissRequest = { isHeaderMenuExpanded = false }
-                    ) {
-                        if (!uiState.showArchived) {
-                            DropdownMenuItem(
-                                text = { Text("Xem mục đã lưu trữ") },
-                                onClick = {
-                                    isHeaderMenuExpanded = false
-                                    viewModel.toggleShowArchived(true)
-                                }
-                            )
-                        } else {
-                            DropdownMenuItem(
-                                text = { Text("Xem cuộc trò chuyện đang hoạt động") },
-                                onClick = {
-                                    isHeaderMenuExpanded = false
-                                    viewModel.toggleShowArchived(false)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 2. Danh sách cuộn chứa Hero, Search, Filters và Threads
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = effectiveBottomPadding + 80.dp) // Tránh bị nút FAB che khi cuộn xuống cuối
+                    .fillMaxSize()
+                    .statusBarsPadding(),
+                contentPadding = PaddingValues(bottom = effectiveBottomPadding + 88.dp)
             ) {
-                // Hero Banner
+                // 1. Header Hero Banner
                 item(key = "hero_banner") {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = CandySpace.lg, vertical = 10.dp)
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        CandyColors.Chat.headerGradientStart,
-                                        CandyColors.Chat.headerGradientEnd
-                                    )
-                                )
-                            )
-                            .padding(20.dp)
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(ChatTokens.coolingActiveBg)
+                            .padding(16.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Chào bạn!",
-                                    fontSize = 18.sp,
+                                    text = "Trò chuyện cùng Chanko",
+                                    fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = CandyColors.textPrimary
+                                    color = ChatTokens.body
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Đang phân vân món đồ nào? Hãy chia sẻ để Chanko giúp bạn hạ nhiệt và đánh giá khách quan nhé!",
+                                    text = "Thẩm định chi tiêu khách quan, hạ nhiệt mua sắm và so sánh sản phẩm thông minh.",
                                     fontSize = 13.sp,
-                                    color = CandyColors.textSecondary,
-                                    lineHeight = 18.sp
+                                    lineHeight = 18.sp,
+                                    color = ChatTokens.secondary
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Image(
-                                painter = painterResource(id = R.drawable.chanko_welcome),
+                                painter = painterResource(id = R.drawable.chanko_chat_hero),
                                 contentDescription = "Chanko Hero",
-                                modifier = Modifier.size(96.dp)
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .size(108.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                             )
                         }
                     }
                 }
 
-                // Search Bar
+                // 2. Search Bar (min 52dp)
                 item(key = "search_bar") {
                     OutlinedTextField(
                         value = uiState.searchQuery,
                         onValueChange = viewModel::onSearchQueryChanged,
-                        placeholder = { Text("Tìm cuộc trò chuyện…", fontSize = 14.sp) },
+                        placeholder = { Text("Tìm cuộc trò chuyện…", fontSize = 14.sp, color = ChatTokens.secondary) },
                         leadingIcon = {
-                            ChankoIcon(
-                                id = ChankoIconId.ACT_07,
+                            Image(
+                                painter = painterResource(id = R.drawable.chat_search_default),
                                 contentDescription = "Tìm kiếm",
-                                size = 20.dp
+                                modifier = Modifier.size(20.dp)
                             )
                         },
                         trailingIcon = {
                             if (uiState.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                                    ChankoIcon(
-                                        id = ChankoIconId.ACT_03,
+                                    Image(
+                                        painter = painterResource(id = R.drawable.chat_close_default),
                                         contentDescription = "Xóa",
-                                        size = 18.dp
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
@@ -246,60 +164,56 @@ fun ChatListScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
-                            focusedBorderColor = CandyColors.brandPurple,
-                            unfocusedBorderColor = CandyColors.divider
+                            focusedBorderColor = ChatTokens.primaryTextAndCTA,
+                            unfocusedBorderColor = ChatTokens.divider
                         ),
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = CandySpace.lg, vertical = 6.dp)
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
                     )
                 }
 
-                // Filter Chips (Cuộn ngang)
-                item(key = "filter_chips") {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = CandySpace.lg, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf(
-                            Pair(ThreadFilter.ALL, "Tất cả"),
-                            Pair(ThreadFilter.CONSIDERING, "Đang cân nhắc"),
-                            Pair(ThreadFilter.READY, "Chờ xem lại"),
-                            Pair(ThreadFilter.PURCHASED, "Đã mua")
-                        ).forEach { (filter, label) ->
-                            val isSelected = uiState.selectedFilter == filter && !uiState.showArchived
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { viewModel.onFilterSelected(filter) },
-                                label = {
-                                    Text(
-                                        text = label,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = 13.sp
-                                    )
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = CandyColors.brandPurple,
-                                    selectedLabelColor = Color.White,
-                                    containerColor = Color.White,
-                                    labelColor = CandyColors.textPrimary
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    borderColor = if (isSelected) Color.Transparent else CandyColors.divider,
-                                    enabled = true,
-                                    selected = isSelected
-                                )
+                // 3. Tab Chuyển đổi: Đang hoạt động / Kho lưu trữ (Bỏ filter chips cũ CL-GAP-02)
+                item(key = "tabs_mode") {
+                    TabRow(
+                        selectedTabIndex = if (uiState.showArchived) 1 else 0,
+                        containerColor = Color.Transparent,
+                        contentColor = ChatTokens.primaryTextAndCTA,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier.tabIndicatorOffset(tabPositions[if (uiState.showArchived) 1 else 0]),
+                                color = ChatTokens.primaryTextAndCTA
                             )
-                        }
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    ) {
+                        Tab(
+                            selected = !uiState.showArchived,
+                            onClick = { viewModel.onToggleArchived(false) },
+                            text = {
+                                Text(
+                                    text = "Đang hoạt động (${uiState.activeThreads.size})",
+                                    fontWeight = if (!uiState.showArchived) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
+                        Tab(
+                            selected = uiState.showArchived,
+                            onClick = { viewModel.onToggleArchived(true) },
+                            text = {
+                                Text(
+                                    text = "Kho lưu trữ (${uiState.archivedThreads.size})",
+                                    fontWeight = if (uiState.showArchived) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
                     }
                 }
 
-                // Danh sách Threads
+                // 4. Danh sách Threads (CL-GAP-01, CL-GAP-03)
                 val threads = uiState.filteredThreads
                 if (threads.isEmpty()) {
                     item(key = "empty_state") {
@@ -311,300 +225,277 @@ fun ChatListScreen(
                         ) {
                             Text(
                                 text = if (uiState.searchQuery.isNotEmpty())
-                                    "Không tìm thấy cuộc trò chuyện phù hợp"
+                                    "Không tìm thấy đoạn chat phù hợp"
+                                else if (uiState.showArchived)
+                                    "Kho lưu trữ đang trống"
                                 else
                                     "Chưa có cuộc trò chuyện nào",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = CandyColors.textPrimary
+                                color = ChatTokens.body
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Bắt đầu thẩm định một món đồ cùng Chanko nhé!",
+                                fontSize = 13.sp,
+                                color = ChatTokens.secondary
                             )
                             if (uiState.searchQuery.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 TextButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                                    Text("Xóa tìm kiếm", color = CandyColors.brandPurple)
+                                    Text("Xóa từ khóa tìm kiếm", color = ChatTokens.primaryTextAndCTA)
                                 }
                             }
                         }
                     }
                 } else {
                     items(threads, key = { it.id }) { thread ->
-                        ChatThreadRow(
+                        ChatThreadItem(
                             thread = thread,
                             onClick = { onNavigateToDetail(thread.id) },
-                            onOptionsClick = { viewModel.openOptions(thread) },
-                            modifier = Modifier.padding(horizontal = CandySpace.lg, vertical = 6.dp)
+                            onOptionsClick = { viewModel.onOptionsClicked(thread) },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                         )
                     }
                 }
             }
-        }
 
-        // 3. Floating Action Button "+ Đoạn chat mới" nổi phía trên Bottom Bar
-        ExtendedFloatingActionButton(
-            onClick = onNavigateToNewChat,
-            icon = {
-                ChankoIcon(
-                    id = ChankoIconId.ACT_01,
-                    contentDescription = null,
-                    size = 22.dp
-                )
-            },
-            text = {
-                Text(
-                    text = "Đoạn chat mới",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            },
-            containerColor = CandyColors.brandPurple,
-            contentColor = Color.White,
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = CandySpace.lg, bottom = effectiveBottomPadding + CandySpace.md)
+            // 5. Nút "+ Đoạn chat mới" cố định góc phải (touch target >= 48dp, height min 56dp)
+            ExtendedFloatingActionButton(
+                onClick = onNavigateToNewChat,
+                icon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.chat_new_chat_default),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp)
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Đoạn chat mới",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                containerColor = ChatTokens.primaryTextAndCTA,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = effectiveBottomPadding + 16.dp)
+                    .heightIn(min = 56.dp)
+            )
+        }
+    }
+
+    // Modal BottomSheet: Options
+    val threadForOptions = uiState.threadForOptions
+    if (threadForOptions != null) {
+        androidx.compose.material3.ExperimentalMaterial3Api::class
+        val sheetState = androidx.compose.material3.rememberModalBottomSheetState()
+        ThreadOptionsSheet(
+            isArchived = threadForOptions.isArchived,
+            onArchiveClicked = { viewModel.onRequestArchive(threadForOptions) },
+            onRestoreClicked = { viewModel.onRestoreThread(threadForOptions) },
+            onDeleteClicked = { viewModel.onRequestDelete(threadForOptions) },
+            onRenameClicked = { viewModel.onRequestRename(threadForOptions) },
+            onViewItemClicked = { onNavigateToItemDetail(threadForOptions.primaryProduct.productId) },
+            onDismiss = { viewModel.onDismissOptions() },
+            sheetState = sheetState
         )
     }
 
-    // Modal BottomSheet: Tùy chọn trên từng Thread Row
-    val threadForOptions = uiState.threadForOptions
-    if (threadForOptions != null) {
-        val sheetState = rememberModalBottomSheetState()
-        ModalBottomSheet(
-            onDismissRequest = { viewModel.closeOptions() },
-            sheetState = sheetState,
-            containerColor = Color.White
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = threadForOptions.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CandyColors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 1. Đổi tên
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { viewModel.openRenameDialog(threadForOptions) }
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ChankoIcon(id = ChankoIconId.ACT_05, contentDescription = null, size = 20.dp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Đổi tên cuộc trò chuyện", fontSize = 15.sp, color = CandyColors.textPrimary)
-                }
-
-                // 2. Lưu trữ / Khôi phục
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { viewModel.openArchiveDialog(threadForOptions) }
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val icon = if (threadForOptions.isArchived) ChankoIconId.ACT_11 else ChankoIconId.ITM_06
-                    val label = if (threadForOptions.isArchived) "Khôi phục cuộc trò chuyện" else "Lưu trữ cuộc trò chuyện"
-                    ChankoIcon(id = icon, contentDescription = null, size = 20.dp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(label, fontSize = 15.sp, color = CandyColors.textPrimary)
-                }
-
-                // 3. Xem món đồ (nếu có linkedItemId)
-                val linkedItemId = threadForOptions.linkedItemId
-                if (linkedItemId != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable {
-                                viewModel.closeOptions()
-                                onNavigateToItemDetail(linkedItemId)
-                            }
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ChankoIcon(id = ChankoIconId.ACT_14, contentDescription = null, size = 20.dp)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Xem chi tiết món đồ", fontSize = 15.sp, color = CandyColors.textPrimary)
-                    }
-                }
-
-                // 4. Xóa
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { viewModel.openDeleteDialog(threadForOptions) }
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ChankoIcon(id = ChankoIconId.ACT_06, contentDescription = null, size = 20.dp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Xóa cuộc trò chuyện", fontSize = 15.sp, color = CandyColors.error)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-
-    // Dialogs
+    // Rename Dialog
     val threadForRename = uiState.threadForRename
     if (threadForRename != null) {
         RenameThreadDialog(
             initialTitle = threadForRename.title,
-            onConfirm = { viewModel.confirmRename(it) },
-            onDismiss = { viewModel.closeRenameDialog() }
+            onConfirm = { viewModel.onConfirmRename(it) },
+            onDismiss = { viewModel.onDismissRename() }
         )
     }
 
+    // Archive Dialog
     val threadForArchive = uiState.threadForArchive
     if (threadForArchive != null) {
         ArchiveConfirmationDialog(
-            onConfirm = { viewModel.confirmArchive() },
-            onDismiss = { viewModel.closeArchiveDialog() }
+            onConfirm = { viewModel.onConfirmArchive() },
+            onDismiss = { viewModel.onDismissArchive() }
         )
     }
 
+    // Delete Dialog
     val threadForDelete = uiState.threadForDelete
     if (threadForDelete != null) {
         DeleteConfirmationDialog(
-            onConfirm = { viewModel.confirmDelete() },
-            onDismiss = { viewModel.closeDeleteDialog() }
+            onConfirm = { viewModel.onConfirmDelete() },
+            onDismiss = { viewModel.onDismissDelete() }
         )
     }
 }
 
 /**
- * Thẻ một cuộc trò chuyện kiểu Messenger
+ * ChatThreadItem: Thẻ hiển thị một cuộc trò chuyện trên CL (CL-GAP-01, CL-GAP-03).
  */
 @Composable
-fun ChatThreadRow(
+fun ChatThreadItem(
     thread: ChatThread,
     onClick: () -> Unit,
     onOptionsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val timeString = dateFormat.format(Date(thread.updatedAt))
+    val timeString = dateFormat.format(Date(thread.updatedAtEpochMillis))
+    val cooling = thread.primaryProduct.coolingOff
+    val refCount = thread.referenceProducts.size
 
-    Box(
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
+        border = androidx.compose.foundation.BorderStroke(1.dp, ChatTokens.listCardBorder),
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color.White)
-            .border(1.dp, CandyColors.divider, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
-            .padding(14.dp)
+            .semantics {
+                role = Role.Button
+                contentDescription = "Cuộc trò chuyện: ${thread.title}, ${thread.primaryProduct.name}, ${thread.previewText ?: ""}"
+            }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // Thumbnail 56dp
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(CandyColors.Chat.searchFieldBg),
-                contentAlignment = Alignment.Center
-            ) {
-                if (thread.mode == ThreadMode.ITEM) {
-                    Image(
-                        painter = painterResource(id = R.drawable.chanko_neutral),
-                        contentDescription = "Item Chat",
-                        modifier = Modifier.size(40.dp)
-                    )
-                } else {
-                    ChankoIcon(
-                        id = ChankoIconId.SYS_01,
-                        contentDescription = "Free Chat",
-                        size = 28.dp
-                    )
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Primary Thumbnail 56dp + Reference Badge +N (CL-GAP-01)
+            Box(modifier = Modifier.size(56.dp)) {
+                val thumbRes = thread.primaryProduct.thumbnailResId
+                    ?: getProductThumbnailResId(thread.primaryProduct.thumbnailUrl)
+                Image(
+                    painter = painterResource(id = thumbRes),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(ChatTokens.grayIconBg)
+                )
+
+                // Badge +N (CL-GAP-01)
+                if (refCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(ChatTokens.primaryTextAndCTA)
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                            .semantics { contentDescription = "Kèm $refCount sản phẩm so sánh" }
+                    ) {
+                        Text(
+                            text = "+$refCount",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            // Nội dung chính
+            // Body
             Column(modifier = Modifier.weight(1f)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = thread.title,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = CandyColors.textPrimary,
+                        fontSize = 15.sp,
+                        color = ChatTokens.body,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
+                        modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = timeString,
-                        fontSize = 11.sp,
-                        color = CandyColors.mutedInk
+                        fontSize = 12.sp,
+                        color = ChatTokens.secondary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    text = thread.previewText ?: "Nhấn để tiếp tục trò chuyện...",
+                    text = thread.previewText ?: "Chưa có tin nhắn",
                     fontSize = 13.sp,
-                    color = CandyColors.mutedInk,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 18.sp
+                    color = ChatTokens.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Tag trạng thái
-                val (tagLabel, tagBg, tagText) = when {
-                    thread.isArchived -> Triple("Đã lưu trữ", CandyColors.Chat.tagArchivedBg, CandyColors.Chat.tagArchivedText)
-                    thread.itemStatus == ItemContextStatus.CONSIDERING -> Triple("Đang cân nhắc", CandyColors.Chat.tagConsideringBg, CandyColors.Chat.tagConsideringText)
-                    thread.itemStatus == ItemContextStatus.READY -> Triple("Chờ xem lại", CandyColors.Chat.tagReadyBg, CandyColors.Chat.tagReadyText)
-                    thread.itemStatus == ItemContextStatus.PURCHASED -> Triple("Đã mua", CandyColors.Chat.tagPurchasedBg, CandyColors.Chat.tagPurchasedText)
-                    else -> Triple("Tự do", CandyColors.Chat.tagFreeformBg, CandyColors.brandPurple)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(tagBg)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                // Price and Cooling-off status
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = tagLabel,
-                        fontSize = 10.sp,
+                        text = formatVndPrice(thread.primaryProduct.price),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = tagText
+                        color = ChatTokens.primaryTextAndCTA
                     )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (thread.primaryProduct.isPrimaryDeleted) {
+                        Text(
+                            text = "Món chính đã xóa",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = ChatTokens.alertRed
+                        )
+                    } else if (cooling != null) {
+                        val coolingLabel = when (cooling.status) {
+                            CoolingOffStatus.ELAPSED -> "Sẵn sàng xem xét"
+                            CoolingOffStatus.ACTIVE -> "Đang hạ nhiệt"
+                            CoolingOffStatus.UNKNOWN -> "Chưa rõ hạ nhiệt"
+                        }
+                        val coolingColor = when (cooling.status) {
+                            CoolingOffStatus.ELAPSED -> ChatTokens.coolingElapsedText
+                            CoolingOffStatus.ACTIVE -> ChatTokens.primaryTextAndCTA
+                            CoolingOffStatus.UNKNOWN -> ChatTokens.secondary
+                        }
+                        Text(
+                            text = "• $coolingLabel",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = coolingColor
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Nút More
-            IconButton(
-                onClick = onOptionsClick,
-                modifier = Modifier.size(36.dp)
+            // More Options Menu button (>= 48dp target)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onOptionsClick)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = "Tùy chọn cho đoạn chat ${thread.title}"
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                ChankoIcon(
-                    id = ChankoIconId.ACT_10,
-                    contentDescription = "Tùy chọn"
+                Image(
+                    painter = painterResource(id = R.drawable.chat_more_default),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

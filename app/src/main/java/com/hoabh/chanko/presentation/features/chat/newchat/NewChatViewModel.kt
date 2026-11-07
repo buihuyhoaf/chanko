@@ -1,51 +1,36 @@
 package com.hoabh.chanko.presentation.features.chat.newchat
 
 import androidx.lifecycle.viewModelScope
-import com.hoabh.chanko.domain.model.CooldownItem
-import com.hoabh.chanko.domain.repository.ItemRepository
+import com.hoabh.chanko.domain.chat.model.ChatThread
+import com.hoabh.chanko.domain.chat.model.ProductSnapshot
+import com.hoabh.chanko.domain.chat.repository.ChatRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class NewChatMode {
-    FREE,
-    ITEM
-}
-
 data class NewChatUiState(
-    val selectedMode: NewChatMode = NewChatMode.FREE,
-    val items: List<CooldownItem> = emptyList(),
-    val filteredItems: List<CooldownItem> = emptyList(),
-    val selectedItem: CooldownItem? = null,
+    val products: List<ProductSnapshot> = emptyList(),
+    val filteredProducts: List<ProductSnapshot> = emptyList(),
+    val selectedProduct: ProductSnapshot? = null,
     val searchQuery: String = "",
     val isLoading: Boolean = false,
+    val existingActiveThread: ChatThread? = null,
+    val archivedThreads: List<ChatThread> = emptyList(),
+    val showHistoryDialog: Boolean = false,
     val errorMessage: String? = null
 ) {
-    val canStartChat: Boolean
-        get() = when (selectedMode) {
-            NewChatMode.FREE -> true
-            NewChatMode.ITEM -> selectedItem != null
-        }
-
-    val ctaButtonText: String
-        get() = when (selectedMode) {
-            NewChatMode.FREE -> "Bắt đầu trò chuyện"
-            NewChatMode.ITEM -> {
-                val item = selectedItem
-                if (item != null) "Trò chuyện về ${item.name}" else "Chọn một món đồ"
-            }
-        }
+    val canStartChat: Boolean get() = selectedProduct != null
 }
 
 sealed interface NewChatUiEffect {
-    data class NavigateToChatDetail(
-        val threadId: String? = null,
-        val contextMode: String, // "FREE" or "ITEM"
-        val itemId: String? = null,
-        val itemName: String? = null,
-        val itemPrice: Long? = null
+    data class NavigateToExistingChat(val threadId: String) : NewChatUiEffect
+    data class NavigateToNewDraftChat(
+        val productId: String,
+        val productName: String,
+        val productPrice: Long,
+        val thumbnailUrl: String? = null
     ) : NewChatUiEffect
     data object NavigateToMyItems : NewChatUiEffect
     data object Close : NewChatUiEffect
@@ -53,25 +38,25 @@ sealed interface NewChatUiEffect {
 
 @HiltViewModel
 class NewChatViewModel @Inject constructor(
-    private val itemRepository: ItemRepository
+    private val chatRepository: ChatRepository
 ) : BaseViewModel<NewChatUiState, NewChatUiEffect>(NewChatUiState(isLoading = true)) {
 
     init {
-        loadItems()
+        loadEligibleProducts()
     }
 
-    private fun loadItems() {
+    private fun loadEligibleProducts() {
         viewModelScope.launch {
-            itemRepository.getActiveItems()
+            chatRepository.getEligibleProducts()
                 .catch { e ->
                     updateState { it.copy(isLoading = false, errorMessage = e.message) }
                 }
-                .collect { items ->
+                .collect { products ->
                     updateState { state ->
-                        val filtered = filterItems(items, state.searchQuery)
+                        val filtered = filterProducts(products, state.searchQuery)
                         state.copy(
-                            items = items,
-                            filteredItems = filtered,
+                            products = products,
+                            filteredProducts = filtered,
                             isLoading = false
                         )
                     }
@@ -79,45 +64,77 @@ class NewChatViewModel @Inject constructor(
         }
     }
 
-    fun selectMode(mode: NewChatMode) {
-        updateState { it.copy(selectedMode = mode) }
+    private fun filterProducts(products: List<ProductSnapshot>, query: String): List<ProductSnapshot> {
+        if (query.isBlank()) return products
+        val q = query.trim().lowercase()
+        return products.filter {
+            it.name.lowercase().contains(q) || it.productId.lowercase().contains(q)
+        }
     }
 
     fun updateSearchQuery(query: String) {
         updateState { state ->
             state.copy(
                 searchQuery = query,
-                filteredItems = filterItems(state.items, query)
+                filteredProducts = filterProducts(state.products, query)
             )
         }
     }
 
-    fun selectItem(item: CooldownItem) {
-        updateState { it.copy(selectedItem = item) }
+    fun selectProduct(product: ProductSnapshot) {
+        updateState { it.copy(selectedProduct = product) }
     }
 
     fun startChat() {
-        val state = currentState
-        when (state.selectedMode) {
-            NewChatMode.FREE -> {
-                sendEffect(
-                    NewChatUiEffect.NavigateToChatDetail(
-                        contextMode = "FREE"
+        val product = currentState.selectedProduct ?: return
+        viewModelScope.launch {
+            val existing = chatRepository.findActiveThreadForProduct(product.productId)
+            val archived = chatRepository.getArchivedThreadsForProduct(product.productId)
+
+            if (existing != null) {
+                // CHAT-02, NC-GAP-01: Có chat cũ -> hiển thị dialog tùy chọn
+                updateState {
+                    it.copy(
+                        existingActiveThread = existing,
+                        archivedThreads = archived,
+                        showHistoryDialog = true
                     )
-                )
-            }
-            NewChatMode.ITEM -> {
-                val item = state.selectedItem ?: return
+                }
+            } else {
+                // NC-GAP-04: Mở draft mới
                 sendEffect(
-                    NewChatUiEffect.NavigateToChatDetail(
-                        contextMode = "ITEM",
-                        itemId = item.id.toString(),
-                        itemName = item.name,
-                        itemPrice = item.price
+                    NewChatUiEffect.NavigateToNewDraftChat(
+                        productId = product.productId,
+                        productName = product.name,
+                        productPrice = product.price,
+                        thumbnailUrl = product.thumbnailUrl
                     )
                 )
             }
         }
+    }
+
+    fun onContinueExistingChat() {
+        val existing = currentState.existingActiveThread ?: return
+        updateState { it.copy(showHistoryDialog = false) }
+        sendEffect(NewChatUiEffect.NavigateToExistingChat(existing.id))
+    }
+
+    fun onCreateNewThreadAnyway() {
+        val product = currentState.selectedProduct ?: return
+        updateState { it.copy(showHistoryDialog = false) }
+        sendEffect(
+            NewChatUiEffect.NavigateToNewDraftChat(
+                productId = product.productId,
+                productName = product.name,
+                productPrice = product.price,
+                thumbnailUrl = product.thumbnailUrl
+            )
+        )
+    }
+
+    fun onDismissHistoryDialog() {
+        updateState { it.copy(showHistoryDialog = false) }
     }
 
     fun onNavigateToMyItems() {
@@ -126,10 +143,5 @@ class NewChatViewModel @Inject constructor(
 
     fun onClose() {
         sendEffect(NewChatUiEffect.Close)
-    }
-
-    private fun filterItems(items: List<CooldownItem>, query: String): List<CooldownItem> {
-        if (query.isBlank()) return items
-        return items.filter { it.name.contains(query, ignoreCase = true) }
     }
 }
