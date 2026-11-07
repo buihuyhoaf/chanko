@@ -173,6 +173,37 @@ private object CandyPalette {
     val White = Color(0xFFFFFFFF)
     val BlackShadow14 = Color(0x14000000)
 
+    // Chat v2.2 Palette (Chanko-Chat-UI-v2.2)
+    val ChatPrimary = Color(0xFF8965F6)
+    val ChatPrimaryCTA = Color(0xFF7043D6)
+    val ChatBody = Color(0xFF292238)
+    val ChatSecondary = Color(0xFF62586F)
+    val ChatBgStart = Color(0xFFF5F0FF)
+    val ChatBgEnd = Color(0xFFFFF1F7)
+    val ChatScreenBg = Color(0xFFFAF8FC)
+    val ChatUserBubble = Color(0xFFEEE6FF)
+    val ChatBubbleBorder = Color(0xFFEFE9F8)
+    val ChatCardBorder = Color(0xFFECE6F5)
+    val ChatDivider = Color(0xFFE8E5EE)
+    val ChatAlertRed = Color(0xFF9E4054)
+    val ChatCoolingElapsedBg = Color(0xFFE6F9F0)
+    val ChatCoolingElapsedText = Color(0xFF16794C)
+    val ChatCoolingActiveBorder = Color(0xFFE2D6F5)
+    val ChatNeutralMuted = Color(0xFFF0EDF5)
+    val ChatGrayIconBg = Color(0xFFF7F5FA)
+    val ChatCardDeletedBg = Color(0xFFF9F8FA)
+    val ChatCardBorderDeleted = Color(0xFFE5E2EA)
+    val ChatComposerInputBg = Color(0xFFF6F3F9)
+    val ChatDisabledBg = Color(0xFFF8F7FA)
+    val ChatDisabledBorder = Color(0xFFEBE7F2)
+    val ChatRefBorder = Color(0xFFDCCFF7)
+    val ChatSendDisabled = Color(0xFFEAE5F2)
+    val ChatIndicatorTrack = Color(0xFFE8E2F2)
+    val ChatIndicatorUnknown = Color(0xFFB5AFBF)
+    val ChatRadioUnselected = Color(0xFFC7BFD6)
+    val ChatListCardBorder = Color(0xFFEEEBF4)
+    val ChatSnapshotCardBg = Color(0xFFF9F7FC)
+
     // Home v2.0 Palette (DESIGN-TOKENS.json & reference/home-v2-approved.png)
     val CandyOrange400 = Color(0xFFFFB665)
     val CandyOrange600 = Color(0xFFF59145)
@@ -435,6 +466,41 @@ object CandyColors {
 
     /** Feature tokens for Chat screens, bubbles, and sheets */
     object Chat {
+        // Chat v2.2 Semantic Tokens (Chanko-Chat-UI-v2.2)
+        val primary = CandyPalette.ChatPrimary
+        val primaryTextAndCTA = CandyPalette.ChatPrimaryCTA
+        val body = CandyPalette.ChatBody
+        val secondary = CandyPalette.ChatSecondary
+        val surface = CandyPalette.White
+        val backgroundStart = CandyPalette.ChatBgStart
+        val backgroundEnd = CandyPalette.ChatBgEnd
+        val screenBg = CandyPalette.ChatScreenBg
+        val userBubble = CandyPalette.ChatUserBubble
+        val chankoBubble = CandyPalette.White
+        val bubbleBorder = CandyPalette.ChatBubbleBorder
+        val cardBorder = CandyPalette.ChatCardBorder
+        val divider = CandyPalette.ChatDivider
+        val alertRed = CandyPalette.ChatAlertRed
+        val coolingElapsedBg = CandyPalette.ChatCoolingElapsedBg
+        val coolingElapsedText = CandyPalette.ChatCoolingElapsedText
+        val coolingActiveBg = CandyPalette.Lavender30
+        val coolingActiveBorder = CandyPalette.ChatCoolingActiveBorder
+        val neutralMuted = CandyPalette.ChatNeutralMuted
+        val grayIconBg = CandyPalette.ChatGrayIconBg
+        val cardDeletedBg = CandyPalette.ChatCardDeletedBg
+        val cardBorderDeleted = CandyPalette.ChatCardBorderDeleted
+        val composerInputBg = CandyPalette.ChatComposerInputBg
+        val disabledBg = CandyPalette.ChatDisabledBg
+        val disabledBorder = CandyPalette.ChatDisabledBorder
+        val refBorder = CandyPalette.ChatRefBorder
+        val sendDisabled = CandyPalette.ChatSendDisabled
+        val indicatorTrack = CandyPalette.ChatIndicatorTrack
+        val indicatorUnknown = CandyPalette.ChatIndicatorUnknown
+        val radioUnselected = CandyPalette.ChatRadioUnselected
+        val listCardBorder = CandyPalette.ChatListCardBorder
+        val snapshotCardBg = CandyPalette.ChatSnapshotCardBg
+
+        // Legacy compatibility
         val userBubbleBg = CandyPalette.Lavender110
         val userBubbleBorder = CandyPalette.Lavender250
         val userBubbleText = CandyPalette.Ink800

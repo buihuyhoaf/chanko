@@ -25,8 +25,14 @@ class FakeChatDao : ChatDao {
     override suspend fun getThreadByIdDirect(threadId: String): ChatThreadEntity? =
         threadsFlow.value.find { it.id == threadId }
 
+    override suspend fun findActiveThreadForProduct(productId: String): ChatThreadEntity? =
+        threadsFlow.value.find { it.primaryProductId == productId && !it.isArchived }
+
+    override suspend fun getArchivedThreadsForProduct(productId: String): List<ChatThreadEntity> =
+        threadsFlow.value.filter { it.primaryProductId == productId && it.isArchived }
+
     override fun getMessagesByThreadId(threadId: String): Flow<List<ChatMessageEntity>> =
-        messagesFlow.map { list -> list.filter { it.threadId == threadId }.sortedBy { it.timestamp } }
+        messagesFlow.map { list -> list.filter { it.threadId == threadId }.sortedBy { it.createdAt } }
 
     override suspend fun insertOrUpdateThread(thread: ChatThreadEntity) {
         val current = threadsFlow.value.toMutableList()
@@ -84,13 +90,13 @@ class FakeChatDao : ChatDao {
 
     override suspend fun archiveThread(threadId: String, updatedAt: Long) {
         threadsFlow.value = threadsFlow.value.map {
-            if (it.id == threadId) it.copy(isArchived = true, updatedAt = updatedAt) else it
+            if (it.id == threadId) it.copy(isArchived = true, readOnlyReason = "ARCHIVED", updatedAt = updatedAt) else it
         }
     }
 
     override suspend fun restoreThread(threadId: String, updatedAt: Long) {
         threadsFlow.value = threadsFlow.value.map {
-            if (it.id == threadId) it.copy(isArchived = false, updatedAt = updatedAt) else it
+            if (it.id == threadId) it.copy(isArchived = false, readOnlyReason = "NONE", updatedAt = updatedAt) else it
         }
     }
 
@@ -100,27 +106,21 @@ class FakeChatDao : ChatDao {
         }
     }
 
-    override suspend fun bindItemToThread(
-        threadId: String,
-        itemId: String,
-        itemName: String,
-        price: Long,
-        updatedAt: Long
-    ) {
+    override suspend fun updateReferences(threadId: String, referencesJson: String, updatedAt: Long) {
         threadsFlow.value = threadsFlow.value.map {
-            if (it.id == threadId) it.copy(
-                mode = "ITEM",
-                linkedItemId = itemId,
-                linkedItemName = itemName,
-                linkedItemPriceVnd = price,
-                contextRevision = it.contextRevision + 1,
-                updatedAt = updatedAt
-            ) else it
+            if (it.id == threadId) it.copy(referenceProductsJson = referencesJson, updatedAt = updatedAt) else it
+        }
+    }
+
+    override suspend fun updateReadOnlyReason(threadId: String, reason: String, updatedAt: Long) {
+        threadsFlow.value = threadsFlow.value.map {
+            if (it.id == threadId) it.copy(readOnlyReason = reason, updatedAt = updatedAt) else it
         }
     }
 
     override suspend fun deleteThread(threadId: String) {
         threadsFlow.value = threadsFlow.value.filterNot { it.id == threadId }
+        messagesFlow.value = messagesFlow.value.filterNot { it.threadId == threadId }
     }
 
     override suspend fun deleteMessagesByThreadId(threadId: String) {

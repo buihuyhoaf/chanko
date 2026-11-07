@@ -1,10 +1,6 @@
 package com.hoabh.chanko.presentation.features.chat.newchat
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,21 +12,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
-import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -47,33 +42,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hoabh.chanko.domain.model.CooldownItem
-import com.hoabh.chanko.ui.theme.CandyColors
-import kotlinx.coroutines.flow.collectLatest
+import com.hoabh.chanko.R
+import com.hoabh.chanko.domain.chat.model.ProductSnapshot
+import com.hoabh.chanko.presentation.features.chat.components.formatVndPrice
+import com.hoabh.chanko.presentation.features.chat.components.getProductThumbnailResId
+import com.hoabh.chanko.ui.theme.ChatTokens
 
 @Composable
 fun NewChatScreen(
     viewModel: NewChatViewModel,
-    onNavigateToChatDetail: (contextMode: String, itemId: String?, itemName: String?, itemPrice: Long?) -> Unit,
+    onNavigateToChatDetail: (threadId: String?, productId: String?, productName: String?, productPrice: Long?, thumbnailUrl: String?) -> Unit,
     onNavigateToMyItems: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(viewModel) {
-        viewModel.effect.collectLatest { effect ->
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
             when (effect) {
-                is NewChatUiEffect.NavigateToChatDetail -> {
+                is NewChatUiEffect.NavigateToExistingChat -> {
+                    onNavigateToChatDetail(effect.threadId, null, null, null, null)
+                }
+                is NewChatUiEffect.NavigateToNewDraftChat -> {
                     onNavigateToChatDetail(
-                        effect.contextMode,
-                        effect.itemId,
-                        effect.itemName,
-                        effect.itemPrice
+                        null,
+                        effect.productId,
+                        effect.productName,
+                        effect.productPrice,
+                        effect.thumbnailUrl
                     )
                 }
                 is NewChatUiEffect.NavigateToMyItems -> onNavigateToMyItems()
@@ -82,34 +90,9 @@ fun NewChatScreen(
         }
     }
 
-    NewChatContent(
-        state = state,
-        onSelectMode = viewModel::selectMode,
-        onSearchQueryChange = viewModel::updateSearchQuery,
-        onSelectItem = viewModel::selectItem,
-        onStartChat = viewModel::startChat,
-        onNavigateToMyItems = viewModel::onNavigateToMyItems,
-        onClose = viewModel::onClose,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun NewChatContent(
-    state: NewChatUiState,
-    onSelectMode: (NewChatMode) -> Unit,
-    onSearchQueryChange: (String) -> Unit,
-    onSelectItem: (CooldownItem) -> Unit,
-    onStartChat: () -> Unit,
-    onNavigateToMyItems: () -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scrollState = rememberScrollState()
-
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = CandyColors.background
+        color = ChatTokens.screenBg
     ) {
         Column(
             modifier = Modifier
@@ -117,396 +100,310 @@ fun NewChatContent(
                 .statusBarsPadding()
         ) {
             // Header
-            NewChatHeader(onClose = onClose)
-
-            // Scrollable Body
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Card 1: Trò chuyện tự do
-                ModeSelectionCard(
-                    title = "Trò chuyện tự do",
-                    description = "Hỏi đáp, tâm sự chi tiêu, nhận lời khuyên can chung từ Chanko.",
-                    icon = {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(CandyColors.backgroundLavender),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            ChankoIcon(
-                                id = ChankoIconId.SYS_01,
-                                contentDescription = null,
-                                size = 26.dp
-                            )
-                        }
-                    },
-                    isSelected = state.selectedMode == NewChatMode.FREE,
-                    onClick = { onSelectMode(NewChatMode.FREE) }
-                )
-
-                // Card 2: Về một món đồ
-                ModeSelectionCard(
-                    title = "Về một món đồ",
-                    description = "Thẩm định một món đồ trong danh sách để Chanko phân tích kỹ lưỡng.",
-                    icon = {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(CandyColors.Chat.contextHeaderBg),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            ChankoIcon(
-                                id = ChankoIconId.ITM_03,
-                                contentDescription = null,
-                                size = 26.dp
-                            )
-                        }
-                    },
-                    isSelected = state.selectedMode == NewChatMode.ITEM,
-                    onClick = { onSelectMode(NewChatMode.ITEM) }
-                )
-
-                // Inline Item Picker (chỉ xuất hiện khi chọn mode ITEM)
-                AnimatedVisibility(
-                    visible = state.selectedMode == NewChatMode.ITEM,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onClose)
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = "Đóng màn hình tạo đoạn chat mới"
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    InlineItemPickerSection(
-                        items = state.filteredItems,
-                        allItemsCount = state.items.size,
-                        selectedItem = state.selectedItem,
-                        searchQuery = state.searchQuery,
-                        isLoading = state.isLoading,
-                        onSearchQueryChange = onSearchQueryChange,
-                        onSelectItem = onSelectItem,
-                        onNavigateToMyItems = onNavigateToMyItems
+                    Image(
+                        painter = painterResource(id = R.drawable.chat_close_default),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+                Spacer(modifier = Modifier.width(8.dp))
 
-            // Fixed Footer CTA (Tuyệt đối không có composer)
-            NewChatFixedFooter(
-                ctaText = state.ctaButtonText,
-                isEnabled = state.canStartChat,
-                onStartChat = onStartChat
-            )
-        }
-    }
-}
-
-@Composable
-private fun NewChatHeader(
-    onClose: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = onClose,
-            modifier = Modifier.size(48.dp)
-        ) {
-            ChankoIcon(
-                id = ChankoIconId.ACT_03,
-                contentDescription = "Đóng"
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Column {
-            Text(
-                text = "Đoạn chat mới",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = CandyColors.textPrimary
-            )
-            Text(
-                text = "Chọn cách bắt đầu",
-                fontSize = 13.sp,
-                color = CandyColors.mutedInk
-            )
-        }
-    }
-}
-
-@Composable
-private fun ModeSelectionCard(
-    title: String,
-    description: String,
-    icon: @Composable () -> Unit,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val borderColor = if (isSelected) CandyColors.brandPurple else CandyColors.divider
-    val borderWidth = if (isSelected) 2.dp else 1.dp
-    val backgroundColor = if (isSelected) CandyColors.backgroundLavender.copy(alpha = 0.35f) else Color.White
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .border(borderWidth, borderColor, RoundedCornerShape(20.dp))
-            .background(backgroundColor)
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        icon()
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = CandyColors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = description,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
-                color = CandyColors.mutedInk
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = CandyColors.brandPurple,
-                unselectedColor = CandyColors.divider
-            )
-        )
-    }
-}
-
-@Composable
-private fun InlineItemPickerSection(
-    items: List<CooldownItem>,
-    allItemsCount: Int,
-    selectedItem: CooldownItem?,
-    searchQuery: String,
-    isLoading: Boolean,
-    onSearchQueryChange: (String) -> Unit,
-    onSelectItem: (CooldownItem) -> Unit,
-    onNavigateToMyItems: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Chọn món đồ muốn thẩm định",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = CandyColors.textPrimary
-        )
-
-        // Search field
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            placeholder = { Text("Tìm món đồ...", fontSize = 14.sp, color = CandyColors.mutedInk) },
-            leadingIcon = {
-                ChankoIcon(
-                    id = ChankoIconId.ACT_07,
-                    contentDescription = null,
-                    size = 20.dp
-                )
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = CandyColors.brandPurple,
-                unfocusedBorderColor = CandyColors.divider,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
-            )
-        )
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = CandyColors.brandPurple,
-                    modifier = Modifier.size(32.dp)
+                Text(
+                    text = "Bắt đầu cuộc trò chuyện",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ChatTokens.body
                 )
             }
-        } else if (items.isEmpty()) {
-            Box(
+
+            // Subtitle & Search
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White)
-                    .border(1.dp, CandyColors.divider, RoundedCornerShape(16.dp))
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = if (allItemsCount == 0) {
-                            "Chưa có món đồ nào đang cân nhắc"
-                        } else {
-                            "Không tìm thấy món đồ phù hợp"
-                        },
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = CandyColors.mutedInk
-                    )
+                Text(
+                    text = "Chọn món đồ bạn muốn thẩm định hoặc tâm sự cùng Chanko:",
+                    fontSize = 13.sp,
+                    color = ChatTokens.secondary
+                )
 
-                    if (allItemsCount == 0) {
-                        TextButton(onClick = onNavigateToMyItems) {
-                            Text(
-                                text = "Xem danh sách món đồ",
-                                color = CandyColors.brandPurple,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            ChankoIcon(
-                                id = ChankoIconId.ACT_18,
-                                contentDescription = null,
-                                size = 16.dp
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = state.searchQuery,
+                    onValueChange = viewModel::updateSearchQuery,
+                    placeholder = { Text("Tìm món đồ trong danh sách…", fontSize = 14.sp, color = ChatTokens.secondary) },
+                    leadingIcon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.chat_search_default),
+                            contentDescription = "Tìm kiếm",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedBorderColor = ChatTokens.primaryTextAndCTA,
+                        unfocusedBorderColor = ChatTokens.divider
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Body: Product List or Empty State (NC-GAP-02, NC-GAP-03)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                if (state.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = ChatTokens.primaryTextAndCTA)
+                    }
+                } else if (state.filteredProducts.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = if (state.searchQuery.isNotEmpty())
+                                "Không tìm thấy món đồ phù hợp"
+                            else
+                                "Chưa có món đồ nào trong danh sách",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = ChatTokens.body
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Hãy thêm món đồ bạn đang cân nhắc mua để Chanko giúp bạn hạ nhiệt nhé!",
+                            fontSize = 13.sp,
+                            color = ChatTokens.secondary,
+                            lineHeight = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = viewModel::onNavigateToMyItems,
+                            colors = ButtonDefaults.buttonColors(containerColor = ChatTokens.primaryTextAndCTA),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.heightIn(min = 48.dp)
+                        ) {
+                            Text(text = "Thêm món đồ ngay", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 4.dp,
+                            bottom = 16.dp
+                        )
+                    ) {
+                        items(state.filteredProducts, key = { it.productId }) { product ->
+                            val isSelected = state.selectedProduct?.productId == product.productId
+                            ProductSelectionCard(
+                                product = product,
+                                isSelected = isSelected,
+                                onClick = { viewModel.selectProduct(product) }
                             )
                         }
                     }
                 }
             }
-        } else {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items.forEach { item ->
-                    val isChecked = selectedItem?.id == item.id
-                    val itemBorderColor = if (isChecked) CandyColors.brandPurple else CandyColors.divider
-                    val itemBg = if (isChecked) CandyColors.backgroundLavender.copy(alpha = 0.25f) else Color.White
 
-                    Row(
+            // Bottom CTA Button (min 56dp)
+            Surface(
+                color = Color.White,
+                shadowElevation = 8.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Button(
+                        onClick = viewModel::startChat,
+                        enabled = state.canStartChat,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ChatTokens.primaryTextAndCTA,
+                            disabledContainerColor = ChatTokens.divider
+                        ),
+                        shape = RoundedCornerShape(18.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, itemBorderColor, RoundedCornerShape(16.dp))
-                            .background(itemBg)
-                            .clickable { onSelectItem(item) }
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .heightIn(min = 56.dp)
                     ) {
-                        // Thumbnail icon
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(CandyColors.backgroundLavender),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            ChankoIcon(
-                                id = ChankoIconId.ITM_03,
-                                contentDescription = null,
-                                size = 22.dp
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = item.name,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = CandyColors.textPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "%,d ₫".format(item.price),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = CandyColors.brandPurple
-                            )
-                        }
-
-                        RadioButton(
-                            selected = isChecked,
-                            onClick = { onSelectItem(item) },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = CandyColors.brandPurple,
-                                unselectedColor = CandyColors.divider
-                            )
+                        Text(
+                            text = if (state.selectedProduct != null)
+                                "Trò chuyện về ${state.selectedProduct!!.name}"
+                            else
+                                "Chọn một món đồ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (state.canStartChat) Color.White else ChatTokens.secondary
                         )
                     }
                 }
             }
         }
     }
+
+    // Dialog: History Found (CHAT-02, NC-GAP-01)
+    if (state.showHistoryDialog) {
+        val activeThread = state.existingActiveThread
+        val archivedCount = state.archivedThreads.size
+        AlertDialog(
+            onDismissRequest = viewModel::onDismissHistoryDialog,
+            title = {
+                Text(
+                    text = "Món đồ đã có cuộc trò chuyện",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    color = ChatTokens.body
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Bạn đã có đoạn chat '${activeThread?.title ?: ""}' đang hoạt động về món đồ này.",
+                        fontSize = 14.sp,
+                        color = ChatTokens.body,
+                        lineHeight = 20.sp
+                    )
+                    if (archivedCount > 0) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "(Ngoài ra có $archivedCount đoạn chat về món này trong kho lưu trữ)",
+                            fontSize = 12.sp,
+                            color = ChatTokens.secondary
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::onContinueExistingChat,
+                    colors = ButtonDefaults.buttonColors(containerColor = ChatTokens.primaryTextAndCTA),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Tiếp tục đoạn chat cũ", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::onCreateNewThreadAnyway) {
+                    Text("Tạo đoạn chat mới", color = ChatTokens.primaryTextAndCTA)
+                }
+            }
+        )
+    }
 }
 
+/**
+ * ProductSelectionCard: Thẻ chọn 1 sản phẩm chính (NC-GAP-02) với semantics RadioButton.
+ * Card min 88dp, thumbnail 64dp.
+ */
 @Composable
-private fun NewChatFixedFooter(
-    ctaText: String,
-    isEnabled: Boolean,
-    onStartChat: () -> Unit
+fun ProductSelectionCard(
+    product: ProductSnapshot,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 8.dp
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) ChatTokens.backgroundStart else Color.White,
+        border = androidx.compose.foundation.BorderStroke(
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected) ChatTokens.primary else ChatTokens.disabledBorder
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 88.dp)
+            .clickable(onClick = onClick)
+            .semantics {
+                role = Role.RadioButton
+                selected = isSelected
+                contentDescription = "${product.name}, giá ${formatVndPrice(product.price)}"
+            }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = onStartChat,
-                enabled = isEnabled,
+            val thumbRes = product.thumbnailResId ?: getProductThumbnailResId(product.thumbnailUrl)
+            Image(
+                painter = painterResource(id = thumbRes),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CandyColors.brandPurple,
-                    disabledContainerColor = CandyColors.divider
-                )
-            ) {
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(ChatTokens.grayIconBg)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = ctaText,
-                    fontSize = 16.sp,
+                    text = product.name,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isEnabled) Color.White else CandyColors.mutedInk,
+                    color = ChatTokens.body,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = formatVndPrice(product.price),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = ChatTokens.primaryTextAndCTA
+                )
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            RadioButton(
+                selected = isSelected,
+                onClick = null,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = ChatTokens.primaryTextAndCTA,
+                    unselectedColor = ChatTokens.radioUnselected
+                )
+            )
         }
     }
 }

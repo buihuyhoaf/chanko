@@ -26,7 +26,13 @@ interface ChatDao {
     @Query("SELECT * FROM chat_threads WHERE id = :threadId LIMIT 1")
     suspend fun getThreadByIdDirect(threadId: String): ChatThreadEntity?
 
-    @Query("SELECT * FROM chat_messages WHERE threadId = :threadId ORDER BY timestamp ASC")
+    @Query("SELECT * FROM chat_threads WHERE primaryProductId = :productId AND isArchived = 0 ORDER BY updatedAt DESC LIMIT 1")
+    suspend fun findActiveThreadForProduct(productId: String): ChatThreadEntity?
+
+    @Query("SELECT * FROM chat_threads WHERE primaryProductId = :productId AND isArchived = 1 ORDER BY updatedAt DESC")
+    suspend fun getArchivedThreadsForProduct(productId: String): List<ChatThreadEntity>
+
+    @Query("SELECT * FROM chat_messages WHERE threadId = :threadId ORDER BY createdAt ASC")
     fun getMessagesByThreadId(threadId: String): Flow<List<ChatMessageEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -53,8 +59,11 @@ interface ChatDao {
     @Query("UPDATE chat_threads SET previewText = :previewText, updatedAt = :updatedAt WHERE id = :threadId")
     suspend fun updateThreadPreview(threadId: String, previewText: String, updatedAt: Long = System.currentTimeMillis())
 
-    @Query("UPDATE chat_threads SET mode = 'ITEM', linkedItemId = :itemId, linkedItemName = :itemName, linkedItemPriceVnd = :price, contextRevision = contextRevision + 1, updatedAt = :updatedAt WHERE id = :threadId")
-    suspend fun bindItemToThread(threadId: String, itemId: String, itemName: String, price: Long, updatedAt: Long = System.currentTimeMillis())
+    @Query("UPDATE chat_threads SET referenceProductsJson = :referencesJson, updatedAt = :updatedAt WHERE id = :threadId")
+    suspend fun updateReferences(threadId: String, referencesJson: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE chat_threads SET readOnlyReason = :reason, updatedAt = :updatedAt WHERE id = :threadId")
+    suspend fun updateReadOnlyReason(threadId: String, reason: String, updatedAt: Long = System.currentTimeMillis())
 
     @Query("DELETE FROM chat_threads WHERE id = :threadId")
     suspend fun deleteThread(threadId: String)

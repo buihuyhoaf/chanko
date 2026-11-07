@@ -2,8 +2,6 @@ package com.hoabh.chanko.presentation.features.chat.list
 
 import androidx.lifecycle.viewModelScope
 import com.hoabh.chanko.domain.chat.model.ChatThread
-import com.hoabh.chanko.domain.chat.model.ItemContextStatus
-import com.hoabh.chanko.domain.chat.model.ThreadFilter
 import com.hoabh.chanko.domain.chat.repository.ChatRepository
 import com.hoabh.chanko.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +13,6 @@ data class ChatListUiState(
     val activeThreads: List<ChatThread> = emptyList(),
     val archivedThreads: List<ChatThread> = emptyList(),
     val searchQuery: String = "",
-    val selectedFilter: ThreadFilter = ThreadFilter.ALL,
     val showArchived: Boolean = false,
     val isLoading: Boolean = false,
     val threadForOptions: ChatThread? = null,
@@ -29,31 +26,24 @@ data class ChatListUiState(
     val filteredThreads: List<ChatThread>
         get() {
             var list = threads
-            // Filter by search query
             if (searchQuery.isNotBlank()) {
                 val query = searchQuery.trim().lowercase()
                 list = list.filter {
                     it.title.lowercase().contains(query) ||
-                        (it.linkedItemName?.lowercase()?.contains(query) == true) ||
+                        it.primaryProduct.name.lowercase().contains(query) ||
                         (it.previewText?.lowercase()?.contains(query) == true)
                 }
             }
-            // Filter by status chips
-            list = when (selectedFilter) {
-                ThreadFilter.ALL -> list
-                ThreadFilter.CONSIDERING -> list.filter { it.itemStatus == ItemContextStatus.CONSIDERING }
-                ThreadFilter.READY -> list.filter { it.itemStatus == ItemContextStatus.READY }
-                ThreadFilter.PURCHASED -> list.filter { it.itemStatus == ItemContextStatus.PURCHASED }
-                ThreadFilter.ARCHIVED -> list.filter { it.isArchived }
-            }
-            return list
+            return list.sortedWith(
+                compareByDescending<ChatThread> { it.updatedAtEpochMillis }.thenByDescending { it.id }
+            )
         }
 }
 
 sealed interface ChatListUiEffect {
     data class NavigateToDetail(val threadId: String) : ChatListUiEffect
     data object NavigateToNewChat : ChatListUiEffect
-    data class NavigateToItemDetail(val itemId: String) : ChatListUiEffect
+    data class NavigateToItemDetail(val productId: String) : ChatListUiEffect
 }
 
 @HiltViewModel
@@ -68,8 +58,8 @@ class ChatListViewModel @Inject constructor(
     private fun observeThreads() {
         viewModelScope.launch {
             combine(
-                chatRepository.getActiveThreads(),
-                chatRepository.getArchivedThreads()
+                chatRepository.getThreads(isArchived = false),
+                chatRepository.getThreads(isArchived = true)
             ) { active, archived ->
                 Pair(active, archived)
             }.collect { (active, archived) ->
@@ -88,83 +78,78 @@ class ChatListViewModel @Inject constructor(
         updateState { it.copy(searchQuery = query) }
     }
 
-    fun onFilterSelected(filter: ThreadFilter) {
-        updateState {
-            if (filter == ThreadFilter.ARCHIVED) {
-                it.copy(selectedFilter = filter, showArchived = true)
-            } else {
-                it.copy(selectedFilter = filter, showArchived = false)
-            }
-        }
+    fun onToggleArchived(showArchived: Boolean) {
+        updateState { it.copy(showArchived = showArchived) }
     }
 
-    fun toggleShowArchived(showArchived: Boolean) {
-        updateState {
-            it.copy(
-                showArchived = showArchived,
-                selectedFilter = if (showArchived) ThreadFilter.ARCHIVED else ThreadFilter.ALL
-            )
-        }
+    fun onThreadClicked(threadId: String) {
+        sendEffect(ChatListUiEffect.NavigateToDetail(threadId))
     }
 
-    // Modal Actions
-    fun openOptions(thread: ChatThread) {
+    fun onNewChatClicked() {
+        sendEffect(ChatListUiEffect.NavigateToNewChat)
+    }
+
+    fun onOptionsClicked(thread: ChatThread) {
         updateState { it.copy(threadForOptions = thread) }
     }
 
-    fun closeOptions() {
+    fun onDismissOptions() {
         updateState { it.copy(threadForOptions = null) }
     }
 
-    fun openRenameDialog(thread: ChatThread) {
+    fun onRequestRename(thread: ChatThread) {
         updateState { it.copy(threadForOptions = null, threadForRename = thread) }
     }
 
-    fun closeRenameDialog() {
+    fun onDismissRename() {
         updateState { it.copy(threadForRename = null) }
     }
 
-    fun confirmRename(newTitle: String) {
+    fun onConfirmRename(newTitle: String) {
         val target = currentState.threadForRename ?: return
-        closeRenameDialog()
         viewModelScope.launch {
             chatRepository.renameThread(target.id, newTitle)
+            updateState { it.copy(threadForRename = null) }
         }
     }
 
-    fun openArchiveDialog(thread: ChatThread) {
+    fun onRequestArchive(thread: ChatThread) {
         updateState { it.copy(threadForOptions = null, threadForArchive = thread) }
     }
 
-    fun closeArchiveDialog() {
+    fun onDismissArchive() {
         updateState { it.copy(threadForArchive = null) }
     }
 
-    fun confirmArchive() {
+    fun onConfirmArchive() {
         val target = currentState.threadForArchive ?: return
-        closeArchiveDialog()
         viewModelScope.launch {
-            if (target.isArchived) {
-                chatRepository.restoreThread(target.id)
-            } else {
-                chatRepository.archiveThread(target.id)
-            }
+            chatRepository.archiveThread(target.id)
+            updateState { it.copy(threadForArchive = null) }
         }
     }
 
-    fun openDeleteDialog(thread: ChatThread) {
+    fun onRestoreThread(thread: ChatThread) {
+        viewModelScope.launch {
+            chatRepository.restoreThread(thread.id)
+            updateState { it.copy(threadForOptions = null) }
+        }
+    }
+
+    fun onRequestDelete(thread: ChatThread) {
         updateState { it.copy(threadForOptions = null, threadForDelete = thread) }
     }
 
-    fun closeDeleteDialog() {
+    fun onDismissDelete() {
         updateState { it.copy(threadForDelete = null) }
     }
 
-    fun confirmDelete() {
+    fun onConfirmDelete() {
         val target = currentState.threadForDelete ?: return
-        closeDeleteDialog()
         viewModelScope.launch {
             chatRepository.deleteThread(target.id)
+            updateState { it.copy(threadForDelete = null) }
         }
     }
 }

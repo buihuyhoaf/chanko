@@ -4,41 +4,50 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.hoabh.chanko.domain.chat.model.ChatMessage
 import com.hoabh.chanko.domain.chat.model.ChatThread
-import com.hoabh.chanko.domain.chat.model.DecisionVerdict
-import com.hoabh.chanko.domain.chat.model.ItemContextStatus
 import com.hoabh.chanko.domain.chat.model.MascotEmotion
 import com.hoabh.chanko.domain.chat.model.MessageSender
-import com.hoabh.chanko.domain.chat.model.ThreadMode
+import com.hoabh.chanko.domain.chat.model.MessageStatus
+import com.hoabh.chanko.domain.chat.model.ProductSnapshot
+import com.hoabh.chanko.domain.chat.model.ReadOnlyReason
+import org.json.JSONArray
+import org.json.JSONObject
 
 @Entity(tableName = "chat_threads")
 data class ChatThreadEntity(
     @PrimaryKey val id: String,
     val title: String,
-    val mode: String,
-    val linkedItemId: String?,
-    val linkedItemName: String?,
-    val linkedItemPriceVnd: Long?,
+    val primaryProductId: String,
+    val primaryProductName: String,
+    val primaryProductPrice: Long,
+    val primaryProductThumbnailUrl: String? = null,
+    val referenceProductsJson: String = "[]",
     val previewText: String? = null,
-    val itemStatus: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
-    val isArchived: Boolean,
-    val contextRevision: Int,
-    val cachedAt: Long
+    val isArchived: Boolean = false,
+    val readOnlyReason: String = "NONE",
+    val cachedAt: Long = System.currentTimeMillis()
 ) {
     fun toDomain(): ChatThread = ChatThread(
         id = id,
         title = title,
-        mode = if (mode == "ITEM") ThreadMode.ITEM else ThreadMode.FREE,
-        linkedItemId = linkedItemId,
-        linkedItemName = linkedItemName,
-        linkedItemPriceVnd = linkedItemPriceVnd,
-        previewText = previewText,
-        itemStatus = itemStatus?.let { runCatching { ItemContextStatus.valueOf(it) }.getOrNull() },
-        createdAt = createdAt,
-        updatedAt = updatedAt,
+        primaryProduct = ProductSnapshot(
+            productId = primaryProductId,
+            name = primaryProductName,
+            price = primaryProductPrice,
+            thumbnailUrl = primaryProductThumbnailUrl,
+            isPrimaryDeleted = readOnlyReason == "PRIMARY_DELETED"
+        ),
+        referenceProducts = referenceProductsJson.toProductSnapshotList(),
+        lastMessage = null, // Injected via repository when loading messages
+        updatedAtEpochMillis = updatedAt,
         isArchived = isArchived,
-        contextRevision = contextRevision
+        readOnlyReason = when (readOnlyReason) {
+            "ARCHIVED" -> ReadOnlyReason.ARCHIVED
+            "PRIMARY_DELETED" -> ReadOnlyReason.PRIMARY_DELETED
+            "OFFLINE" -> ReadOnlyReason.OFFLINE
+            else -> ReadOnlyReason.NONE
+        }
     )
 
     companion object {
@@ -46,16 +55,21 @@ data class ChatThreadEntity(
             ChatThreadEntity(
                 id = domain.id,
                 title = domain.title,
-                mode = domain.mode.name,
-                linkedItemId = domain.linkedItemId,
-                linkedItemName = domain.linkedItemName,
-                linkedItemPriceVnd = domain.linkedItemPriceVnd,
+                primaryProductId = domain.primaryProduct.productId,
+                primaryProductName = domain.primaryProduct.name,
+                primaryProductPrice = domain.primaryProduct.price,
+                primaryProductThumbnailUrl = domain.primaryProduct.thumbnailUrl,
+                referenceProductsJson = domain.referenceProducts.toJsonString(),
                 previewText = domain.previewText,
-                itemStatus = domain.itemStatus?.name,
                 createdAt = domain.createdAt,
-                updatedAt = domain.updatedAt,
+                updatedAt = domain.updatedAtEpochMillis,
                 isArchived = domain.isArchived,
-                contextRevision = domain.contextRevision,
+                readOnlyReason = when (domain.readOnlyReason) {
+                    ReadOnlyReason.ARCHIVED -> "ARCHIVED"
+                    ReadOnlyReason.PRIMARY_DELETED -> "PRIMARY_DELETED"
+                    ReadOnlyReason.OFFLINE -> "OFFLINE"
+                    ReadOnlyReason.NONE -> "NONE"
+                },
                 cachedAt = cachedAt
             )
     }
@@ -66,11 +80,12 @@ data class ChatMessageEntity(
     @PrimaryKey val id: String,
     val threadId: String,
     val sender: String,
-    val text: String,
-    val timestamp: Long,
-    val emotion: String,
-    val verdict: String?,
-    val cachedAt: Long
+    val content: String,
+    val productSnapshotsJson: String = "[]",
+    val createdAt: Long,
+    val emotion: String = "NEUTRAL",
+    val status: String = "SENT",
+    val cachedAt: Long = System.currentTimeMillis()
 ) {
     fun toDomain(): ChatMessage = ChatMessage(
         id = id,
@@ -80,11 +95,12 @@ data class ChatMessageEntity(
             "SYSTEM" -> MessageSender.SYSTEM
             else -> MessageSender.CHANKO
         },
-        text = text,
-        timestamp = timestamp,
+        content = content,
+        productSnapshots = productSnapshotsJson.toProductSnapshotList(),
+        createdAtEpochMillis = createdAt,
         emotion = runCatching { MascotEmotion.valueOf(emotion) }.getOrDefault(MascotEmotion.NEUTRAL),
-        verdict = verdict?.let { runCatching { DecisionVerdict.valueOf(it) }.getOrNull() },
-        isPending = false
+        status = runCatching { MessageStatus.valueOf(status) }.getOrDefault(MessageStatus.SENT),
+        isPending = status == "SENDING"
     )
 
     companion object {
@@ -93,11 +109,46 @@ data class ChatMessageEntity(
                 id = domain.id,
                 threadId = domain.threadId,
                 sender = domain.sender.name,
-                text = domain.text,
-                timestamp = domain.timestamp,
+                content = domain.content,
+                productSnapshotsJson = domain.productSnapshots.toJsonString(),
+                createdAt = domain.createdAtEpochMillis,
                 emotion = domain.emotion.name,
-                verdict = domain.verdict?.name,
+                status = domain.status.name,
                 cachedAt = cachedAt
             )
     }
+}
+
+private fun ProductSnapshot.toJson(): JSONObject = JSONObject().apply {
+    put("productId", productId)
+    put("name", name)
+    put("price", price)
+    put("thumbnailUrl", thumbnailUrl ?: "")
+    put("isPrimaryDeleted", isPrimaryDeleted)
+}
+
+private fun JSONObject.toProductSnapshot(): ProductSnapshot = ProductSnapshot(
+    productId = optString("productId", ""),
+    name = optString("name", ""),
+    price = optLong("price", 0L),
+    thumbnailUrl = optString("thumbnailUrl").takeIf { it.isNotEmpty() },
+    isPrimaryDeleted = optBoolean("isPrimaryDeleted", false)
+)
+
+private fun List<ProductSnapshot>.toJsonString(): String {
+    val arr = JSONArray()
+    forEach { arr.put(it.toJson()) }
+    return arr.toString()
+}
+
+private fun String?.toProductSnapshotList(): List<ProductSnapshot> {
+    if (isNullOrEmpty()) return emptyList()
+    return runCatching {
+        val arr = JSONArray(this)
+        val list = mutableListOf<ProductSnapshot>()
+        for (i in 0 until arr.length()) {
+            list.add(arr.getJSONObject(i).toProductSnapshot())
+        }
+        list
+    }.getOrDefault(emptyList())
 }
