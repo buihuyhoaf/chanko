@@ -25,8 +25,23 @@ object CandyBudgetThemes {
     val labelTextSize = 16.sp
     val monthTextSize = 24.sp
 
+    // Budget v3 Compact Card Tokens (04-COMPOSE-GUIDE.md)
+    val compactCardRadius = 20.dp
+    val compactAmountTextSize = 16.sp
+    val compactLabelTextSize = 12.sp
+    val compactPadding = 12.dp
+    val compactAspect = 1.6f
+
     fun getTheme(ordinal: Int): CandyColors.BudgetThemes.GradientTheme {
         return CandyColors.BudgetThemes.forOrdinal(ordinal)
+    }
+
+    /**
+     * Map tháng 01..12 trực tiếp tới palette 01..12 theo Budget v3 (04-COMPOSE-GUIDE.md).
+     */
+    fun forMonth(month: Int): CandyColors.BudgetThemes.GradientTheme {
+        val safeMonth = month.coerceIn(1, 12)
+        return CandyColors.BudgetThemes.allThemes[safeMonth - 1]
     }
 
     /**
@@ -43,6 +58,22 @@ object CandyBudgetThemes {
             ),
             start = Offset(0f, 0f),
             end = Offset(900f, 650f)
+        )
+    }
+
+    /**
+     * Tạo Brush gradient cho thẻ tháng theo số tháng (1..12).
+     */
+    fun getGradientBrushForMonth(month: Int): Brush {
+        val theme = forMonth(month)
+        return Brush.linearGradient(
+            colorStops = arrayOf(
+                0.0f to theme.light,
+                0.5f to theme.main,
+                1.0f to theme.dark
+            ),
+            start = Offset(0f, 0f),
+            end = Offset(450f, 280f)
         )
     }
 

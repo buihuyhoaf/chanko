@@ -4,10 +4,12 @@ import com.hoabh.chanko.domain.budget.model.BudgetActivity
 import com.hoabh.chanko.domain.budget.model.BudgetAdjustment
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
+import com.hoabh.chanko.domain.budget.model.BudgetGalleryOverview
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.model.PaymentType
 import kotlinx.coroutines.flow.Flow
+import java.time.YearMonth
 
 /**
  * Hợp đồng dữ liệu cho phân hệ Ngân sách (Domain Layer).
@@ -18,6 +20,9 @@ import kotlinx.coroutines.flow.Flow
  * — không phụ thuộc vào validation của form.
  */
 interface BudgetRepository {
+    val firstEstablishedMonth: YearMonth
+        get() = YearMonth.of(2026, 9)
+
     fun getAvailableCycles(): Flow<List<BudgetCycle>>
 
     /**
@@ -26,6 +31,16 @@ interface BudgetRepository {
      * và chu kỳ chưa có cache; [com.hoabh.chanko.domain.budget.model.BudgetLoadException] khi lỗi tải.
      */
     fun getCycleOverview(cycleId: String): Flow<BudgetCycleOverview>
+
+    /**
+     * Lấy dữ liệu toàn cảnh năm (Budget Gallery v3) theo năm đã chọn.
+     */
+    fun getYearGalleryOverview(year: Int): Flow<BudgetGalleryOverview>
+
+    /**
+     * Thiết lập hoặc chỉnh sửa hạn mức ngân sách cho một tháng bất kỳ (Setup / Edit).
+     */
+    suspend fun setBudgetForMonth(yearMonth: YearMonth, limitMinor: Long): Result<Unit>
 
     /** Tập ID chu kỳ đã có cache để xem ngoại tuyến (C02 offline). */
     fun getOfflineCachedCycleIds(): Flow<Set<String>>

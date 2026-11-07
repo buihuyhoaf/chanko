@@ -50,4 +50,42 @@ class HomeHeaderResourceTest {
         val headerCheckedIn = HeaderUiModel(userName = "Hoa", hasCheckedInToday = true)
         assertTrue(headerCheckedIn.hasCheckedInToday)
     }
+
+    @Test
+    fun testCollapsedHeaderMinHeightAccommodatesChipsRow() {
+        // Sticky header retains the chips row (hạt, level, check-in +10) even when collapsed
+        val minHeight = com.hoabh.chanko.presentation.features.home.components.HomeHeaderTokens.CollapsedMinHeight
+        assertTrue("CollapsedMinHeight must accommodate chips row (>= 80dp)", minHeight.value >= 80f)
+    }
+
+    @Test
+    fun testHomeCarouselDisplaysNovemberCreditCardAsCurrent() {
+        val fakeRepo = com.hoabh.chanko.data.budget.FakeBudgetRepository()
+        assertEquals("cycle_2026_11", fakeRepo.currentCycleId)
+
+        val fakeSource = HomeFakeDataSource()
+        val defaultState = fakeSource.getStateForScenario(HomeScenario.DEFAULT)
+        val carousel = (defaultState.budgetCarouselState as SectionState.Content).data
+        val currentSlot = carousel.slots.first { it.role == BudgetCardRole.Current } as BudgetCardSlotUi.ActiveCard
+        assertEquals("11", currentSlot.monthLabel)
+        assertEquals("Tháng 11/2026", currentSlot.cycleLabel)
+        assertEquals(10, currentSlot.themeOrdinal)
+        assertEquals("Pistachio", com.hoabh.chanko.ui.theme.CandyBudgetThemes.getTheme(currentSlot.themeOrdinal).name)
+    }
+
+    @Test
+    fun testCurrentMonthCardRolesIdentifyCurrentMonthForBorder() {
+        val fakeSource = HomeFakeDataSource()
+        val defaultState = fakeSource.getStateForScenario(HomeScenario.DEFAULT)
+        val carousel = (defaultState.budgetCarouselState as SectionState.Content).data
+        val currentSlot = carousel.slots.first { it.role == BudgetCardRole.Current }
+        assertTrue(currentSlot is BudgetCardSlotUi.ActiveCard)
+        assertEquals("11", currentSlot.monthLabel)
+
+        val noBudgetState = fakeSource.getStateForScenario(HomeScenario.NO_BUDGET)
+        val noBudgetCarousel = (noBudgetState.budgetCarouselState as SectionState.Content).data
+        val currentEmptySlot = noBudgetCarousel.slots.first { it.role == BudgetCardRole.Current }
+        assertTrue(currentEmptySlot is BudgetCardSlotUi.CurrentEmptyCard)
+        assertEquals("11", currentEmptySlot.monthLabel)
+    }
 }

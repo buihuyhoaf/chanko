@@ -325,7 +325,7 @@ class BudgetViewModelTest {
         advanceUntilIdle()
 
         val state = vm.uiState.value
-        assertEquals("cycle_2026_11", state.selectedCycle?.id)
+        assertEquals(repository.nextCycleId, state.selectedCycle?.id)
         assertTrue(state.isUpcomingCycle)
         assertTrue(state.canWrite)
         assertTrue(state.currentSheet is com.hoabh.chanko.presentation.features.budget.sheets.BudgetSheetDestination.EditBudget)
@@ -350,7 +350,7 @@ class BudgetViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(BudgetUiEffect.ShowSnackbar("Đã thiết lập ngân sách kỳ tới")), effects)
-        val nextCycle = repository.getAvailableCycles().first().first { it.id == "cycle_2026_11" }
+        val nextCycle = repository.getAvailableCycles().first().first { it.id == repository.nextCycleId }
         assertEquals(7_000_000L, nextCycle.configuredLimitMinor)
         assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingConfigured, nextCycle.status)
         job.cancel()

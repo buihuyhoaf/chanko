@@ -8,14 +8,18 @@ import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetCycle
 import com.hoabh.chanko.domain.budget.model.BudgetCycleOverview
 import com.hoabh.chanko.domain.budget.model.BudgetCycleStatus
+import com.hoabh.chanko.domain.budget.model.BudgetGalleryOverview
 import com.hoabh.chanko.domain.budget.model.BudgetLoadException
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
 import com.hoabh.chanko.domain.budget.model.BudgetSaveException
+import com.hoabh.chanko.domain.budget.model.BudgetSetupState
 import com.hoabh.chanko.domain.budget.model.BudgetSnapshot
+import com.hoabh.chanko.domain.budget.model.BudgetTemporalRole
 import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
+import com.hoabh.chanko.domain.budget.model.MonthlyBudgetOverview
 import com.hoabh.chanko.domain.budget.model.NotableItem
 import com.hoabh.chanko.domain.budget.model.TriCycleWindow
 import com.hoabh.chanko.domain.budget.repository.BudgetRepository
@@ -25,12 +29,30 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import java.time.YearMonth
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FakeBudgetRepository @Inject constructor() : BudgetRepository {
+
+    data class FakeMonthRecord(
+        val limitMinor: Long?,
+        val actualSpentMinor: Long?
+    )
+
+    override val firstEstablishedMonth: YearMonth = YearMonth.of(2026, 9)
+    val currentClockMonth: YearMonth = YearMonth.of(2026, 11)
+
+    private val monthlyRecordsState = MutableStateFlow<Map<YearMonth, FakeMonthRecord>>(
+        mapOf(
+            YearMonth.of(2026, 9) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 5_550_000L),
+            YearMonth.of(2026, 10) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 6_200_000L),
+            YearMonth.of(2026, 11) to FakeMonthRecord(limitMinor = 6_000_000L, actualSpentMinor = 3_650_000L)
+            // 2026-12 starts unconfigured (Missing)
+        )
+    )
 
     // --- State Storage ---
     private val isOnlineState = MutableStateFlow(true)
@@ -42,13 +64,13 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     var simulatedDelayMs: Long = 0L
 
     // Cycles
-    val currentCycleId = "cycle_2026_10"
-    val pastCycleId = "cycle_2026_09"
-    val pastUncachedCycleId = "cycle_2026_08"
-    val nextCycleId = "cycle_2026_11"
+    val currentCycleId = "cycle_2026_11"
+    val pastCycleId = "cycle_2026_10"
+    val pastUncachedCycleId = "cycle_2026_09"
+    val nextCycleId = "cycle_2026_12"
 
     // Default data timestamp (fixed base or current time when data was last synced)
-    private val initialDataTimestamp = 1_761_708_600_000L // 2025-10-29 10:30
+    private val initialDataTimestamp = 1_762_500_000_000L // 2026-11-07
 
     private val cachedCycleIdsState = MutableStateFlow(
         setOf(currentCycleId, pastCycleId)
@@ -58,42 +80,42 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         listOf(
             BudgetCycle(
                 id = currentCycleId,
-                label = "Tháng 10/2026",
-                startDate = "01/10/2026",
-                endDate = "31/10/2026",
+                label = "Tháng 11/2026",
+                startDate = "01/11/2026",
+                endDate = "30/11/2026",
                 isCurrent = true,
                 anchorDay = 1,
-                ordinal = 0,
+                ordinal = 10,
                 status = BudgetCycleStatus.Active
             ),
             BudgetCycle(
                 id = pastCycleId,
+                label = "Tháng 10/2026",
+                startDate = "01/10/2026",
+                endDate = "31/10/2026",
+                isCurrent = false,
+                anchorDay = 1,
+                ordinal = 9,
+                status = BudgetCycleStatus.Closed
+            ),
+            BudgetCycle(
+                id = pastUncachedCycleId,
                 label = "Tháng 09/2026",
                 startDate = "01/09/2026",
                 endDate = "30/09/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = -1,
-                status = BudgetCycleStatus.Closed
-            ),
-            BudgetCycle(
-                id = pastUncachedCycleId,
-                label = "Tháng 08/2026",
-                startDate = "01/08/2026",
-                endDate = "31/08/2026",
-                isCurrent = false,
-                anchorDay = 1,
-                ordinal = -2,
+                ordinal = 8,
                 status = BudgetCycleStatus.Closed
             ),
             BudgetCycle(
                 id = nextCycleId,
-                label = "Tháng 11/2026",
-                startDate = "01/11/2026",
-                endDate = "30/11/2026",
+                label = "Tháng 12/2026",
+                startDate = "01/12/2026",
+                endDate = "31/12/2026",
                 isCurrent = false,
                 anchorDay = 1,
-                ordinal = 1,
+                ordinal = 11,
                 status = BudgetCycleStatus.UpcomingUnconfigured
             )
         )
@@ -145,10 +167,10 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
             currentCycleId to listOf(
                 BudgetActivity("act_1", currentCycleId, "Mua tai nghe Sony", -3_500_000L, "Hôm nay, 10:15", "1", BudgetActivityType.PURCHASE_RECORDED),
                 BudgetActivity("act_2", currentCycleId, "Hoàn tiền đơn hàng cũ", 500_000L, "Hôm qua, 16:30", null, BudgetActivityType.EXPENSE_CORRECTED),
-                BudgetActivity("act_3", currentCycleId, "Tăng hạn mức chi tiêu", 1_000_000L, "25/10/2026", null, BudgetActivityType.BUDGET_ADJUSTED)
+                BudgetActivity("act_3", currentCycleId, "Tăng hạn mức chi tiêu", 1_000_000L, "05/11/2026", null, BudgetActivityType.BUDGET_ADJUSTED)
             ),
             pastCycleId to listOf(
-                BudgetActivity("act_past_1", pastCycleId, "Chi tiêu ăn uống", -1_200_000L, "28/09/2026", null, BudgetActivityType.PURCHASE_RECORDED)
+                BudgetActivity("act_past_1", pastCycleId, "Chi tiêu ăn uống", -1_200_000L, "28/10/2026", null, BudgetActivityType.PURCHASE_RECORDED)
             ),
             pastUncachedCycleId to emptyList()
         )
@@ -158,7 +180,7 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     private val adjustmentsState = MutableStateFlow<Map<String, List<BudgetAdjustment>>>(
         mapOf(
             currentCycleId to listOf(
-                BudgetAdjustment("adj_1", currentCycleId, 4_000_000L, 5_000_000L, "25/10/2026, 09:00")
+                BudgetAdjustment("adj_1", currentCycleId, 5_000_000L, 6_000_000L, "05/11/2026, 09:00")
             ),
             pastCycleId to emptyList(),
             pastUncachedCycleId to emptyList()
@@ -549,9 +571,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val next = cyclesState.value.firstOrNull { it.ordinal == nextOrdinal }
             ?: BudgetCycle(
                 id = nextCycleId,
-                label = "Tháng 11/2026",
-                startDate = "01/11/2026",
-                endDate = "30/11/2026",
+                label = "Tháng 12/2026",
+                startDate = "01/12/2026",
+                endDate = "31/12/2026",
                 isCurrent = false,
                 anchorDay = current.anchorDay,
                 ordinal = nextOrdinal,
@@ -567,9 +589,9 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
         val futureOrdinal = nextOrdinal + 1
         val newNextCycle = BudgetCycle(
             id = "cycle_future_$futureOrdinal",
-            label = "Tháng 12/2026",
-            startDate = "01/12/2026",
-            endDate = "31/12/2026",
+            label = "Tháng 01/2027",
+            startDate = "01/01/2027",
+            endDate = "31/01/2027",
             isCurrent = false,
             anchorDay = current.anchorDay,
             ordinal = futureOrdinal,
@@ -614,5 +636,106 @@ class FakeBudgetRepository @Inject constructor() : BudgetRepository {
     fun setNoPreviousCycleForTesting() {
         val current = cyclesState.value.first { it.isCurrent }
         cyclesState.value = cyclesState.value.filter { it.ordinal >= current.ordinal }
+    }
+
+    override fun getYearGalleryOverview(year: Int): Flow<BudgetGalleryOverview> {
+        return combine(
+            monthlyRecordsState,
+            isOnlineState
+        ) { records, online ->
+            val startMonth = if (year == firstEstablishedMonth.year) {
+                firstEstablishedMonth.monthValue
+            } else if (year < firstEstablishedMonth.year) {
+                13 // Không hiển thị tháng trước năm thiết lập đầu tiên
+            } else {
+                1
+            }
+
+            val monthOverviews = if (startMonth <= 12) {
+                (startMonth..12).map { monthNum ->
+                    val ym = YearMonth.of(year, monthNum)
+                    val record = records[ym]
+                    val role = when {
+                        ym < currentClockMonth -> BudgetTemporalRole.Past
+                        ym == currentClockMonth -> BudgetTemporalRole.Current
+                        else -> BudgetTemporalRole.Future
+                    }
+                    val isConfigured = record?.limitMinor != null && record.limitMinor > 0L
+                    val setupState = if (isConfigured) BudgetSetupState.Configured else BudgetSetupState.Missing
+
+                    if (role == BudgetTemporalRole.Future) {
+                        MonthlyBudgetOverview(
+                            yearMonth = ym,
+                            temporalRole = role,
+                            setupState = setupState,
+                            limitMinor = record?.limitMinor,
+                            actualSpentMinor = null,
+                            remainingMinor = null,
+                            overMinor = null,
+                            usagePercent = null,
+                            isOverBudget = false,
+                            themeMonth = ym.monthValue,
+                            canEdit = true
+                        )
+                    } else {
+                        val limit = record?.limitMinor
+                        val spent = record?.actualSpentMinor ?: 0L
+                        val metrics = if (limit != null && limit > 0L) {
+                            BudgetCalculation.calculateMetrics(limit, spent)
+                        } else null
+
+                        MonthlyBudgetOverview(
+                            yearMonth = ym,
+                            temporalRole = role,
+                            setupState = setupState,
+                            limitMinor = limit,
+                            actualSpentMinor = spent,
+                            remainingMinor = metrics?.remainingMinor,
+                            overMinor = metrics?.overMinor,
+                            usagePercent = metrics?.realPercentInt,
+                            isOverBudget = metrics?.isOverBudget ?: false,
+                            themeMonth = ym.monthValue,
+                            canEdit = (role == BudgetTemporalRole.Current)
+                        )
+                    }
+                }
+            } else {
+                emptyList()
+            }
+
+            val annualTotal = BudgetCalculation.calculateAnnualConfiguredTotal(monthOverviews.map { it.limitMinor })
+            val configuredCount = monthOverviews.count { it.setupState == BudgetSetupState.Configured }
+
+            BudgetGalleryOverview(
+                selectedYear = year,
+                firstEstablishedMonth = firstEstablishedMonth,
+                currentClockMonth = currentClockMonth,
+                annualConfiguredTotalMinor = annualTotal,
+                configuredMonthsCount = configuredCount,
+                months = monthOverviews,
+                isOnline = online,
+                lastSyncedAt = if (!online) initialDataTimestamp else System.currentTimeMillis()
+            )
+        }
+    }
+
+    override suspend fun setBudgetForMonth(yearMonth: YearMonth, limitMinor: Long): Result<Unit> {
+        if (!isOnlineState.value) {
+            return Result.failure(BudgetOfflineException())
+        }
+        if (limitMinor <= 0L) {
+            return Result.failure(InvalidBudgetAmountException())
+        }
+        if (yearMonth < currentClockMonth) {
+            return Result.failure(BudgetPastCycleException())
+        }
+
+        val existing = monthlyRecordsState.value[yearMonth]
+        val updated = FakeMonthRecord(
+            limitMinor = limitMinor,
+            actualSpentMinor = existing?.actualSpentMinor
+        )
+        monthlyRecordsState.value = monthlyRecordsState.value + (yearMonth to updated)
+        return Result.success(Unit)
     }
 }

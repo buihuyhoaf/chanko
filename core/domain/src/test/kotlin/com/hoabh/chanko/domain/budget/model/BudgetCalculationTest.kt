@@ -86,4 +86,11 @@ class BudgetCalculationTest {
         assertEquals(3, rolledWindow.next.ordinal)
         assertEquals(BudgetCycleStatus.UpcomingUnconfigured, rolledWindow.next.status)
     }
+
+    @Test
+    fun verify_annual_configured_total_sums_only_valid_configured_months() {
+        val limits = listOf(6_000_000L, 6_000_000L, 6_000_000L, null, 0L)
+        val total = BudgetCalculation.calculateAnnualConfiguredTotal(limits)
+        assertEquals(18_000_000L, total)
+    }
 }

@@ -60,6 +60,8 @@ private object CandyPalette {
     val Purple30 = Color(0xFFF7F3FF)
     val Purple120 = Color(0xFFE8DFF8)
     val Purple80 = Color(0xFFEEE8F5)
+    val PurpleBorderLight = Color(0xFFE4CCFB)
+    val PurpleSurfaceSubtle = Color(0xFFEEE5F7)
 
     // Pinks, Roses & Magentas
     val Pink500 = Color(0xFFFF85B3)
@@ -353,6 +355,11 @@ object CandyColors {
     val coolingLavender = CandyPalette.Lavender160
     val coolingChip = CandyPalette.Lavender290
     val speechSurface = CandyPalette.Peach100
+
+    // Budget v3 Detail & Activity Feed Tokens
+    val detailCardBorder = CandyPalette.PurpleBorderLight
+    val detailIconSurface = CandyPalette.PurpleSurfaceSubtle
+    val detailDivider = CandyPalette.Lavender70
 
     // Home v2 Image-Aligned Semantic Tokens (approved-home-user-reference.png & 11-ASSET-DELIVERY.md & HOME-BG-01)
     val homeScreenBackgroundTop = CandyPalette.Lavender120

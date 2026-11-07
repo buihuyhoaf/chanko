@@ -57,7 +57,7 @@ import com.hoabh.chanko.ui.theme.ChankoTheme
 object HomeHeaderTokens {
     val AvatarExpandedSize = 52.dp
     val AvatarCollapsedSize = 38.dp
-    val CollapsedMinHeight = 56.dp
+    val CollapsedMinHeight = 80.dp
     val CollapseScrollRange = 96.dp
 }
 
@@ -206,21 +206,15 @@ fun HomeHeader(
             }
         }
 
-        // Chip Tài nguyên (Hạt & Cấp độ Chanko / Pate)
-        if (clampedFraction < 0.7f) {
-            val chipsAlpha = (1f - clampedFraction * 1.4f).coerceIn(0f, 1f)
-            if (chipsAlpha > 0f) {
-                HomeResourceChipsRow(
-                    hatBalance = header.hatBalance,
-                    currentLevel = header.currentLevel,
-                    pateProgressFraction = header.pateProgressFraction,
-                    hasCheckedInToday = header.hasCheckedInToday,
-                    onResourceClick = onResourceClick,
-                    onCheckInClick = onCheckInClick,
-                    modifier = Modifier.graphicsLayer { alpha = chipsAlpha }
-                )
-            }
-        }
+        // Chip Tài nguyên (Hạt & Cấp độ Chanko / Pate & Check-in) luôn nằm trong Sticky Header
+        HomeResourceChipsRow(
+            hatBalance = header.hatBalance,
+            currentLevel = header.currentLevel,
+            pateProgressFraction = header.pateProgressFraction,
+            hasCheckedInToday = header.hasCheckedInToday,
+            onResourceClick = onResourceClick,
+            onCheckInClick = onCheckInClick
+        )
 
         // Dải banner ngoại tuyến đầy đủ (ẩn dần khi cuộn xuống)
         if (header.isOffline && clampedFraction < 0.85f) {

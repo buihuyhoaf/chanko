@@ -64,6 +64,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCard
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCardCarousel
 import com.hoabh.chanko.presentation.features.home.components.DailyCheckInDialog
@@ -216,7 +218,7 @@ fun HomeScreen(
     val expandedHeaderHeightDp = if (expandedHeaderHeightPx > 0) {
         with(density) { expandedHeaderHeightPx.toDp() }
     } else {
-        statusBarTopPadding + (if (state.header.isOffline) 100.dp else 68.dp)
+        statusBarTopPadding + (if (state.header.isOffline) 140.dp else 104.dp)
     }
 
     BoxWithConstraints(
@@ -341,17 +343,54 @@ fun HomeScreen(
             ) {
                 // 2. Budget Section: Header + Carousel v2.2 (BC22-01..BC22-24)
                 item(key = "section_budget_header") {
-                    Text(
-                        text = stringResource(R.string.home_budget_section_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 20.sp
-                        ),
-                        color = CandyColors.HomeV2.textPrimary,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding)
-                    )
+                            .padding(horizontal = horizontalPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            ChankoIcon(
+                                id = ChankoIconId.BUD_01,
+                                contentDescription = null,
+                                size = 24.dp
+                            )
+                            Text(
+                                text = stringResource(R.string.home_budget_section_title),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp
+                                ),
+                                color = CandyColors.HomeV2.textPrimary
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable(
+                                    role = Role.Button,
+                                    onClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) }
+                                )
+                                .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Text(
+                                text = "${stringResource(R.string.home_budget_see_all)} ›",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = CandyColors.brandPurple
+                            )
+                        }
+                    }
                 }
 
                 item(key = "section_budget_credit_card") {

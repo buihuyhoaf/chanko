@@ -21,6 +21,18 @@ sealed class Screen(val route: String) {
     data object ArchivedItems : Screen("archived_items")
     data object Profile : Screen("profile")
     data object Personality : Screen("personality")
+    data object BudgetGallery : Screen("budget_gallery")
+    data object BudgetDetail : Screen("budget_detail?cycleId={cycleId}&mode={mode}") {
+        fun createRoute(
+            cycleId: String? = null,
+            mode: String? = null
+        ): String {
+            val params = mutableListOf<String>()
+            if (!cycleId.isNullOrBlank()) params.add("cycleId=$cycleId")
+            if (!mode.isNullOrBlank()) params.add("mode=$mode")
+            return if (params.isEmpty()) "budget_detail" else "budget_detail?${params.joinToString("&")}"
+        }
+    }
     data object BudgetDetails : Screen("budget_details?cycleId={cycleId}&mode={mode}&expandHistory={expandHistory}") {
         fun createRoute(
             cycleId: String? = null,

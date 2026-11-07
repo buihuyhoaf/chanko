@@ -4,15 +4,19 @@ import com.hoabh.chanko.domain.budget.model.BudgetConflictException
 import com.hoabh.chanko.domain.budget.model.BudgetNoOfflineCacheException
 import com.hoabh.chanko.domain.budget.model.BudgetOfflineException
 import com.hoabh.chanko.domain.budget.model.BudgetPastCycleException
+import com.hoabh.chanko.domain.budget.model.BudgetSetupState
+import com.hoabh.chanko.domain.budget.model.BudgetTemporalRole
 import com.hoabh.chanko.domain.budget.model.InvalidBudgetAmountException
 import com.hoabh.chanko.domain.budget.model.MoneyVnd
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.YearMonth
 
 class FakeBudgetRepositoryTest {
 
@@ -43,11 +47,11 @@ class FakeBudgetRepositoryTest {
         val window = repository.observeTriCycleWindow().first()
         assertTrue(window.hasPrevious)
         assertEquals(repository.pastCycleId, window.previous?.id)
-        assertEquals("09", window.previous?.labelMonth)
+        assertEquals("10", window.previous?.labelMonth)
         assertEquals(repository.currentCycleId, window.current.id)
-        assertEquals("10", window.current.labelMonth)
+        assertEquals("11", window.current.labelMonth)
         assertEquals(repository.nextCycleId, window.next.id)
-        assertEquals("11", window.next.labelMonth)
+        assertEquals("12", window.next.labelMonth)
         assertEquals(com.hoabh.chanko.domain.budget.model.BudgetCycleStatus.UpcomingUnconfigured, window.next.status)
     }
 
@@ -212,5 +216,80 @@ class FakeBudgetRepositoryTest {
         repository.setScenarioPastOfflineZero()
         val pastZeroSnap = repository.getBudgetSnapshot(repository.pastCycleId).first()
         assertTrue(pastZeroSnap.isZeroSpend)
+    }
+
+    @Test
+    fun `getYearGalleryOverview returns months from firstEstablishedMonth to 12 for 2026`() = runTest {
+        val overview = repository.getYearGalleryOverview(2026).first()
+        assertEquals(2026, overview.selectedYear)
+        assertEquals(YearMonth.of(2026, 9), overview.firstEstablishedMonth)
+        // AC01: First 09/2026, chọn 2026 -> chỉ 09, 10, 11, 12
+        assertEquals(4, overview.months.size)
+        assertEquals(listOf(9, 10, 11, 12), overview.months.map { it.yearMonth.monthValue })
+
+        // AC05: Trước khi thiết lập 12 -> tổng 18tr, 3 tháng configured
+        assertEquals(18_000_000L, overview.annualConfiguredTotalMinor)
+        assertEquals(3, overview.configuredMonthsCount)
+
+        // Month 12 is Future and Missing (no spent/remaining/usage)
+        val month12 = overview.months.first { it.yearMonth.monthValue == 12 }
+        assertEquals(BudgetTemporalRole.Future, month12.temporalRole)
+        assertEquals(BudgetSetupState.Missing, month12.setupState)
+        assertNull(month12.limitMinor)
+        assertNull(month12.actualSpentMinor)
+        assertNull(month12.remainingMinor)
+        assertNull(month12.usagePercent)
+
+        // AC08: Month 10 is over budget (limit 6tr, spent 6.2tr -> over 200k, usage 103%)
+        val month10 = overview.months.first { it.yearMonth.monthValue == 10 }
+        assertEquals(BudgetTemporalRole.Past, month10.temporalRole)
+        assertEquals(BudgetSetupState.Configured, month10.setupState)
+        assertEquals(6_000_000L, month10.limitMinor)
+        assertEquals(6_200_000L, month10.actualSpentMinor)
+        assertEquals(200_000L, month10.overMinor)
+        assertEquals(-200_000L, month10.remainingMinor)
+        assertTrue(month10.isOverBudget)
+        assertEquals(103, month10.usagePercent)
+    }
+
+    @Test
+    fun `getYearGalleryOverview returns all 12 months for 2027`() = runTest {
+        val overview = repository.getYearGalleryOverview(2027).first()
+        // AC02: Chọn 2027 -> 01..12
+        assertEquals(12, overview.months.size)
+        assertEquals((1..12).toList(), overview.months.map { it.yearMonth.monthValue })
+    }
+
+    @Test
+    fun `setBudgetForMonth updates future month limit and refreshes annual total`() = runTest {
+        // AC05: Sau khi lưu tháng 12 = 6tr -> tổng 24tr, 4 tháng configured
+        val result = repository.setBudgetForMonth(YearMonth.of(2026, 12), 6_000_000L)
+        assertTrue(result.isSuccess)
+
+        val overview = repository.getYearGalleryOverview(2026).first()
+        assertEquals(24_000_000L, overview.annualConfiguredTotalMinor)
+        assertEquals(4, overview.configuredMonthsCount)
+
+        val month12 = overview.months.first { it.yearMonth.monthValue == 12 }
+        assertEquals(BudgetSetupState.Configured, month12.setupState)
+        assertEquals(6_000_000L, month12.limitMinor)
+        assertNull(month12.actualSpentMinor) // Future still has no actual spent
+    }
+
+    @Test
+    fun `setBudgetForMonth fails when offline or invalid amount or past month`() = runTest {
+        repository.setNetworkOnline(false)
+        val offlineRes = repository.setBudgetForMonth(YearMonth.of(2026, 12), 6_000_000L)
+        assertTrue(offlineRes.isFailure)
+        assertTrue(offlineRes.exceptionOrNull() is BudgetOfflineException)
+
+        repository.setNetworkOnline(true)
+        val invalidRes = repository.setBudgetForMonth(YearMonth.of(2026, 12), 0L)
+        assertTrue(invalidRes.isFailure)
+        assertTrue(invalidRes.exceptionOrNull() is InvalidBudgetAmountException)
+
+        val pastRes = repository.setBudgetForMonth(YearMonth.of(2026, 9), 6_000_000L)
+        assertTrue(pastRes.isFailure)
+        assertTrue(pastRes.exceptionOrNull() is BudgetPastCycleException)
     }
 }

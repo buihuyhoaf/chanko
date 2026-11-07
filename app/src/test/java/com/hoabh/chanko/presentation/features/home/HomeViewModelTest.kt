@@ -477,7 +477,7 @@ class HomeViewModelTest {
         assertTrue(carouselState is SectionState.Content)
         val data = (carouselState as SectionState.Content).data
         assertEquals(3, data.slots.size)
-        assertEquals("cycle_2026_10", data.currentCycleKey)
+        assertEquals(fakeRepo.currentCycleId, data.currentCycleKey)
     }
 
     @Test

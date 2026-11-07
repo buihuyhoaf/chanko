@@ -307,4 +307,41 @@
     <string name="transaction_detail_default_item_name">Món đồ</string>
     <string name="transaction_detail_save_success">Đã lưu thay đổi giao dịch</string>
     <string name="transaction_detail_delete_success">Đã xóa giao dịch nhập sai</string>
+    <string name="budget_detail_title">Chi tiết ngân sách</string>
+    <string name="budget_recent_activity_title">Hoạt động gần đây</string>
+
+    <!-- Budget Gallery & Detail Sync Strings -->
+    <string name="budget_gallery_description">Theo dõi ngân sách mỗi tháng, mua sắm có suy nghĩ hơn. ✨</string>
+    <string name="budget_detail_description">Chi tiết ngân sách và lịch sử giao dịch chu kỳ này. 💳</string>
+    <string name="budget_gallery_menu_about">Giới thiệu về ngân sách</string>
+    <string name="budget_gallery_menu_sync">Đồng bộ dữ liệu</string>
+    <string name="budget_annual_summary_title">Tổng ngân sách năm</string>
+    <string name="budget_annual_summary_configured_months">%1$d/%2$d tháng</string>
+    <string name="budget_annual_summary_offline">Đang xem dữ liệu ngoại tuyến</string>
+    <string name="budget_year_selector_label">Năm %1$d</string>
+    <string name="budget_year_selector_previous_cd">Xem năm trước</string>
+    <string name="budget_year_selector_next_cd">Xem năm kế tiếp</string>
+    <string name="budget_compact_setup_button">+ Thiết lập</string>
+    <string name="budget_compact_spent_label">Đã chi tiêu</string>
+    <string name="budget_compact_not_configured">Chưa thiết lập</string>
+    <string name="budget_compact_spoken_not_configured">Tháng %1$s năm %2$s. Chưa thiết lập ngân sách. Chạm để thiết lập.</string>
+    <string name="budget_compact_spoken_current">Tháng hiện tại. </string>
+    <string name="budget_compact_spoken_spent">Đã chi tiêu %1$s. Chạm để xem chi tiết.</string>
+    <string name="budget_detail_toggle_expand">Xem chi tiết</string>
+    <string name="budget_detail_toggle_collapse">Ẩn chi tiết</string>
+    <string name="budget_detail_toggle_expand_cd">Xem chi tiết ngân sách</string>
+    <string name="budget_detail_toggle_collapse_cd">Ẩn chi tiết ngân sách</string>
+    <string name="budget_detail_period_label">Thời gian</string>
+    <string name="budget_detail_progress_label">Tiến độ sử dụng: %1$d%%</string>
+    <string name="budget_detail_spoken_card_prefix">Thẻ ngân sách tháng %1$s. Hạn mức: %2$s, đã chi: %3$s. </string>
+    <string name="budget_detail_spoken_progress">Tiến độ: %1$s.</string>
+    <string name="budget_future_sheet_error_zero">Ngân sách phải lớn hơn 0</string>
+    <string name="budget_future_sheet_edit_title">Chỉnh sửa ngân sách</string>
+    <string name="budget_future_sheet_setup_title">Thiết lập ngân sách</string>
+    <string name="budget_future_sheet_helper">Ngân sách này sẽ áp dụng cho toàn bộ chi tiêu trong tháng tương lai và chưa phát sinh giao dịch thực tế.</string>
+    <string name="budget_future_sheet_label">Số tiền ngân sách (VND)</string>
+    <string name="budget_future_sheet_placeholder">Ví dụ: 6.000.000</string>
+    <string name="budget_future_sheet_clear_cd">Xóa nội dung</string>
+    <string name="budget_future_sheet_suggestion">Gợi ý từ tháng trước: %1$s</string>
+    <string name="budget_future_sheet_save_button">Lưu ngân sách</string>
 </resources>

@@ -103,4 +103,12 @@ object BudgetCalculation {
             lastSyncedAt = System.currentTimeMillis()
         )
     }
+
+    /**
+     * Tính tổng hạn mức ngân sách đã thiết lập trong năm (AC05).
+     * Chỉ cộng các tháng đã có cấu hình (limitMinor > 0), tuyệt đối không tính nháp hoặc gợi ý.
+     */
+    fun calculateAnnualConfiguredTotal(limits: List<Long?>): Long {
+        return limits.filterNotNull().filter { it > 0L }.sum()
+    }
 }
