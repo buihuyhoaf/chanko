@@ -163,8 +163,38 @@ class AddItemViewModelTest {
         }
         val vm = vm(engine = engine); vm.manual(); runCurrent(); vm.confirmManualInput(); vm.validForm(); vm.continueForm(); runCurrent()
         assertEquals(AddItemStep.DECISION_RESULT, vm.state.value.step)
-        assertEquals(Verdict.WAIT, vm.state.value.form.assessment?.verdict)
-        assertEquals(CoolingChoice.UNSELECTED, vm.state.value.form.coolingChoice)
+        assertEquals(CoolingChoice.APPLIED, vm.state.value.form.coolingChoice)
+        assertEquals(java.util.concurrent.TimeUnit.DAYS.toMillis(1), vm.state.value.form.coolingDurationMillis)
+    }
+
+    @Test fun saveItemInsertsCooldownItemWithMandatoryDuration() = runTest(dispatcher) {
+        val inserted = mutableListOf<com.hoabh.chanko.domain.model.CooldownItem>()
+        val repo = object : com.hoabh.chanko.domain.repository.ItemRepository {
+            override fun getActiveItems() = flowOf(emptyList<com.hoabh.chanko.domain.model.CooldownItem>())
+            override fun getItemsByStatus(status: com.hoabh.chanko.domain.model.ItemStatus) = flowOf(emptyList<com.hoabh.chanko.domain.model.CooldownItem>())
+            override fun getArchivedItems() = flowOf(emptyList<com.hoabh.chanko.domain.model.CooldownItem>())
+            override fun getItemById(id: Int) = flowOf(null)
+            override suspend fun insertItem(item: com.hoabh.chanko.domain.model.CooldownItem) { inserted += item }
+            override suspend fun updateItem(item: com.hoabh.chanko.domain.model.CooldownItem) {}
+            override suspend fun updateItemStatus(id: Int, status: com.hoabh.chanko.domain.model.ItemStatus) {}
+            override suspend fun setArchived(id: Int, isArchived: Boolean) {}
+            override suspend fun deleteItem(item: com.hoabh.chanko.domain.model.CooldownItem) {}
+            override fun getTotalSavedAmount() = flowOf(0L)
+        }
+        val engine = QuickCheckEvaluationContract { form ->
+            EvaluationState.Result(AssessmentSnapshot(Verdict.WAIT, listOf("Fixture"), emptyList(),
+                form.productRevision, form.answerRevision, "test-only"))
+        }
+        val vm = AddItemViewModel(UnavailableUrlExtractionService(), engine, Auth(), repo)
+        vm.manual(); runCurrent(); vm.confirmManualInput(); vm.validForm(); vm.continueForm(); runCurrent()
+        assertEquals(AddItemStep.DECISION_RESULT, vm.state.value.step)
+        vm.saveItem(); runCurrent()
+        assertEquals(1, inserted.size)
+        assertEquals("Tai nghe", inserted.first().name)
+        assertEquals(1000L, inserted.first().price)
+        assertEquals(com.hoabh.chanko.domain.model.ItemStatus.COOLING_DOWN, inserted.first().status)
+        assertEquals(java.util.concurrent.TimeUnit.DAYS.toMillis(1), inserted.first().cooldownDurationMillis)
+        assertFalse(vm.state.value.active)
     }
     @Test fun staleAssessmentCannotOpenResult() = runTest(dispatcher) {
         val engine = MockQuickCheckEngine(EvaluationState.Result(

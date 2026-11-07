@@ -7,6 +7,8 @@ import com.hoabh.chanko.R
 import com.hoabh.chanko.domain.model.CooldownItem
 import com.hoabh.chanko.domain.model.ItemStatus
 import com.hoabh.chanko.domain.model.PurchaseTransaction
+import com.hoabh.chanko.domain.policy.FreezeCountdownCalculator
+import com.hoabh.chanko.domain.policy.FreezeDurationPolicy
 import com.hoabh.chanko.domain.repository.ItemRepository
 import com.hoabh.chanko.domain.repository.PurchaseRepository
 import com.hoabh.chanko.presentation.base.UiText
@@ -244,6 +246,50 @@ class ItemDetailViewModel @Inject constructor(
             }
             is ItemDetailUiEvent.DismissSkipWaitingDialog -> {
                 _uiState.update { it.copy(isSkipWaitingConfirmDialogOpen = false) }
+            }
+            is ItemDetailUiEvent.RequestReFreeze -> {
+                _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isReFreezeConfirmDialogOpen = true) }
+            }
+            is ItemDetailUiEvent.DismissReFreezeDialog -> {
+                _uiState.update { it.copy(isReFreezeConfirmDialogOpen = false) }
+            }
+            is ItemDetailUiEvent.ConfirmReFreeze -> {
+                _uiState.update { it.copy(isReFreezeConfirmDialogOpen = false) }
+                viewModelScope.launch {
+                    val current = _uiState.value
+                    val now = System.currentTimeMillis()
+                    val newDuration = FreezeDurationPolicy.calculateDurationMillis(current.rawPrice)
+                    val updated = CooldownItem(
+                        id = current.id,
+                        name = current.name,
+                        price = current.rawPrice,
+                        imageUri = current.imageUri,
+                        addedTimestamp = now,
+                        cooldownDurationMillis = newDuration,
+                        reason = current.reason,
+                        status = ItemStatus.COOLING_DOWN
+                    )
+                    itemRepository.updateItem(updated)
+                    _uiState.update {
+                        it.copy(
+                            isRefrozen = true,
+                            displayStatus = ItemDisplayStatus.CoolingOff,
+                            remainingMillis = newDuration,
+                            remainingFormatted = FreezeCountdownCalculator.formatRemainingTimeVi(newDuration),
+                            speechBubbleText = "Đã kích hoạt chu kỳ Freeze mới. Bạn sẽ không nhận thêm thưởng Freeze cho món đồ này.",
+                            speechBubbleUiText = UiText.DynamicString("Đã kích hoạt chu kỳ Freeze mới. Bạn sẽ không nhận thêm thưởng Freeze cho món đồ này.")
+                        )
+                    }
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Đã kích hoạt chu kỳ Freeze mới")))
+                }
+            }
+            is ItemDetailUiEvent.RequestPassItem -> {
+                _uiState.update { it.copy(isMoreOptionsSheetOpen = false) }
+                viewModelScope.launch {
+                    itemRepository.updateItemStatus(_uiState.value.id, ItemStatus.PASSED)
+                    _effect.emit(ItemDetailUiEffect.ShowToast(UiText.DynamicString("Đã bỏ qua món đồ này")))
+                    _effect.emit(ItemDetailUiEffect.NavigateBack)
+                }
             }
             is ItemDetailUiEvent.RequestRecordPurchase -> {
                 _uiState.update { it.copy(isMoreOptionsSheetOpen = false, isRecordPurchaseSheetOpen = true) }
