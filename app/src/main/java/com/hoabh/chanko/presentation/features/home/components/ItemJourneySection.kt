@@ -98,8 +98,8 @@ data class JourneyNodeVisualStyle(
 
 fun resolveJourneyNodeStyle(status: JourneyNodeStatus): JourneyNodeVisualStyle = when (status) {
     JourneyNodeStatus.CoolingOff -> JourneyNodeVisualStyle(
-        ringColor = CandyColors.HomeV2.statusWaitingRing,
-        badgeColor = CandyColors.HomeV2.statusWaitingRing
+        ringColor = CandyColors.HomeV2.statusCoolingOffRing,
+        badgeColor = CandyColors.HomeV2.statusCoolingOffRing
     )
     JourneyNodeStatus.Ready -> JourneyNodeVisualStyle(
         ringColor = CandyColors.HomeV2.statusReadyRing,

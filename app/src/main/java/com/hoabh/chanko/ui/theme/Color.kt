@@ -514,19 +514,19 @@ object CandyColors {
         val headerFrostedSurface = CandyPalette.Lavender120
         val headerBorderDivider = CandyPalette.Lavender110
 
-        // 6 Journey Node Statuses (Ring + Badge + Label Ink)
-        val statusSavedInk = CandyPalette.Slate610
-        val statusSavedRing = CandyPalette.Purple500
-        val statusConsideringInk = CandyPalette.Purple850
-        val statusConsideringRing = CandyPalette.Purple400
-        val statusWaitingInk = CandyPalette.Amber950
-        val statusWaitingRing = CandyPalette.Orange450
+        // 4 Journey Node Statuses (Cooling-off Ring + Badge + Label Ink — SPEC-cooling-off-journey-visuals.md)
+        val statusCoolingOffInk = CandyPalette.Amber950
+        val statusCoolingOffRing = CandyPalette.Orange450
         val statusReadyInk = CandyPalette.Mint850
         val statusReadyRing = CandyPalette.Mint500
         val statusPurchasedInk = CandyPalette.Teal800
         val statusPurchasedRing = CandyPalette.Blue500
         val statusSkippedInk = CandyPalette.Slate610
         val statusSkippedRing = CandyPalette.Slate400
+
+        // Aliases
+        val statusWaitingInk = statusCoolingOffInk
+        val statusWaitingRing = statusCoolingOffRing
     }
 
     /** Home v2.2 - 12 Candy Gradient Themes & Budget Carousel Semantic Tokens (design-tokens.json) */

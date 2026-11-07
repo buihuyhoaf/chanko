@@ -609,13 +609,13 @@ Loại bỏ các token màu viền tàn dư cũ (`statusSavedRing`, `statusConsi
 Đảm bảo 100% tuân thủ `ColorArchitectureTest`.
 
 **Acceptance criteria:**
-- [ ] `resolveJourneyNodeStyle(status)` chỉ xử lý 4 trạng thái, trả về đúng cấu hình viền và badge.
-- [ ] Không còn tham chiếu đến `Saved` hay `Considering` trong `ItemJourneySection.kt`.
-- [ ] Huy hiệu góc trên phải (`JourneyStatusBadge`) giữ lại icon chuẩn: ⏳ Đồng hồ cát (CoolingOff), ✓ Tích xanh (Ready), 🛍️ Túi (Purchased), − Dấu trừ (Skipped).
+- [x] `resolveJourneyNodeStyle(status)` chỉ xử lý 4 trạng thái, trả về đúng cấu hình viền và badge.
+- [x] Không còn tham chiếu đến `Saved` hay `Considering` trong `ItemJourneySection.kt`.
+- [x] Huy hiệu góc trên phải (`JourneyStatusBadge`) giữ lại icon chuẩn: ⏳ Đồng hồ cát (CoolingOff), ✓ Tích xanh (Ready), 🛍️ Túi (Purchased), − Dấu trừ (Skipped).
 
 **Verification:**
-- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"`
-- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+- [x] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*ColorArchitectureTest*"`
+- [x] Build succeeds: `./gradlew compileDevDebugKotlin`
 
 **Dependencies:** Task 19
 
