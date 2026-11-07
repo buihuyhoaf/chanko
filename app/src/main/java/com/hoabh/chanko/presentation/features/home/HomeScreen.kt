@@ -64,6 +64,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hoabh.chanko.R
 import com.hoabh.chanko.presentation.base.CollectEffect
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIcon
+import com.hoabh.chanko.presentation.designsystem.icon.ChankoIconId
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCard
 import com.hoabh.chanko.presentation.features.home.components.BudgetCreditCardCarousel
 import com.hoabh.chanko.presentation.features.home.components.DailyCheckInDialog
@@ -341,17 +343,27 @@ fun HomeScreen(
             ) {
                 // 2. Budget Section: Header + Carousel v2.2 (BC22-01..BC22-24)
                 item(key = "section_budget_header") {
-                    Text(
-                        text = stringResource(R.string.home_budget_section_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 20.sp
-                        ),
-                        color = CandyColors.HomeV2.textPrimary,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding)
-                    )
+                            .padding(horizontal = horizontalPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ChankoIcon(
+                            id = ChankoIconId.BUD_01,
+                            contentDescription = null,
+                            size = 24.dp
+                        )
+                        Text(
+                            text = stringResource(R.string.home_budget_section_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 20.sp
+                            ),
+                            color = CandyColors.HomeV2.textPrimary
+                        )
+                    }
                 }
 
                 item(key = "section_budget_credit_card") {
