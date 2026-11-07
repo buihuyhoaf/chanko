@@ -348,21 +348,48 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = horizontalPadding),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        ChankoIcon(
-                            id = ChankoIconId.BUD_01,
-                            contentDescription = null,
-                            size = 24.dp
-                        )
-                        Text(
-                            text = stringResource(R.string.home_budget_section_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp
-                            ),
-                            color = CandyColors.HomeV2.textPrimary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(CandySpace.xs),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            ChankoIcon(
+                                id = ChankoIconId.BUD_01,
+                                contentDescription = null,
+                                size = 24.dp
+                            )
+                            Text(
+                                text = stringResource(R.string.home_budget_section_title),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp
+                                ),
+                                color = CandyColors.HomeV2.textPrimary
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable(
+                                    role = Role.Button,
+                                    onClick = { onEvent(HomeUiEvent.BudgetSeeAllTap) }
+                                )
+                                .padding(horizontal = CandySpace.xs, vertical = CandySpace.xs),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Text(
+                                text = "${stringResource(R.string.home_budget_see_all)} ›",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = CandyColors.brandPurple
+                            )
+                        }
                     }
                 }
 
