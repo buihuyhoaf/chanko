@@ -22,9 +22,9 @@ Làm thế nào để tổ chức tầng Presentation của Chanko từ tư duy 
 ---
 
 ## Key Assumptions to Validate
-- [ ] Việc đổi `presentation.screens` sang `presentation.features` có thể thực hiện thông qua rename package an toàn mà không làm gãy Hilt DI hay Navigation.
-- [ ] Các feature đa màn hình (`chat`, `additem`) sau khi phân cấp theo sub-packages sẽ dễ đọc, giảm kích thước file và tránh lộn xộn.
-- [ ] Tất cả unit test và compilation verification (`compileDevDebugKotlin`, `compileProdReleaseKotlin`) duy trì 100% pass rate.
+- [x] Việc đổi `presentation.screens` sang `presentation.features` có thể thực hiện thông qua rename package an toàn mà không làm gãy Hilt DI hay Navigation.
+- [x] Các feature đa màn hình (`chat`, `additem`) sau khi phân cấp theo sub-packages sẽ dễ đọc, giảm kích thước file và tránh lộn xộn.
+- [x] Tất cả unit test và compilation verification (`compileDevDebugKotlin`, `compileProdReleaseKotlin`) duy trì 100% pass rate.
 
 ---
 
