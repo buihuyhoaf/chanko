@@ -94,10 +94,28 @@ flowchart TD
   - *Checkpoint 4:* Hiển thị Hạt, Pate, Level trên TopBar; Mascot phản ứng biểu cảm trung thực và không phán xét.
 - **Phase 5: Proactive Engagement & Final Verification** (Tasks 12–13)
   - *Checkpoint 5:* Điều phối thông báo và kiểm thử hồi quy toàn diện đạt 100% build và unit tests.
+- **Phase 6: Home Screen Refresh — Daily Check-in, Item Sorting & Mascot Celebration** (Tasks 14–18)
+  - *Checkpoint 6:* Popup Daily Check-in, nút pill trên Header, sắp xếp item mới nhất ở dưới cùng và chúc mừng tăng Level hoạt động trơn tru, không ảnh hưởng Carousel v2.2.
 
 ---
 
-## 5. Risks & Mitigation Strategies
+## 5. Phase 6 Task Breakdown: Home Screen Refresh
+
+```mermaid
+flowchart TD
+    T14["Task 14: DailyCheckInDialog Component"]
+    T15["Task 15: Header Daily Check-in Pill"]
+    T16["Task 16: Check-in Flow & Level Up in HomeViewModel"]
+    T17["Task 17: Item Journey Sorting & Visual Status"]
+    T18["Task 18: Full Home Regression & Verification"]
+
+    T14 & T15 --> T16
+    T16 & T17 --> T18
+```
+
+---
+
+## 6. Risks & Mitigation Strategies
 
 | Rủi ro (Risk) | Mức độ | Biện pháp giảm thiểu (Mitigation) |
 | :--- | :---: | :--- |

@@ -404,3 +404,161 @@ Thực hiện kiểm thử tích hợp toàn diện trên toàn bộ hệ thốn
 ### Checkpoint 5: Hoàn tất Toàn diện & Sẵn sàng Triển khai
 - [x] Đầy đủ 13 tasks qua 5 phases đã được định nghĩa với acceptance criteria và verification rõ ràng.
 - [x] Kế hoạch sẵn sàng để lập trình viên hoặc AI agent thực hiện từng bước.
+
+---
+
+## Phase 6: Home Screen Refresh — Daily Check-in, Item Sorting & Mascot Celebration (`home-screen-refresh`)
+
+### Task 14: Thành phần Dialog Popup Daily Check-in (`DailyCheckInDialog.kt`)
+
+**Description:**
+Xây dựng Composable `DailyCheckInDialog` xuất hiện tự động hoặc khi bấm nút Check-in trên Home:
+- Hiển thị thông điệp nhẹ nhàng, không phán xét: *"Hôm nay bạn có giữ được kế hoạch chi tiêu, không mua sắm ngoài dự kiến chứ?"*
+- Hiển thị rõ phần thưởng: `+10 Hạt, +10 Pate`
+- 2 nút hành động:
+  - Nút chính: *"Xác nhận (+10 Hạt, +10 Pate)"*
+  - Nút phụ: *"Để sau"* (đóng popup nhẹ nhàng, không ép buộc hay spam)
+- Giọng điệu thân thiện, tích cực, tuân thủ nguyên tắc `MASCOT-FEEDING = A`.
+
+**Acceptance criteria:**
+- [ ] Dialog hiển thị tiêu đề, nội dung câu hỏi xác nhận và phần thưởng +10 Hạt & +10 Pate.
+- [ ] Bấm "Xác nhận" gọi callback `onConfirm` để cộng thưởng vào ledger.
+- [ ] Bấm "Để sau" gọi callback `onDismiss` đóng popup mà không phạt người dùng.
+- [ ] Tuân thủ chuẩn thiết kế Candy Colors (không dùng direct hex Color ngoài Color.kt) và responsive font scale.
+
+**Verification:**
+- [ ] Preview hoạt động tốt trong Compose Previews.
+- [ ] Unit test giao diện hoặc kiểm thử trạng thái component pass.
+
+**Dependencies:** Task 7, Task 10
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/DailyCheckInDialog.kt`
+
+**Estimated scope:** Small (1 file)
+
+---
+
+### Task 15: Nút Pill Daily Check-in trên TopBar Header (`HomeHeader.kt`)
+
+**Description:**
+Nâng cấp hàng chip tài nguyên `HomeResourceChipsRow` trên `HomeHeader`:
+- Thêm một chip `DailyCheckInPill` cạnh chip Hạt và Level:
+  - Khi **chưa check-in hôm nay**: hiển thị pill màu cam/accent nổi bật `[Check-in +10 🌰]`, bấm vào mở lại `DailyCheckInDialog`.
+  - Khi **đã check-in hôm nay**: hiển thị pill màu xám/xanh dịu `[Đã check-in ✓]`, disabled (không clickable) để người dùng yên tâm.
+- Tự động mờ dần khi cuộn trang xuống theo `collapseFraction` tương tự các chip tài nguyên khác.
+
+**Acceptance criteria:**
+- [ ] Khi `hasCheckedInToday = false`: pill hiển thị nhãn Check-in và bấm vào kích hoạt `onCheckInClick`.
+- [ ] Khi `hasCheckedInToday = true`: pill hiển thị trạng thái đã hoàn thành và vô hiệu hóa click.
+- [ ] Hiệu ứng thu gọn Header khi cuộn mượt mà không lỗi layout.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeHeaderResourceTest*"`
+- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Task 10, Task 14
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/HomeHeader.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
+- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/HomeHeaderResourceTest.kt`
+
+**Estimated scope:** Small (2-3 files)
+
+---
+
+### Task 16: Tích hợp Luồng Daily Check-in & Level Up Celebration vào ViewModel và Screen
+
+**Description:**
+Kết nối `DailyCheckInUseCase` vào `HomeViewModel` và `HomeScreen`:
+- Khi mở app lần đầu trong ngày: nếu người dùng chưa check-in, tự động set `isCheckInDialogOpen = true` (chỉ mở tự động 1 lần trong phiên để không làm phiền).
+- Xử lý các sự kiện:
+  - `HomeUiEvent.RequestCheckIn`: mở dialog.
+  - `HomeUiEvent.DismissCheckInDialog`: đóng dialog.
+  - `HomeUiEvent.ConfirmCheckIn`: gọi `DailyCheckInUseCase` $\to$ cộng 10 Hạt & 10 Pate $\to$ cập nhật số dư Header $\to$ cập nhật `hasCheckedInToday = true` $\to$ Mascot phản hồi vui vẻ (`MascotEvent.DailyCheckInCompleted`).
+- Khi phát hiện `currentLevel` tăng: tự động mở `LevelUpCelebrationDialog` chúc mừng Chanko lớn hơn.
+
+**Acceptance criteria:**
+- [ ] Tự động mở popup Check-in khi chưa check-in trong ngày; không mở lại nếu người dùng đã chọn "Để sau" trong phiên đó.
+- [ ] Bấm xác nhận check-in cộng đúng 10 Hạt & 10 Pate vào StateFlow của Header tức thì.
+- [ ] Nút pill trên Header chuyển sang trạng thái "Đã check-in" ngay lập tức.
+- [ ] Mascot phát câu thoại chúc mừng và dialog Level Up hiển thị khi Chanko tăng Cấp.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeViewModelTest*"`
+
+**Dependencies:** Task 7, Task 14, Task 15
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiState.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeUiEvent.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeScreen.kt`
+
+**Estimated scope:** Medium (4 files)
+
+---
+
+### Task 17: Sắp xếp Danh sách Item Journey theo Thời gian (Mới nhất ở dưới cùng) & Trạng thái Trực quan
+
+**Description:**
+Điều chỉnh danh sách món đồ trong `ItemJourneySection`:
+- Giữ 1 danh sách cuộn duy nhất (không chia tab/nhóm).
+- Sắp xếp các món đồ theo thứ tự thời gian được thêm vào: món cũ nhất ở trên, **món mới nhất ở dưới cùng** (`addedTimestamp` tăng dần).
+- Hiển thị trực quan trạng thái:
+  - Món đang Cooling-off (`FREEZE_ACTIVE` / `Waiting`): hiển thị countdown thời gian còn lại (VD: `Còn 2 ngày 14h`).
+  - Món đã hoàn thành Freeze (`READY_FOR_REVIEW` / `Ready`): hiển thị badge nổi bật *"Sẵn sàng xem xét"* để người dùng nhận diện ngay món nào cần đưa ra quyết định.
+
+**Acceptance criteria:**
+- [ ] Danh sách món đồ trong Journey sắp xếp theo `addedTimestamp` tăng dần (món mới nhất ở dưới cùng).
+- [ ] Node / Card món đồ hiển thị đúng trạng thái đếm ngược hoặc sẵn sàng xem xét.
+- [ ] Chạm vào node điều hướng chính xác đến `ItemDetailScreen` của món tương ứng.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest --tests "*HomeDomainLogicTest*"`
+- [ ] Build succeeds: `./gradlew compileDevDebugKotlin`
+
+**Dependencies:** Task 4, Task 16
+
+**Files likely touched:**
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/components/ItemJourneySection.kt`
+- `app/src/main/java/com/hoabh/chanko/presentation/screens/home/HomeViewModel.kt`
+
+**Estimated scope:** Medium (2 files)
+
+---
+
+### Task 18: Kiểm thử Toàn diện & Hồi quy Màn hình Home (Home Regression & E2E Test)
+
+**Description:**
+Thực hiện kiểm thử tích hợp và hồi quy toàn diện cho màn hình Home sau khi refresh:
+- Kiểm tra toàn bộ luồng Check-in: tự động mở popup $\to$ xác nhận $\to$ Header cập nhật Hạt/Pate $\to$ pill chuyển trạng thái.
+- Kiểm tra thứ tự sắp xếp danh sách món đồ (mới nhất dưới cùng).
+- Xác minh không có bất kỳ hồi quy nào trên `BudgetCreditCardCarousel` (BC22-01..BC22-24 vẫn PASS 100%).
+- Kiểm tra kiến trúc màu sắc `ColorArchitectureTest` (không dùng direct hex).
+- Chạy toàn bộ test suite và build check `assembleDevDebug`.
+
+**Acceptance criteria:**
+- [ ] Viết test `HomeCheckInFlowTest` kiểm tra trọn vẹn luồng Check-in và cập nhật tài nguyên.
+- [ ] Tất cả các bài test của Home (Carousel, Header, DomainLogic, CheckIn) PASS 100%.
+- [ ] `./gradlew :app:testDevDebugUnitTest` PASS 100% không lỗi.
+- [ ] `./gradlew assembleDevDebug` biên dịch thành công 100%.
+
+**Verification:**
+- [ ] Tests pass: `./gradlew :app:testDevDebugUnitTest`
+- [ ] Build succeeds: `./gradlew assembleDevDebug`
+
+**Dependencies:** Tasks 14–17
+
+**Files likely touched:**
+- `app/src/test/java/com/hoabh/chanko/presentation/screens/home/HomeCheckInFlowTest.kt`
+
+**Estimated scope:** Small (1 file)
+
+---
+
+### Checkpoint 6: Home Screen Refresh Verified
+- [ ] Popup Daily Check-in và pill mở lại trên Header hoạt động mượt mà.
+- [ ] Danh sách món đồ sắp xếp chuẩn thời gian (mới nhất dưới cùng) và hiển thị rõ trạng thái Freeze / Sẵn sàng.
+- [ ] Carousel ngân sách 3 thẻ v2.2 hoàn toàn nguyên vẹn, 100% test xanh.
